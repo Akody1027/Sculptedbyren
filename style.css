@@ -67,9 +67,10 @@ hr{
 
 h2{
     width: 60%;
-    margin: 3%;
+    margin: 1%;
     font-family: 'Dancing Script';
-
+    font-size: 200%;
+    
 }
 
 #infoimage{
