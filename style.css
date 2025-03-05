@@ -1,9 +1,33 @@
 html{
     background-color: pink;
+    margin: none;
+    padding: none;
+    border: none;
+
 }
 
 body{
     text-align: -webkit-center;
+}
+
+#name{
+    color:pink;
+    font-family: 'Dancing Script';
+    font-weight: 900;
+    margin: 0px;
+
+}
+
+#Navbar{
+    background-color: black;
+    width: 100%;
+    height: inherit;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    
+
 }
 
 #bookingWidget{
