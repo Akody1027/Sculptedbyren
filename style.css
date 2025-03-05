@@ -1,5 +1,5 @@
 html{
-    background-color: rgb(255, 218, 235);
+    background-color:white;
     margin: none;
     padding: none;
     border: none;
@@ -29,7 +29,6 @@ hr{
     height: 10px;
     background-color: black;
     margin-top: -4px;
-    
     border: 0px;
     padding: 0px;
 }
@@ -39,13 +38,14 @@ hr{
     font-family: 'Dancing Script';
     font-weight: 900;
     margin: 0px;
+    font-size: 240%;
+    padding: 1%;
 
 }
 
 #Navbar{
     background-color: black;
     width: 100%;
-    height: inherit;
     position: fixed;
     top: 0;
     left: 0;
@@ -62,21 +62,19 @@ hr{
 .textandimage{
     width: 100%;
     display: flex;
-    margin-top: 20px;
+    margin-top: 30px;
 }
 
 h2{
-    font-weight:900;
-    width: 60%;
-    margin: 1%;
-    font-family: 'Dancing Script';
-    font-size: 200%;
-    
+    font-size: 25px;
+    width: 50%;
+    margin: 2%;
+
 }
 
 #infoimage{
-    width: 53%;
-    border-radius: 5px;
+    width: 50%;
+    border-radius: 10px;
 }
 
 .info2{
