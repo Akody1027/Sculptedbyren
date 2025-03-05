@@ -1,0 +1,12 @@
+html{
+    background-color: pink;
+}
+
+body{
+    text-align: -webkit-center;
+}
+
+#bookingWidget{
+   margin-top: 30%;
+   width: 90%;
+}
