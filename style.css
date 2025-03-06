@@ -65,15 +65,10 @@ hr{
     margin-top: 30px;
 }
 
-h2{
-    font-size: 25px;
-    width: 50%;
-    margin: 2%;
 
-}
 
 #infoimage{
-    width: 50%;
+    width: 100%;
     border-radius: 10px;
 }
 
