@@ -89,6 +89,8 @@ h4{
 #shades{
     margin-top: 10%;
     width: 90%;
+    border-radius: 10px;
+
 }
 
 #info3{
@@ -103,6 +105,8 @@ h4{
 #tanlines{
     margin-top: 10%;
     width: 90%;
+    border-radius: 10px;
+
 }
 
 #after{
