@@ -1,0 +1,153 @@
+html{
+    background-color:white;
+    margin: none;
+    padding: none;
+    border: none;
+
+
+}
+    html::-webkit-scrollbar {
+        display: none;
+    }
+
+body{
+    text-align: -webkit-center;
+    margin: 0px;
+}
+
+#beach{
+    width: 100%;
+    height: 350px;
+
+    margin-top: -10%;
+    padding: 0px;
+    border: 0px;
+    opacity: 60%;
+}
+
+hr{
+    color:black;
+}
+
+#underbeach{
+    height: 10px;
+    background-color: black;
+    margin-top: -4px;
+    border: 0px;
+    padding: 0px;
+}
+
+#name{
+    color:pink;
+    font-family: 'Dancing Script';
+    font-weight: 900;
+    margin: 0px;
+    font-size: 240%;
+    padding: 1%;
+
+}
+
+#Navbar{
+    background-color: black;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    
+
+}
+
+#info{
+    margin-top: 40%;
+    width: 90%;
+}
+
+.textandimage{
+    width: 100%;
+    display: flex;
+    margin-top: 30px;
+}
+
+h2{
+    font-size: 25px;
+    width: 50%;
+    margin: 2%;
+
+}
+
+#infoimage{
+    width: 100%;
+    border-radius: 10px;
+}
+
+.info2{
+    width: 90%;
+    margin-top: 10%;
+    font-family: 'Dancing Script';
+
+}
+
+h4{
+    padding: 3%;
+    font-size: 30px;
+    font-family: 'Dancing Script';
+
+}
+
+#shades{
+    margin-top: 10%;
+    width: 90%;
+    border-radius: 10px;
+
+
+}
+
+#info3{
+    width: 90%;
+    margin-top: 10%;
+    padding: 3%;
+    font-size: 30px;
+    font-family: 'Dancing Script';
+    font-weight: 900;
+}
+
+#tanlines{
+    margin-top: 10%;
+    width: 90%;
+    border-radius: 10px;
+
+}
+
+#after{
+    width: 90%;
+    margin-top: 10%;
+    padding: 3%;
+    font-size: 30px;
+    font-family: 'Dancing Script';
+    font-weight: 900;
+
+}
+
+
+.hours{
+    width: 90%;
+    margin-top: 10%;
+    border: 10px;
+    border-color: black;
+    border-radius: 5px;
+
+}
+
+h3{
+    font-weight: 900;
+    color: rgb(0, 0, 0);
+    font-family: 'Dancing Script';
+    font-size: 50px;
+}
+
+
+#bookingWidget{
+   margin-top: 30%;
+   width: 90%;
+}
