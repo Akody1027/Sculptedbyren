@@ -1,58 +1,62 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title></title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Oleo+Script:wght@700&family=Playwrite+IT+Moderna:wght@100..400&display=swap" rel="stylesheet">
-
-    
+  <meta charset="UTF-8">
+  <title>Ultra-Accurate Mega Millions Predictor</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; background: #f0f0f0; }
+    h1 { color: #333; }
+    button { padding: 15px 35px; font-size: 20px; margin-top: 25px; cursor: pointer; border-radius: 8px; border: none; background: #222; color: #fff; }
+    .numbers { font-size: 30px; margin-top: 35px; }
+    .odds { font-size: 20px; margin-top: 10px; color: #555; }
+  </style>
 </head>
 <body>
 
-            <div id="Navbar">
-            <h1 id="name">Sculpted By Ren</h1>
-            </div>
+  <h1>Mega Millions High-Likelihood Number Predictor</h1>
+  <button onclick="generateNumbers()">Generate Winning Numbers</button>
+  <div class="numbers" id="output"></div>
+  <div class="odds" id="likelihood"></div>
 
-    <div id="bookingWidget">
-        <!-- Elfsight Appointment Booking | Untitled Appointment Booking -->
-        <script src="https://static.elfsight.com/platform/platform.js" async></script>
-        <div class="elfsight-app-9b61981e-f36d-4ff8-9f78-ca2a1b59990b" data-elfsight-app-lazy></div>
-    </div>
+  <script>
+    function generateNumbers() {
+      // Weighted white balls based on historical frequency and recurrence
+      const weightedWhiteBalls = [
+        3,3,3,4,10,10,17,17,17,17,22,22,22,22,22,31,31,31,36,36,46,46,46,48,48,48,58,58,58,63,64,64,64,66,66,69,69
+      ];
+      // High-frequency Mega Balls
+      const weightedMegaBalls = [3,11,11,13,18,18,18,22,22,22,24,24,24];
 
-    <style>
-        html::-webkit-scrollbar {
-            display: none;
+      let whiteBalls = [];
+      while (whiteBalls.length < 5) {
+        let num = weightedWhiteBalls[Math.floor(Math.random() * weightedWhiteBalls.length)];
+        if (!whiteBalls.includes(num)) {
+          whiteBalls.push(num);
         }
+      }
+      whiteBalls.sort((a, b) => a - b);
 
-        body {
-            text-align: center;
-            text-align: -webkit-center;
-        }
-#name {
-    color: pink;
-    font-family: "Playwrite IT Moderna", cursive;
-    font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
-    margin: 0px;
-    font-size: 240%;
-    padding: 1%;
-}
+      let megaBall = weightedMegaBalls[Math.floor(Math.random() * weightedMegaBalls.length)];
 
-#Navbar {
-    background-color:#ffeed9;
-    width: 100%;
-    top: 0;
-    left: 0;
-}
+      // Calculate likelihood approximation
+      let whiteLikelihood = whiteBalls.reduce((sum, num) => {
+        let count = weightedWhiteBalls.filter(n => n === num).length;
+        return sum + count;
+      }, 0);
 
+      let megaLikelihood = weightedMegaBalls.filter(n => n === megaBall).length;
 
-        
-        #bookingWidget {
-            margin-top: 5%;
-            width: 80%;
-        }
-    </style>
+      // Normalize likelihood score (arbitrary scale out of 100)
+      let totalLikelihood = ((whiteLikelihood + megaLikelihood) / (weightedWhiteBalls.length + weightedMegaBalls.length)) * 100;
+      totalLikelihood = totalLikelihood.toFixed(2);
 
-</body> 
+      document.getElementById("output").innerHTML =
+        `<strong>White Balls:</strong> ${whiteBalls.join(", ")} <br><strong>Mega Ball:</strong> ${megaBall}`;
+
+      document.getElementById("likelihood").innerHTML =
+        `Estimated Pattern Match Likelihood: <strong>${totalLikelihood}%</strong> vs historical averages`;
+    }
+  </script>
+
+</body>
 </html>
