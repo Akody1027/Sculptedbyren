@@ -2,100 +2,106 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ultimate Mega Millions Predictor with Heatmap</title>
+  <title>Mega Millions Predictor — Advanced Generator</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; background: #f4f4f4; }
+    body { font-family: Arial, sans-serif; text-align: center; padding: 30px; background: #f0f0f0; }
     h1 { color: #333; }
-    button { padding: 15px 35px; font-size: 20px; margin-top: 25px; cursor: pointer; border-radius: 8px; border: none; background: #222; color: #fff; }
-    .numbers { font-size: 28px; margin-top: 30px; }
-    .odds { font-size: 18px; margin-top: 15px; color: #555; }
-    .heatmap { display: flex; flex-wrap: wrap; justify-content: center; max-width: 600px; margin: 30px auto; }
-    .ball { width: 45px; height: 45px; border-radius: 50%; margin: 3px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; }
+    button { padding: 15px 30px; font-size: 18px; margin: 20px; border-radius: 8px; background: #222; color: #fff; border: none; cursor: pointer; }
+    .numbers, .history, .bars, .heatmap { margin-top: 30px; }
+    .numbers { font-size: 26px; }
+    .history { text-align: left; max-width: 600px; margin: 20px auto; background: #fff; padding: 15px; border-radius: 8px; }
+    .ball { display: inline-block; width: 40px; height: 40px; line-height: 40px; margin: 3px; border-radius: 50%; color: #fff; font-weight: bold; }
+    .heatmap { display: flex; flex-wrap: wrap; max-width: 600px; margin: 0 auto; }
+    .bar { height: 16px; background: #0080ff; margin: 4px 0; border-radius: 4px; }
+    .disclaimer { color: red; font-weight: bold; margin-top: 30px; }
   </style>
 </head>
 <body>
 
-  <h1>Ultra-Smart Mega Millions Predictor + Heatmap</h1>
-  <button onclick="generateNumbers()">Generate Smart Numbers</button>
-  <div class="numbers" id="output"></div>
-  <div class="odds" id="likelihood"></div>
-  <div id="heatmap" class="heatmap"></div>
+<h1>Mega Millions Smart Predictor</h1>
+<button onclick="generateNumbers()">Generate Smart Numbers</button>
 
-  <script>
-    // Weighted high-frequency white balls from data
-    const weightedWhiteBalls = [
-      3,3,3,4,10,10,17,17,17,22,22,22,31,31,31,36,36,46,46,48,48,58,58,58,63,64,64,64,66,66,69,69
-    ];
-    // High-frequency Mega Balls
-    const weightedMegaBalls = [3,11,11,13,18,18,18,22,22,24,24,24];
+<div class="numbers" id="output"></div>
+<div class="bars" id="bars"></div>
+<div class="heatmap" id="heatmap"></div>
+<div class="history" id="history"><strong>Pick History:</strong><br></div>
+<div class="disclaimer">** Disclaimer: This tool uses historical trends but cannot guarantee winning numbers. Play responsibly. **</div>
 
-    // All possible numbers for heatmap
-    const allWhiteBalls = Array.from({length:70}, (_,i)=>i+1);
-    const allMegaBalls = Array.from({length:25}, (_,i)=>i+1);
+<script>
+  const weightedWhiteBalls = [
+    3,3,3,4,10,10,17,17,22,22,31,31,36,36,46,46,48,48,58,58,63,64,64,66,66,69,69
+  ];
+  const weightedMegaBalls = [3,11,11,13,18,18,22,22,24,24];
+  const allWhiteBalls = Array.from({length:70},(_,i)=>i+1);
+  const allMegaBalls = Array.from({length:25},(_,i)=>i+1);
+  let pickHistory = [];
+  let pickCounts = {};
 
-    function generateNumbers() {
-      let whiteBalls = [];
-
-      while (whiteBalls.length < 5) {
-        let num = weightedWhiteBalls[Math.floor(Math.random() * weightedWhiteBalls.length)];
-        if (!whiteBalls.includes(num)) {
-          whiteBalls.push(num);
-        }
-      }
-
-      whiteBalls.sort((a, b) => a - b);
-
-      // Balance even/odd
-      let evenCount = whiteBalls.filter(n => n % 2 === 0).length;
-      if (evenCount === 0 || evenCount === 5) return generateNumbers();
-
-      // Number spread control
-      let ranges = [0, 0, 0];
-      whiteBalls.forEach(n => {
-        if (n <= 23) ranges[0]++;
-        else if (n <= 46) ranges[1]++;
-        else ranges[2]++;
-      });
-      if (Math.max(...ranges) > 3) return generateNumbers();
-
-      let megaBall = weightedMegaBalls[Math.floor(Math.random() * weightedMegaBalls.length)];
-
-      // Likelihood score
-      let whiteLikelihood = whiteBalls.reduce((sum, num) => weightedWhiteBalls.filter(n=>n===num).length + sum, 0);
-      let megaLikelihood = weightedMegaBalls.filter(n=>n===megaBall).length;
-      let totalLikelihood = ((whiteLikelihood + megaLikelihood) / (weightedWhiteBalls.length + weightedMegaBalls.length)) * 100;
-      totalLikelihood = totalLikelihood.toFixed(2);
-
-      document.getElementById("output").innerHTML =
-        `<strong>White Balls:</strong> ${whiteBalls.join(", ")} <br><strong>Mega Ball:</strong> ${megaBall}`;
-
-      document.getElementById("likelihood").innerHTML =
-        `Estimated Pattern Likelihood: <strong>${totalLikelihood}%</strong> vs historical trends`;
-
-      renderHeatmap(whiteBalls, megaBall);
+  function generateNumbers() {
+    let whiteBalls = [];
+    while (whiteBalls.length < 5) {
+      let n = weightedWhiteBalls[Math.floor(Math.random()*weightedWhiteBalls.length)];
+      if (!whiteBalls.includes(n)) whiteBalls.push(n);
     }
+    whiteBalls.sort((a,b)=>a-b);
+    let evenCount = whiteBalls.filter(n=>n%2===0).length;
+    if (evenCount===0||evenCount===5) return generateNumbers();
 
-    function renderHeatmap(selectedWhites, selectedMega) {
-      const heatmap = document.getElementById("heatmap");
-      heatmap.innerHTML = "";
+    let ranges = [0,0,0];
+    whiteBalls.forEach(n=>{
+      if(n<=23) ranges[0]++;
+      else if(n<=46) ranges[1]++;
+      else ranges[2]++;
+    });
+    if (Math.max(...ranges)>3) return generateNumbers();
 
-      allWhiteBalls.forEach(n => {
-        let count = weightedWhiteBalls.filter(x=>x===n).length;
-        let color = count > 2 ? "#ff4500" : count > 0 ? "#ffa500" : "#999";
-        if (selectedWhites.includes(n)) color = "#32cd32";
-        heatmap.innerHTML += `<div class="ball" style="background:${color}">${n}</div>`;
-      });
+    let megaBall = weightedMegaBalls[Math.floor(Math.random()*weightedMegaBalls.length)];
 
-      // Mega Ball section
-      heatmap.innerHTML += `<div style="flex-basis:100%; height:20px;"></div>`;
-      allMegaBalls.forEach(n => {
-        let count = weightedMegaBalls.filter(x=>x===n).length;
-        let color = count > 2 ? "#0066cc" : count > 0 ? "#00bfff" : "#999";
-        if (selectedMega===n) color = "#32cd32";
-        heatmap.innerHTML += `<div class="ball" style="background:${color}">${n}</div>`;
-      });
-    }
-  </script>
+    let pick = `White: ${whiteBalls.join(", ")} | Mega: ${megaBall}`;
+    pickHistory.unshift(pick);
+    updateHistory();
+    trackCounts(whiteBalls, megaBall);
+    renderHeatmap(whiteBalls, megaBall);
+    updateBars();
+    document.getElementById("output").innerHTML = `<strong>${pick}</strong>`;
+  }
+
+  function updateHistory() {
+    document.getElementById("history").innerHTML = "<strong>Pick History:</strong><br>" + pickHistory.join("<br>");
+  }
+
+  function trackCounts(whites, mega) {
+    whites.forEach(n => pickCounts[n] = (pickCounts[n]||0)+1);
+    pickCounts[`M${mega}`] = (pickCounts[`M${mega}`]||0)+1;
+  }
+
+  function renderHeatmap(whites, mega) {
+    const heatmap = document.getElementById("heatmap");
+    heatmap.innerHTML = "";
+    allWhiteBalls.forEach(n=>{
+      let freq = weightedWhiteBalls.filter(x=>x===n).length;
+      let color = whites.includes(n) ? "#32cd32" : freq>2 ? "#ff4500" : freq>0 ? "#ffa500" : "#ccc";
+      heatmap.innerHTML += `<div class="ball" style="background:${color}">${n}</div>`;
+    });
+    heatmap.innerHTML += `<div style="flex-basis:100%;height:20px;"></div>`;
+    allMegaBalls.forEach(n=>{
+      let freq = weightedMegaBalls.filter(x=>x===n).length;
+      let color = (mega===n) ? "#32cd32" : freq>2 ? "#0066cc" : freq>0 ? "#00bfff" : "#ccc";
+      heatmap.innerHTML += `<div class="ball" style="background:${color}">${n}</div>`;
+    });
+  }
+
+  function updateBars() {
+    const bars = document.getElementById("bars");
+    bars.innerHTML = "<strong>Number Frequency Bars:</strong><br>";
+    let numbers = [...allWhiteBalls.map(n=>[n,pickCounts[n]||0]), ...allMegaBalls.map(n=>[`M${n}`,pickCounts[`M${n}`]||0])];
+    numbers.sort((a,b)=>b[1]-a[1]);
+    numbers.forEach(([n,count])=>{
+      let label = n.toString().startsWith("M") ? `Mega ${n.substring(1)}` : `White ${n}`;
+      bars.innerHTML += `${label}: ${count}<div class="bar" style="width:${count*10}px"></div>`;
+    });
+  }
+</script>
 
 </body>
 </html>
