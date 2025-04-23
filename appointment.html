@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Mega Millions Smart Predictor — Enhanced</title>
+  <title>Mega Millions Smart Predictor</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; padding: 30px; background: #f0f0f0; }
     h1 { color: #333; }
@@ -17,7 +17,7 @@
 </head>
 <body>
 
-<h1>Mega Millions Smart Predictor — Enhanced</h1>
+<h1>Mega Millions Smart Predictor</h1>
 <button onclick="generateNumbers()">Generate Smart Numbers</button>
 
 <div class="numbers" id="output"></div>
@@ -34,12 +34,7 @@
   const allMegaBalls = Array.from({length:25},(_,i)=>i+1);
   let pickHistory = [];
 
-  // Function to check if last draw was used
-  function lastDrawAvoidance(whiteBalls) {
-    const lastDraw = pickHistory[0]?.split(' | ')[0].replace('White: ', '').split(', ').map(Number);
-    return lastDraw && !whiteBalls.every(n => lastDraw.includes(n));
-  }
-
+  // Function to generate numbers
   function generateNumbers() {
     let whiteBalls = [];
     while (whiteBalls.length < 5) {
@@ -49,19 +44,10 @@
 
     whiteBalls.sort((a, b) => a - b);
 
-    // Apply avoidance of consecutive numbers
+    // Avoid consecutive numbers
     if (whiteBalls.some((n, i) => i > 0 && n === whiteBalls[i - 1] + 1)) return generateNumbers();
 
-    // Apply last draw avoidance
-    if (!lastDrawAvoidance(whiteBalls)) return generateNumbers();
-
-    // Apply number aging algorithm: boost rarely drawn numbers
-    whiteBalls.forEach(n => {
-      const age = 100 - weightedWhiteBalls.filter(x => x === n).length;
-      if (age > 10) weightedWhiteBalls.push(n); // Boost aging numbers
-    });
-
-    // Ensure range distribution (no more than 3 numbers from any range)
+    // Check for too many numbers from the same range
     let ranges = [0, 0, 0];
     whiteBalls.forEach(n => {
       if (n <= 23) ranges[0]++;
@@ -70,7 +56,11 @@
     });
     if (Math.max(...ranges) > 3) return generateNumbers();
 
-    // Random MegaBall generation with frequency adjustment
+    // Avoid using numbers from the last draw
+    const lastDraw = pickHistory[0]?.split(' | ')[0].replace('White: ', '').split(', ').map(Number);
+    if (lastDraw && whiteBalls.every(n => lastDraw.includes(n))) return generateNumbers();
+
+    // Select Mega Ball
     let megaBall = weightedMegaBalls[Math.floor(Math.random() * weightedMegaBalls.length)];
 
     // Add to history and render
