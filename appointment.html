@@ -43,6 +43,10 @@
     <div class="legend-color" style="background-color:#ccc;"></div>
     <span>Rarely picked numbers</span>
   </div>
+  <div class="legend-item">
+    <div class="legend-color" style="background-color:#0066cc;"></div>
+    <span>Frequently picked Mega Balls</span>
+  </div>
 </div>
 <div class="history" id="history"><strong>Pick History:</strong><br></div>
 <div class="disclaimer">** Disclaimer: This tool uses historical trends but cannot guarantee winning numbers. Play responsibly. **</div>
@@ -56,9 +60,12 @@
   const allMegaBalls = Array.from({length:25},(_,i)=>i+1);
   let pickHistory = [];
 
-  // Function to calculate percentage chances for each number
-  function calculatePercentage(freq, totalDraws) {
-    return ((freq / totalDraws) * 100).toFixed(2);
+  // Function to calculate percentage chances for the complete set of numbers
+  function calculatePercentage(whiteFreq, megaFreq, totalDraws) {
+    const whitePercentage = ((whiteFreq / totalDraws) * 100).toFixed(2);
+    const megaPercentage = ((megaFreq / totalDraws) * 100).toFixed(2);
+    const totalPercentage = ((whiteFreq + megaFreq) / totalDraws) * 100;
+    return { whitePercentage, megaPercentage, totalPercentage: totalPercentage.toFixed(2) };
   }
 
   // Function to generate numbers
@@ -116,19 +123,22 @@
     heatmap.innerHTML += `<div style="flex-basis:100%;height:20px;"></div>`;
     allMegaBalls.forEach(n => {
       let freq = weightedMegaBalls.filter(x => x === n).length;
-      let color = (mega === n) ? "#32cd32" : freq > 2 ? "#0066cc" : freq > 0 ? "#00bfff" : "#ccc";
+      let color = (mega === n) ? "#0066cc" : freq > 2 ? "#ff4500" : freq > 0 ? "#ffa500" : "#ccc";
       heatmap.innerHTML += `<div class="ball" style="background:${color}">${n}</div>`;
     });
   }
 
   // Render percentage chances for the complete set of numbers
   function renderPercentage(whites, mega) {
-    let percentageWhite = calculatePercentage(weightedWhiteBalls.filter(x => whites.includes(x)).length, weightedWhiteBalls.length);
-    let percentageMega = calculatePercentage(weightedMegaBalls.filter(x => mega === x).length, weightedMegaBalls.length);
+    let whiteFreq = weightedWhiteBalls.filter(x => whites.includes(x)).length;
+    let megaFreq = weightedMegaBalls.filter(x => mega === x).length;
+
+    let { whitePercentage, megaPercentage, totalPercentage } = calculatePercentage(whiteFreq, megaFreq, weightedWhiteBalls.length);
 
     let percentageOutput = `<strong>Set Percentage Chances:</strong><br>`;
-    percentageOutput += `White Balls: ${percentageWhite}%<br>`;
-    percentageOutput += `Mega Ball: ${percentageMega}%`;
+    percentageOutput += `White Balls: ${whitePercentage}%<br>`;
+    percentageOutput += `Mega Ball: ${megaPercentage}%<br>`;
+    percentageOutput += `Total Set Percentage: ${totalPercentage}%`;
 
     document.getElementById("percentage").innerHTML = percentageOutput;
   }
