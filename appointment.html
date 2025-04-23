@@ -121,17 +121,15 @@
     });
   }
 
-  // Render percentage chances for each number
+  // Render percentage chances for the complete set of numbers
   function renderPercentage(whites, mega) {
-    let percentageOutput = "<strong>Percentage Chances:</strong><br>";
-    allWhiteBalls.forEach(n => {
-      let freq = weightedWhiteBalls.filter(x => x === n).length;
-      let percent = calculatePercentage(freq, weightedWhiteBalls.length);
-      percentageOutput += `White Ball ${n}: ${percent}%<br>`;
-    });
-    let megaFreq = weightedMegaBalls.filter(x => x === mega).length;
-    let megaPercent = calculatePercentage(megaFreq, weightedMegaBalls.length);
-    percentageOutput += `Mega Ball ${mega}: ${megaPercent}%`;
+    let percentageWhite = calculatePercentage(weightedWhiteBalls.filter(x => whites.includes(x)).length, weightedWhiteBalls.length);
+    let percentageMega = calculatePercentage(weightedMegaBalls.filter(x => mega === x).length, weightedMegaBalls.length);
+
+    let percentageOutput = `<strong>Set Percentage Chances:</strong><br>`;
+    percentageOutput += `White Balls: ${percentageWhite}%<br>`;
+    percentageOutput += `Mega Ball: ${percentageMega}%`;
+
     document.getElementById("percentage").innerHTML = percentageOutput;
   }
 
