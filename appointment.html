@@ -2,51 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ultra-Accurate Mega Millions Predictor</title>
+  <title>Ultimate Mega Millions Predictor with Heatmap</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; background: #f0f0f0; }
+    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; background: #f4f4f4; }
     h1 { color: #333; }
     button { padding: 15px 35px; font-size: 20px; margin-top: 25px; cursor: pointer; border-radius: 8px; border: none; background: #222; color: #fff; }
-    .numbers { font-size: 30px; margin-top: 35px; }
-    .odds { font-size: 20px; margin-top: 10px; color: #555; }
+    .numbers { font-size: 28px; margin-top: 30px; }
+    .odds { font-size: 18px; margin-top: 15px; color: #555; }
+    .heatmap { display: flex; flex-wrap: wrap; justify-content: center; max-width: 600px; margin: 30px auto; }
+    .ball { width: 45px; height: 45px; border-radius: 50%; margin: 3px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; }
   </style>
 </head>
 <body>
 
-  <h1>Mega Millions High-Likelihood Number Predictor</h1>
-  <button onclick="generateNumbers()">Generate Winning Numbers</button>
+  <h1>Ultra-Smart Mega Millions Predictor + Heatmap</h1>
+  <button onclick="generateNumbers()">Generate Smart Numbers</button>
   <div class="numbers" id="output"></div>
   <div class="odds" id="likelihood"></div>
+  <div id="heatmap" class="heatmap"></div>
 
   <script>
-    function generateNumbers() {
-      // Weighted white balls based on historical frequency and recurrence
-      const weightedWhiteBalls = [
-        3,3,3,4,10,10,17,17,17,17,22,22,22,22,22,31,31,31,36,36,46,46,46,48,48,48,58,58,58,63,64,64,64,66,66,69,69
-      ];
-      // High-frequency Mega Balls
-      const weightedMegaBalls = [3,11,11,13,18,18,18,22,22,22,24,24,24];
+    // Weighted high-frequency white balls from data
+    const weightedWhiteBalls = [
+      3,3,3,4,10,10,17,17,17,22,22,22,31,31,31,36,36,46,46,48,48,58,58,58,63,64,64,64,66,66,69,69
+    ];
+    // High-frequency Mega Balls
+    const weightedMegaBalls = [3,11,11,13,18,18,18,22,22,24,24,24];
 
+    // All possible numbers for heatmap
+    const allWhiteBalls = Array.from({length:70}, (_,i)=>i+1);
+    const allMegaBalls = Array.from({length:25}, (_,i)=>i+1);
+
+    function generateNumbers() {
       let whiteBalls = [];
+
       while (whiteBalls.length < 5) {
         let num = weightedWhiteBalls[Math.floor(Math.random() * weightedWhiteBalls.length)];
         if (!whiteBalls.includes(num)) {
           whiteBalls.push(num);
         }
       }
+
       whiteBalls.sort((a, b) => a - b);
+
+      // Balance even/odd
+      let evenCount = whiteBalls.filter(n => n % 2 === 0).length;
+      if (evenCount === 0 || evenCount === 5) return generateNumbers();
+
+      // Number spread control
+      let ranges = [0, 0, 0];
+      whiteBalls.forEach(n => {
+        if (n <= 23) ranges[0]++;
+        else if (n <= 46) ranges[1]++;
+        else ranges[2]++;
+      });
+      if (Math.max(...ranges) > 3) return generateNumbers();
 
       let megaBall = weightedMegaBalls[Math.floor(Math.random() * weightedMegaBalls.length)];
 
-      // Calculate likelihood approximation
-      let whiteLikelihood = whiteBalls.reduce((sum, num) => {
-        let count = weightedWhiteBalls.filter(n => n === num).length;
-        return sum + count;
-      }, 0);
-
-      let megaLikelihood = weightedMegaBalls.filter(n => n === megaBall).length;
-
-      // Normalize likelihood score (arbitrary scale out of 100)
+      // Likelihood score
+      let whiteLikelihood = whiteBalls.reduce((sum, num) => weightedWhiteBalls.filter(n=>n===num).length + sum, 0);
+      let megaLikelihood = weightedMegaBalls.filter(n=>n===megaBall).length;
       let totalLikelihood = ((whiteLikelihood + megaLikelihood) / (weightedWhiteBalls.length + weightedMegaBalls.length)) * 100;
       totalLikelihood = totalLikelihood.toFixed(2);
 
@@ -54,7 +70,30 @@
         `<strong>White Balls:</strong> ${whiteBalls.join(", ")} <br><strong>Mega Ball:</strong> ${megaBall}`;
 
       document.getElementById("likelihood").innerHTML =
-        `Estimated Pattern Match Likelihood: <strong>${totalLikelihood}%</strong> vs historical averages`;
+        `Estimated Pattern Likelihood: <strong>${totalLikelihood}%</strong> vs historical trends`;
+
+      renderHeatmap(whiteBalls, megaBall);
+    }
+
+    function renderHeatmap(selectedWhites, selectedMega) {
+      const heatmap = document.getElementById("heatmap");
+      heatmap.innerHTML = "";
+
+      allWhiteBalls.forEach(n => {
+        let count = weightedWhiteBalls.filter(x=>x===n).length;
+        let color = count > 2 ? "#ff4500" : count > 0 ? "#ffa500" : "#999";
+        if (selectedWhites.includes(n)) color = "#32cd32";
+        heatmap.innerHTML += `<div class="ball" style="background:${color}">${n}</div>`;
+      });
+
+      // Mega Ball section
+      heatmap.innerHTML += `<div style="flex-basis:100%; height:20px;"></div>`;
+      allMegaBalls.forEach(n => {
+        let count = weightedMegaBalls.filter(x=>x===n).length;
+        let color = count > 2 ? "#0066cc" : count > 0 ? "#00bfff" : "#999";
+        if (selectedMega===n) color = "#32cd32";
+        heatmap.innerHTML += `<div class="ball" style="background:${color}">${n}</div>`;
+      });
     }
   </script>
 
