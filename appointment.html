@@ -7,12 +7,15 @@
     body { font-family: Arial, sans-serif; text-align: center; padding: 30px; background: #f0f0f0; }
     h1 { color: #333; }
     button { padding: 15px 30px; font-size: 18px; margin: 20px; border-radius: 8px; background: #222; color: #fff; border: none; cursor: pointer; }
-    .numbers, .history, .heatmap { margin-top: 30px; }
+    .numbers, .history, .heatmap, .heatmap-legend { margin-top: 30px; }
     .numbers { font-size: 26px; }
     .history { text-align: left; max-width: 600px; margin: 20px auto; background: #fff; padding: 15px; border-radius: 8px; }
     .ball { display: inline-block; width: 40px; height: 40px; line-height: 40px; margin: 3px; border-radius: 50%; color: #fff; font-weight: bold; }
     .heatmap { display: flex; flex-wrap: wrap; max-width: 600px; margin: 0 auto; }
     .disclaimer { color: red; font-weight: bold; margin-top: 30px; }
+    .heatmap-legend { margin-top: 30px; font-size: 14px; text-align: left; display: inline-block; }
+    .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
+    .legend-color { width: 20px; height: 20px; margin-right: 10px; }
   </style>
 </head>
 <body>
@@ -21,7 +24,26 @@
 <button onclick="generateNumbers()">Generate Smart Numbers</button>
 
 <div class="numbers" id="output"></div>
+<div class="percentage" id="percentage"></div>
 <div class="heatmap" id="heatmap"></div>
+<div class="heatmap-legend" id="heatmap-legend">
+  <div class="legend-item">
+    <div class="legend-color" style="background-color:#32cd32;"></div>
+    <span>Frequently picked numbers</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-color" style="background-color:#ff4500;"></div>
+    <span>Moderately picked numbers</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-color" style="background-color:#ffa500;"></div>
+    <span>Occasionally picked numbers</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-color" style="background-color:#ccc;"></div>
+    <span>Rarely picked numbers</span>
+  </div>
+</div>
 <div class="history" id="history"><strong>Pick History:</strong><br></div>
 <div class="disclaimer">** Disclaimer: This tool uses historical trends but cannot guarantee winning numbers. Play responsibly. **</div>
 
@@ -33,6 +55,11 @@
   const allWhiteBalls = Array.from({length:70},(_,i)=>i+1);
   const allMegaBalls = Array.from({length:25},(_,i)=>i+1);
   let pickHistory = [];
+
+  // Function to calculate percentage chances for each number
+  function calculatePercentage(freq, totalDraws) {
+    return ((freq / totalDraws) * 100).toFixed(2);
+  }
 
   // Function to generate numbers
   function generateNumbers() {
@@ -68,13 +95,16 @@
     pickHistory.unshift(pick);
     updateHistory();
     renderHeatmap(whiteBalls, megaBall);
+    renderPercentage(whiteBalls, megaBall);
     document.getElementById("output").innerHTML = `<strong>${pick}</strong>`;
   }
 
+  // Update pick history
   function updateHistory() {
     document.getElementById("history").innerHTML = "<strong>Pick History:</strong><br>" + pickHistory.join("<br>");
   }
 
+  // Render heatmap
   function renderHeatmap(whites, mega) {
     const heatmap = document.getElementById("heatmap");
     heatmap.innerHTML = "";
@@ -90,6 +120,21 @@
       heatmap.innerHTML += `<div class="ball" style="background:${color}">${n}</div>`;
     });
   }
+
+  // Render percentage chances for each number
+  function renderPercentage(whites, mega) {
+    let percentageOutput = "<strong>Percentage Chances:</strong><br>";
+    allWhiteBalls.forEach(n => {
+      let freq = weightedWhiteBalls.filter(x => x === n).length;
+      let percent = calculatePercentage(freq, weightedWhiteBalls.length);
+      percentageOutput += `White Ball ${n}: ${percent}%<br>`;
+    });
+    let megaFreq = weightedMegaBalls.filter(x => x === mega).length;
+    let megaPercent = calculatePercentage(megaFreq, weightedMegaBalls.length);
+    percentageOutput += `Mega Ball ${mega}: ${megaPercent}%`;
+    document.getElementById("percentage").innerHTML = percentageOutput;
+  }
+
 </script>
 
 </body>
