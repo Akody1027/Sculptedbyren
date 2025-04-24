@@ -104,9 +104,6 @@
       margin-top: 10px;
       opacity: 0.6;
     }
-    .sum-low { color: var(--lowSum); }
-    .sum-ideal { color: var(--idealSum); }
-    .sum-high { color: var(--highSum); }
   </style>
 </head>
 <body>
@@ -133,6 +130,28 @@
       const mega = Math.floor(Math.random() * 25) + 1;
       document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2>`;
       document.getElementById('heatmap').style.display = 'block';
+      
+      updateHeatmap();
+    }
+
+    function updateHeatmap() {
+      const grid = document.getElementById('heatmapGrid');
+      const megaGrid = document.getElementById('megaHeatmapGrid');
+      grid.innerHTML = '';
+      megaGrid.innerHTML = '';
+
+      for (let i = 1; i <= 70; i++) {
+        const ball = document.createElement('div');
+        ball.className = `ball ${['cold','warm','hot'][Math.floor(Math.random()*3)]}`;
+        ball.textContent = i;
+        grid.appendChild(ball);
+      }
+      for (let m = 1; m <= 25; m++) {
+        const mb = document.createElement('div');
+        mb.className = `ball ${['cold','warm','hot'][Math.floor(Math.random()*3)]}`;
+        mb.textContent = m;
+        megaGrid.appendChild(mb);
+      }
     }
   </script>
 </body>
