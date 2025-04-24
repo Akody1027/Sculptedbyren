@@ -6,55 +6,141 @@
   <title>Mega Millions Smart Generator</title>
   <style>
     :root {
-      --bg: #1e1e1e;
-      --text: #e0e0e0;
-      --card: #2c2c2c;
-      --accent: #42a5f5;
-      --cold: #90caf9;
+      --bg: #141414;
+      --text: #f0f0f0;
+      --card: #1f1f1f;
+      --accent: #82b1ff;
+      --cold: #b3e5fc;
       --warm: #ffe082;
-      --hot: #ef5350;
+      --hot: #ef9a9a;
     }
     body {
       margin: 0;
-      font-family: system-ui, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background: var(--bg);
       color: var(--text);
-      padding: 20px;
-      text-align: center;
+      padding: 30px 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     h1 {
-      font-size: 1.8em;
+      font-size: 2.2em;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #82b1ff, #ffcc80);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     button {
-      padding: 10px 16px;
+      padding: 12px 20px;
+      margin: 15px 0;
       border: none;
       background: var(--accent);
-      color: white;
+      color: #000;
+      font-weight: bold;
       font-size: 1em;
-      border-radius: 8px;
+      border-radius: 12px;
       cursor: pointer;
+      box-shadow: 0 0 10px rgba(130, 177, 255, 0.4);
+    }
+    .results-box, .heatmap {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+      text-align: center;
+    }
+    .ball-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+      gap: 8px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+    .ball {
+      width: 35px;
+      height: 35px;
+      line-height: 35px;
+      border-radius: 50%;
+      text-align: center;
+      font-weight: bold;
+      color: #000;
+    }
+    .cold { background: var(--cold); }
+    .warm { background: var(--warm); }
+    .hot { background: var(--hot); }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      font-size: 0.85em;
+      margin-top: 10px;
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .legend-box {
+      width: 15px;
+      height: 15px;
+      border-radius: 3px;
     }
     .disclaimer {
       color: red;
       font-size: 0.8em;
-      margin-top: 10px;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>Mega Millions Smart Generator</h1>
+  <h1>Mega Millions Generator</h1>
   <div id="countdown"></div>
   <button onclick="generateNumbers()">Generate Numbers</button>
-  <div id="results"></div>
+  <div class="results-box" id="results"></div>
   <div id="confidence"></div>
-  <ul id="logList"></ul>
+  <div class="heatmap" id="heatmapSection">
+    <h3>White Ball Heatmap</h3>
+    <div class="ball-grid" id="white-heatmap"></div>
+    <h3>Mega Ball Heatmap</h3>
+    <div class="ball-grid" id="mega-heatmap"></div>
+    <div class="legend">
+      <span><div class="legend-box cold"></div>Cold</span>
+      <span><div class="legend-box warm"></div>Warm</span>
+      <span><div class="legend-box hot"></div>Hot</span>
+    </div>
+  </div>
   <div class="disclaimer">*This tool analyzes past patterns but does not guarantee winnings. Play responsibly.</div>
   <script>
     const hotWhite = [21, 45, 44, 48, 49, 10, 33];
     const coldWhite = [62, 67, 70, 3, 31];
     const hotMega = [23, 22, 14];
     const coldMega = [19, 21, 2];
-    const logKey = 'megaGenLog';
+
+    function getClass(num, hot, cold) {
+      return hot.includes(num) ? 'hot' : cold.includes(num) ? 'cold' : 'warm';
+    }
+
+    function updateHeatmap() {
+      const whiteMap = document.getElementById('white-heatmap');
+      const megaMap = document.getElementById('mega-heatmap');
+      whiteMap.innerHTML = megaMap.innerHTML = '';
+      for (let i = 1; i <= 70; i++) {
+        const ball = document.createElement('div');
+        ball.className = `ball ${getClass(i, hotWhite, coldWhite)}`;
+        ball.textContent = i;
+        whiteMap.appendChild(ball);
+      }
+      for (let i = 1; i <= 25; i++) {
+        const ball = document.createElement('div');
+        ball.className = `ball ${getClass(i, hotMega, coldMega)}`;
+        ball.textContent = i;
+        megaMap.appendChild(ball);
+      }
+    }
 
     function generateNumbers() {
       let pool = [], megaPool = [];
@@ -75,7 +161,7 @@
       picks.sort((a,b)=>a-b);
       const mega = megaPool[Math.floor(Math.random() * megaPool.length)];
       document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2><p>Based on frequency-weighted selection using historical data.</p>`;
-      logResult(picks, mega);
+      document.getElementById('heatmapSection').style.display = 'block';
       analyzeConfidence(picks, mega);
     }
 
@@ -88,23 +174,6 @@
       if (highLow >= 2 && highLow <= 3) score += 10;
       score += hotHits * 5;
       document.getElementById('confidence').innerText = `Confidence: ${score}%`;
-    }
-
-    function logResult(picks, mega) {
-      const list = document.getElementById('logList');
-      const entry = `${picks.join(', ')} + MB: ${mega}`;
-      const li = document.createElement('li');
-      li.textContent = entry;
-      list.prepend(li);
-      const log = JSON.parse(localStorage.getItem(logKey) || '[]');
-      log.unshift(entry);
-      localStorage.setItem(logKey, JSON.stringify(log.slice(0, 20)));
-    }
-
-    function loadLog() {
-      const list = document.getElementById('logList');
-      const log = JSON.parse(localStorage.getItem(logKey) || '[]');
-      list.innerHTML = log.map(e => `<li>${e}</li>`).join('');
     }
 
     function getNextDrawTime() {
@@ -134,7 +203,7 @@
       setInterval(update, 1000);
     }
 
-    loadLog();
+    updateHeatmap();
     startCountdown();
   </script>
 </body>
