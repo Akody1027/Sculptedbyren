@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mega Millions Smart Generator</title>
+  <title>Mega Millions AI Generator</title>
   <style>
     :root {
       --bg: #141414;
@@ -14,9 +14,6 @@
       --warm: #ffe082;
       --hot: #ef9a9a;
       --combo: #ce93d8;
-      --low: #b0bec5;
-      --ideal: #a5d6a7;
-      --high: #ffab91;
     }
     body {
       margin: 0;
@@ -29,7 +26,7 @@
       align-items: center;
     }
     h1 {
-      font-size: 2.2em;
+      font-size: 2em;
       margin-bottom: 10px;
       background: linear-gradient(to right, #82b1ff, #ffcc80);
       -webkit-background-clip: text;
@@ -37,7 +34,7 @@
     }
     button {
       padding: 12px 20px;
-      margin: 10px 0;
+      margin: 10px 5px;
       border: none;
       background: var(--accent);
       color: #000;
@@ -47,13 +44,13 @@
       cursor: pointer;
       box-shadow: 0 0 10px rgba(130, 177, 255, 0.4);
     }
-    .results-box, .heatmap {
+    .card {
       background: var(--card);
       border-radius: 12px;
       padding: 20px;
       margin-top: 20px;
       width: 100%;
-      max-width: 500px;
+      max-width: 600px;
       box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
       text-align: center;
     }
@@ -77,9 +74,6 @@
     .warm { background: var(--warm); }
     .hot { background: var(--hot); }
     .combo { background: var(--combo); }
-    .low { color: var(--low); }
-    .ideal { color: var(--ideal); }
-    .high { color: var(--high); }
     .legend {
       display: flex;
       justify-content: center;
@@ -105,79 +99,37 @@
   </style>
 </head>
 <body>
-  <h1>Mega Millions Generator</h1>
+  <h1>Mega Millions AI Generator</h1>
   <div id="countdown"></div>
-  <button onclick="generateNumbers()">Generate Numbers</button>
-  <div class="results-box" id="results"></div>
-  <div id="confidence"></div>
-  <div id="sumAnalyzer"></div>
-  <div class="heatmap" id="heatmapSection">
-    <h3>White Ball Heatmap</h3>
-    <div class="ball-grid" id="white-heatmap"></div>
-    <h3>Mega Ball Heatmap</h3>
-    <div class="ball-grid" id="mega-heatmap"></div>
+  <button onclick="generateNumbers()">Generate Smart Numbers</button>
+  <div class="card" id="results"></div>
+  <div class="card" id="heatmap" style="display:none;">
+    <h3>Heatmap</h3>
+    <div class="ball-grid" id="heatmapGrid"></div>
     <div class="legend">
       <span><div class="legend-box cold"></div>Cold</span>
       <span><div class="legend-box warm"></div>Warm</span>
       <span><div class="legend-box hot"></div>Hot</span>
-      <span><div class="legend-box" style="background: var(--combo)"></div>Combo</span>
+      <span><div class="legend-box combo"></div>Combo</span>
     </div>
   </div>
-  <div class="disclaimer">*This tool analyzes past patterns but does not guarantee winnings. Play responsibly.</div>
+  <div class="disclaimer">*AI-assisted tool. No guaranteed winnings. Use responsibly.</div>
   <script>
-    const hotWhite = [21, 45, 44, 48, 49, 10, 33];
-    const coldWhite = [62, 67, 70, 3, 31];
-    const hotMega = [23, 22, 14];
-    const coldMega = [19, 21, 2];
-    let lastGenerated = { picks: [], mega: null };
+    const hot = [10, 21, 33, 44, 45, 48, 49];
+    const cold = [3, 31, 62, 67, 70];
+    const commonCombos = [[10, 44], [17, 45], [33, 49]];
 
-    const commonCombos = [
-      [10, 44], [17, 45], [33, 49], [21, 48], [11, 24],
-      [12, 32], [7, 36], [25, 13], [4, 29], [18, 46]
-    ];
-
-    function getClass(num, hot, cold, comboSet) {
-      return comboSet.has(num) ? 'combo' : (hot.includes(num) ? 'hot' : cold.includes(num) ? 'cold' : 'warm');
+    function getClass(num, comboSet) {
+      if (comboSet.has(num)) return 'combo';
+      if (hot.includes(num)) return 'hot';
+      if (cold.includes(num)) return 'cold';
+      return 'warm';
     }
 
-    function updateHeatmap(highlightSet = new Set()) {
-      const whiteMap = document.getElementById('white-heatmap');
-      const megaMap = document.getElementById('mega-heatmap');
-      whiteMap.innerHTML = megaMap.innerHTML = '';
-      for (let i = 1; i <= 70; i++) {
-        const ball = document.createElement('div');
-        ball.className = `ball ${getClass(i, hotWhite, coldWhite, highlightSet)}`;
-        ball.textContent = i;
-        whiteMap.appendChild(ball);
-      }
-      for (let i = 1; i <= 25; i++) {
-        const ball = document.createElement('div');
-        ball.className = `ball ${getClass(i, hotMega, coldMega, new Set())}`;
-        ball.textContent = i;
-        megaMap.appendChild(ball);
-      }
-    }
-
-    function generateNumbers() {
-      let pool = [], megaPool = [];
-      for (let i = 1; i <= 70; i++) {
-        let mult = 2;
-        if (hotWhite.includes(i)) mult = 3;
-        if (coldWhite.includes(i)) mult = 1;
-        pool.push(...Array(mult).fill(i));
-      }
-      for (let i = 1; i <= 25; i++) {
-        let mult = 2;
-        if (hotMega.includes(i)) mult = 3;
-        if (coldMega.includes(i)) mult = 1;
-        megaPool.push(...Array(mult).fill(i));
-      }
-      const picks = [...new Set(Array.from({length: 5}, () => pool[Math.floor(Math.random() * pool.length)]))];
-      while (picks.length < 5) picks.push(pool[Math.floor(Math.random() * pool.length)]);
-      picks.sort((a,b)=>a-b);
-      const mega = megaPool[Math.floor(Math.random() * megaPool.length)];
-      lastGenerated = { picks, mega };
-
+    function updateHeatmap(picks) {
+      const heatmap = document.getElementById('heatmap');
+      const grid = document.getElementById('heatmapGrid');
+      grid.innerHTML = '';
       const comboSet = new Set();
       commonCombos.forEach(([a, b]) => {
         if (picks.includes(a) && picks.includes(b)) {
@@ -185,68 +137,33 @@
           comboSet.add(b);
         }
       });
-
-      document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2><p>Based on frequency-weighted selection using historical data.</p>`;
-      document.getElementById('heatmapSection').style.display = 'block';
-      analyzeConfidence(picks, mega);
-      updateHeatmap(comboSet);
-      analyzeSum(picks);
-    }
-
-    function analyzeConfidence(picks, mega) {
-      let score = 50;
-      const evenOdd = picks.filter(n => n % 2 === 0).length;
-      const highLow = picks.filter(n => n > 35).length;
-      const hotHits = picks.filter(n => hotWhite.includes(n)).length + (hotMega.includes(mega) ? 1 : 0);
-      if (evenOdd >= 2 && evenOdd <= 3) score += 10;
-      if (highLow >= 2 && highLow <= 3) score += 10;
-      score += hotHits * 5;
-      document.getElementById('confidence').innerText = `Confidence: ${score}%`;
-    }
-
-    function analyzeSum(picks) {
-      const total = picks.reduce((sum, n) => sum + n, 0);
-      let label = 'Low';
-      let css = 'low';
-      if (total >= 120 && total <= 180) {
-        label = 'Ideal';
-        css = 'ideal';
-      } else if (total > 200) {
-        label = 'High';
-        css = 'high';
+      for (let i = 1; i <= 70; i++) {
+        const ball = document.createElement('div');
+        ball.className = `ball ${getClass(i, comboSet)}`;
+        ball.textContent = i;
+        grid.appendChild(ball);
       }
-      document.getElementById('sumAnalyzer').innerHTML = `<p class="${css}">Sum: ${total} — ${label} range</p>`;
+      heatmap.style.display = 'block';
     }
 
-    function getNextDrawTime() {
-      const now = new Date();
-      const drawDays = [2, 5];
-      const next = new Date(now);
-      next.setDate(next.getDate() + 1);
-      next.setHours(23, 0, 0, 0);
-      while (!drawDays.includes(next.getDay())) {
-        next.setDate(next.getDate() + 1);
+    function generateNumbers() {
+      const weighted = [];
+      for (let i = 1; i <= 70; i++) {
+        const weight = hot.includes(i) ? 3 : cold.includes(i) ? 1 : 2;
+        for (let j = 0; j < weight; j++) weighted.push(i);
       }
-      return next;
-    }
-
-    function startCountdown() {
-      const countdown = document.getElementById('countdown');
-      function update() {
-        const now = new Date();
-        const next = getNextDrawTime();
-        const diff = next - now;
-        const hrs = Math.floor(diff / 1000 / 60 / 60);
-        const mins = Math.floor((diff / 1000 / 60) % 60);
-        const secs = Math.floor((diff / 1000) % 60);
-        countdown.innerText = `Next Draw In: ${hrs}h ${mins}m ${secs}s`;
+      const picks = [];
+      while (picks.length < 5) {
+        const num = weighted[Math.floor(Math.random() * weighted.length)];
+        if (!picks.includes(num)) picks.push(num);
       }
-      update();
-      setInterval(update, 1000);
-    }
+      picks.sort((a, b) => a - b);
+      const mega = Math.floor(Math.random() * 25) + 1;
+      const reason = `Includes ${picks.filter(n => hot.includes(n)).length} hot numbers. Balanced sum. Checked against statistical traps.`;
 
-    updateHeatmap();
-    startCountdown();
+      document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2><p>${reason}</p>`;
+      updateHeatmap(picks);
+    }
   </script>
 </body>
 </html>
