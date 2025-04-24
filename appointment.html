@@ -13,6 +13,7 @@
       --cold: #b3e5fc;
       --warm: #ffe082;
       --hot: #ef9a9a;
+      --combo: #ce93d8;
     }
     body {
       margin: 0;
@@ -72,6 +73,7 @@
     .cold { background: var(--cold); }
     .warm { background: var(--warm); }
     .hot { background: var(--hot); }
+    .combo { background: var(--combo); }
     .legend {
       display: flex;
       justify-content: center;
@@ -111,6 +113,7 @@
       <span><div class="legend-box cold"></div>Cold</span>
       <span><div class="legend-box warm"></div>Warm</span>
       <span><div class="legend-box hot"></div>Hot</span>
+      <span><div class="legend-box" style="background: var(--combo)"></div>Combo</span>
     </div>
   </div>
   <div class="disclaimer">*This tool analyzes past patterns but does not guarantee winnings. Play responsibly.</div>
@@ -120,23 +123,28 @@
     const hotMega = [23, 22, 14];
     const coldMega = [19, 21, 2];
 
-    function getClass(num, hot, cold) {
-      return hot.includes(num) ? 'hot' : cold.includes(num) ? 'cold' : 'warm';
+    const commonCombos = [
+      [10, 44], [17, 45], [33, 49], [21, 48], [11, 24],
+      [12, 32], [7, 36], [25, 13], [4, 29], [18, 46]
+    ];
+
+    function getClass(num, hot, cold, comboSet) {
+      return comboSet.has(num) ? 'combo' : (hot.includes(num) ? 'hot' : cold.includes(num) ? 'cold' : 'warm');
     }
 
-    function updateHeatmap() {
+    function updateHeatmap(highlightSet = new Set()) {
       const whiteMap = document.getElementById('white-heatmap');
       const megaMap = document.getElementById('mega-heatmap');
       whiteMap.innerHTML = megaMap.innerHTML = '';
       for (let i = 1; i <= 70; i++) {
         const ball = document.createElement('div');
-        ball.className = `ball ${getClass(i, hotWhite, coldWhite)}`;
+        ball.className = `ball ${getClass(i, hotWhite, coldWhite, highlightSet)}`;
         ball.textContent = i;
         whiteMap.appendChild(ball);
       }
       for (let i = 1; i <= 25; i++) {
         const ball = document.createElement('div');
-        ball.className = `ball ${getClass(i, hotMega, coldMega)}`;
+        ball.className = `ball ${getClass(i, hotMega, coldMega, new Set())}`;
         ball.textContent = i;
         megaMap.appendChild(ball);
       }
@@ -160,9 +168,19 @@
       while (picks.length < 5) picks.push(pool[Math.floor(Math.random() * pool.length)]);
       picks.sort((a,b)=>a-b);
       const mega = megaPool[Math.floor(Math.random() * megaPool.length)];
+
+      const comboSet = new Set();
+      commonCombos.forEach(([a, b]) => {
+        if (picks.includes(a) && picks.includes(b)) {
+          comboSet.add(a);
+          comboSet.add(b);
+        }
+      });
+
       document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2><p>Based on frequency-weighted selection using historical data.</p>`;
       document.getElementById('heatmapSection').style.display = 'block';
       analyzeConfidence(picks, mega);
+      updateHeatmap(comboSet);
     }
 
     function analyzeConfidence(picks, mega) {
