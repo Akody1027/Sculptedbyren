@@ -96,11 +96,16 @@
       font-size: 0.8em;
       margin-top: 20px;
     }
+    #botStatus {
+      font-size: 0.85em;
+      margin-top: 10px;
+      opacity: 0.6;
+    }
   </style>
 </head>
 <body>
   <h1>Mega Millions AI Generator</h1>
-  <div id="countdown"></div>
+  <div id="botStatus">BOT: Scanning latest draws...</div>
   <button onclick="generateNumbers()">Generate Smart Numbers</button>
   <div class="card" id="results"></div>
   <div class="card" id="heatmap" style="display:none;">
@@ -117,11 +122,37 @@
   </div>
   <div class="disclaimer">*AI-assisted tool. No guaranteed winnings. Use responsibly.</div>
   <script>
-    const hot = [10, 21, 33, 44, 45, 48, 49];
-    const cold = [3, 31, 62, 67, 70];
+    let hot = [10, 21, 33, 44, 45, 48, 49];
+    let cold = [3, 31, 62, 67, 70];
     const commonCombos = [[10, 44], [17, 45], [33, 49]];
     const hotMega = [1, 13, 17, 18, 22];
     const coldMega = [3, 7, 15, 24];
+
+    async function fetchLatestDraw() {
+      try {
+        const response = await fetch('https://www.lotteryusa.com/mega-millions/');
+        const text = await response.text();
+        const match = text.match(/<ul class="draw-result">(.*?)<\/ul>/s);
+        if (match) {
+          const nums = Array.from(match[1].matchAll(/<li.*?>(\d+)<\/li>/g)).map(m => parseInt(m[1]));
+          if (nums.length >= 6) {
+            const balls = nums.slice(0, 5);
+            const mega = nums[5];
+            updateWeights(balls, mega);
+            document.getElementById('botStatus').textContent = `BOT: Synced with last draw: ${balls.join(', ')} + MB ${mega}`;
+          }
+        }
+      } catch (e) {
+        document.getElementById('botStatus').textContent = 'BOT: Failed to sync. Using cached AI settings.';
+      }
+    }
+
+    function updateWeights(balls, mega) {
+      const allCounts = Array(71).fill(0);
+      balls.forEach(n => allCounts[n]++);
+      hot = allCounts.map((count, i) => ({ num: i, count })).filter(n => n.count > 0).sort((a, b) => b.count - a.count).slice(0, 7).map(n => n.num);
+      cold = allCounts.map((count, i) => ({ num: i, count })).filter(n => n.count > 0).sort((a, b) => a.count - b.count).slice(0, 5).map(n => n.num);
+    }
 
     function getClass(num, comboSet) {
       if (comboSet.has(num)) return 'combo';
@@ -177,11 +208,12 @@
       }
       picks.sort((a, b) => a - b);
       const mega = Math.floor(Math.random() * 25) + 1;
-      const reason = `Includes ${picks.filter(n => hot.includes(n)).length} hot numbers. Balanced sum. Checked against statistical traps.`;
-
+      const reason = `Includes ${picks.filter(n => hot.includes(n)).length} hot numbers. Balanced sum. AI-optimized.`;
       document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2><p>${reason}</p>`;
       updateHeatmap(picks, mega);
     }
+
+    fetchLatestDraw();
   </script>
 </body>
 </html>
