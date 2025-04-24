@@ -2,148 +2,129 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Mega Millions Smart Predictor</title>
+  <title>Advanced Mega Millions Predictor</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 30px; background: #f0f0f0; }
-    h1 { color: #333; }
-    button { padding: 15px 30px; font-size: 18px; margin: 20px; border-radius: 8px; background: #222; color: #fff; border: none; cursor: pointer; }
-    .numbers, .history, .heatmap, .heatmap-legend { margin-top: 30px; }
-    .numbers { font-size: 26px; }
-    .history { text-align: left; max-width: 600px; margin: 20px auto; background: #fff; padding: 15px; border-radius: 8px; }
-    .ball { display: inline-block; width: 40px; height: 40px; line-height: 40px; margin: 3px; border-radius: 50%; color: #fff; font-weight: bold; }
-    .heatmap { display: flex; flex-wrap: wrap; max-width: 600px; margin: 0 auto; }
-    .disclaimer { color: red; font-weight: bold; margin-top: 30px; }
-    .heatmap-legend { margin-top: 30px; font-size: 14px; text-align: left; display: inline-block; }
-    .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
-    .legend-color { width: 20px; height: 20px; margin-right: 10px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #f0f0f0;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      color: #00ffff;
+    }
+    #numbers {
+      font-size: 1.8em;
+      margin: 20px 0;
+    }
+    button {
+      padding: 10px 25px;
+      font-size: 1em;
+      border: none;
+      background: #00ffff;
+      color: #121212;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background: #00cccc;
+    }
+    .log {
+      margin-top: 30px;
+      font-size: 0.9em;
+      max-height: 300px;
+      overflow-y: scroll;
+      background: #1e1e1e;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #333;
+    }
+    canvas {
+      margin-top: 30px;
+      background: #fff;
+      border-radius: 10px;
+    }
+    .disclaimer {
+      color: red;
+      margin-top: 30px;
+      font-size: 0.8em;
+    }
   </style>
 </head>
 <body>
-
-<h1>Mega Millions Smart Predictor</h1>
-<button onclick="generateNumbers()">Generate Smart Numbers</button>
-
-<div class="numbers" id="output"></div>
-<div class="percentage" id="percentage"></div>
-<div class="heatmap" id="heatmap"></div>
-<div class="heatmap-legend" id="heatmap-legend">
-  <div class="legend-item">
-    <div class="legend-color" style="background-color:#32cd32;"></div>
-    <span>Frequently picked numbers</span>
+  <h1>Advanced Mega Millions Predictor</h1>
+  <div id="numbers">Click the button to generate numbers</div>
+  <button onclick="generateNumbers()">Generate</button>
+  <canvas id="heatmap" width="700" height="200"></canvas>
+  <div class="log" id="log">Log:</div>
+  <div class="disclaimer">
+    *Disclaimer: This tool uses historical patterns to generate statistically optimized picks but cannot guarantee winning results. Play responsibly.
   </div>
-  <div class="legend-item">
-    <div class="legend-color" style="background-color:#ff4500;"></div>
-    <span>Moderately picked numbers</span>
-  </div>
-  <div class="legend-item">
-    <div class="legend-color" style="background-color:#ffa500;"></div>
-    <span>Occasionally picked numbers</span>
-  </div>
-  <div class="legend-item">
-    <div class="legend-color" style="background-color:#ccc;"></div>
-    <span>Rarely picked numbers</span>
-  </div>
-  <div class="legend-item">
-    <div class="legend-color" style="background-color:#0066cc;"></div>
-    <span>Frequently picked Mega Balls</span>
-  </div>
-</div>
-<div class="history" id="history"><strong>Pick History:</strong><br></div>
-<div class="disclaimer">** Disclaimer: This tool uses historical trends but cannot guarantee winning numbers. Play responsibly. **</div>
 
-<script>
-  const weightedWhiteBalls = [
-    3,3,3,4,10,10,17,17,22,22,31,31,36,36,46,46,48,48,58,58,63,64,64,66,66,69,69
-  ];
-  const weightedMegaBalls = [3,11,11,13,18,18,22,22,24,24];
-  const allWhiteBalls = Array.from({length:70},(_,i)=>i+1);
-  const allMegaBalls = Array.from({length:25},(_,i)=>i+1);
-  let pickHistory = [];
+  <script>
+    const hotWhite = [24, 15, 16, 46, 5, 21, 45, 44, 48, 49];
+    const coldWhite = [70, 26, 27, 28, 29, 30, 53, 52, 33, 34];
+    const hotMega = [1, 14, 24, 23, 22];
+    const coldMega = [1, 23, 22, 21, 20];
 
-  // Function to calculate percentage chances for the complete set of numbers
-  function calculatePercentage(whiteFreq, megaFreq, totalDraws) {
-    const whitePercentage = ((whiteFreq / totalDraws) * 100).toFixed(2);
-    const megaPercentage = ((megaFreq / totalDraws) * 100).toFixed(2);
-    const totalPercentage = ((whiteFreq + megaFreq) / totalDraws) * 100;
-    return { whitePercentage, megaPercentage, totalPercentage: totalPercentage.toFixed(2) };
-  }
+    let frequency = Array(71).fill(0);
+    let megaFrequency = Array(26).fill(0);
 
-  // Function to generate numbers
-  function generateNumbers() {
-    let whiteBalls = [];
-    while (whiteBalls.length < 5) {
-      let n = weightedWhiteBalls[Math.floor(Math.random() * weightedWhiteBalls.length)];
-      if (!whiteBalls.includes(n)) whiteBalls.push(n);
+    function getRandomWeighted(hot, cold, total, needed) {
+      let all = [];
+      for (let i = 1; i <= total; i++) {
+        if (hot.includes(i)) {
+          all.push(i, i, i);
+        } else if (cold.includes(i)) {
+          all.push(i);
+        } else {
+          all.push(i, i);
+        }
+      }
+
+      let result = new Set();
+      while (result.size < needed) {
+        let rand = all[Math.floor(Math.random() * all.length)];
+        result.add(rand);
+      }
+      return Array.from(result).sort((a, b) => a - b);
     }
 
-    whiteBalls.sort((a, b) => a - b);
+    function generateNumbers() {
+      const whiteBalls = getRandomWeighted(hotWhite, coldWhite, 70, 5);
+      const megaBall = getRandomWeighted(hotMega, coldMega, 25, 1)[0];
 
-    // Avoid consecutive numbers
-    if (whiteBalls.some((n, i) => i > 0 && n === whiteBalls[i - 1] + 1)) return generateNumbers();
+      whiteBalls.forEach(n => frequency[n]++);
+      megaFrequency[megaBall]++;
 
-    // Check for too many numbers from the same range
-    let ranges = [0, 0, 0];
-    whiteBalls.forEach(n => {
-      if (n <= 23) ranges[0]++;
-      else if (n <= 46) ranges[1]++;
-      else ranges[2]++;
-    });
-    if (Math.max(...ranges) > 3) return generateNumbers();
+      const oddsPercent = ((1 / 302575350) * 100).toFixed(20); // actual Mega Millions odds
+      const display = `White Balls: ${whiteBalls.join(', ')} | Mega Ball: ${megaBall} | Odds: ${oddsPercent}%`;
+      document.getElementById('numbers').innerText = display;
 
-    // Avoid using numbers from the last draw
-    const lastDraw = pickHistory[0]?.split(' | ')[0].replace('White: ', '').split(', ').map(Number);
-    if (lastDraw && whiteBalls.every(n => lastDraw.includes(n))) return generateNumbers();
+      const log = document.getElementById('log');
+      const timestamp = new Date().toLocaleString();
+      log.innerHTML += `<div>${timestamp} - ${display}</div>`;
+      log.scrollTop = log.scrollHeight;
 
-    // Select Mega Ball
-    let megaBall = weightedMegaBalls[Math.floor(Math.random() * weightedMegaBalls.length)];
+      drawHeatmap();
+    }
 
-    // Add to history and render
-    let pick = `White: ${whiteBalls.join(", ")} | Mega: ${megaBall}`;
-    pickHistory.unshift(pick);
-    updateHistory();
-    renderHeatmap(whiteBalls, megaBall);
-    renderPercentage(whiteBalls, megaBall);
-    document.getElementById("output").innerHTML = `<strong>${pick}</strong>`;
-  }
-
-  // Update pick history
-  function updateHistory() {
-    document.getElementById("history").innerHTML = "<strong>Pick History:</strong><br>" + pickHistory.join("<br>");
-  }
-
-  // Render heatmap
-  function renderHeatmap(whites, mega) {
-    const heatmap = document.getElementById("heatmap");
-    heatmap.innerHTML = "";
-    allWhiteBalls.forEach(n => {
-      let freq = weightedWhiteBalls.filter(x => x === n).length;
-      let color = whites.includes(n) ? "#32cd32" : freq > 2 ? "#ff4500" : freq > 0 ? "#ffa500" : "#ccc";
-      heatmap.innerHTML += `<div class="ball" style="background:${color}">${n}</div>`;
-    });
-    heatmap.innerHTML += `<div style="flex-basis:100%;height:20px;"></div>`;
-    allMegaBalls.forEach(n => {
-      let freq = weightedMegaBalls.filter(x => x === n).length;
-      let color = (mega === n) ? "#0066cc" : freq > 2 ? "#ff4500" : freq > 0 ? "#ffa500" : "#ccc";
-      heatmap.innerHTML += `<div class="ball" style="background:${color}">${n}</div>`;
-    });
-  }
-
-  // Render percentage chances for the complete set of numbers
-  function renderPercentage(whites, mega) {
-    let whiteFreq = weightedWhiteBalls.filter(x => whites.includes(x)).length;
-    let megaFreq = weightedMegaBalls.filter(x => mega === x).length;
-
-    let { whitePercentage, megaPercentage, totalPercentage } = calculatePercentage(whiteFreq, megaFreq, weightedWhiteBalls.length);
-
-    let percentageOutput = `<strong>Set Percentage Chances:</strong><br>`;
-    percentageOutput += `White Balls: ${whitePercentage}%<br>`;
-    percentageOutput += `Mega Ball: ${megaPercentage}%<br>`;
-    percentageOutput += `Total Set Percentage: ${totalPercentage}%`;
-
-    document.getElementById("percentage").innerHTML = percentageOutput;
-  }
-
-</script>
-
+    function drawHeatmap() {
+      const canvas = document.getElementById('heatmap');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 1; i <= 70; i++) {
+        const barHeight = frequency[i] * 4;
+        ctx.fillStyle = '#00ffff';
+        ctx.fillRect((i - 1) * 10, canvas.height - barHeight, 8, barHeight);
+      }
+      for (let i = 1; i <= 25; i++) {
+        const barHeight = megaFrequency[i] * 4;
+        ctx.fillStyle = '#ff00ff';
+        ctx.fillRect((i - 1) * 10, 0, 8, barHeight);
+      }
+    }
+  </script>
 </body>
 </html>
