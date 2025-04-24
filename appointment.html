@@ -14,6 +14,9 @@
       --warm: #ffe082;
       --hot: #ef9a9a;
       --combo: #ce93d8;
+      --lowSum: #90caf9;
+      --idealSum: #a5d6a7;
+      --highSum: #ffab91;
     }
     body {
       margin: 0;
@@ -101,6 +104,9 @@
       margin-top: 10px;
       opacity: 0.6;
     }
+    .sum-low { color: var(--lowSum); }
+    .sum-ideal { color: var(--idealSum); }
+    .sum-high { color: var(--highSum); }
   </style>
 </head>
 <body>
@@ -212,8 +218,10 @@
       picks.sort((a, b) => a - b);
       const mega = Math.floor(Math.random() * 25) + 1;
       const sum = picks.reduce((a, b) => a + b, 0) + mega;
-      const reason = `Includes ${picks.filter(n => hot.includes(n)).length} hot numbers. Sum: ${sum}. Range: ${picks[4] - picks[0]}.`;
+      const range = picks[4] - picks[0];
       const odds = ((Math.random() * 0.9 + 0.05) * 100).toFixed(2);
+      const sumClass = sum < 130 ? 'sum-low' : sum > 180 ? 'sum-high' : 'sum-ideal';
+      const reason = `Includes ${picks.filter(n => hot.includes(n)).length} hot numbers. <span class="${sumClass}">Sum: ${sum}</span>. Range: ${range}.`;
       document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2><p>${reason}</p><p>Estimated Odds Score: ${odds}%</p>`;
       updateHeatmap(picks, mega);
     }
