@@ -34,16 +34,12 @@
       border-radius: 8px;
       cursor: pointer;
     }
-    .heatmap {
+    .heatmap, .log {
       background: var(--card);
       padding: 12px;
       border-radius: 10px;
       margin: 15px auto;
       max-width: 600px;
-      display: none;
-    }
-    .heatmap.show {
-      display: block;
     }
     .ball-grid {
       display: grid;
@@ -86,13 +82,18 @@
       font-size: 0.8em;
       margin-top: 10px;
     }
+    #confidence, #countdown, #logList {
+      margin-top: 15px;
+    }
   </style>
 </head>
 <body>
   <h1>Mega Millions Smart Generator</h1>
+  <div id="countdown"></div>
   <button onclick="generateNumbers()">Generate Numbers</button>
   <div id="results"></div>
-  <div class="heatmap" id="heatmapSection">
+  <div id="confidence"></div>
+  <div class="heatmap" id="heatmapSection" style="display:none">
     <h3>White Ball Heatmap</h3>
     <div class="ball-grid" id="white-heatmap"></div>
     <h3>Mega Ball Heatmap</h3>
@@ -103,12 +104,19 @@
       <span><div class="legend-box hot"></div>Hot</span>
     </div>
   </div>
+  <div class="log">
+    <h3>Generated Numbers Log</h3>
+    <ul id="logList"></ul>
+    <button onclick="clearLog()">Clear All</button>
+  </div>
   <div class="disclaimer">*This tool analyzes past patterns but does not guarantee winnings. Play responsibly.</div>
+
   <script>
     const hotWhite = [21, 45, 44, 48, 49, 10, 33];
     const coldWhite = [62, 67, 70, 3, 31];
     const hotMega = [23, 22, 14];
     const coldMega = [19, 21, 2];
+    const logKey = 'megaGenLog';
 
     function getClass(num, hot, cold) {
       return hot.includes(num) ? 'hot' : cold.includes(num) ? 'cold' : 'warm';
@@ -146,15 +154,78 @@
         if (coldMega.includes(i)) mult = 1;
         megaPool.push(...Array(mult).fill(i));
       }
-      const picks = [...new Set(Array.from({length: 5}, () => pool[Math.floor(Math.random() * pool.length)]))].sort((a,b)=>a-b);
+      const picks = [...new Set(Array.from({length: 5}, () => pool[Math.floor(Math.random() * pool.length)]))];
       while (picks.length < 5) picks.push(pool[Math.floor(Math.random() * pool.length)]);
       picks.sort((a,b)=>a-b);
       const mega = megaPool[Math.floor(Math.random() * megaPool.length)];
       document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2><p>Based on frequency-weighted selection using historical data.</p>`;
-      document.getElementById('heatmapSection').classList.add('show');
+      document.getElementById('heatmapSection').style.display = 'block';
+      logResult(picks, mega);
+      analyzeConfidence(picks, mega);
+    }
+
+    function analyzeConfidence(picks, mega) {
+      let score = 50;
+      const evenOdd = picks.filter(n => n % 2 === 0).length;
+      const highLow = picks.filter(n => n > 35).length;
+      const hotHits = picks.filter(n => hotWhite.includes(n)).length + (hotMega.includes(mega) ? 1 : 0);
+      if (evenOdd >= 2 && evenOdd <= 3) score += 10;
+      if (highLow >= 2 && highLow <= 3) score += 10;
+      score += hotHits * 5;
+      document.getElementById('confidence').innerText = `Confidence: ${score}%`;
+    }
+
+    function logResult(picks, mega) {
+      const list = document.getElementById('logList');
+      const entry = `${picks.join(', ')} + MB: ${mega}`;
+      const li = document.createElement('li');
+      li.textContent = entry;
+      list.prepend(li);
+      const log = JSON.parse(localStorage.getItem(logKey) || '[]');
+      log.unshift(entry);
+      localStorage.setItem(logKey, JSON.stringify(log.slice(0, 20)));
+    }
+
+    function loadLog() {
+      const list = document.getElementById('logList');
+      const log = JSON.parse(localStorage.getItem(logKey) || '[]');
+      list.innerHTML = log.map(e => `<li>${e}</li>`).join('');
+    }
+
+    function clearLog() {
+      localStorage.removeItem(logKey);
+      document.getElementById('logList').innerHTML = '';
+    }
+
+    function getNextDrawTime() {
+      const now = new Date();
+      const drawDays = [2, 5]; // Tuesday and Friday
+      const next = new Date(now);
+      while (!drawDays.includes(next.getDay()) || next.getHours() > 22 || (next.getHours() === 22 && next.getMinutes() >= 59)) {
+        next.setDate(next.getDate() + 1);
+        next.setHours(23, 0, 0, 0);
+      }
+      return next;
+    }
+
+    function startCountdown() {
+      const countdown = document.getElementById('countdown');
+      function update() {
+        const now = new Date();
+        const next = getNextDrawTime();
+        const diff = next - now;
+        const hrs = Math.floor(diff / 1000 / 60 / 60);
+        const mins = Math.floor((diff / 1000 / 60) % 60);
+        const secs = Math.floor((diff / 1000) % 60);
+        countdown.innerText = `Next Draw In: ${hrs}h ${mins}m ${secs}s`;
+      }
+      update();
+      setInterval(update, 1000);
     }
 
     updateHeatmap();
+    loadLog();
+    startCountdown();
   </script>
 </body>
 </html>
