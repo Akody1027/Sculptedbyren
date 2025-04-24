@@ -99,11 +99,6 @@
       font-size: 0.8em;
       margin-top: 20px;
     }
-    #botStatus {
-      font-size: 0.85em;
-      margin-top: 10px;
-      opacity: 0.6;
-    }
     .sum-low { color: var(--lowSum); }
     .sum-ideal { color: var(--idealSum); }
     .sum-high { color: var(--highSum); }
@@ -111,7 +106,6 @@
 </head>
 <body>
   <h1>Mega Millions AI Generator</h1>
-  <div id="botStatus">BOT: Checking for new draw data...</div>
   <button onclick="generateNumbers()">Generate Smart Numbers</button>
   <div class="card" id="results"></div>
   <div class="card" id="heatmap" style="display:none;">
@@ -128,14 +122,48 @@
   </div>
   <div class="disclaimer">*AI-assisted tool. No guaranteed winnings. Use responsibly.</div>
   <script>
+    // Precomputed heatmap arrays remain constant
+    const ballHeatmap = Array.from({length: 70}, () => ['cold','warm','hot'][Math.floor(Math.random()*3)]);
+    const megaBallHeatmap = Array.from({length: 25}, () => ['cold','warm','hot'][Math.floor(Math.random()*3)]);
+
+    function updateHeatmap() {
+      const grid = document.getElementById('heatmapGrid');
+      const megaGrid = document.getElementById('megaHeatmapGrid');
+      grid.innerHTML = '';
+      megaGrid.innerHTML = '';
+
+      ballHeatmap.forEach((cls, idx) => {
+        const ball = document.createElement('div');
+        ball.className = `ball ${cls}`;
+        ball.textContent = idx + 1;
+        grid.appendChild(ball);
+      });
+      megaBallHeatmap.forEach((cls, idx) => {
+        const mb = document.createElement('div');
+        mb.className = `ball ${cls}`;
+        mb.textContent = idx + 1;
+        megaGrid.appendChild(mb);
+      });
+    }
+
     function generateNumbers() {
+      // Generate numbers
       const picks = Array.from({length: 5}, () => Math.floor(Math.random() * 70) + 1).sort((a,b)=>a-b);
       const mega = Math.floor(Math.random() * 25) + 1;
+      // Sum and styling
       const sum = picks.reduce((acc, val) => acc + val, 0);
       const sumClass = sum < 130 ? 'sum-low' : sum > 180 ? 'sum-high' : 'sum-ideal';
       const odds = (Math.random() * (0.85 - 0.55) + 0.55).toFixed(2);
-      document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2><p class="${sumClass}">Sum: ${sum}</p><p>Estimated odds: ${odds}%</p>`;
+
+      // Display results
+      document.getElementById('results').innerHTML = 
+        `<h2>${picks.join(', ')} + MB: ${mega}</h2>` +
+        `<p class="${sumClass}">Sum: ${sum} (${sumClass.replace('sum-','').toUpperCase()})</p>` +
+        `<p>Estimated odds: ${odds}%</p>`;
+
+      // Show heatmap once
       document.getElementById('heatmap').style.display = 'block';
+      updateHeatmap();
     }
   </script>
 </body>
