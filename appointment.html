@@ -6,19 +6,13 @@
   <title>Mega Millions Smart Generator</title>
   <style>
     :root {
-      --bg: #f9f9f9;
-      --text: #111;
-      --card: #ffffff;
-      --accent: #0077cc;
-      --cold: #90caf9;
-      --warm: #ffe082;
-      --hot: #ef5350;
-    }
-    [data-theme="dark"] {
       --bg: #1e1e1e;
       --text: #e0e0e0;
       --card: #2c2c2c;
       --accent: #42a5f5;
+      --cold: #90caf9;
+      --warm: #ffe082;
+      --hot: #ef5350;
     }
     body {
       margin: 0;
@@ -26,12 +20,12 @@
       background: var(--bg);
       color: var(--text);
       padding: 20px;
-      transition: background 0.3s, color 0.3s;
+      text-align: center;
     }
     h1 {
       font-size: 1.8em;
     }
-    button, select {
+    button {
       padding: 10px 16px;
       border: none;
       background: var(--accent);
@@ -40,18 +34,12 @@
       border-radius: 8px;
       cursor: pointer;
     }
-    .switch {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      margin: 15px 0;
-    }
-    .heatmap, .log {
+    .heatmap {
       background: var(--card);
       padding: 12px;
       border-radius: 10px;
-      margin: 15px 0;
+      margin: 15px auto;
+      max-width: 600px;
     }
     .ball-grid {
       display: grid;
@@ -76,25 +64,10 @@
       font-size: 0.8em;
       margin-top: 10px;
     }
-    #darkToggle {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-    }
   </style>
 </head>
 <body>
-  <button id="darkToggle">Toggle Dark Mode</button>
   <h1>Mega Millions Smart Generator</h1>
-  <div class="switch">
-    <label>Strategy:
-      <select id="strategy">
-        <option value="default">Default Weighted</option>
-        <option value="past">Past Winner Pattern</option>
-      </select>
-    </label>
-    <label><input type="checkbox" id="adaptRecent"> Use Recent Draws</label>
-  </div>
   <button onclick="generateNumbers()">Generate Numbers</button>
   <div id="results"></div>
   <div class="heatmap">
@@ -103,23 +76,12 @@
     <h3>Mega Ball Heatmap</h3>
     <div class="ball-grid" id="mega-heatmap"></div>
   </div>
-  <div class="heatmap">
-    <h3>Jackpot Prediction</h3>
-    <div id="jackpot-info">Awaiting data...</div>
-  </div>
-  <div class="heatmap">
-    <h3>Recent Results Log</h3>
-    <input id="recentInput" placeholder="e.g. 5 12 18 34 49 23" />
-    <button onclick="addRecentResult()">+ Add</button>
-    <ul id="recentList"></ul>
-  </div>
   <div class="disclaimer">*This tool analyzes past patterns but does not guarantee winnings. Play responsibly.</div>
   <script>
     const hotWhite = [21, 45, 44, 48, 49, 10, 33];
     const coldWhite = [62, 67, 70, 3, 31];
     const hotMega = [23, 22, 14];
     const coldMega = [19, 21, 2];
-    let recentResults = JSON.parse(localStorage.getItem('recentMegaResults') || '[]');
 
     function getClass(num, hot, cold) {
       return hot.includes(num) ? 'hot' : cold.includes(num) ? 'cold' : 'warm';
@@ -144,72 +106,26 @@
     }
 
     function generateNumbers() {
-      const strat = document.getElementById('strategy').value;
-      const useRecent = document.getElementById('adaptRecent').checked;
       let pool = [], megaPool = [];
       for (let i = 1; i <= 70; i++) {
         let mult = 2;
         if (hotWhite.includes(i)) mult = 3;
         if (coldWhite.includes(i)) mult = 1;
-        if (strat === 'past' && [21, 45, 44, 48].includes(i)) mult += 2;
-        if (useRecent && recentResults.flat().includes(i)) mult++;
         pool.push(...Array(mult).fill(i));
       }
       for (let i = 1; i <= 25; i++) {
         let mult = 2;
         if (hotMega.includes(i)) mult = 3;
         if (coldMega.includes(i)) mult = 1;
-        if (strat === 'past' && [14, 23].includes(i)) mult += 2;
-        if (useRecent && recentResults.flat().includes(i)) mult++;
         megaPool.push(...Array(mult).fill(i));
       }
       const picks = [...new Set(Array.from({length: 5}, () => pool[Math.floor(Math.random() * pool.length)]))].sort((a,b)=>a-b);
       while (picks.length < 5) picks.push(pool[Math.floor(Math.random() * pool.length)]);
       picks.sort((a,b)=>a-b);
       const mega = megaPool[Math.floor(Math.random() * megaPool.length)];
-      let explanation = `Using ${strat === 'past' ? 'Past Winner Strategy' : 'Balanced Frequency'}${useRecent ? ' + recent trends' : ''}`;
-      document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2><p>${explanation}</p>`;
+      document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2><p>Based on frequency-weighted selection using historical data.</p>`;
     }
 
-    function addRecentResult() {
-      const input = document.getElementById('recentInput').value.trim();
-      const nums = input.split(/\s+/).map(n => parseInt(n)).filter(n => !isNaN(n));
-      if (nums.length === 6) {
-        recentResults.unshift(nums);
-        if (recentResults.length > 20) recentResults.pop();
-        localStorage.setItem('recentMegaResults', JSON.stringify(recentResults));
-        renderRecentResults();
-        updateJackpotPrediction();
-      }
-    }
-
-    function renderRecentResults() {
-      const ul = document.getElementById('recentList');
-      ul.innerHTML = recentResults.map(r => `<li>${r.join(', ')}</li>`).join('');
-    }
-
-    function updateJackpotPrediction() {
-      const drawsSinceJackpot = recentResults.length;
-      const avgJackpotGap = 21; // Historical average
-      let level = 'Low';
-      if (drawsSinceJackpot >= avgJackpotGap - 3) level = 'Medium';
-      if (drawsSinceJackpot >= avgJackpotGap + 2) level = 'High';
-      document.getElementById('jackpot-info').innerText = `Jackpot Likelihood: ${level} (Based on ${drawsSinceJackpot} recent draws)`;
-    }
-
-    function toggleDarkMode() {
-      const theme = document.body.dataset.theme;
-      document.body.dataset.theme = theme === 'dark' ? '' : 'dark';
-      localStorage.setItem('darkmode', document.body.dataset.theme);
-    }
-
-    document.getElementById('darkToggle').addEventListener('click', toggleDarkMode);
-    if (localStorage.getItem('darkmode') === 'dark') {
-      document.body.dataset.theme = 'dark';
-    }
-
-    renderRecentResults();
-    updateJackpotPrediction();
     updateHeatmap();
   </script>
 </body>
