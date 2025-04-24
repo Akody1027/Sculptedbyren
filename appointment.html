@@ -106,6 +106,8 @@
   <div class="card" id="heatmap" style="display:none;">
     <h3>Heatmap</h3>
     <div class="ball-grid" id="heatmapGrid"></div>
+    <h4>Mega Ball Heatmap</h4>
+    <div class="ball-grid" id="megaHeatmapGrid"></div>
     <div class="legend">
       <span><div class="legend-box cold"></div>Cold</span>
       <span><div class="legend-box warm"></div>Warm</span>
@@ -118,6 +120,8 @@
     const hot = [10, 21, 33, 44, 45, 48, 49];
     const cold = [3, 31, 62, 67, 70];
     const commonCombos = [[10, 44], [17, 45], [33, 49]];
+    const hotMega = [1, 13, 17, 18, 22];
+    const coldMega = [3, 7, 15, 24];
 
     function getClass(num, comboSet) {
       if (comboSet.has(num)) return 'combo';
@@ -126,10 +130,18 @@
       return 'warm';
     }
 
-    function updateHeatmap(picks) {
+    function getMegaClass(num) {
+      if (hotMega.includes(num)) return 'hot';
+      if (coldMega.includes(num)) return 'cold';
+      return 'warm';
+    }
+
+    function updateHeatmap(picks, mega) {
       const heatmap = document.getElementById('heatmap');
       const grid = document.getElementById('heatmapGrid');
+      const megaGrid = document.getElementById('megaHeatmapGrid');
       grid.innerHTML = '';
+      megaGrid.innerHTML = '';
       const comboSet = new Set();
       commonCombos.forEach(([a, b]) => {
         if (picks.includes(a) && picks.includes(b)) {
@@ -142,6 +154,12 @@
         ball.className = `ball ${getClass(i, comboSet)}`;
         ball.textContent = i;
         grid.appendChild(ball);
+      }
+      for (let m = 1; m <= 25; m++) {
+        const mb = document.createElement('div');
+        mb.className = `ball ${getMegaClass(m)}`;
+        mb.textContent = m;
+        megaGrid.appendChild(mb);
       }
       heatmap.style.display = 'block';
     }
@@ -162,7 +180,7 @@
       const reason = `Includes ${picks.filter(n => hot.includes(n)).length} hot numbers. Balanced sum. Checked against statistical traps.`;
 
       document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2><p>${reason}</p>`;
-      updateHeatmap(picks);
+      updateHeatmap(picks, mega);
     }
   </script>
 </body>
