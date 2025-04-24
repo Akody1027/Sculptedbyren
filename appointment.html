@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Advanced Mega Millions Predictor</title>
   <style>
     body {
@@ -9,17 +10,18 @@
       background: #121212;
       color: #f0f0f0;
       text-align: center;
-      padding: 40px;
+      padding: 20px;
     }
     h1 {
       color: #00ffff;
+      font-size: 1.6em;
     }
     #numbers {
-      font-size: 1.8em;
+      font-size: 1.4em;
       margin: 20px 0;
     }
     button {
-      padding: 10px 25px;
+      padding: 10px 20px;
       font-size: 1em;
       border: none;
       background: #00ffff;
@@ -31,9 +33,9 @@
       background: #00cccc;
     }
     .log {
-      margin-top: 30px;
+      margin-top: 20px;
       font-size: 0.9em;
-      max-height: 300px;
+      max-height: 200px;
       overflow-y: scroll;
       background: #1e1e1e;
       padding: 10px;
@@ -41,13 +43,15 @@
       border: 1px solid #333;
     }
     canvas {
-      margin-top: 30px;
+      margin-top: 20px;
       background: #fff;
       border-radius: 10px;
+      width: 100%;
+      height: auto;
     }
     .disclaimer {
       color: red;
-      margin-top: 30px;
+      margin-top: 20px;
       font-size: 0.8em;
     }
   </style>
@@ -98,8 +102,7 @@
       whiteBalls.forEach(n => frequency[n]++);
       megaFrequency[megaBall]++;
 
-      const oddsPercent = ((1 / 302575350) * 100).toFixed(20); // actual Mega Millions odds
-      const display = `White Balls: ${whiteBalls.join(', ')} | Mega Ball: ${megaBall} | Odds: ${oddsPercent}%`;
+      const display = `White Balls: ${whiteBalls.join(', ')} | Mega Ball: ${megaBall}`;
       document.getElementById('numbers').innerText = display;
 
       const log = document.getElementById('log');
