@@ -48,7 +48,8 @@
       background: #fff;
       border-radius: 10px;
       width: 100%;
-      height: auto;
+      max-width: 700px;
+      height: 300px;
     }
     .disclaimer {
       color: red;
@@ -61,7 +62,7 @@
   <h1>Advanced Mega Millions Predictor</h1>
   <div id="numbers">Click the button to generate numbers</div>
   <button onclick="generateNumbers()">Generate</button>
-  <canvas id="heatmap" width="700" height="200"></canvas>
+  <canvas id="heatmap"></canvas>
   <div class="log" id="log">Log:</div>
   <div class="disclaimer">
     *Disclaimer: This tool uses historical patterns to generate statistically optimized picks but cannot guarantee winning results. Play responsibly.
@@ -117,16 +118,23 @@
     function drawHeatmap() {
       const canvas = document.getElementById('heatmap');
       const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const width = canvas.width = canvas.offsetWidth;
+      const height = canvas.height = canvas.offsetHeight;
+      ctx.clearRect(0, 0, width, height);
+
+      const barWidth = width / 70;
       for (let i = 1; i <= 70; i++) {
-        const barHeight = frequency[i] * 4;
+        const barHeight = frequency[i] * 3;
         ctx.fillStyle = '#00aaff';
-        ctx.fillRect((i - 1) * 10, canvas.height - barHeight, 8, barHeight);
+        ctx.fillRect((i - 1) * barWidth, height - barHeight, barWidth - 1, barHeight);
       }
+
+      const megaYStart = 0;
+      const megaBarWidth = width / 25;
       for (let i = 1; i <= 25; i++) {
-        const barHeight = megaFrequency[i] * 4;
+        const barHeight = megaFrequency[i] * 3;
         ctx.fillStyle = '#ff00aa';
-        ctx.fillRect((i - 1) * 10, 0, 8, barHeight);
+        ctx.fillRect((i - 1) * megaBarWidth, megaYStart, megaBarWidth - 1, barHeight);
       }
     }
   </script>
