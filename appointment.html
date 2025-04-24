@@ -5,65 +5,130 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mega Millions AI Generator</title>
   <style>
+    :root {
+      --bg: #141414;
+      --text: #f0f0f0;
+      --card: #1f1f1f;
+      --accent: #82b1ff;
+      --cold: #b3e5fc;
+      --warm: #ffe082;
+      --hot: #ef9a9a;
+      --combo: #ce93d8;
+      --lowSum: #90caf9;
+      --idealSum: #a5d6a7;
+      --highSum: #ffab91;
+    }
     body {
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: #ffffff;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 30px 15px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
     }
-    .container {
-      max-width: 600px;
-      text-align: center;
+    h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #82b1ff, #ffcc80);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     button {
-      padding: 10px 20px;
-      margin: 20px;
+      padding: 12px 20px;
+      margin: 10px 5px;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      font-weight: bold;
+      font-size: 1em;
+      border-radius: 12px;
       cursor: pointer;
+      box-shadow: 0 0 10px rgba(130, 177, 255, 0.4);
     }
-    .results, .analysis {
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+      text-align: center;
+    }
+    .ball-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+      gap: 8px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+    .ball {
+      width: 35px;
+      height: 35px;
+      line-height: 35px;
+      border-radius: 50%;
+      text-align: center;
+      font-weight: bold;
+      color: #000;
+    }
+    .cold { background: var(--cold); }
+    .warm { background: var(--warm); }
+    .hot { background: var(--hot); }
+    .combo { background: var(--combo); }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      font-size: 0.85em;
+      margin-top: 10px;
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .legend-box {
+      width: 15px;
+      height: 15px;
+      border-radius: 3px;
+    }
+    .disclaimer {
+      color: red;
+      font-size: 0.8em;
       margin-top: 20px;
     }
-    .low { color: #ffcccb; }
-    .ideal { color: #90ee90; }
-    .high { color: #ffa07a; }
+    #botStatus {
+      font-size: 0.85em;
+      margin-top: 10px;
+      opacity: 0.6;
+    }
+    .sum-low { color: var(--lowSum); }
+    .sum-ideal { color: var(--idealSum); }
+    .sum-high { color: var(--highSum); }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Mega Millions AI Generator</h1>
-    <button onclick="generateNumbers()">Generate Numbers</button>
-    <div class="results" id="results"></div>
-    <div class="analysis" id="analysis"></div>
+  <h1>Mega Millions AI Generator</h1>
+  <div id="botStatus">BOT: Checking for new draw data...</div>
+  <button onclick="generateNumbers()">Generate Smart Numbers</button>
+  <div class="card" id="results"></div>
+  <div class="card" id="heatmap" style="display:none;">
+    <h3>Heatmap</h3>
+    <div class="ball-grid" id="heatmapGrid"></div>
+    <h4>Mega Ball Heatmap</h4>
+    <div class="ball-grid" id="megaHeatmapGrid"></div>
+    <div class="legend">
+      <span><div class="legend-box cold"></div>Cold</span>
+      <span><div class="legend-box warm"></div>Warm</span>
+      <span><div class="legend-box hot"></div>Hot</span>
+      <span><div class="legend-box combo"></div>Combo</span>
+    </div>
   </div>
-
+  <div class="disclaimer">*AI-assisted tool. No guaranteed winnings. Use responsibly.</div>
   <script>
-    const historicalSums = [152, 148, 160, 172, 155, 161, 142, 167, 179, 133, 158, 144]; // Example jackpot sums
-
-    function categorizeSum(sum) {
-      const avg = historicalSums.reduce((a, b) => a + b, 0) / historicalSums.length;
-      const sd = Math.sqrt(historicalSums.map(x => Math.pow(x - avg, 2)).reduce((a, b) => a + b) / historicalSums.length);
-      if (sum < avg - sd) return 'low';
-      if (sum > avg + sd) return 'high';
-      return 'ideal';
-    }
-
-    function generateNumbers() {
-      let numbers = [];
-      while (numbers.length < 5) {
-        let num = Math.floor(Math.random() * 70) + 1;
-        if (!numbers.includes(num)) numbers.push(num);
-      }
-      numbers.sort((a, b) => a - b);
-      const megaBall = Math.floor(Math.random() * 25) + 1;
-      const sum = numbers.reduce((a, b) => a + b, 0) + megaBall;
-      const category = categorizeSum(sum);
-
-      document.getElementById('results').innerHTML = `<h2>${numbers.join(', ')} + Mega Ball: ${megaBall}</h2>`;
-      document.getElementById('analysis').innerHTML = `<p>Sum: <span class="${category}">${sum} (${category.toUpperCase()})</span></p>`;
-    }
+    // The script you previously had here
   </script>
 </body>
 </html>
