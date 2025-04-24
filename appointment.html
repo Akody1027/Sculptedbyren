@@ -105,7 +105,7 @@
 </head>
 <body>
   <h1>Mega Millions AI Generator</h1>
-  <div id="botStatus">BOT: Scanning latest draws...</div>
+  <div id="botStatus">BOT: Checking for new draw data...</div>
   <button onclick="generateNumbers()">Generate Smart Numbers</button>
   <div class="card" id="results"></div>
   <div class="card" id="heatmap" style="display:none;">
@@ -130,8 +130,11 @@
 
     async function fetchLatestDraw() {
       try {
-        const response = await fetch('https://www.lotteryusa.com/mega-millions/');
-        const text = await response.text();
+        const proxy = 'https://api.allorigins.win/get?url=';
+        const url = encodeURIComponent('https://www.lotteryusa.com/mega-millions/');
+        const response = await fetch(`${proxy}${url}`);
+        const json = await response.json();
+        const text = json.contents;
         const match = text.match(/<ul class="draw-result">(.*?)<\/ul>/s);
         if (match) {
           const nums = Array.from(match[1].matchAll(/<li.*?>(\d+)<\/li>/g)).map(m => parseInt(m[1]));
@@ -143,7 +146,7 @@
           }
         }
       } catch (e) {
-        document.getElementById('botStatus').textContent = 'BOT: Failed to sync. Using cached AI settings.';
+        document.getElementById('botStatus').textContent = 'BOT: Sync failed. Using cached AI settings.';
       }
     }
 
