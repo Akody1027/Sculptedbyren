@@ -43,12 +43,13 @@
       border-radius: 8px;
       border: 1px solid #999;
     }
-    .ball-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
+    .ball-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 5px;
-      max-width: 400px;
-      margin: 20px auto;
+      margin: 10px auto 30px;
+      max-width: 1200px;
     }
     .ball {
       width: 35px;
@@ -152,18 +153,16 @@
     function drawBallHeatmaps() {
       const whiteContainer = document.getElementById('white-heatmap');
       const megaContainer = document.getElementById('mega-heatmap');
-      whiteContainer.innerHTML = '<h3>White Ball Heatmap</h3><div class="ball-grid">';
-      megaContainer.innerHTML = '<h3>Mega Ball Heatmap</h3><div class="ball-grid">';
+      whiteContainer.innerHTML = '<h3>White Ball Heatmap</h3><div class="ball-row">';
+      megaContainer.innerHTML = '<h3>Mega Ball Heatmap</h3><div class="ball-row">';
 
       for (let i = 1; i <= 70; i++) {
-        const freq = frequency[i];
         const className = hotWhite.includes(i) ? 'hot' : coldWhite.includes(i) ? 'cold' : 'warm';
         whiteContainer.innerHTML += `<div class="ball ${className}">${i}</div>`;
       }
       whiteContainer.innerHTML += '</div>';
 
       for (let i = 1; i <= 25; i++) {
-        const freq = megaFrequency[i];
         const className = hotMega.includes(i) ? 'hot' : coldMega.includes(i) ? 'cold' : 'warm';
         megaContainer.innerHTML += `<div class="ball ${className}">${i}</div>`;
       }
