@@ -34,56 +34,10 @@
       border-radius: 8px;
       cursor: pointer;
     }
-    .heatmap, .log {
-      background: var(--card);
-      padding: 12px;
-      border-radius: 10px;
-      margin: 15px auto;
-      max-width: 600px;
-    }
-    .ball-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
-      gap: 6px;
-      margin-top: 10px;
-      justify-content: center;
-    }
-    .ball {
-      width: 35px;
-      height: 35px;
-      line-height: 35px;
-      border-radius: 50%;
-      text-align: center;
-      font-weight: bold;
-      color: white;
-    }
-    .cold { background: var(--cold); }
-    .warm { background: var(--warm); color: black; }
-    .hot { background: var(--hot); }
-    .legend {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      font-size: 0.85em;
-      margin-top: 10px;
-    }
-    .legend span {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .legend-box {
-      width: 15px;
-      height: 15px;
-      border-radius: 3px;
-    }
     .disclaimer {
       color: red;
       font-size: 0.8em;
       margin-top: 10px;
-    }
-    #confidence, #countdown, #logList {
-      margin-top: 15px;
     }
   </style>
 </head>
@@ -93,52 +47,14 @@
   <button onclick="generateNumbers()">Generate Numbers</button>
   <div id="results"></div>
   <div id="confidence"></div>
-  <div class="heatmap" id="heatmapSection" style="display:none">
-    <h3>White Ball Heatmap</h3>
-    <div class="ball-grid" id="white-heatmap"></div>
-    <h3>Mega Ball Heatmap</h3>
-    <div class="ball-grid" id="mega-heatmap"></div>
-    <div class="legend">
-      <span><div class="legend-box cold"></div>Cold</span>
-      <span><div class="legend-box warm"></div>Warm</span>
-      <span><div class="legend-box hot"></div>Hot</span>
-    </div>
-  </div>
-  <div class="log">
-    <h3>Generated Numbers Log</h3>
-    <ul id="logList"></ul>
-    <button onclick="clearLog()">Clear All</button>
-  </div>
+  <ul id="logList"></ul>
   <div class="disclaimer">*This tool analyzes past patterns but does not guarantee winnings. Play responsibly.</div>
-
   <script>
     const hotWhite = [21, 45, 44, 48, 49, 10, 33];
     const coldWhite = [62, 67, 70, 3, 31];
     const hotMega = [23, 22, 14];
     const coldMega = [19, 21, 2];
     const logKey = 'megaGenLog';
-
-    function getClass(num, hot, cold) {
-      return hot.includes(num) ? 'hot' : cold.includes(num) ? 'cold' : 'warm';
-    }
-
-    function updateHeatmap() {
-      const whiteMap = document.getElementById('white-heatmap');
-      const megaMap = document.getElementById('mega-heatmap');
-      whiteMap.innerHTML = megaMap.innerHTML = '';
-      for (let i = 1; i <= 70; i++) {
-        const ball = document.createElement('div');
-        ball.className = `ball ${getClass(i, hotWhite, coldWhite)}`;
-        ball.textContent = i;
-        whiteMap.appendChild(ball);
-      }
-      for (let i = 1; i <= 25; i++) {
-        const ball = document.createElement('div');
-        ball.className = `ball ${getClass(i, hotMega, coldMega)}`;
-        ball.textContent = i;
-        megaMap.appendChild(ball);
-      }
-    }
 
     function generateNumbers() {
       let pool = [], megaPool = [];
@@ -159,7 +75,6 @@
       picks.sort((a,b)=>a-b);
       const mega = megaPool[Math.floor(Math.random() * megaPool.length)];
       document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2><p>Based on frequency-weighted selection using historical data.</p>`;
-      document.getElementById('heatmapSection').style.display = 'block';
       logResult(picks, mega);
       analyzeConfidence(picks, mega);
     }
@@ -192,18 +107,14 @@
       list.innerHTML = log.map(e => `<li>${e}</li>`).join('');
     }
 
-    function clearLog() {
-      localStorage.removeItem(logKey);
-      document.getElementById('logList').innerHTML = '';
-    }
-
     function getNextDrawTime() {
       const now = new Date();
-      const drawDays = [2, 5]; // Tuesday and Friday
+      const drawDays = [2, 5];
       const next = new Date(now);
-      while (!drawDays.includes(next.getDay()) || next.getHours() > 22 || (next.getHours() === 22 && next.getMinutes() >= 59)) {
+      next.setDate(next.getDate() + 1);
+      next.setHours(23, 0, 0, 0);
+      while (!drawDays.includes(next.getDay())) {
         next.setDate(next.getDate() + 1);
-        next.setHours(23, 0, 0, 0);
       }
       return next;
     }
@@ -223,7 +134,6 @@
       setInterval(update, 1000);
     }
 
-    updateHeatmap();
     loadLog();
     startCountdown();
   </script>
