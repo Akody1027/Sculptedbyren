@@ -1,32 +1,210 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Oleo+Script:wght@700&family=Playwrite+IT+Moderna:wght@100..400&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sculpted by Ren | Luxury Spray Tanning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Outfit', sans-serif;
+    }
 
-    <title>Sculpted By Ren</title>
+    body {
+      background: #fff;
+      color: #333;
+      line-height: 1.6;
+    }
 
+    header {
+      background: linear-gradient(to right, #ffe0ec, #ffe0ec, #fff);
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      color: #d16b86;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      color: #555;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #d16b86;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      color: #a14461;
+    }
+
+    section {
+      padding: 4rem 2rem;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .hero {
+      background: url('https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?fit=crop&w=1400&q=80') no-repeat center center/cover;
+      height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+
+    .hero h2 {
+      font-size: 3rem;
+      background: rgba(0,0,0,0.4);
+      padding: 1rem 2rem;
+      border-radius: 10px;
+    }
+
+    .about,
+    .services,
+    .testimonials,
+    .contact {
+      background-color: #fefefe;
+      margin-top: 2rem;
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    h3 {
+      color: #d16b86;
+      margin-bottom: 1rem;
+    }
+
+    .services ul {
+      list-style: none;
+    }
+
+    .services li {
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .testimonials blockquote {
+      font-style: italic;
+      color: #555;
+      margin-bottom: 1.5rem;
+    }
+
+    .contact form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .contact input,
+    .contact textarea {
+      padding: 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .contact button {
+      background: #d16b86;
+      color: white;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .contact button:hover {
+      background: #a14461;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      background: #f9f9f9;
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .hero h2 {
+        font-size: 2rem;
+        padding: 1rem;
+      }
+    }
+  </style>
 </head>
-    <body>
-        <div id="Navbar">
-            <h1 id="name">Sculpted By Ren</h1>
-        </div>
+<body>
 
-        <img id="shades" src="Images/spraytanningshades1.jpg" alt="">
+  <header>
+    <h1>Sculpted by Ren</h1>
+    <p>Luxury Spray Tanning for Every Skin Tone</p>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#testimonials">Testimonials</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
 
-        <img id="tanlines" src="Images/tanlines.jpg" alt="">
-        
-       <style>
-           html {           
-               font-family: "Playwrite IT Moderna", cursive;
-               font-optical-sizing: auto;
-               font-weight: 400;
-               font-style: normal;
-           }
-           }
-       </style>
-    </body>
-</html
+  <div class="hero">
+    <h2>Glow With Confidence</h2>
+  </div>
+
+  <section id="about" class="about">
+    <h3>About Us</h3>
+    <p>At Sculpted by Ren, we believe every body deserves to shine. Using only the highest-quality, skin-safe solutions, we provide flawless spray tans customized for your tone, event, or everyday glow. Whether it's your first tan or your hundredth, you’ll leave feeling radiant and confident.</p>
+  </section>
+
+  <section id="services" class="services">
+    <h3>Services</h3>
+    <ul>
+      <li>Signature Full Body Tan - $45</li>
+      <li>Rapid Rinse Tan (2-4hr) - $55</li>
+      <li>Bridal Tan Package - $120</li>
+      <li>Group Tans / Events (Ask for quote)</li>
+    </ul>
+  </section>
+
+  <section id="testimonials" class="testimonials">
+    <h3>Client Love</h3>
+    <blockquote>"Ren made me feel so comfortable and the tan looked completely natural. 10/10!" – Emily R.</blockquote>
+    <blockquote>"The bridal tan was perfect in every photo – I felt like a goddess!" – Lauren M.</blockquote>
+  </section>
+
+  <section id="contact" class="contact">
+    <h3>Book Your Glow</h3>
+    <form>
+      <input type="text" placeholder="Your Name" required />
+      <input type="email" placeholder="Your Email" required />
+      <textarea rows="5" placeholder="Your Message or Appointment Request" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </section>
+
+  <footer>
+    &copy; 2025 Sculpted by Ren | All Rights Reserved
+  </footer>
+
+</body>
+</html>
