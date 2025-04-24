@@ -1,173 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced Mega Millions Predictor</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mega Millions Smart Generator</title>
   <style>
+    :root {
+      --bg: #f9f9f9;
+      --text: #111;
+      --card: #ffffff;
+      --accent: #0077cc;
+      --cold: #90caf9;
+      --warm: #ffe082;
+      --hot: #ef5350;
+    }
+    [data-theme="dark"] {
+      --bg: #1e1e1e;
+      --text: #e0e0e0;
+      --card: #2c2c2c;
+      --accent: #42a5f5;
+    }
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      color: #333;
-      text-align: center;
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       padding: 20px;
+      transition: background 0.3s, color 0.3s;
     }
     h1 {
-      color: #0077aa;
-      font-size: 1.6em;
+      font-size: 1.8em;
     }
-    #numbers {
-      font-size: 1.4em;
-      margin: 20px 0;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 1em;
+    button, select {
+      padding: 10px 16px;
       border: none;
-      background: #00aaff;
-      color: #fff;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    button:hover {
-      background: #0088cc;
-    }
-    .log {
-      margin-top: 20px;
-      font-size: 0.9em;
-      max-height: 200px;
-      overflow-y: scroll;
-      background: #e0e0e0;
-      color: #000;
-      padding: 10px;
+      background: var(--accent);
+      color: white;
+      font-size: 1em;
       border-radius: 8px;
-      border: 1px solid #999;
+      cursor: pointer;
+    }
+    .switch {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin: 15px 0;
+    }
+    .heatmap, .log {
+      background: var(--card);
+      padding: 12px;
+      border-radius: 10px;
+      margin: 15px 0;
     }
     .ball-grid {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 5px;
-      max-width: 1000px;
-      margin: 10px auto 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
+      gap: 6px;
+      margin-top: 10px;
     }
     .ball {
       width: 35px;
       height: 35px;
       line-height: 35px;
       border-radius: 50%;
-      font-size: 0.9em;
-      color: white;
-      font-weight: bold;
       text-align: center;
+      font-weight: bold;
+      color: white;
     }
-    .cold { background: #007bff; }
-    .warm { background: #ffc107; color: #000; }
-    .hot { background: #dc3545; }
-    .legend {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin: 15px 0;
-      font-size: 0.85em;
-    }
-    .legend div {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .legend-box {
-      width: 15px;
-      height: 15px;
-      border-radius: 3px;
-    }
+    .cold { background: var(--cold); }
+    .warm { background: var(--warm); color: black; }
+    .hot { background: var(--hot); }
     .disclaimer {
       color: red;
-      margin-top: 20px;
       font-size: 0.8em;
+      margin-top: 10px;
+    }
+    #darkToggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>Advanced Mega Millions Predictor</h1>
-  <div id="numbers">Click the button to generate numbers</div>
-  <button onclick="generateNumbers()">Generate</button>
-  <div id="white-heatmap"></div>
-  <div id="mega-heatmap"></div>
-  <div class="legend">
-    <div><div class="legend-box cold"></div> Cold</div>
-    <div><div class="legend-box warm"></div> Warm</div>
-    <div><div class="legend-box hot"></div> Hot</div>
+  <button id="darkToggle">Toggle Dark Mode</button>
+  <h1>Mega Millions Smart Generator</h1>
+  <div class="switch">
+    <label>Strategy:
+      <select id="strategy">
+        <option value="default">Default Weighted</option>
+        <option value="past">Past Winner Pattern</option>
+      </select>
+    </label>
+    <label><input type="checkbox" id="adaptRecent"> Use Recent Draws</label>
   </div>
-  <div class="log" id="log">Log:</div>
-  <div class="disclaimer">
-    *Disclaimer: This tool uses historical patterns to generate statistically optimized picks but cannot guarantee winning results. Play responsibly.
+  <button onclick="generateNumbers()">Generate Numbers</button>
+  <div id="results"></div>
+  <div class="heatmap">
+    <h3>White Ball Heatmap</h3>
+    <div class="ball-grid" id="white-heatmap"></div>
+    <h3>Mega Ball Heatmap</h3>
+    <div class="ball-grid" id="mega-heatmap"></div>
   </div>
-
+  <div class="heatmap">
+    <h3>Jackpot Prediction</h3>
+    <div id="jackpot-info">Awaiting data...</div>
+  </div>
+  <div class="heatmap">
+    <h3>Recent Results Log</h3>
+    <input id="recentInput" placeholder="e.g. 5 12 18 34 49 23" />
+    <button onclick="addRecentResult()">+ Add</button>
+    <ul id="recentList"></ul>
+  </div>
+  <div class="disclaimer">*This tool analyzes past patterns but does not guarantee winnings. Play responsibly.</div>
   <script>
-    const hotWhite = [24, 15, 16, 46, 5, 21, 45, 44, 48, 49];
-    const coldWhite = [70, 26, 27, 28, 29, 30, 53, 52, 33, 34];
-    const hotMega = [1, 14, 24, 23, 22];
-    const coldMega = [1, 23, 22, 21, 20];
+    const hotWhite = [21, 45, 44, 48, 49, 10, 33];
+    const coldWhite = [62, 67, 70, 3, 31];
+    const hotMega = [23, 22, 14];
+    const coldMega = [19, 21, 2];
+    let recentResults = JSON.parse(localStorage.getItem('recentMegaResults') || '[]');
 
-    let frequency = Array(71).fill(0);
-    let megaFrequency = Array(26).fill(0);
+    function getClass(num, hot, cold) {
+      return hot.includes(num) ? 'hot' : cold.includes(num) ? 'cold' : 'warm';
+    }
 
-    function getRandomWeighted(hot, cold, total, needed) {
-      let all = [];
-      for (let i = 1; i <= total; i++) {
-        if (hot.includes(i)) {
-          all.push(i, i, i);
-        } else if (cold.includes(i)) {
-          all.push(i);
-        } else {
-          all.push(i, i);
-        }
+    function updateHeatmap() {
+      const whiteMap = document.getElementById('white-heatmap');
+      const megaMap = document.getElementById('mega-heatmap');
+      whiteMap.innerHTML = megaMap.innerHTML = '';
+      for (let i = 1; i <= 70; i++) {
+        const ball = document.createElement('div');
+        ball.className = `ball ${getClass(i, hotWhite, coldWhite)}`;
+        ball.textContent = i;
+        whiteMap.appendChild(ball);
       }
-      let result = new Set();
-      while (result.size < needed) {
-        let rand = all[Math.floor(Math.random() * all.length)];
-        result.add(rand);
+      for (let i = 1; i <= 25; i++) {
+        const ball = document.createElement('div');
+        ball.className = `ball ${getClass(i, hotMega, coldMega)}`;
+        ball.textContent = i;
+        megaMap.appendChild(ball);
       }
-      return Array.from(result).sort((a, b) => a - b);
     }
 
     function generateNumbers() {
-      const whiteBalls = getRandomWeighted(hotWhite, coldWhite, 70, 5);
-      const megaBall = getRandomWeighted(hotMega, coldMega, 25, 1)[0];
-
-      whiteBalls.forEach(n => frequency[n]++);
-      megaFrequency[megaBall]++;
-
-      const display = `White Balls: ${whiteBalls.join(', ')} | Mega Ball: ${megaBall}`;
-      document.getElementById('numbers').innerText = display;
-
-      const log = document.getElementById('log');
-      const timestamp = new Date().toLocaleString();
-      log.innerHTML += `<div>${timestamp} - ${display}</div>`;
-      log.scrollTop = log.scrollHeight;
-
-      drawBallHeatmaps();
-    }
-
-    function drawBallHeatmaps() {
-      const whiteContainer = document.getElementById('white-heatmap');
-      const megaContainer = document.getElementById('mega-heatmap');
-
-      whiteContainer.innerHTML = '<h3>White Ball Heatmap</h3><div class="ball-grid">';
+      const strat = document.getElementById('strategy').value;
+      const useRecent = document.getElementById('adaptRecent').checked;
+      let pool = [], megaPool = [];
       for (let i = 1; i <= 70; i++) {
-        const className = hotWhite.includes(i) ? 'hot' : coldWhite.includes(i) ? 'cold' : 'warm';
-        whiteContainer.innerHTML += `<div class="ball ${className}">${i}</div>`;
+        let mult = 2;
+        if (hotWhite.includes(i)) mult = 3;
+        if (coldWhite.includes(i)) mult = 1;
+        if (strat === 'past' && [21, 45, 44, 48].includes(i)) mult += 2;
+        if (useRecent && recentResults.flat().includes(i)) mult++;
+        pool.push(...Array(mult).fill(i));
       }
-      whiteContainer.innerHTML += '</div>';
-
-      megaContainer.innerHTML = '<h3>Mega Ball Heatmap</h3><div class="ball-grid">';
       for (let i = 1; i <= 25; i++) {
-        const className = hotMega.includes(i) ? 'hot' : coldMega.includes(i) ? 'cold' : 'warm';
-        megaContainer.innerHTML += `<div class="ball ${className}">${i}</div>`;
+        let mult = 2;
+        if (hotMega.includes(i)) mult = 3;
+        if (coldMega.includes(i)) mult = 1;
+        if (strat === 'past' && [14, 23].includes(i)) mult += 2;
+        if (useRecent && recentResults.flat().includes(i)) mult++;
+        megaPool.push(...Array(mult).fill(i));
       }
-      megaContainer.innerHTML += '</div>';
+      const picks = [...new Set(Array.from({length: 5}, () => pool[Math.floor(Math.random() * pool.length)]))].sort((a,b)=>a-b);
+      while (picks.length < 5) picks.push(pool[Math.floor(Math.random() * pool.length)]);
+      picks.sort((a,b)=>a-b);
+      const mega = megaPool[Math.floor(Math.random() * megaPool.length)];
+      let explanation = `Using ${strat === 'past' ? 'Past Winner Strategy' : 'Balanced Frequency'}${useRecent ? ' + recent trends' : ''}`;
+      document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2><p>${explanation}</p>`;
     }
+
+    function addRecentResult() {
+      const input = document.getElementById('recentInput').value.trim();
+      const nums = input.split(/\s+/).map(n => parseInt(n)).filter(n => !isNaN(n));
+      if (nums.length === 6) {
+        recentResults.unshift(nums);
+        if (recentResults.length > 20) recentResults.pop();
+        localStorage.setItem('recentMegaResults', JSON.stringify(recentResults));
+        renderRecentResults();
+        updateJackpotPrediction();
+      }
+    }
+
+    function renderRecentResults() {
+      const ul = document.getElementById('recentList');
+      ul.innerHTML = recentResults.map(r => `<li>${r.join(', ')}</li>`).join('');
+    }
+
+    function updateJackpotPrediction() {
+      const drawsSinceJackpot = recentResults.length;
+      const avgJackpotGap = 21; // Historical average
+      let level = 'Low';
+      if (drawsSinceJackpot >= avgJackpotGap - 3) level = 'Medium';
+      if (drawsSinceJackpot >= avgJackpotGap + 2) level = 'High';
+      document.getElementById('jackpot-info').innerText = `Jackpot Likelihood: ${level} (Based on ${drawsSinceJackpot} recent draws)`;
+    }
+
+    function toggleDarkMode() {
+      const theme = document.body.dataset.theme;
+      document.body.dataset.theme = theme === 'dark' ? '' : 'dark';
+      localStorage.setItem('darkmode', document.body.dataset.theme);
+    }
+
+    document.getElementById('darkToggle').addEventListener('click', toggleDarkMode);
+    if (localStorage.getItem('darkmode') === 'dark') {
+      document.body.dataset.theme = 'dark';
+    }
+
+    renderRecentResults();
+    updateJackpotPrediction();
+    updateHeatmap();
   </script>
 </body>
 </html>
