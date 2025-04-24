@@ -47,7 +47,7 @@
       cursor: pointer;
       box-shadow: 0 0 10px rgba(130, 177, 255, 0.4);
     }
-    .results-box, .heatmap, .simulator {
+    .results-box, .heatmap, .simulator, .newsbox {
       background: var(--card);
       border-radius: 12px;
       padding: 20px;
@@ -102,6 +102,15 @@
       font-size: 0.8em;
       margin-top: 20px;
     }
+    .newsbox p {
+      margin: 5px 0;
+      font-size: 0.95em;
+    }
+    #newsText {
+      min-height: 20px;
+      font-style: italic;
+      transition: opacity 0.5s ease-in-out;
+    }
   </style>
 </head>
 <body>
@@ -113,6 +122,11 @@
   <div id="sumAnalyzer"></div>
   <button onclick="simulateDraws()">Simulate 10,000 Draws</button>
   <div class="simulator" id="simulatorResults"></div>
+  <div class="newsbox">
+    <h3>Jackpot & News</h3>
+    <p><strong>Current Jackpot:</strong> $522 Million</p>
+    <p id="newsText">Loading news...</p>
+  </div>
   <div class="heatmap" id="heatmapSection">
     <h3>White Ball Heatmap</h3>
     <div class="ball-grid" id="white-heatmap"></div>
@@ -245,6 +259,26 @@
       `;
     }
 
+    function rotateNews() {
+      const news = [
+        "Next drawing: Tuesday 11PM ET",
+        "Winning ticket claimed in Florida",
+        "Jackpot rolls to $522M",
+        "Last winner took home $1.3B in cash option",
+        "Mega Millions sees record streak"
+      ];
+      let i = 0;
+      const box = document.getElementById('newsText');
+      setInterval(() => {
+        box.style.opacity = 0;
+        setTimeout(() => {
+          box.innerText = news[i];
+          box.style.opacity = 1;
+          i = (i + 1) % news.length;
+        }, 300);
+      }, 4000);
+    }
+
     function getNextDrawTime() {
       const now = new Date();
       const drawDays = [2, 5];
@@ -274,6 +308,7 @@
 
     updateHeatmap();
     startCountdown();
+    rotateNews();
   </script>
 </body>
 </html>
