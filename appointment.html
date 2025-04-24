@@ -47,7 +47,7 @@
       cursor: pointer;
       box-shadow: 0 0 10px rgba(130, 177, 255, 0.4);
     }
-    .results-box, .heatmap, .simulator, .newsbox {
+    .results-box, .heatmap {
       background: var(--card);
       border-radius: 12px;
       padding: 20px;
@@ -102,15 +102,6 @@
       font-size: 0.8em;
       margin-top: 20px;
     }
-    .newsbox p {
-      margin: 5px 0;
-      font-size: 0.95em;
-    }
-    #newsText {
-      min-height: 20px;
-      font-style: italic;
-      transition: opacity 0.5s ease-in-out;
-    }
   </style>
 </head>
 <body>
@@ -120,13 +111,6 @@
   <div class="results-box" id="results"></div>
   <div id="confidence"></div>
   <div id="sumAnalyzer"></div>
-  <button onclick="simulateDraws()">Simulate 10,000 Draws</button>
-  <div class="simulator" id="simulatorResults"></div>
-  <div class="newsbox">
-    <h3>Jackpot & News</h3>
-    <p><strong>Current Jackpot:</strong> $522 Million</p>
-    <p id="newsText">Loading news...</p>
-  </div>
   <div class="heatmap" id="heatmapSection">
     <h3>White Ball Heatmap</h3>
     <div class="ball-grid" id="white-heatmap"></div>
@@ -207,7 +191,6 @@
       analyzeConfidence(picks, mega);
       updateHeatmap(comboSet);
       analyzeSum(picks);
-      document.getElementById('simulatorResults').innerHTML = '';
     }
 
     function analyzeConfidence(picks, mega) {
@@ -233,50 +216,6 @@
         css = 'high';
       }
       document.getElementById('sumAnalyzer').innerHTML = `<p class="${css}">Sum: ${total} — ${label} range</p>`;
-    }
-
-    function simulateDraws() {
-      const counts = [0, 0, 0, 0, 0, 0];
-      let megaHits = 0;
-      for (let i = 0; i < 10000; i++) {
-        const draw = new Set();
-        while (draw.size < 5) draw.add(Math.floor(Math.random() * 70) + 1);
-        const mb = Math.floor(Math.random() * 25) + 1;
-        let match = 0;
-        lastGenerated.picks.forEach(n => draw.has(n) && match++);
-        if (mb === lastGenerated.mega) megaHits++;
-        counts[match]++;
-      }
-      document.getElementById('simulatorResults').innerHTML = `
-        <h3>Simulation Results (10,000 draws)</h3>
-        <p>0 matches: ${counts[0]}</p>
-        <p>1 match: ${counts[1]}</p>
-        <p>2 matches: ${counts[2]}</p>
-        <p>3 matches: ${counts[3]}</p>
-        <p>4 matches: ${counts[4]}</p>
-        <p>5 matches: ${counts[5]}</p>
-        <p>Mega Ball matches: ${megaHits}</p>
-      `;
-    }
-
-    function rotateNews() {
-      const news = [
-        "Next drawing: Tuesday 11PM ET",
-        "Winning ticket claimed in Florida",
-        "Jackpot rolls to $522M",
-        "Last winner took home $1.3B in cash option",
-        "Mega Millions sees record streak"
-      ];
-      let i = 0;
-      const box = document.getElementById('newsText');
-      setInterval(() => {
-        box.style.opacity = 0;
-        setTimeout(() => {
-          box.innerText = news[i];
-          box.style.opacity = 1;
-          i = (i + 1) % news.length;
-        }, 300);
-      }, 4000);
     }
 
     function getNextDrawTime() {
@@ -308,7 +247,6 @@
 
     updateHeatmap();
     startCountdown();
-    rotateNews();
   </script>
 </body>
 </html>
