@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sculpted by Ren | Luxury Spray Tanning</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
@@ -20,168 +20,147 @@
     }
 
     header {
-      background: linear-gradient(to right, #ffe0ec, #fff4f8);
-      padding: 2rem;
       text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      padding: 2rem;
+      background-color: #ffeef3;
     }
 
     header h1 {
-      font-size: 2.8rem;
-      color: #d16b86;
+      font-size: 3rem;
+      color: #cc5c8d;
     }
 
     header p {
+      color: #7a4f61;
       font-size: 1.2rem;
-      color: #555;
     }
 
     nav {
       display: flex;
       justify-content: center;
-      gap: 1.5rem;
-      margin-top: 1rem;
-      flex-wrap: wrap;
+      gap: 2rem;
+      background-color: #fff4f8;
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
     nav a {
+      color: #cc5c8d;
       text-decoration: none;
-      color: #d16b86;
-      font-weight: 500;
-      transition: 0.3s;
+      font-weight: 600;
+      transition: color 0.3s;
     }
 
     nav a:hover {
       color: #a14461;
     }
 
-    .hero {
-      background: url('https://images.pexels.com/photos/6621464/pexels-photo-6621464.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260') no-repeat center center/cover;
+    .parallax {
+      background-attachment: fixed;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
       height: 80vh;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
       text-align: center;
     }
 
-    .hero h2 {
+    .parallax h2 {
       font-size: 3rem;
-      background: rgba(0,0,0,0.4);
+      background: rgba(0, 0, 0, 0.4);
       padding: 1rem 2rem;
-      border-radius: 12px;
+      border-radius: 1rem;
     }
 
     section {
-      padding: 4rem 2rem;
       max-width: 1100px;
       margin: auto;
+      padding: 4rem 2rem;
     }
 
     h3 {
-      color: #d16b86;
+      color: #cc5c8d;
       font-size: 2rem;
-      margin-bottom: 1rem;
       text-align: center;
-    }
-
-    p {
-      font-size: 1.1rem;
-      color: #555;
-    }
-
-    .about,
-    .services,
-    .testimonials,
-    .gallery,
-    .contact {
-      background-color: #fffdfd;
-      margin-top: 2rem;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      margin-bottom: 2rem;
     }
 
     .services ul {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
       list-style: none;
       padding: 0;
-      margin-top: 1rem;
     }
 
     .services li {
-      padding: 0.5rem 0;
+      background: #fff4f8;
+      padding: 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      text-align: center;
       font-weight: 500;
-      color: #333;
     }
 
     .testimonials blockquote {
+      background: #ffeef3;
+      padding: 1rem;
+      border-left: 5px solid #cc5c8d;
+      margin-bottom: 1rem;
+      border-radius: 1rem;
       font-style: italic;
       color: #444;
-      margin-bottom: 1.5rem;
-      border-left: 4px solid #f9c6d2;
-      padding-left: 1rem;
     }
 
-    .gallery-images {
+    .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 1.5rem;
-      margin-top: 2rem;
     }
 
-    .gallery-images img {
+    .gallery img {
       width: 100%;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      object-fit: cover;
+      border-radius: 1rem;
       height: 300px;
+      object-fit: cover;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
-    .contact form {
-      display: flex;
-      flex-direction: column;
+    form {
+      display: grid;
       gap: 1rem;
-      margin-top: 1rem;
     }
 
-    .contact input,
-    .contact textarea {
+    input, textarea, button {
       padding: 0.8rem;
       border: 1px solid #ccc;
-      border-radius: 8px;
+      border-radius: 0.5rem;
       font-size: 1rem;
     }
 
-    .contact button {
-      background: #d16b86;
+    button {
+      background: #cc5c8d;
       color: white;
-      padding: 0.8rem;
       border: none;
-      border-radius: 8px;
-      font-size: 1rem;
       cursor: pointer;
-      transition: 0.3s;
+      transition: background 0.3s;
     }
 
-    .contact button:hover {
+    button:hover {
       background: #a14461;
     }
 
     footer {
+      background: #fff4f8;
       text-align: center;
       padding: 2rem;
-      background: #fafafa;
-      color: #888;
-      font-size: 0.9rem;
-      margin-top: 3rem;
-    }
-
-    @media (max-width: 768px) {
-      .hero h2 {
-        font-size: 2rem;
-        padding: 1rem;
-      }
+      color: #777;
     }
   </style>
 </head>
@@ -189,64 +168,64 @@
 
   <header>
     <h1>Sculpted by Ren</h1>
-    <p>Luxury Spray Tanning for Every Skin Tone</p>
-    <nav>
-      <a href="#about">About</a>
-      <a href="#services">Services</a>
-      <a href="#testimonials">Testimonials</a>
-      <a href="#gallery">Gallery</a>
-      <a href="#contact">Contact</a>
-    </nav>
+    <p>Luxury Spray Tanning for Glowing Confidence</p>
   </header>
 
-  <div class="hero">
+  <nav>
+    <a href="#about">About</a>
+    <a href="#services">Services</a>
+    <a href="#testimonials">Testimonials</a>
+    <a href="#gallery">Gallery</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <div class="parallax" style="background-image: url('https://images.pexels.com/photos/6621237/pexels-photo-6621237.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260');">
     <h2>Glow With Confidence</h2>
   </div>
 
-  <section id="about" class="about">
+  <section id="about">
     <h3>About Us</h3>
-    <p>At Sculpted by Ren, we believe every body deserves to shine. Using only the highest-quality, skin-safe solutions, we provide flawless spray tans customized for your tone, event, or everyday glow. Whether it’s your first tan or your hundredth, you’ll leave feeling radiant and confident.</p>
+    <p>At Sculpted by Ren, we provide high-end, personalized spray tanning experiences using only the finest solutions for your skin. Whether it's your first tan or a regular beauty ritual, you'll leave feeling radiant and confident.</p>
   </section>
 
   <section id="services" class="services">
-    <h3>Services</h3>
+    <h3>Our Services</h3>
     <ul>
       <li>Signature Full Body Tan — $45</li>
-      <li>Rapid Rinse Tan (2-4hr) — $55</li>
-      <li>Bridal Tan Package — $120</li>
-      <li>Group Tans / Events — Custom Pricing</li>
+      <li>Rapid Rinse Tan (2–4 hrs) — $55</li>
+      <li>Bridal Glow Package — $120</li>
+      <li>Group & Event Tanning — Custom Rates</li>
     </ul>
   </section>
 
-  <section id="testimonials" class="testimonials">
+  <section id="testimonials">
     <h3>Client Love</h3>
-    <blockquote>“Ren made me feel so comfortable and the tan looked completely natural. 10/10!” – Emily R.</blockquote>
-    <blockquote>“The bridal tan was perfect in every photo – I felt like a goddess!” – Lauren M.</blockquote>
+    <blockquote>"Absolutely obsessed with how natural my tan looked! Ren is amazing!" – Sarah T.</blockquote>
+    <blockquote>"Perfect color and no orange tint. This is the only place I trust!" – Jess L.</blockquote>
   </section>
 
-  <section id="gallery" class="gallery">
+  <section id="gallery">
     <h3>Gallery</h3>
-    <p>Real results, real glow. Here's what our clients are raving about:</p>
-    <div class="gallery-images">
-      <img src="https://images.pexels.com/photos/6621238/pexels-photo-6621238.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" alt="Woman being spray tanned">
-      <img src="https://images.pexels.com/photos/1846835/pexels-photo-1846835.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" alt="Back view of woman with tan lines">
-      <img src="https://images.pexels.com/photos/1831234/pexels-photo-1831234.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" alt="Spray tan equipment in studio">
-      <img src="https://images.pexels.com/photos/3310694/pexels-photo-3310694.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" alt="Smiling woman with glowing skin">
+    <div class="gallery">
+      <img src="https://images.pexels.com/photos/6621238/pexels-photo-6621238.jpeg" alt="Spray Tan 1">
+      <img src="https://images.pexels.com/photos/1846835/pexels-photo-1846835.jpeg" alt="Spray Tan 2">
+      <img src="https://images.pexels.com/photos/1831234/pexels-photo-1831234.jpeg" alt="Spray Tan 3">
+      <img src="https://images.pexels.com/photos/3310694/pexels-photo-3310694.jpeg" alt="Spray Tan 4">
     </div>
   </section>
 
-  <section id="contact" class="contact">
+  <section id="contact">
     <h3>Book Your Glow</h3>
     <form>
-      <input type="text" placeholder="Your Name" required />
-      <input type="email" placeholder="Your Email" required />
+      <input type="text" placeholder="Your Name" required>
+      <input type="email" placeholder="Your Email" required>
       <textarea rows="5" placeholder="Your Message or Appointment Request" required></textarea>
       <button type="submit">Send Message</button>
     </form>
   </section>
 
   <footer>
-    &copy; 2025 Sculpted by Ren | All Rights Reserved
+    &copy; 2025 Sculpted by Ren. All rights reserved.
   </footer>
 
 </body>
