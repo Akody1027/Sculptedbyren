@@ -44,11 +44,11 @@
       border: 1px solid #999;
     }
     .ball-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
-      gap: 5px;
+      display: flex;
+      flex-wrap: wrap;
       justify-content: center;
-      max-width: 700px;
+      gap: 5px;
+      max-width: 1000px;
       margin: 10px auto 30px;
     }
     .ball {
@@ -59,6 +59,7 @@
       font-size: 0.9em;
       color: white;
       font-weight: bold;
+      text-align: center;
     }
     .cold { background: #007bff; }
     .warm { background: #ffc107; color: #000; }
