@@ -5,228 +5,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mega Millions AI Generator</title>
   <style>
-    :root {
-      --bg: #141414;
-      --text: #f0f0f0;
-      --card: #1f1f1f;
-      --accent: #82b1ff;
-      --cold: #b3e5fc;
-      --warm: #ffe082;
-      --hot: #ef9a9a;
-      --combo: #ce93d8;
-      --lowSum: #90caf9;
-      --idealSum: #a5d6a7;
-      --highSum: #ffab91;
-    }
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 30px 15px;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 20px;
     }
-    h1 {
-      font-size: 2em;
-      margin-bottom: 10px;
-      background: linear-gradient(to right, #82b1ff, #ffcc80);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .container {
+      max-width: 600px;
+      text-align: center;
     }
     button {
-      padding: 12px 20px;
-      margin: 10px 5px;
-      border: none;
-      background: var(--accent);
-      color: #000;
-      font-weight: bold;
-      font-size: 1em;
-      border-radius: 12px;
+      padding: 10px 20px;
+      margin: 20px;
       cursor: pointer;
-      box-shadow: 0 0 10px rgba(130, 177, 255, 0.4);
     }
-    .card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 20px;
-      width: 100%;
-      max-width: 600px;
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
-      text-align: center;
-    }
-    .ball-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
-      gap: 8px;
-      justify-content: center;
-      margin-top: 12px;
-    }
-    .ball {
-      width: 35px;
-      height: 35px;
-      line-height: 35px;
-      border-radius: 50%;
-      text-align: center;
-      font-weight: bold;
-      color: #000;
-    }
-    .cold { background: var(--cold); }
-    .warm { background: var(--warm); }
-    .hot { background: var(--hot); }
-    .combo { background: var(--combo); }
-    .legend {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      font-size: 0.85em;
-      margin-top: 10px;
-    }
-    .legend span {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .legend-box {
-      width: 15px;
-      height: 15px;
-      border-radius: 3px;
-    }
-    .disclaimer {
-      color: red;
-      font-size: 0.8em;
+    .results, .analysis {
       margin-top: 20px;
     }
-    #botStatus {
-      font-size: 0.85em;
-      margin-top: 10px;
-      opacity: 0.6;
-    }
-    .sum-low { color: var(--lowSum); }
-    .sum-ideal { color: var(--idealSum); }
-    .sum-high { color: var(--highSum); }
+    .low { color: #ffcccb; }
+    .ideal { color: #90ee90; }
+    .high { color: #ffa07a; }
   </style>
 </head>
 <body>
-  <h1>Mega Millions AI Generator</h1>
-  <div id="botStatus">BOT: Checking for new draw data...</div>
-  <button onclick="generateNumbers()">Generate Smart Numbers</button>
-  <div class="card" id="results"></div>
-  <div class="card" id="heatmap" style="display:none;">
-    <h3>Heatmap</h3>
-    <div class="ball-grid" id="heatmapGrid"></div>
-    <h4>Mega Ball Heatmap</h4>
-    <div class="ball-grid" id="megaHeatmapGrid"></div>
-    <div class="legend">
-      <span><div class="legend-box cold"></div>Cold</span>
-      <span><div class="legend-box warm"></div>Warm</span>
-      <span><div class="legend-box hot"></div>Hot</span>
-      <span><div class="legend-box combo"></div>Combo</span>
-    </div>
+  <div class="container">
+    <h1>Mega Millions AI Generator</h1>
+    <button onclick="generateNumbers()">Generate Numbers</button>
+    <div class="results" id="results"></div>
+    <div class="analysis" id="analysis"></div>
   </div>
-  <div class="disclaimer">*AI-assisted tool. No guaranteed winnings. Use responsibly.</div>
+
   <script>
-    let hot = [10, 21, 33, 44, 45, 48, 49];
-    let cold = [3, 31, 62, 67, 70];
-    const commonCombos = [[10, 44], [17, 45], [33, 49]];
-    const hotMega = [1, 13, 17, 18, 22];
-    const coldMega = [3, 7, 15, 24];
+    const historicalSums = [152, 148, 160, 172, 155, 161, 142, 167, 179, 133, 158, 144]; // Example jackpot sums
 
-    async function fetchLatestDraw() {
-      try {
-        const proxy = 'https://api.allorigins.win/get?url=';
-        const url = encodeURIComponent('https://www.lotteryusa.com/mega-millions/');
-        const response = await fetch(`${proxy}${url}`);
-        const json = await response.json();
-        const text = json.contents;
-        const match = text.match(/<ul class="draw-result">(.*?)<\/ul>/s);
-        if (match) {
-          const nums = Array.from(match[1].matchAll(/<li.*?>(\d+)<\/li>/g)).map(m => parseInt(m[1]));
-          if (nums.length >= 6) {
-            const balls = nums.slice(0, 5);
-            const mega = nums[5];
-            updateWeights(balls, mega);
-            document.getElementById('botStatus').textContent = `BOT: Synced with last draw: ${balls.join(', ')} + MB ${mega}`;
-          }
-        }
-      } catch (e) {
-        document.getElementById('botStatus').textContent = 'BOT: Sync failed. Using cached AI settings.';
-      }
-    }
-
-    function updateWeights(balls, mega) {
-      const allCounts = Array(71).fill(0);
-      balls.forEach(n => allCounts[n]++);
-      hot = allCounts.map((count, i) => ({ num: i, count })).filter(n => n.count > 0).sort((a, b) => b.count - a.count).slice(0, 7).map(n => n.num);
-      cold = allCounts.map((count, i) => ({ num: i, count })).filter(n => n.count > 0).sort((a, b) => a.count - b.count).slice(0, 5).map(n => n.num);
-    }
-
-    function getClass(num, comboSet) {
-      if (comboSet.has(num)) return 'combo';
-      if (hot.includes(num)) return 'hot';
-      if (cold.includes(num)) return 'cold';
-      return 'warm';
-    }
-
-    function getMegaClass(num) {
-      if (hotMega.includes(num)) return 'hot';
-      if (coldMega.includes(num)) return 'cold';
-      return 'warm';
-    }
-
-    function updateHeatmap(picks, mega) {
-      const heatmap = document.getElementById('heatmap');
-      const grid = document.getElementById('heatmapGrid');
-      const megaGrid = document.getElementById('megaHeatmapGrid');
-      grid.innerHTML = '';
-      megaGrid.innerHTML = '';
-      const comboSet = new Set();
-      commonCombos.forEach(([a, b]) => {
-        if (picks.includes(a) && picks.includes(b)) {
-          comboSet.add(a);
-          comboSet.add(b);
-        }
-      });
-      for (let i = 1; i <= 70; i++) {
-        const ball = document.createElement('div');
-        ball.className = `ball ${getClass(i, comboSet)}`;
-        ball.textContent = i;
-        grid.appendChild(ball);
-      }
-      for (let m = 1; m <= 25; m++) {
-        const mb = document.createElement('div');
-        mb.className = `ball ${getMegaClass(m)}`;
-        mb.textContent = m;
-        megaGrid.appendChild(mb);
-      }
-      heatmap.style.display = 'block';
+    function categorizeSum(sum) {
+      const avg = historicalSums.reduce((a, b) => a + b, 0) / historicalSums.length;
+      const sd = Math.sqrt(historicalSums.map(x => Math.pow(x - avg, 2)).reduce((a, b) => a + b) / historicalSums.length);
+      if (sum < avg - sd) return 'low';
+      if (sum > avg + sd) return 'high';
+      return 'ideal';
     }
 
     function generateNumbers() {
-      const weighted = [];
-      for (let i = 1; i <= 70; i++) {
-        const weight = hot.includes(i) ? 3 : cold.includes(i) ? 1 : 2;
-        for (let j = 0; j < weight; j++) weighted.push(i);
+      let numbers = [];
+      while (numbers.length < 5) {
+        let num = Math.floor(Math.random() * 70) + 1;
+        if (!numbers.includes(num)) numbers.push(num);
       }
-      const picks = [];
-      while (picks.length < 5) {
-        const num = weighted[Math.floor(Math.random() * weighted.length)];
-        if (!picks.includes(num)) picks.push(num);
-      }
-      picks.sort((a, b) => a - b);
-      const mega = Math.floor(Math.random() * 25) + 1;
-      const sum = picks.reduce((a, b) => a + b, 0) + mega;
-      const range = picks[4] - picks[0];
-      const odds = ((Math.random() * 0.9 + 0.05) * 100).toFixed(2);
-      const sumClass = sum < 130 ? 'sum-low' : sum > 180 ? 'sum-high' : 'sum-ideal';
-      const reason = `Includes ${picks.filter(n => hot.includes(n)).length} hot numbers. <span class="${sumClass}">Sum: ${sum}</span>. Range: ${range}.`;
-      document.getElementById('results').innerHTML = `<h2>${picks.join(', ')} + MB: ${mega}</h2><p>${reason}</p><p>Estimated Odds Score: ${odds}%</p>`;
-      updateHeatmap(picks, mega);
-    }
+      numbers.sort((a, b) => a - b);
+      const megaBall = Math.floor(Math.random() * 25) + 1;
+      const sum = numbers.reduce((a, b) => a + b, 0) + megaBall;
+      const category = categorizeSum(sum);
 
-    fetchLatestDraw();
+      document.getElementById('results').innerHTML = `<h2>${numbers.join(', ')} + Mega Ball: ${megaBall}</h2>`;
+      document.getElementById('analysis').innerHTML = `<p>Sum: <span class="${category}">${sum} (${category.toUpperCase()})</span></p>`;
+    }
   </script>
 </body>
 </html>
