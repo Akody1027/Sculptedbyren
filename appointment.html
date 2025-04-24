@@ -14,6 +14,9 @@
       --warm: #ffe082;
       --hot: #ef9a9a;
       --combo: #ce93d8;
+      --low: #b0bec5;
+      --ideal: #a5d6a7;
+      --high: #ffab91;
     }
     body {
       margin: 0;
@@ -74,6 +77,9 @@
     .warm { background: var(--warm); }
     .hot { background: var(--hot); }
     .combo { background: var(--combo); }
+    .low { color: var(--low); }
+    .ideal { color: var(--ideal); }
+    .high { color: var(--high); }
     .legend {
       display: flex;
       justify-content: center;
@@ -104,6 +110,7 @@
   <button onclick="generateNumbers()">Generate Numbers</button>
   <div class="results-box" id="results"></div>
   <div id="confidence"></div>
+  <div id="sumAnalyzer"></div>
   <div class="heatmap" id="heatmapSection">
     <h3>White Ball Heatmap</h3>
     <div class="ball-grid" id="white-heatmap"></div>
@@ -181,6 +188,7 @@
       document.getElementById('heatmapSection').style.display = 'block';
       analyzeConfidence(picks, mega);
       updateHeatmap(comboSet);
+      analyzeSum(picks);
     }
 
     function analyzeConfidence(picks, mega) {
@@ -192,6 +200,20 @@
       if (highLow >= 2 && highLow <= 3) score += 10;
       score += hotHits * 5;
       document.getElementById('confidence').innerText = `Confidence: ${score}%`;
+    }
+
+    function analyzeSum(picks) {
+      const total = picks.reduce((sum, n) => sum + n, 0);
+      let label = 'Low';
+      let css = 'low';
+      if (total >= 120 && total <= 180) {
+        label = 'Ideal';
+        css = 'ideal';
+      } else if (total > 200) {
+        label = 'High';
+        css = 'high';
+      }
+      document.getElementById('sumAnalyzer').innerHTML = `<p class="${css}">Sum: ${total} — ${label} range</p>`;
     }
 
     function getNextDrawTime() {
