@@ -1,14 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Toilet Map Debug</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link 
-    rel="stylesheet" 
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
-    integrity="sha512-sA+F6e5eL2k+UgN+IBPgpMNsBx8aE5x/pnGQ1gnGkJuqVagB9I0LAxon4LE+3QB1VqEzrPJP7P7sxuR7hG6Mlw==" 
+  <meta charset="UTF-8" />
+  <title>Public Toilets Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha512-sA+F6e5eL2k+UgN+IBPgpMNsBx8aE5x/pnGQ1gnGkJuqVagB9I0LAxon4LE+3QB1VqEzrPJP7P7sxuR7hG6Mlw=="
     crossorigin=""
+  />
+  <!-- MarkerCluster CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
   />
   <style>
     html, body { height: 100%; margin: 0; }
@@ -18,31 +28,81 @@
 <body>
   <div id="map"></div>
 
-  <script 
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
-    integrity="sha512-pM1I0jRLWgc4e+9rP+QJFqRx5Xag1aAndvIaarha+RkzrP5lKxWPmNpN16Mycd9DbOn97n9zH1Q3A6P4hO1gZw==" 
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha512-pM1I0jRLWgc4e+9rP+QJFqRx5Xag1aAndvIaarha+RkzrP5lKxWPmNpN16Mycd9DbOn97n9zH1Q3A6P4hO1gZw=="
     crossorigin=""
   ></script>
+  <!-- MarkerCluster JS -->
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. Initialize the map centered on [0,0]
-      const map = L.map('map').setView([0, 0], 2);
-      console.log('Map initialized:', map);
+      // 1. Initialize map
+      const map = L.map('map').setView([20, 0], 2);
+      console.log('🗺️ Map initialized');
 
-      // 2. Add OSM base layer
+      // 2. Add base layer
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
 
-      // 3. Add a test marker
-      const testMarker = L.marker([0, 0]).addTo(map);
-      testMarker.bindPopup('🗺️ Map is working!').openPopup();
-      console.log('Test marker added at [0,0]');
+      // 3. Marker cluster group
+      const toiletMarkers = L.markerClusterGroup();
+      map.addLayer(toiletMarkers);
 
-      // 4. Simple callback to confirm moveend fires
-      map.on('moveend', () => {
-        console.log('Map moved to bounds:', map.getBounds());
-      });
+      // 4. Fetch & plot toilets
+      async function loadToilets() {
+        const b = map.getBounds();
+        const bbox = [b.getSouth(), b.getWest(), b.getNorth(), b.getEast()].join(',');
+        const query = `
+          [out:json][timeout:25];
+          (
+            node["amenity"="toilets"](${bbox});
+            way["amenity"="toilets"](${bbox});
+            relation["amenity"="toilets"](${bbox});
+          );
+          out center tags;
+        `.trim();
+
+        const url = 'https://overpass.openstreetmap.fr/api/interpreter?data=' 
+                    + encodeURIComponent(query);
+
+        console.log('🔍 Fetching toilets for bbox:', bbox);
+        try {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+          const data = await res.json();
+          console.log(`✅ Received ${data.elements.length} elements`);
+
+          toiletMarkers.clearLayers();
+
+          data.elements.forEach(el => {
+            let lat, lon;
+            if (el.type === 'node') {
+              lat = el.lat; lon = el.lon;
+            } else if (el.center) {
+              lat = el.center.lat; lon = el.center.lon;
+            }
+            if (lat && lon) {
+              const name = el.tags.name || 'Public Toilet';
+              const popup = `
+                <strong>${name}</strong><br/>
+                ${el.tags.opening_hours ? 'Hours: ' + el.tags.opening_hours + '<br/>' : ''}
+                ${el.tags.fee === 'yes' ? 'Fee required' : 'Free to use'}
+              `;
+              toiletMarkers.addLayer(L.marker([lat, lon]).bindPopup(popup));
+            }
+          });
+        } catch (err) {
+          console.error('❌ Error loading toilets:', err);
+        }
+      }
+
+      // 5. Load on init and after each move
+      map.on('moveend', loadToilets);
+      loadToilets();
     });
   </script>
 </body>
