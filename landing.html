@@ -61,10 +61,16 @@
     /* Reviews */
     .reviews { padding: 2.5rem 0; }
     .reviews h2 {
-      text-align: center; margin-bottom: 1.5rem;
+      text-align: center; margin-bottom: 0.5rem;
       font-size: 1.75rem; color: #444;
       opacity: 0; animation: fadeIn 1s ease forwards; animation-delay: 1.6s;
     }
+    .reviews .rating {
+      text-align: center; margin-bottom: 1rem;
+      opacity: 0; animation: fadeIn 1s ease forwards; animation-delay: 1.7s;
+    }
+    .reviews .stars { font-size: 1.5rem; color: #f5c518; }
+    .reviews .rating p { margin: 0; color: #444; }
     .reviews .review-list {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1.5rem;
     }
@@ -79,6 +85,7 @@
     .reviews .review:nth-child(1) { animation-delay: 1.8s; }
     .reviews .review:nth-child(2) { animation-delay: 2.0s; }
     .reviews .review:nth-child(3) { animation-delay: 2.2s; }
+    .reviews .review:nth-child(4) { animation-delay: 2.4s; }
     .reviews img {
       width: 48px; height: 48px; border-radius: 50%; margin-right: 1rem; object-fit: cover;
     }
@@ -184,10 +191,12 @@
     <!-- Reviews -->
     <section class="reviews">
       <h2>What Our Users Say</h2>
+      <div class="rating"><div class="stars">★★★★★</div><p>Rated 5.0/5 by our users</p></div>
       <div class="review-list">
         <div class="review"><img src="https://i.pravatar.cc/48?u=1" alt="User 1"/><div class="review-content"><h4>Jane D.</h4><p>"This tool made my site feel like a real app in seconds!"</p></div></div>
         <div class="review"><img src="https://i.pravatar.cc/48?u=2" alt="User 2"/><div class="review-content"><h4>Alex P.</h4><p>"No coding, no fuss—just paste a URL and go. Love it!"</p></div></div>
         <div class="review"><img src="https://i.pravatar.cc/48?u=3" alt="User 3"/><div class="review-content"><h4>Sam K.</h4><p>"My clients are thrilled with the native app experience."</p></div></div>
+        <div class="review"><img src="https://i.pravatar.cc/48?u=4" alt="User 4"/><div class="review-content"><h4>Lee W.</h4><p>"A game-changer for quickly creating white-label apps."</p></div></div>
       </div>
     </section>
 
