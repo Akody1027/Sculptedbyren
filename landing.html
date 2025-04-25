@@ -82,7 +82,67 @@
     .card h3 { font-size:1.1rem; margin-bottom:0.5rem; color:#222; }
     .card p  { font-size:0.95rem; color:#333; }
 
-    /* Preview Section */
+    /* Reviews */
+    .reviews {
+      padding: 2.5rem 0;
+    }
+    .reviews h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.75rem;
+      color: #444;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards;
+      animation-delay: 1.6s;
+    }
+    .review-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+      gap: 1.5rem;
+    }
+    .review {
+      display: flex;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(12px);
+      border-radius: 1rem;
+      padding: 1rem;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+      transform: translateY(20px);
+      opacity: 0;
+      animation: fadeInUp 1s ease forwards;
+    }
+    .review:nth-child(1) { animation-delay: 1.8s; }
+    .review:nth-child(2) { animation-delay: 2.0s; }
+    .review:nth-child(3) { animation-delay: 2.2s; }
+    .review img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      margin-right: 1rem;
+      object-fit: cover;
+    }
+    .review-content h4 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #222;
+    }
+    .review-content p {
+      margin: 0.25rem 0 0;
+      font-size: 0.9rem;
+      color: #333;
+    }
+
+    /* Try It Now */
+    .preview-section h2 {
+      text-align: center;
+      margin-top: 2.5rem;
+      font-size: 1.75rem;
+      color: #444;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards;
+      animation-delay: 2.4s;
+    }
     .preview {
       text-align: center;
       padding: 2rem 0;
@@ -95,10 +155,11 @@
       transform: translateY(20px);
       opacity: 0;
       animation: fadeInUp 1s ease forwards;
-      animation-delay: 1.6s;
+      animation-delay: 2.6s;
     }
     .preview-tool input {
-      flex: 1; max-width: 300px;
+      flex: 1;
+      max-width: 300px;
       padding: 0.75rem 1rem;
       border: 2px solid #ddd;
       border-radius: 999px;
@@ -125,137 +186,10 @@
 
     /* Phone mockup */
     #phone-mockup {
-      width: 260px; height: 520px;
+      width: 260px;
+      height: 520px;
       margin: 0 auto;
       position: relative;
       border: 16px solid #ddd;
       border-radius: 36px;
       background: #fff;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
-      overflow: hidden;
-      transform: translateY(30px);
-      opacity: 0;
-      animation: slideUp 0.8s ease-out forwards, bob 3s ease-in-out 2.6s infinite;
-      animation-delay: 1.8s;
-    }
-    #phone-mockup::before {
-      content: '';
-      position: absolute;
-      top: 8px; left: 50%;
-      transform: translateX(-50%);
-      width: 60px; height: 5px;
-      background: #ccc;
-      border-radius: 10px;
-    }
-    #phone-mockup::after {
-      content: '';
-      position: absolute;
-      bottom: 8px; left: 50%;
-      transform: translateX(-50%);
-      width: 40px; height: 40px;
-      border: 3px solid #ccc;
-      border-radius: 50%;
-    }
-    .phone-screen { width: 100%; height: 100%; }
-    .phone-screen iframe {
-      width: 100%; height: 100%;
-      border: none;
-    }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      padding: 1.5rem 0;
-      font-size: 0.85rem;
-      color: #777;
-      background: rgba(255,255,255,0.4);
-    }
-
-    /* Animations */
-    @keyframes gradientBG {
-      0%   { background-position:0% 50%; }
-      50%  { background-position:100% 50%; }
-      100% { background-position:0% 50%; }
-    }
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
-    @keyframes slideUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeInUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes bob {
-      0%,100% { transform: translateY(0); }
-      50%     { transform: translateY(-8px); }
-    }
-  </style>
-</head>
-<body>
-
-  <div class="container">
-    <!-- Hero -->
-    <section class="hero">
-      <h1>QuickApp Builder</h1>
-      <p>Instantly wrap any website into a standalone mobile app—no code, no fuss.</p>
-    </section>
-
-    <!-- Features -->
-    <section class="features">
-      <h2>Why You’ll Love It</h2>
-      <div class="grid">
-        <div class="card">
-          <h3>Paste & Go</h3>
-          <p>Just enter your URL—everything else is handled for you.</p>
-        </div>
-        <div class="card">
-          <h3>Offline Ready</h3>
-          <p>Built-in service worker cache means lightning-fast loads—even offline.</p>
-        </div>
-        <div class="card">
-          <h3>Easy Theme</h3>
-          <p>Tweak colors, icons, and titles in your manifest—no dev tools needed.</p>
-        </div>
-        <div class="card">
-          <h3>Native Feel</h3>
-          <p>Add to Home Screen on iOS & Android for a true app-like experience.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Preview Section -->
-    <section class="preview">
-      <div class="preview-tool">
-        <input id="url-input" type="text" placeholder="Enter your URL (e.g. example.com)" />
-        <button id="preview-btn" class="btn">Preview</button>
-      </div>
-      <div id="phone-mockup">
-        <div class="phone-screen">
-          <iframe id="preview-frame" src=""></iframe>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <!-- Footer -->
-  <footer>
-    &copy; 2025 QuickApp Builder • Crafted for modders & futurists
-  </footer>
-
-  <!-- Preview Script -->
-  <script>
-    const btn   = document.getElementById('preview-btn');
-    const input = document.getElementById('url-input');
-    const frame = document.getElementById('preview-frame');
-
-    btn.addEventListener('click', () => {
-      let url = input.value.trim();
-      if (!url) return alert('Please enter a URL.');
-      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-      frame.src = url;
-    });
-  </script>
-
-</body>
-</html>
