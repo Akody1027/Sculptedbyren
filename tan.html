@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>GlowPro Tanning – Professional Spray Tanning</title> <!-- Replace with your business name -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/aos@2.3.1/dist/aos.css"
+  />
+  <style>
+    :root {
+      --primary: #f7d7c4;
+      --secondary: #fff5f0;
+      --accent: #eabfb4;
+      --text: #333;
+    }
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    nav {
+      position: fixed;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(5px);
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 80px;
+    }
+    .logo {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .nav-links a {
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      background: url('https://source.unsplash.com/1600x900/?spray-tan,beauty')
+        center/cover no-repeat fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+    }
+    .hero-text {
+      position: relative;
+      color: #fff;
+      text-align: center;
+      max-width: 800px;
+      padding: 0 1rem;
+    }
+    .hero-text h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    .hero-text p {
+      font-size: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn:hover {
+      background: var(--primary);
+    }
+
+    section {
+      padding: 4rem 0;
+    }
+    h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      color: var(--accent);
+      text-align: center;
+    }
+
+    /* About */
+    .about .content {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .about img {
+      width: 50%;
+      border-radius: 10px;
+    }
+    .about .text {
+      width: 50%;
+    }
+
+    /* Services */
+    .services .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+    .service-card {
+      background: var(--secondary);
+      border-radius: 10px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
+    }
+    .service-card:hover {
+      transform: translateY(-10px);
+    }
+    .service-card i {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+    .service-card h3 {
+      margin-bottom: 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    /* Parallax Promo */
+    .parallax {
+      background: url('https://source.unsplash.com/1600x900/?spa')
+        center/cover fixed;
+      padding: 6rem 0;
+    }
+    .parallax h2 {
+      color: #fff;
+    }
+
+    /* Gallery */
+    .gallery .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    .gallery img {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    /* Contact */
+    .contact .form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .contact input,
+    .contact textarea {
+      width: 100%;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-family: inherit;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--text);
+      color: #fff;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .about .content {
+        flex-direction: column;
+      }
+      .about img,
+      .about .text {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="container nav-container">
+      <div class="logo">GlowPro Tanning</div> <!-- Replace with your logo/text -->
+      <div class="nav-links">
+        <a href="#about">About</a>
+        <a href="#services">Services</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="hero-text" data-aos="fade-up">
+      <h1>Glow with Confidence</h1>
+      <p>
+        Experience the ultimate spray tanning treatment for a flawless, sun-kissed look all year round.
+      </p>
+      <a href="#contact" class="btn">Book Now</a>
+    </div>
+  </header>
+
+  <!-- About Section -->
+  <section id="about" class="about container">
+    <h2 data-aos="fade-up">About Us</h2>
+    <div class="content">
+      <div class="text" data-aos="fade-right">
+        <p>
+          At GlowPro Tanning, our certified technicians use top-of-the-line solutions and personalized techniques to
+          create a natural, streak-free tan tailored just for you.
+        </p>
+      </div>
+      <img
+        src="https://source.unsplash.com/collection/4881151/800x600"
+        alt="Spray Tanning"
+        data-aos="fade-left"
+      />
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="services container">
+    <h2 data-aos="fade-up">Our Services</h2>
+    <div class="grid">
+      <div class="service-card" data-aos="zoom-in">
+        <i class="fas fa-spray-can"></i>
+        <h3>Classic Spray Tan</h3>
+        <p>Perfect for a quick glow that lasts up to 7 days.</p>
+      </div>
+      <div class="service-card" data-aos="zoom-in" data-aos-delay="100">
+        <i class="fas fa-star"></i>
+        <h3>Luxury Airbrush</h3>
+        <p>Customized shading and highlighting for a sculpted effect.</p>
+      </div>
+      <div class="service-card" data-aos="zoom-in" data-aos-delay="200">
+        <i class="fas fa-sun"></i>
+        <h3>Express Tan</h3>
+        <p>Fast-developing formula for last-minute events.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Parallax Promo Banner -->
+  <section class="parallax">
+    <div class="container" data-aos="fade-up">
+      <h2>Refresh Your Glow</h2>
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section id="gallery" class="gallery container">
+    <h2 data-aos="fade-up">Gallery</h2>
+    <div class="grid">
+      <img
+        src="https://source.unsplash.com/collection/4881151/600x400"
+        alt="Before & After"
+        data-aos="fade-up"
+      />
+      <img
+        src="https://source.unsplash.com/collection/4881151/601x401"
+        alt="Client Session"
+        data-aos="fade-up"
+        data-aos-delay="100"
+      />
+      <img
+        src="https://source.unsplash.com/collection/4881151/602x402"
+        alt="Spray Tan Spray"
+        data-aos="fade-up"
+        data-aos-delay="200"
+      />
+      <img
+        src="https://source.unsplash.com/collection/4881151/603x403"
+        alt="Finished Look"
+        data-aos="fade-up"
+        data-aos-delay="300"
+      />
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="contact container">
+    <h2 data-aos="fade-up">Contact Us</h2>
+    <form class="form" data-aos="fade-up" data-aos-delay="100">
+      <input type="text" placeholder="Your Name" required />
+      <input type="email" placeholder="Your Email" required />
+      <textarea rows="6" placeholder="Your Message" required></textarea>
+      <button type="submit" class="btn">Send Message</button>
+    </form>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 GlowPro Tanning. All rights reserved.</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script
+    src="https://kit.fontawesome.com/a076d05399.js"
+    crossorigin="anonymous"
+  ></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({
+      duration: 1000,
+      once: true
+    });
+  </script>
+</body>
+</html>
