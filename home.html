@@ -1,232 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sculpted by Ren | Luxury Spray Tanning</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>CSS Parrot</title>
   <style>
-    * {
+    /* Center on page */
+    body {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
-      font-family: 'Outfit', sans-serif;
-    }
-
-    body {
-      background: #fff;
-      color: #333;
-      line-height: 1.6;
-    }
-
-    header {
-      text-align: center;
-      padding: 2rem;
-      background-color: #ffeef3;
-    }
-
-    header h1 {
-      font-size: 3rem;
-      color: #cc5c8d;
-    }
-
-    header p {
-      color: #7a4f61;
-      font-size: 1.2rem;
-    }
-
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      background-color: #fff4f8;
-      padding: 1rem;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    nav a {
-      color: #cc5c8d;
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.3s;
-    }
-
-    nav a:hover {
-      color: #a14461;
-    }
-
-    .parallax {
-      background-attachment: fixed;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: cover;
-      height: 80vh;
+      height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
-      text-align: center;
+      background: #eef5fb;
     }
 
-    .parallax h2 {
-      font-size: 3rem;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 1rem 2rem;
-      border-radius: 1rem;
-    }
-
-    section {
-      max-width: 1100px;
-      margin: auto;
-      padding: 4rem 2rem;
-    }
-
-    h3 {
-      color: #cc5c8d;
-      font-size: 2rem;
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .services ul {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      list-style: none;
-      padding: 0;
-    }
-
-    .services li {
-      background: #fff4f8;
-      padding: 1rem;
-      border-radius: 1rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      text-align: center;
-      font-weight: 500;
-    }
-
-    .testimonials blockquote {
-      background: #ffeef3;
-      padding: 1rem;
-      border-left: 5px solid #cc5c8d;
-      margin-bottom: 1rem;
-      border-radius: 1rem;
-      font-style: italic;
-      color: #444;
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .gallery img {
-      width: 100%;
-      border-radius: 1rem;
+    .parrot {
+      position: relative;
+      width: 200px;
       height: 300px;
-      object-fit: cover;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
-    form {
-      display: grid;
-      gap: 1rem;
+    /* BODY */
+    .parrot .body {
+      position: absolute;
+      bottom: 0;
+      left: 20px;
+      width: 160px;
+      height: 220px;
+      background: linear-gradient(to top, #2a5, #5c7);
+      border-radius: 80% 80% 60% 60%;
+      box-shadow: inset -10px -10px 20px rgba(0,0,0,0.2);
+    }
+    .parrot .body::before {
+      content: "";
+      position: absolute;
+      top: 30px;
+      left: 50px;
+      width: 50px;
+      height: 50px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
     }
 
-    input, textarea, button {
-      padding: 0.8rem;
-      border: 1px solid #ccc;
-      border-radius: 0.5rem;
-      font-size: 1rem;
+    /* WING */
+    .parrot .wing {
+      position: absolute;
+      top: 60px;
+      left: 5px;
+      width: 140px;
+      height: 160px;
+      background: linear-gradient(to bottom, #3b6, #4a8);
+      border-radius: 70% 50% 60% 70%;
+      transform: rotate(-20deg);
+      box-shadow: inset -8px 8px 15px rgba(0,0,0,0.2);
+    }
+    .parrot .wing::before {
+      content: "";
+      position: absolute;
+      top: 20px;
+      left: 30px;
+      width: 100px;
+      height: 20px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 50%;
+      transform: rotate(-15deg);
     }
 
-    button {
-      background: #cc5c8d;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s;
+    /* TAIL */
+    .parrot .tail {
+      position: absolute;
+      bottom: -20px;
+      left: 50px;
+      width: 20px;
+      height: 100px;
+      background: linear-gradient(to bottom, #3a5, #2a4);
+      border-radius: 10px;
+      transform: rotate(20deg);
+    }
+    .parrot .tail::before,
+    .parrot .tail::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 100px;
+      background: linear-gradient(to bottom, #5b7, #4a6);
+      border-radius: 10px;
+    }
+    .parrot .tail::before {
+      left: 20px;
+      transform: rotate(10deg);
+    }
+    .parrot .tail::after {
+      left: -20px;
+      transform: rotate(-10deg);
     }
 
-    button:hover {
-      background: #a14461;
+    /* HEAD */
+    .parrot .head {
+      position: absolute;
+      top: -40px;
+      right: -10px;
+      width: 140px;
+      height: 140px;
+      background: linear-gradient(to bottom right, #2a5, #4b7);
+      border-radius: 50%;
+      transform: rotate(-10deg);
+      box-shadow: inset -8px -8px 15px rgba(0,0,0,0.2);
     }
 
-    footer {
-      background: #fff4f8;
-      text-align: center;
-      padding: 2rem;
-      color: #777;
+    /* EYE */
+    .parrot .head .eye {
+      position: absolute;
+      top: 40px;
+      left: 70px;
+      width: 24px;
+      height: 24px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 4px #000;
+    }
+
+    /* BEAK UPPER */
+    .parrot .beak {
+      position: absolute;
+      top: 80px;
+      left: 30px;
+      width: 100px;
+      height: 80px;
+      background: linear-gradient(to bottom, #fc4 60%, #e93 60%);
+      border-top-left-radius: 50% 40%;
+      border-bottom-left-radius: 80% 60%;
+      transform: rotate(-20deg);
+      box-shadow: inset -4px -4px 10px rgba(0,0,0,0.2);
+    }
+    /* BEAK LOWER */
+    .parrot .beak::after {
+      content: "";
+      position: absolute;
+      top: 40px;
+      left: 0;
+      width: 80px;
+      height: 50px;
+      background: linear-gradient(to bottom, #e93, #c62);
+      border-top-right-radius: 80% 60%;
+      transform: rotate(10deg);
+      box-shadow: inset -3px 3px 8px rgba(0,0,0,0.2);
     }
   </style>
 </head>
 <body>
-
-  <header>
-    <h1>Sculpted by Ren</h1>
-    <p>Luxury Spray Tanning for Glowing Confidence</p>
-  </header>
-
-  <nav>
-    <a href="#about">About</a>
-    <a href="#services">Services</a>
-    <a href="#testimonials">Testimonials</a>
-    <a href="#gallery">Gallery</a>
-    <a href="#contact">Contact</a>
-  </nav>
-
-  <div class="parallax" style="background-image: url('https://images.pexels.com/photos/6621237/pexels-photo-6621237.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260');">
-    <h2>Glow With Confidence</h2>
-  </div>
-
-  <section id="about">
-    <h3>About Us</h3>
-    <p>At Sculpted by Ren, we provide high-end, personalized spray tanning experiences using only the finest solutions for your skin. Whether it's your first tan or a regular beauty ritual, you'll leave feeling radiant and confident.</p>
-  </section>
-
-  <section id="services" class="services">
-    <h3>Our Services</h3>
-    <ul>
-      <li>Signature Full Body Tan — $45</li>
-      <li>Rapid Rinse Tan (2–4 hrs) — $55</li>
-      <li>Bridal Glow Package — $120</li>
-      <li>Group & Event Tanning — Custom Rates</li>
-    </ul>
-  </section>
-
-  <section id="testimonials">
-    <h3>Client Love</h3>
-    <blockquote>"Absolutely obsessed with how natural my tan looked! Ren is amazing!" – Sarah T.</blockquote>
-    <blockquote>"Perfect color and no orange tint. This is the only place I trust!" – Jess L.</blockquote>
-  </section>
-
-  <section id="gallery">
-    <h3>Gallery</h3>
-    <div class="gallery">
-      <img src="https://images.pexels.com/photos/6621238/pexels-photo-6621238.jpeg" alt="Spray Tan 1">
-      <img src="https://images.pexels.com/photos/1846835/pexels-photo-1846835.jpeg" alt="Spray Tan 2">
-      <img src="https://images.pexels.com/photos/1831234/pexels-photo-1831234.jpeg" alt="Spray Tan 3">
-      <img src="https://images.pexels.com/photos/3310694/pexels-photo-3310694.jpeg" alt="Spray Tan 4">
+  <div class="parrot">
+    <div class="body"></div>
+    <div class="wing"></div>
+    <div class="tail"></div>
+    <div class="head">
+      <div class="eye"></div>
+      <div class="beak"></div>
     </div>
-  </section>
-
-  <section id="contact">
-    <h3>Book Your Glow</h3>
-    <form>
-      <input type="text" placeholder="Your Name" required>
-      <input type="email" placeholder="Your Email" required>
-      <textarea rows="5" placeholder="Your Message or Appointment Request" required></textarea>
-      <button type="submit">Send Message</button>
-    </form>
-  </section>
-
-  <footer>
-    &copy; 2025 Sculpted by Ren. All rights reserved.
-  </footer>
-
+  </div>
 </body>
 </html>
