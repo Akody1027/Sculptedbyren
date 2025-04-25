@@ -42,7 +42,7 @@
 
     /* Preview Tool */
     .preview-tool {
-      margin-top: 2rem;
+      margin: 2rem 0 1rem;
       display: flex;
       justify-content: center;
       gap: 0.5rem;
@@ -74,10 +74,8 @@
       box-shadow: 0 12px 28px rgba(186,230,253,0.6);
     }
 
-    /* Phone mockup (hidden by default) */
+    /* Phone mockup (always visible) */
     #phone-mockup {
-      display: none;
-      opacity: 0;
       width: 260px;
       height: 520px;
       margin: 2rem auto;
@@ -87,13 +85,8 @@
       background: #fff;
       box-shadow: 0 12px 30px rgba(0,0,0,0.1);
       overflow: hidden;
-      transform: translateY(30px);
-      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-    }
-    #phone-mockup.visible {
-      display: block;
-      opacity: 1;
-      transform: translateY(0);
+      /* keep the gentle bob animation */
+      animation: bob 3s ease-in-out infinite;
     }
     #phone-mockup::before {
       content: '';
@@ -152,11 +145,15 @@
       color: #777; background: rgba(255,255,255,0.4);
     }
 
-    /* Background Animation */
+    /* Animations */
     @keyframes gradientBG {
       0%   { background-position:0% 50%; }
       50%  { background-position:100% 50%; }
       100% { background-position:0% 50%; }
+    }
+    @keyframes bob {
+      0%,100% { transform: translateY(0); }
+      50%     { transform: translateY(-8px); }
     }
   </style>
 </head>
@@ -211,7 +208,6 @@
   <script>
     const btn   = document.getElementById('preview-btn');
     const input = document.getElementById('url-input');
-    const mock  = document.getElementById('phone-mockup');
     const frame = document.getElementById('preview-frame');
 
     btn.addEventListener('click', () => {
@@ -219,7 +215,6 @@
       if (!url) return alert('Please enter a URL.');
       if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
       frame.src = url;
-      mock.classList.add('visible');
     });
   </script>
 
