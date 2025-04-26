@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Iowa Pick 3 Weighted Generator</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Papa Parse for CSV parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      color: #333;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 2rem;
+    }
+    #generator {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+    }
+    button {
+      background: #0078d4;
+      border: none;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #005a9e;
+    }
+    .pick {
+      font-size: 2.5rem;
+      margin: 1rem 0 0.5rem;
+      animation: fadeIn 0.5s ease both;
+    }
+    .confidence {
+      font-size: 1.1rem;
+      color: #555;
+      animation: fadeIn 0.5s ease 0.2s both;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Iowa Pick 3 Number Generator</h1>
+  <div id="generator">
+    <div>Click below to generate your pick:</div>
+    <button id="genBtn" disabled>Loading data…</button>
+    <div class="pick" id="pickDisplay"></div>
+    <div class="confidence" id="confDisplay"></div>
+  </div>
+
+  <script>
+    // Load and parse the CSV, then compute frequencies
+    let freq = [Array(10).fill(0), Array(10).fill(0), Array(10).fill(0)];
+    let totalDraws = 0;
+
+    fetch('iowa_pick3_history.csv')
+      .then(r => r.text())
+      .then(csv => Papa.parse(csv, { header: true }))
+      .then(res => {
+        res.data.forEach(row => {
+          // Extract digits even if 'Numbers' is "1 8 9" or "189"
+          let digits = row.Numbers.match(/\d/g);
+          if (digits && digits.length === 3) {
+            digits.forEach((d,i) => freq[i][+d]++);
+            totalDraws++;
+          }
+        });
+      })
+      .then(() => {
+        document.getElementById('genBtn').textContent = 'Generate Pick';
+        document.getElementById('genBtn').disabled = false;
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('genBtn').textContent = 'Error loading data';
+      });
+
+    // Helper: pick a digit 0–9 weighted by freqArr
+    function weightedRandom(freqArr) {
+      let sum = freqArr.reduce((a,b)=>a+b,0),
+          rnd = Math.random()*sum,
+          accum = 0;
+      for (let d=0; d<10; d++) {
+        accum += freqArr[d];
+        if (rnd < accum) return d;
+      }
+      return 9;
+    }
+
+    // Compute max probabilities for normalization
+    function maxCombinedProb() {
+      let pmax = freq.map(arr => Math.max(...arr) / totalDraws);
+      return pmax[0]*pmax[1]*pmax[2];
+    }
+    const maxProb = () => maxCombinedProb();
+
+    // On button click: generate and display
+    document.getElementById('genBtn').addEventListener('click', () => {
+      if (totalDraws === 0) return;
+      // pick digits
+      let picks = freq.map(arr => weightedRandom(arr));
+      // compute combined probability
+      let p = picks.map((d,i) => freq[i][d]/totalDraws)
+                   .reduce((a,b)=>a*b, 1);
+      let confidence = (p / maxProb()) * 100;
+      // display
+      document.getElementById('pickDisplay').textContent = picks.join(' ');
+      document.getElementById('confDisplay').textContent =
+        `Confidence: ${confidence.toFixed(1)}%`;
+    });
+  </script>
+
+</body>
+</html>
