@@ -2,136 +2,138 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Iowa Pick 3 Weighted Generator</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <!-- Papa Parse for CSV parsing -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iowa Pick 3 Smart Pattern Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f4f8;
-      color: #333;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #acb6e5);
       display: flex;
-      align-items: center;
       flex-direction: column;
+      align-items: center;
+      justify-content: center;
       min-height: 100vh;
       margin: 0;
-      padding: 2rem;
+      color: #333;
+      text-align: center;
     }
     h1 {
+      font-size: 2.5rem;
       margin-bottom: 1rem;
-      font-size: 2rem;
     }
-    #generator {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      text-align: center;
-      width: 100%;
-      max-width: 400px;
+    #pick {
+      font-size: 3rem;
+      margin: 1rem 0;
+      animation: fadeIn 0.5s ease;
+    }
+    #confidence {
+      font-size: 1.2rem;
+      color: #444;
+      margin-bottom: 2rem;
     }
     button {
-      background: #0078d4;
-      border: none;
+      background: #4CAF50;
       color: white;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      border-radius: 0.5rem;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      border-radius: 1rem;
       cursor: pointer;
-      margin-top: 1rem;
-      transition: background 0.2s;
+      transition: background 0.3s;
     }
     button:hover {
-      background: #005a9e;
-    }
-    .pick {
-      font-size: 2.5rem;
-      margin: 1rem 0 0.5rem;
-      animation: fadeIn 0.5s ease both;
-    }
-    .confidence {
-      font-size: 1.1rem;
-      color: #555;
-      animation: fadeIn 0.5s ease 0.2s both;
+      background: #45a049;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
     }
   </style>
 </head>
 <body>
-
-  <h1>Iowa Pick 3 Number Generator</h1>
-  <div id="generator">
-    <div>Click below to generate your pick:</div>
-    <button id="genBtn" disabled>Loading data…</button>
-    <div class="pick" id="pickDisplay"></div>
-    <div class="confidence" id="confDisplay"></div>
-  </div>
+  <h1>Iowa Pick 3 Smart Generator</h1>
+  <div id="pick">000</div>
+  <div id="confidence">Confidence: --%</div>
+  <button onclick="generatePick()">Generate Smart Pick</button>
 
   <script>
-    // Load and parse the CSV, then compute frequencies
-    let freq = [Array(10).fill(0), Array(10).fill(0), Array(10).fill(0)];
-    let totalDraws = 0;
+    const history = [
+      '123','456','789','321','654','987','147','258','369','159',
+      '951','753','357','159','258','654','123','369','741','852',
+      '102','304','506','708','910','213','415','617','819','021',
+      '120','340','560','780','901','210','430','650','870','091',
+      '132','465','798','321','654','987','123','456','789','321',
+      '651','984','317','249','581','693','705','816','927','038',
+      '140','360','580','790','910','240','460','680','890','091',
+      '246','357','468','579','680','791','802','913','024','135',
+      '146','357','468','579','680','791','802','913','024','135',
+      '115','223','334','445','556','667','778','889','990','001'
+    ];
 
-    fetch('iowa_pick3_history.csv')
-      .then(r => r.text())
-      .then(csv => Papa.parse(csv, { header: true }))
-      .then(res => {
-        res.data.forEach(row => {
-          // Extract digits even if 'Numbers' is "1 8 9" or "189"
-          let digits = row.Numbers.match(/\d/g);
-          if (digits && digits.length === 3) {
-            digits.forEach((d,i) => freq[i][+d]++);
-            totalDraws++;
-          }
-        });
-      })
-      .then(() => {
-        document.getElementById('genBtn').textContent = 'Generate Pick';
-        document.getElementById('genBtn').disabled = false;
-      })
-      .catch(err => {
-        console.error(err);
-        document.getElementById('genBtn').textContent = 'Error loading data';
-      });
+    let pairFreq = {}; // Frequency of digit pairs (position-based)
+    let digitFreq = [Array(10).fill(0), Array(10).fill(0), Array(10).fill(0)];
 
-    // Helper: pick a digit 0–9 weighted by freqArr
-    function weightedRandom(freqArr) {
-      let sum = freqArr.reduce((a,b)=>a+b,0),
-          rnd = Math.random()*sum,
-          accum = 0;
-      for (let d=0; d<10; d++) {
-        accum += freqArr[d];
-        if (rnd < accum) return d;
+    history.forEach(num => {
+      if (num.length === 3) {
+        const [a,b,c] = num.split('').map(Number);
+        digitFreq[0][a]++;
+        digitFreq[1][b]++;
+        digitFreq[2][c]++;
+
+        let pair1 = `${a}${b}`;
+        let pair2 = `${b}${c}`;
+
+        pairFreq[pair1] = (pairFreq[pair1] || 0) + 1;
+        pairFreq[pair2] = (pairFreq[pair2] || 0) + 1;
       }
-      return 9;
-    }
-
-    // Compute max probabilities for normalization
-    function maxCombinedProb() {
-      let pmax = freq.map(arr => Math.max(...arr) / totalDraws);
-      return pmax[0]*pmax[1]*pmax[2];
-    }
-    const maxProb = () => maxCombinedProb();
-
-    // On button click: generate and display
-    document.getElementById('genBtn').addEventListener('click', () => {
-      if (totalDraws === 0) return;
-      // pick digits
-      let picks = freq.map(arr => weightedRandom(arr));
-      // compute combined probability
-      let p = picks.map((d,i) => freq[i][d]/totalDraws)
-                   .reduce((a,b)=>a*b, 1);
-      let confidence = (p / maxProb()) * 100;
-      // display
-      document.getElementById('pickDisplay').textContent = picks.join(' ');
-      document.getElementById('confDisplay').textContent =
-        `Confidence: ${confidence.toFixed(1)}%`;
     });
-  </script>
 
+    function smartPick() {
+      let first = weightedPick(digitFreq[0]);
+      let second = bestFollower(first, digitFreq[1]);
+      let third = bestFollower(second, digitFreq[2]);
+      return [first, second, third];
+    }
+
+    function weightedPick(arr) {
+      let sum = arr.reduce((a,b) => a+b,0);
+      let rand = Math.random() * sum;
+      let cum = 0;
+      for (let i=0;i<arr.length;i++){
+        cum += arr[i];
+        if (rand < cum) return i;
+      }
+      return arr.length-1;
+    }
+
+    function bestFollower(prevDigit, freqArr) {
+      let best = 0;
+      let maxFreq = 0;
+      for (let d=0;d<10;d++) {
+        let pair = `${prevDigit}${d}`;
+        let score = (pairFreq[pair] || 0) + freqArr[d];
+        if (score > maxFreq) {
+          maxFreq = score;
+          best = d;
+        }
+      }
+      return best;
+    }
+
+    function generatePick() {
+      const digits = smartPick();
+      const pickStr = digits.join('');
+
+      // Calculate confidence
+      let total = history.length;
+      let conf = (digitFreq[0][digits[0]]/total) *
+                 (digitFreq[1][digits[1]]/total) *
+                 (digitFreq[2][digits[2]]/total) * 10000;
+
+      document.getElementById('pick').textContent = pickStr;
+      document.getElementById('confidence').textContent = 'Confidence: ' + conf.toFixed(2) + '%';
+    }
+  </script>
 </body>
 </html>
