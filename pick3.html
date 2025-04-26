@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iowa Pick 3 Smart Pattern Generator</title>
+  <title>Iowa Pick 3 Generator - Real Lottery Style</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -52,12 +52,15 @@
   </style>
 </head>
 <body>
-  <h1>Iowa Pick 3 Smart Generator</h1>
+  <h1>Iowa Pick 3 Realistic Generator</h1>
   <div id="pick">000</div>
   <div id="confidence">Confidence: --%</div>
-  <button onclick="generatePick()">Generate Smart Pick</button>
+  <button onclick="generatePick()">Generate Realistic Pick</button>
 
   <script>
+    // Iowa Lottery Pick 3 uses a Random Number Generator (RNG)
+    // This simulates the randomness but weighted by historical trends
+
     const history = [
       '123','456','789','321','654','987','147','258','369','159',
       '951','753','357','159','258','654','123','369','741','852',
@@ -71,7 +74,6 @@
       '115','223','334','445','556','667','778','889','990','001'
     ];
 
-    let pairFreq = {}; // Frequency of digit pairs (position-based)
     let digitFreq = [Array(10).fill(0), Array(10).fill(0), Array(10).fill(0)];
 
     history.forEach(num => {
@@ -80,58 +82,32 @@
         digitFreq[0][a]++;
         digitFreq[1][b]++;
         digitFreq[2][c]++;
-
-        let pair1 = `${a}${b}`;
-        let pair2 = `${b}${c}`;
-
-        pairFreq[pair1] = (pairFreq[pair1] || 0) + 1;
-        pairFreq[pair2] = (pairFreq[pair2] || 0) + 1;
       }
     });
 
-    function smartPick() {
-      let first = weightedPick(digitFreq[0]);
-      let second = bestFollower(first, digitFreq[1]);
-      let third = bestFollower(second, digitFreq[2]);
-      return [first, second, third];
-    }
-
-    function weightedPick(arr) {
-      let sum = arr.reduce((a,b) => a+b,0);
-      let rand = Math.random() * sum;
-      let cum = 0;
-      for (let i=0;i<arr.length;i++){
-        cum += arr[i];
-        if (rand < cum) return i;
+    function weightedRandom(freqArr) {
+      let total = freqArr.reduce((sum, val) => sum + val, 0);
+      let rand = Math.random() * total;
+      let accum = 0;
+      for (let i = 0; i < 10; i++) {
+        accum += freqArr[i];
+        if (rand < accum) return i;
       }
-      return arr.length-1;
-    }
-
-    function bestFollower(prevDigit, freqArr) {
-      let best = 0;
-      let maxFreq = 0;
-      for (let d=0;d<10;d++) {
-        let pair = `${prevDigit}${d}`;
-        let score = (pairFreq[pair] || 0) + freqArr[d];
-        if (score > maxFreq) {
-          maxFreq = score;
-          best = d;
-        }
-      }
-      return best;
+      return 9;
     }
 
     function generatePick() {
-      const digits = smartPick();
-      const pickStr = digits.join('');
+      const first = weightedRandom(digitFreq[0]);
+      const second = weightedRandom(digitFreq[1]);
+      const third = weightedRandom(digitFreq[2]);
 
-      // Calculate confidence
-      let total = history.length;
-      let conf = (digitFreq[0][digits[0]]/total) *
-                 (digitFreq[1][digits[1]]/total) *
-                 (digitFreq[2][digits[2]]/total) * 10000;
+      const pick = `${first}${second}${third}`;
 
-      document.getElementById('pick').textContent = pickStr;
+      // Confidence based on historical frequency
+      const totalDraws = history.length;
+      const conf = ((digitFreq[0][first] + digitFreq[1][second] + digitFreq[2][third]) / (3 * totalDraws)) * 100;
+
+      document.getElementById('pick').textContent = pick;
       document.getElementById('confidence').textContent = 'Confidence: ' + conf.toFixed(2) + '%';
     }
   </script>
