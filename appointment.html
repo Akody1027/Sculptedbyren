@@ -1,119 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>AI Mega Millions Generator</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <title>Accurate Mega Millions Generator</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root {
       --bg-start: #FDEFF9;
-      --bg-end: #E8F6FF;
-      --card-bg: #FFFFFFCC;
-      --primary: #A49CF2;
-      --accent: #F29E9E;
-      --text: #333333;
-      --subtle: #555555;
-      --shadow: 0 8px 24px rgba(0,0,0,0.1);
+      --bg-end:   #E8F6FF;
+      --card-bg:  #FFFFFFCC;
+      --primary:  #A49CF2;
+      --accent:   #F29E9E;
+      --text:     #333333;
+      --subtle:   #555555;
+      --shadow:   0 8px 24px rgba(0,0,0,0.1);
     }
-    * { box-sizing: border-box; margin:0; padding:0 }
+    * { box-sizing:border-box; margin:0; padding:0 }
     body {
       background: linear-gradient(135deg,var(--bg-start),var(--bg-end));
-      font-family:'Quicksand',sans-serif;
-      color:var(--text);
-      display:flex; align-items:center; justify-content:center;
-      min-height:100vh; padding:1rem;
+      font-family: 'Quicksand', sans-serif;
+      color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 1rem;
     }
     .card {
-      background:var(--card-bg);
-      border-radius:20px;
-      box-shadow:var(--shadow);
-      max-width:480px; width:100%;
-      padding:2rem; text-align:center;
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      max-width: 500px; width: 100%;
+      padding: 2rem; text-align: center;
     }
     h1 {
-      font-weight:600; color:var(--primary);
-      margin-bottom:1.5rem;
+      font-weight: 600; color: var(--primary);
+      margin-bottom: 1.5rem;
     }
     #generate-btn {
-      background:var(--primary); color:#fff;
-      border:none; border-radius:30px;
-      padding:.75rem 2rem; font-size:1.1rem;
-      font-weight:500; cursor:pointer;
-      box-shadow:var(--shadow);
-      transition:transform .2s,box-shadow .2s;
-      margin-bottom:1.5rem;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: .75rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 500;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform .2s, box-shadow .2s;
+      margin-bottom: 1.5rem;
     }
     #generate-btn:hover {
-      transform:translateY(-2px);
-      box-shadow:0 12px 32px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.15);
     }
     .balls {
-      display:flex; flex-wrap:wrap;
-      justify-content:center; gap:.75rem;
-      margin-bottom:1rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .75rem;
+      margin-bottom: 1rem;
     }
     .ball {
-      width:60px; height:60px;
-      border-radius:50%; display:flex;
-      align-items:center; justify-content:center;
-      font-weight:600; font-size:1.2rem;
-      color:#fff; box-shadow:0 4px 16px rgba(0,0,0,0.08);
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 1.2rem;
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
     }
     .white-ball {
-      background:#fff; color:var(--primary);
-      border:3px solid var(--primary);
+      background: #fff;
+      color: var(--primary);
+      border: 3px solid var(--primary);
     }
     .mega-ball {
-      background:var(--accent);
+      background: var(--accent);
     }
     .confidence {
-      font-size:1rem; font-weight:500;
-      color:var(--primary); margin-top:.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--primary);
+      margin-top: .5rem;
     }
     .info {
-      text-align:left; font-size:.9rem;
-      color:var(--subtle); line-height:1.4;
-      margin-top:1rem;
+      text-align: left;
+      font-size: .9rem;
+      color: var(--subtle);
+      line-height: 1.4;
+      margin-top: 1rem;
     }
     .info h2 {
-      margin-bottom:.5rem; font-weight:500;
-      color:var(--primary);
+      margin-bottom: .5rem;
+      font-weight: 500;
+      color: var(--primary);
     }
     .info ul {
-      list-style:inside disc; margin-left:1rem;
+      list-style: inside disc;
+      margin-left: 1rem;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>AI Mega Millions Generator</h1>
+    <h1>Accurate Mega Millions</h1>
     <button id="generate-btn">Generate Numbers</button>
     <div class="balls" id="balls"></div>
     <div class="confidence" id="confidence"></div>
     <div class="info">
       <h2>Patterns &amp; Weights</h2>
       <ul>
-        <li>Even/Odd: 2–3 evens</li>
-        <li>Sum: 155–195</li>
-        <li>Span: 30–45</li>
-        <li>≥1 consecutive pair</li>
-        <li>≥1 hot cluster (17&32,23&44,49&12)</li>
-        <li>Whites / Megas weighted by historical frequency</li>
+        <li>Even/Odd: aim for **2–4 evens**</li>
+        <li>Sum of the 6 numbers: **148–207** (25th–75th percentile)</li>
+        <li>Span (max–min): **38–55**</li>
+        <li>Gaps of 5–10: at least **3** of the 5 adjacent gaps</li>
+        <li>At least **one** consecutive pair</li>
+        <li>At least one **hot cluster**: (9&10), (10&13), or (3&12)</li>
+        <li>Weighted by **combined historical** &amp; **recency** data</li>
       </ul>
     </div>
   </div>
 
   <script>
-  // historical frequencies
-  const whiteFreq = {31:279,17:275,10:271,20:270,29:265,14:262,4:260,39:260};
-  const megaFreq  = {22:43,11:40,24:38,4:35,9:35,13:35};
+  // ───── Combined Weight Map (All-Time + Recency) ─────
+// (Generated from your CSV, numbers 1–75)
+  const weightMap = {
+    1: 365.3005678380126, 2: 354.442099676787, 3: 324.11066809083354,
+    4: 284.0568024442691, 5: 301.16297278853705, 6: 306.3203776995488,
+    7: 285.5918367865084, 8: 299.7622039290241, 9: 306.7739073459993,
+    10:377.83837583993176,11:291.0090066246958,12:339.5083135363108,
+    13:351.44551887519516,14:328.96060760081633,15:378.0753062990546,
+    16:327.3360550094097,17:326.93602725224624,18:320.3750287905642,
+    19:258.3476226271191,20:280.20046973648636,21:240.68966287989458,
+    22:268.09996215420416,23:323.6456619647936,24:381.08988740443435,
+    25:247.8300172422558,26:265.51795203983976,27:206.21586172903276,
+    28:281.32936177974505,29:328.2776252509281,30:299.6912435849393,
+    31:350.8438489753046,32:234.3707960320744,33:241.31221127841938,
+    34:246.3332222248349,35:245.41642204489912,36:287.2629614332621,
+    37:240.9011028478512,38:324.8611106721004,39:265.7914214502093,
+    40:210.12005134637512,41:297.88964154223,42:271.96522576507334,
+    43:230.725834245861,44:245.1289567144286,45:300.30621437979206,
+    46:247.29219864622788,47:200.85805516214335,48:293.3082384941919,
+    49:285.6750789945729,50:221.40654464609484,51:205.26042504331005,
+    52:235.92393276329178,53:226.15542833276513,54:193.29124734709506,
+    55:169.75873697375835,56:223.35659145650824,57:202.1920779334906,
+    58:229.4507186783616,59:205.5033192577631,60:202.4922928380108,
+    61:199.8029571605481,62:174.97692825080722,63:206.80740632418924,
+    64:191.60325235548805,65:163.09258338500647,66:193.3895689421257,
+    67:183.63440063986747,68:177.41633341939145,69:186.32217741828118,
+    70:192.8011392370695,71:142.38486334572563,72:118.39110323071662,
+    73:186.02952680889506,74:112.1845946842319,75: 99.21133360223616
+  };
 
-  // weighted pick
-  function weightedPick(freq, pool) {
+  // The top 3 hot-pair clusters
+  const clusters = [[9,10],[10,13],[3,12]];
+
+  // Weighted random pick from pool based on weightMap
+  function weightedPick(pool) {
     let total = 0;
     const opts = pool.map(n => {
-      const w = freq[n] || 100;
+      const w = weightMap[n] || 1;
       total += w;
       return {n,w};
     });
@@ -125,70 +169,64 @@
     return opts[opts.length-1].n;
   }
 
-  // generate one candidate
+  // Generate one 6-number candidate
   function generateCandidate() {
-    let pool = Array.from({length:56},(_,i)=>i+1);
-    const whites = [];
-    for (let i=0; i<5; i++) {
-      const n = weightedPick(whiteFreq, pool);
-      whites.push(n);
-      pool = pool.filter(x => x!==n);
+    let pool = Array.from({length:75},(_,i)=>i+1);
+    const pick = [];
+    for (let i=0; i<6; i++) {
+      const n = weightedPick(pool);
+      pick.push(n);
+      pool = pool.filter(x=>x!==n);
     }
-    whites.sort((a,b)=>a-b);
-    const mega = weightedPick(megaFreq, Array.from({length:25},(_,i)=>i+1));
-    return {whites,mega};
+    return pick.sort((a,b)=>a-b);
   }
 
-  // score candidate
-  function score({whites}) {
-    const sum = whites.reduce((a,b)=>a+b,0);
-    const ev  = whites.filter(n=>n%2===0).length;
-    const span= whites[4]-whites[0];
-    const gaps= whites.slice(1).map((n,i)=>n-whites[i]);
+  // Score a candidate
+  function scoreSet(wh) {
+    const sum  = wh.reduce((a,b)=>a+b,0);
+    const ev   = wh.filter(n=>n%2===0).length;
+    const span = wh[5]-wh[0];
+    const gaps = wh.slice(1).map((n,i)=>n-wh[i-1]);
     const consec = gaps.some(g=>g===1);
-    const cluster= [[17,32],[23,44],[49,12]]
-      .some(p=>p.every(x=>whites.includes(x)));
-    let s=50;
-    if(ev>=2&&ev<=3) s+=10;
-    if(sum>=155&&sum<=195) s+=10;
-    if(span>=30&&span<=45) s+=10;
-    if(consec) s+=10;
-    if(cluster) s+=10;
+    const hotCl = clusters.some(p=>p.every(x=>wh.includes(x)));
+
+    let s = 50;
+    if (ev >= 2 && ev <= 4)       s += 10;
+    if (sum >= 148 && sum <= 207)  s += 10;
+    if (span >= 38 && span <= 55)  s += 10;
+    if (gaps.filter(g=>g>=5&&g<=10).length >= 3) s += 10;
+    if (consec) s += 5;
+    if (hotCl)  s += 5;
     return s;
   }
 
-  // pick best of N
-  function pickBest(n=30) {
+  // Pick best of N candidates
+  function pickBest(N=50) {
     let best=null, bestScore=-1;
-    for (let i=0;i<n;i++){
+    for (let i=0;i<N;i++) {
       const cand = generateCandidate();
-      const sc = score(cand);
-      if(sc>bestScore){
-        bestScore=sc;
-        best=cand;
+      const sc   = scoreSet(cand);
+      if (sc > bestScore) {
+        best = cand; bestScore = sc;
       }
     }
-    return {...best, confidence: bestScore};
+    return { numbers: best, confidence: bestScore };
   }
 
-  document.getElementById('generate-btn')
-    .addEventListener('click', ()=>{
-      const {whites,mega,confidence} = pickBest(30);
-      const balls = document.getElementById('balls');
-      balls.innerHTML = '';
-      whites.forEach(n=>{
-        const d = document.createElement('div');
-        d.className = 'ball white-ball';
-        d.textContent = n;
-        balls.appendChild(d);
-      });
-      const m = document.createElement('div');
-      m.className = 'ball mega-ball';
-      m.textContent = mega;
-      balls.appendChild(m);
-      document.getElementById('confidence').textContent =
-        `Confidence: ${confidence}%`;
+  document.getElementById('generate-btn').addEventListener('click', ()=>{
+    const {numbers, confidence} = pickBest(50);
+    // Render
+    const balls = document.getElementById('balls');
+    balls.innerHTML = '';
+    numbers.forEach((n,i)=>{
+      const d = document.createElement('div');
+      d.className = 'ball ' + (i<5?'white-ball':'mega-ball');
+      d.textContent = n;
+      balls.appendChild(d);
     });
+    document.getElementById('confidence').textContent =
+      `Confidence: ${confidence}%`;
+  });
   </script>
 </body>
 </html>
