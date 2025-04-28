@@ -1,201 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Next-Gen Mega Millions Generator</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>Modern Mega Millions Generator</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
-      padding: 2rem;
       font-family: 'Roboto', sans-serif;
       background: #eef2f7;
-      color: #333;
+      display: flex;
+      justify-content: center;
+      padding: 2rem;
     }
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
+    .card {
       background: #fff;
       border-radius: 16px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      max-width: 480px;
+      width: 100%;
       padding: 2rem;
-      overflow: hidden;
+      text-align: center;
     }
     h1 {
-      text-align: center;
       color: #4a90e2;
       margin-bottom: 1.5rem;
     }
-    #output {
-      font-size: 2.5rem;
-      text-align: center;
-      margin: 1rem 0 2rem;
-      letter-spacing: .5rem;
-      transition: transform .4s ease, opacity .4s ease;
+    .balls {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
     }
-    #output.animate {
-      animation: pop 0.5s ease;
+    .ball {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transform: scale(0);
+      animation: pop 0.4s forwards ease-out;
     }
     @keyframes pop {
-      0%   { transform: scale(0.8); opacity: 0; }
-      60%  { transform: scale(1.2); opacity: 1; }
-      100% { transform: scale(1);   opacity: 1; }
+      to { transform: scale(1); }
     }
+    .white { background: #fff; color: #333; }
+    .white { border: 2px solid #4a90e2; }
+    .mega  { background: #f5a623; }
     button {
-      display: block;
-      margin: 0 auto 2rem;
       background: linear-gradient(135deg,#4a90e2,#357ab8);
       border: none;
       color: #fff;
-      padding: .75rem 2rem;
-      font-size: 1.1rem;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
       border-radius: 30px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
       cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
       transition: transform .2s ease, box-shadow .2s ease;
+      margin-bottom: 1.5rem;
     }
     button:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 24px rgba(0,0,0,0.2);
     }
     .info {
+      text-align: left;
       background: #fafcff;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
       padding: 1rem 1.5rem;
-      margin-bottom: 1.5rem;
-      line-height: 1.5;
-      transition: box-shadow .3s ease, transform .3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      margin-top: 1.5rem;
     }
-    .info:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-    }
-    .info h2 { margin-top: 0; color: #4a90e2; }
+    .info h2 { color: #4a90e2; margin-bottom: 0.5rem; }
     .info ul { padding-left: 1.2rem; }
-    .historical {
-      font-size: .9rem;
-      color: #555;
+    .info li { margin-bottom: 0.4rem; }
+    .history {
+      text-align: left;
       background: #fff;
-      margin-top: 2rem;
-      padding: 1rem;
       border-radius: 10px;
+      padding: 1rem;
       box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #555;
     }
-    .historical h2 { margin-top: 0; }
+    .history h2 { margin-bottom: 0.5rem; }
   </style>
 </head>
 <body>
+  <div class="card">
+    <h1>Next-Gen Mega Millions</h1>
+    <button onclick="generate()">Generate Numbers</button>
+    <div class="balls" id="balls">
+      <!-- Balls appear here -->
+    </div>
 
-  <div class="container">
-    <h1>Next-Gen Mega Millions Generator</h1>
-    <button onclick="generate()">Generate</button>
-    <div id="output">-- -- -- -- -- --</div>
-
-    <div class="info" id="explanation">
+    <div class="info" id="patterns">
       <h2>Patterns Applied</h2>
       <ul>
-        <li>3 Even / 3 Odd split</li>
-        <li>Sum between 155–195 (ideal 175–185)</li>
-        <li>Span (max–min) between 35–45</li>
+        <li>Weighted by top whites (31,17,10,20,29…) :contentReference[oaicite:0]{index=0}</li>
+        <li>5 White balls: 2–3 evens</li>
+        <li>Span (max−min): 30–45</li>
         <li>At least one consecutive pair</li>
-        <li>At least one clustered hot pair (17&32, 23&44, 49&12)</li>
-        <li>Majority of gaps (3+ of 5) between 5–10</li>
-        <li>Weighted toward your hot numbers (12,17,23,32,44,49)</li>
+        <li>At least one hot cluster (17&32, 23&44, 49&12)</li>
+        <li>Majority of gaps (3+ of 4) between 5–10</li>
+        <li>Mega Ball weighted by top megas (22,11,24,4,9…) :contentReference[oaicite:1]{index=1}</li>
       </ul>
     </div>
 
-    <div class="historical">
+    <div class="history">
       <h2>Historical Hot Numbers</h2>
-      <p><strong>Top White Balls (your data):</strong> 12 (146), 17 (163), 23 (158), 32 (154), 44 (151), 49 (149).</p>
-      <p><strong>Top Mega Balls:</strong> 3 (115), 9 (111), 1 (111), 15 (106), 7 (106) :contentReference[oaicite:0]{index=0}.</p>
+      <strong>Top Whites:</strong> 31(279), 17(275), 10(271), 20(270), 29(265)… :contentReference[oaicite:2]{index=2}<br/>
+      <strong>Top Megas:</strong> 22(43), 11(40), 24(38), 4(35), 9(35) :contentReference[oaicite:3]{index=3}
     </div>
   </div>
 
   <script>
-    const frequencies = {12:146,17:163,23:158,32:154,44:151,49:149};
-    const hotPairs = [[17,32],[23,44],[49,12]];
+    // frequency maps
+    const whiteFreq = {31:279,17:275,10:271,20:270,29:265,14:262,4:260,39:260};
+    const megaFreq  = {22:43,11:40,24:38,4:35,9:35,13:35};
+    const hotClusters = [[17,32],[23,44],[49,12]];
 
-    function weightedDraw(opts) {
-      let total = opts.reduce((s,o)=>s+o.w,0), r=Math.random()*total, acc=0;
-      for (let o of opts) {
-        acc+=o.w;
-        if (r<=acc) return o.n;
+    function weightedPick(map, pool) {
+      const opts = pool.map(n => ({
+        n, w: map[n] || 100
+      }));
+      const total = opts.reduce((s,o)=>s+o.w,0);
+      let r = Math.random()*total, acc=0;
+      for (const o of opts) {
+        acc += o.w;
+        if (r <= acc) return o.n;
       }
       return opts[opts.length-1].n;
     }
 
-    function draw() {
-      let pool=Array.from({length:56},(_,i)=>i+1), pick=[];
-      while(pick.length<6){
-        let opts=pool.map(n=>({n,w:frequencies[n]||100}));
-        let n=weightedDraw(opts);
-        pick.push(n);
-        pool=pool.filter(x=>x!==n);
-      }
-      return pick.sort((a,b)=>a-b);
+    function analyze(set) {
+      const sum       = set.reduce((s,n)=>s+n,0);
+      const evens     = set.filter(n=>n%2===0).length;
+      const span      = set[4] - set[0];
+      const gaps      = set.slice(1).map((n,i)=>n-set[i]);
+      const goodGaps  = gaps.filter(g=>g>=5&&g<=10).length;
+      const hasConsec = gaps.some(g=>g===1);
+      const hasCluster= hotClusters.some(p=>p.every(x=>set.includes(x)));
+      return { sum, evens, span, goodGaps, hasConsec, hasCluster, gaps };
     }
 
-    function meets(a){
-      return a.e%2===3 &&
-             a.sum>=155&&a.sum<=195 &&
-             a.span>=35&&a.span<=45 &&
-             a.goodGaps>=3 &&
-             a.consec&&
-             a.cluster;
+    function meetsWhite(a) {
+      return a.evens >= 2 && a.evens <= 3 &&
+             a.span  >= 30 && a.span  <= 45 &&
+             a.goodGaps >= 3 &&
+             a.hasConsec &&
+             a.hasCluster;
     }
 
-    function analyze(set){
-      let sum=set.reduce((s,n)=>s+n,0),
-          evens=set.filter(n=>n%2===0).length,
-          span=set[5]-set[0],
-          gaps=set.slice(1).map((n,i)=>n-set[i]),
-          goodGaps=gaps.filter(g=>g>=5&&g<=10).length,
-          consec=gaps.some(g=>g===1),
-          cluster=hotPairs.some(p=>p.every(x=>set.includes(x)));
-      return { sum, e:evens, span, gaps, goodGaps, consec, cluster };
-    }
-
-    function generate(){
-      let set, a, tries=0;
+    function drawWhite() {
+      let pool = Array.from({length:56},(_,i)=>i+1), pick;
       do {
-        set=draw();
-        a=analyze(set);
-        tries++;
-      } while(!meets(a)&&tries<5000);
+        pick = [];
+        let temp = [...pool];
+        for (let i=0; i<5; i++) {
+          const n = weightedPick(whiteFreq, temp);
+          pick.push(n);
+          temp = temp.filter(x=>x!==n);
+        }
+        pick.sort((a,b)=>a-b);
+      } while (!meetsWhite(analyze(pick)));
+      return pick;
+    }
 
-      const out=document.getElementById('output');
-      out.textContent=set.join('  ');
-      out.classList.remove('animate');
-      void out.offsetWidth;
-      out.classList.add('animate');
+    function drawMega() {
+      const pool = Array.from({length:25},(_,i)=>i+1);
+      return weightedPick(megaFreq, pool);
+    }
 
-      const cons=a.gaps
-        .map((g,i)=> g===1 ? `${set[i]}–${set[i+1]}` : null)
-        .filter(Boolean);
-      const clus=hotPairs
-        .filter(p=>p.every(x=>set.includes(x)))
-        .map(p=>p.join('&'));
-
-      document.getElementById('explanation').innerHTML=`
-        <h2>Your Pick</h2>
-        <p><strong>${set.join('  ')}</strong> &nbsp;(sum=${a.sum}, span=${a.span})</p>
-        <h2>Why?</h2>
-        <ul>
-          <li>Even/Odd: ${a.e} even / ${6-a.e} odd</li>
-          <li>Sum: ${a.sum}</li>
-          <li>Span: ${a.span}</li>
-          <li>Gaps 5–10: ${a.goodGaps}/5</li>
-          <li>Consecutive: ${cons.join(', ')||'none'}</li>
-          <li>Clustered pair: ${clus.join('; ')||'none'}</li>
-        </ul>
-        <p><small>Confidence: ${Math.min(50 + (a.e===3)*10 + (a.sum>=175&&a.sum<=185?10: a.sum>=155?5:0) + (a.span>=35&&a.span<=45?10:0) + (a.goodGaps>=3?10:0) + (a.consec?10:0) + (a.cluster?10:0) + set.filter(n=>[12,17,23,32,44,49].includes(n)).length*5,100)}%</small></p>
-        <p><small>No guarantee—data-driven patterns only.</small></p>
-      `;
+    function generate() {
+      const whites = drawWhite();
+      const mega   = drawMega();
+      const balls  = document.getElementById('balls');
+      balls.innerHTML = '';
+      whites.forEach((n,i) => {
+        const div = document.createElement('div');
+        div.className = 'ball white';
+        div.style.animationDelay = (i*0.1)+'s';
+        div.textContent = n;
+        balls.appendChild(div);
+      });
+      const m = document.createElement('div');
+      m.className = 'ball mega';
+      m.style.animationDelay = '0.6s';
+      m.textContent = mega;
+      balls.appendChild(m);
+      // Scroll patterns into view
+      document.getElementById('patterns').scrollIntoView({ behavior: 'smooth' });
     }
   </script>
-
 </body>
 </html>
