@@ -2,241 +2,193 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Ultra Mega Millions Generator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap" rel="stylesheet" />
+  <title>AI Mega Millions Generator</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --primary: #4A90E2;
-      --accent: #F5A623;
-      --bg-start: #EDF2F7;
-      --bg-end: #D6E2F0;
-      --card-bg: #FFF;
-      --text: #333;
-      --muted: #555;
+      --bg-start: #FDEFF9;
+      --bg-end: #E8F6FF;
+      --card-bg: #FFFFFFCC;
+      --primary: #A49CF2;
+      --accent: #F29E9E;
+      --text: #333333;
+      --subtle: #555555;
+      --shadow: 0 8px 24px rgba(0,0,0,0.1);
     }
     * { box-sizing: border-box; margin:0; padding:0 }
     body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
-      color: var(--text);
-      padding:2rem 1rem;
-      display:flex; justify-content:center;
+      background: linear-gradient(135deg,var(--bg-start),var(--bg-end));
+      font-family:'Quicksand',sans-serif;
+      color:var(--text);
+      display:flex; align-items:center; justify-content:center;
+      min-height:100vh; padding:1rem;
     }
-    .container {
-      max-width:700px; width:100%;
+    .card {
       background:var(--card-bg);
-      border-radius:16px;
-      box-shadow:0 12px 32px rgba(0,0,0,0.1);
-      overflow:hidden;
-      display:flex; flex-direction:column;
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      max-width:480px; width:100%;
+      padding:2rem; text-align:center;
     }
-    header {
-      background: var(--primary);
-      padding:1.5rem; text-align:center;
+    h1 {
+      font-weight:600; color:var(--primary);
+      margin-bottom:1.5rem;
     }
-    header h1 {
-      color:#fff; font-weight:600; font-size:1.75rem;
-    }
-    main { padding:2rem; }
     #generate-btn {
-      display:block; margin:0 auto 1rem;
-      background: var(--primary); color:#fff; border:none;
-      border-radius:30px; padding:.75rem 2rem;
-      font-size:1rem; cursor:pointer;
-      box-shadow:0 6px 16px rgba(0,0,0,0.1);
+      background:var(--primary); color:#fff;
+      border:none; border-radius:30px;
+      padding:.75rem 2rem; font-size:1.1rem;
+      font-weight:500; cursor:pointer;
+      box-shadow:var(--shadow);
       transition:transform .2s,box-shadow .2s;
+      margin-bottom:1.5rem;
     }
-    #generate-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    #generate-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow:0 10px 24px rgba(0,0,0,0.15);
-    }
-    #status {
-      text-align:center;
-      margin-bottom:1rem;
-      color: var(--muted);
-      font-style: italic;
+    #generate-btn:hover {
+      transform:translateY(-2px);
+      box-shadow:0 12px 32px rgba(0,0,0,0.15);
     }
     .balls {
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(60px,1fr));
-      gap:1rem; justify-items:center;
-      margin-bottom:2rem;
+      display:flex; flex-wrap:wrap;
+      justify-content:center; gap:.75rem;
+      margin-bottom:1rem;
     }
     .ball {
-      width:60px; height:60px; border-radius:50%;
-      display:flex;align-items:center;justify-content:center;
-      font-weight:600;font-size:1.2rem;color:#fff;
-      opacity:0;transform:scale(.5);
-      animation:pop .4s forwards ease-out;
-      box-shadow:0 4px 16px rgba(0,0,0,0.08);
+      width:60px; height:60px;
+      border-radius:50%; display:flex;
+      align-items:center; justify-content:center;
+      font-weight:600; font-size:1.2rem;
+      color:#fff; box-shadow:0 4px 16px rgba(0,0,0,0.08);
     }
-    @keyframes pop { to{opacity:1;transform:scale(1);} }
     .white-ball {
-      background:#fff;color:var(--primary);
+      background:#fff; color:var(--primary);
       border:3px solid var(--primary);
     }
     .mega-ball {
       background:var(--accent);
     }
-    .section { margin-bottom:2rem; }
-    .section h2 {
-      font-size:1.25rem; margin-bottom:.75rem;
-      color: var(--primary);
-      border-bottom:2px solid var(--bg-end);
-      padding-bottom:.25rem;
+    .confidence {
+      font-size:1rem; font-weight:500;
+      color:var(--primary); margin-top:.5rem;
     }
-    .grid-two {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:1.5rem;
+    .info {
+      text-align:left; font-size:.9rem;
+      color:var(--subtle); line-height:1.4;
+      margin-top:1rem;
     }
-    .grid-two ul {
-      list-style: inside disc;
-      color: var(--muted);
-      line-height:1.5;
+    .info h2 {
+      margin-bottom:.5rem; font-weight:500;
+      color:var(--primary);
     }
-    @media(max-width:500px){ .grid-two{grid-template-columns:1fr} }
+    .info ul {
+      list-style:inside disc; margin-left:1rem;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header><h1>Ultra Mega Millions</h1></header>
-    <main>
-      <button id="generate-btn">Generate Numbers</button>
-      <div id="status"></div>
-      <div class="balls" id="balls"></div>
-
-      <div class="section">
-        <h2>Weights &amp; Patterns</h2>
-        <div class="grid-two">
-          <ul>
-            <li><strong>Recency decay:</strong> most recent draw ×0.9ⁿ</li>
-            <li><strong>All-time weights:</strong> top whites &amp; megas</li>
-            <li><strong>Even/Odd:</strong> 2–3 evens</li>
-            <li><strong>Sum:</strong> 155–195</li>
-          </ul>
-          <ul>
-            <li><strong>Span:</strong> 30–45</li>
-            <li><strong>Good gaps [5–10]:</strong> ≥3 of 4</li>
-            <li><strong>Consecutive:</strong> ≥1 pair</li>
-            <li><strong>Cluster:</strong> 17&32, 23&44 or 49&12</li>
-          </ul>
-        </div>
-      </div>
-    </main>
+  <div class="card">
+    <h1>AI Mega Millions Generator</h1>
+    <button id="generate-btn">Generate Numbers</button>
+    <div class="balls" id="balls"></div>
+    <div class="confidence" id="confidence"></div>
+    <div class="info">
+      <h2>Patterns &amp; Weights</h2>
+      <ul>
+        <li>Even/Odd: 2–3 evens</li>
+        <li>Sum: 155–195</li>
+        <li>Span: 30–45</li>
+        <li>≥1 consecutive pair</li>
+        <li>≥1 hot cluster (17&32,23&44,49&12)</li>
+        <li>Whites / Megas weighted by historical frequency</li>
+      </ul>
+    </div>
   </div>
 
   <script>
-  (function(){
-    // ─── Your recent draws here (most recent first) ───
-    const recentDraws = [
-      /* [12,44,15,18,1,42], [14,15,48,4,24,41], … */
-    ];
+  // historical frequencies
+  const whiteFreq = {31:279,17:275,10:271,20:270,29:265,14:262,4:260,39:260};
+  const megaFreq  = {22:43,11:40,24:38,4:35,9:35,13:35};
 
-    // All-time weights
-    const allTimeWhite = {31:279,17:275,10:271,20:270,29:265,14:262,4:260,39:260};
-    const allTimeMega  = {22:43,11:40,24:38,4:35,9:35,13:35};
-
-    // Build recency tables
-    const decay = 0.9, recFactor = 50;
-    const recWhite = {}, recMega = {};
-    recentDraws.forEach((d,i)=>{
-      const w = Math.pow(decay,i);
-      d.slice(0,5).forEach(n=> recWhite[n]=(recWhite[n]||0)+w );
-      recMega[d[5]] = (recMega[d[5]]||0) + w;
+  // weighted pick
+  function weightedPick(freq, pool) {
+    let total = 0;
+    const opts = pool.map(n => {
+      const w = freq[n] || 100;
+      total += w;
+      return {n,w};
     });
+    let r = Math.random() * total;
+    for (let o of opts) {
+      if (r < o.w) return o.n;
+      r -= o.w;
+    }
+    return opts[opts.length-1].n;
+  }
 
-    const clusters = [[17,32],[23,44],[49,12]];
+  // generate one candidate
+  function generateCandidate() {
+    let pool = Array.from({length:56},(_,i)=>i+1);
+    const whites = [];
+    for (let i=0; i<5; i++) {
+      const n = weightedPick(whiteFreq, pool);
+      whites.push(n);
+      pool = pool.filter(x => x!==n);
+    }
+    whites.sort((a,b)=>a-b);
+    const mega = weightedPick(megaFreq, Array.from({length:25},(_,i)=>i+1));
+    return {whites,mega};
+  }
 
-    function weightedPick(freq, rec, pool) {
-      const opts = pool.map(n=>{
-        const base = freq[n]||100;
-        const extra= (rec[n]||0)*recFactor;
-        return {n, w: base+extra};
-      });
-      let total = opts.reduce((s,o)=>s+o.w,0), r=Math.random()*total;
-      for (let o of opts) {
-        if (r < o.w) return o.n;
-        r -= o.w;
+  // score candidate
+  function score({whites}) {
+    const sum = whites.reduce((a,b)=>a+b,0);
+    const ev  = whites.filter(n=>n%2===0).length;
+    const span= whites[4]-whites[0];
+    const gaps= whites.slice(1).map((n,i)=>n-whites[i]);
+    const consec = gaps.some(g=>g===1);
+    const cluster= [[17,32],[23,44],[49,12]]
+      .some(p=>p.every(x=>whites.includes(x)));
+    let s=50;
+    if(ev>=2&&ev<=3) s+=10;
+    if(sum>=155&&sum<=195) s+=10;
+    if(span>=30&&span<=45) s+=10;
+    if(consec) s+=10;
+    if(cluster) s+=10;
+    return s;
+  }
+
+  // pick best of N
+  function pickBest(n=30) {
+    let best=null, bestScore=-1;
+    for (let i=0;i<n;i++){
+      const cand = generateCandidate();
+      const sc = score(cand);
+      if(sc>bestScore){
+        bestScore=sc;
+        best=cand;
       }
-      return opts[opts.length-1].n;
     }
+    return {...best, confidence: bestScore};
+  }
 
-    function analyze(ws) {
-      const sum = ws.reduce((s,n)=>s+n,0),
-            ev  = ws.filter(n=>n%2===0).length,
-            span= ws[4]-ws[0],
-            gaps= ws.slice(1).map((n,i)=>n-ws[i]);
-      return {
-        sum, ev, span,
-        good: gaps.filter(g=>g>=5&&g<=10).length,
-        consec: gaps.some(g=>g===1),
-        clust: clusters.some(p=>p.every(x=>ws.includes(x)))
-      };
-    }
-
-    function ok(ws) {
-      const a = analyze(ws);
-      return a.ev>=2 && a.ev<=3 &&
-             a.sum>=155&&a.sum<=195 &&
-             a.span>=30&&a.span<=45 &&
-             a.good>=3 && a.consec && a.clust;
-    }
-
-    function drawWhites() {
-      let ws;
-      do {
-        let pool = Array.from({length:56},(_,i)=>i+1);
-        ws = [];
-        for (let i=0;i<5;i++) {
-          const n = weightedPick(pool, allTimeWhite, recWhite);
-          ws.push(n);
-          pool = pool.filter(x=>x!==n);
-        }
-        ws.sort((a,b)=>a-b);
-      } while (!ok(ws));
-      return ws;
-    }
-
-    function drawMega() {
-      return weightedPick(
-        Array.from({length:25},(_,i)=>i+1),
-        allTimeMega, recMega
-      );
-    }
-
-    const btn    = document.getElementById('generate-btn');
-    const status = document.getElementById('status');
-    const balls  = document.getElementById('balls');
-
-    btn.addEventListener('click', ()=>{
-      status.textContent = 'Processing…';
-      btn.disabled = true;
-      setTimeout(()=>{
-        balls.innerHTML = '';
-        const ws = drawWhites();
-        ws.forEach((n,i)=>{
-          const d = document.createElement('div');
-          d.className = 'ball white-ball';
-          d.style.animationDelay = (i*0.1)+'s';
-          d.textContent = n;
-          balls.appendChild(d);
-        });
-        const m = document.createElement('div');
-        m.className = 'ball mega-ball';
-        m.style.animationDelay = '0.6s';
-        m.textContent = drawMega();
-        balls.appendChild(m);
-        status.textContent = '';
-        btn.disabled = false;
-      }, 50);
+  document.getElementById('generate-btn')
+    .addEventListener('click', ()=>{
+      const {whites,mega,confidence} = pickBest(30);
+      const balls = document.getElementById('balls');
+      balls.innerHTML = '';
+      whites.forEach(n=>{
+        const d = document.createElement('div');
+        d.className = 'ball white-ball';
+        d.textContent = n;
+        balls.appendChild(d);
+      });
+      const m = document.createElement('div');
+      m.className = 'ball mega-ball';
+      m.textContent = mega;
+      balls.appendChild(m);
+      document.getElementById('confidence').textContent =
+        `Confidence: ${confidence}%`;
     });
-  })();
   </script>
 </body>
 </html>
