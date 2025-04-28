@@ -2,28 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Ultra-Modern Mega Millions Generator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link
-    href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap"
-    rel="stylesheet"
-  />
+  <title>Ultra-Mega Millions Generator</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --primary: #4a90e2;
-      --primary-dark: #357abd;
-      --accent: #f5a623;
-      --bg-start: #edf2f7;
-      --bg-end: #d6e2f0;
-      --card-bg: #ffffff;
+      --primary: #4A90E2;
+      --primary-dark: #357ABD;
+      --accent: #F5A623;
+      --bg-start: #EDF2F7;
+      --bg-end: #D6E2F0;
+      --card-bg: #FFFFFF;
       --text: #333333;
       --text-muted: #555555;
     }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', sans-serif;
       background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
@@ -37,7 +30,7 @@
       max-width: 700px;
       background: var(--card-bg);
       border-radius: 20px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.1);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -55,7 +48,7 @@
     main {
       padding: 2rem;
     }
-    .generate-btn {
+    #generate-btn {
       display: block;
       margin: 0 auto 1.5rem;
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
@@ -66,23 +59,22 @@
       font-size: 1rem;
       font-weight: 500;
       cursor: pointer;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
       transition: transform 0.2s, box-shadow 0.2s;
     }
-    .generate-btn:hover {
+    #generate-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.15);
     }
     .balls {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(60px,1fr));
       gap: 1rem;
       justify-items: center;
       margin-bottom: 2rem;
     }
     .ball {
-      width: 60px;
-      height: 60px;
+      width: 60px; height: 60px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -90,16 +82,13 @@
       font-weight: 600;
       font-size: 1.2rem;
       color: #fff;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
       opacity: 0;
       transform: scale(0.5);
       animation: pop 0.4s forwards ease-out;
     }
     @keyframes pop {
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
+      to { opacity:1; transform:scale(1); }
     }
     .white-ball {
       background: #fff;
@@ -109,9 +98,7 @@
     .mega-ball {
       background: var(--accent);
     }
-    .section {
-      margin-bottom: 2rem;
-    }
+    .section { margin-bottom: 2rem; }
     .section h2 {
       font-size: 1.25rem;
       margin-bottom: 0.75rem;
@@ -119,35 +106,27 @@
       border-bottom: 2px solid var(--bg-end);
       padding-bottom: 0.25rem;
     }
-    .patterns ul,
-    .history ul {
+    .patterns ul, .history ul {
       list-style: inside disc;
       color: var(--text-muted);
       line-height: 1.5;
     }
-    .patterns ul li,
-    .history ul li {
-      margin-bottom: 0.5rem;
-    }
+    .patterns ul li, .history ul li { margin-bottom: 0.5rem; }
     .grid-two {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1.5rem;
     }
-    @media (max-width: 500px) {
-      .grid-two {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width:500px) {
+      .grid-two { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>Ultra-Modern Mega Millions</h1>
-    </header>
+    <header><h1>Ultra-Modern Mega Millions</h1></header>
     <main>
-      <button class="generate-btn">Generate Numbers</button>
+      <button id="generate-btn">Generate Numbers</button>
       <div class="balls" id="balls"></div>
 
       <div class="section patterns">
@@ -197,16 +176,16 @@
   </div>
 
   <script>
-    ;(function(){
+    (function(){
       // all-time frequencies
       const whiteFreq = {31:279,17:275,10:271,20:270,29:265,14:262,4:260,39:260};
       const megaFreq  = {22:43,11:40,24:38,4:35,9:35,13:35};
       const hotClusters = [[17,32],[23,44],[49,12]];
 
-      function weightedPick(freqMap, pool) {
-        const opts = pool.map(n => ({n, w: freqMap[n]||100}));
-        const tot = opts.reduce((s,o)=>s+o.w,0);
-        let r = Math.random()*tot, acc=0;
+      function weightedPick(freq, pool) {
+        const opts = pool.map(n=>({n,w:freq[n]||100}));
+        const total = opts.reduce((s,o)=>s+o.w,0);
+        let r = Math.random()*total, acc = 0;
         for (let o of opts) {
           acc += o.w;
           if (r <= acc) return o.n;
@@ -215,37 +194,37 @@
       }
 
       function analyze(set) {
-        const sum       = set.reduce((s,n)=>s+n,0);
-        const evens     = set.filter(n=>n%2===0).length;
-        const span      = set[4] - set[0];
-        const gaps      = set.slice(1).map((n,i)=>n - set[i]);
-        const goodGaps  = gaps.filter(g=>g>=5&&g<=10).length;
-        const hasCons   = gaps.some(g=>g===1);
-        const hasClust  = hotClusters.some(p=>p.every(x=>set.includes(x)));
-        return { sum, evens, span, goodGaps, hasCons, hasClust };
+        const sum   = set.reduce((s,n)=>s+n,0);
+        const evens = set.filter(n=>n%2===0).length;
+        const span  = set[set.length-1] - set[0];
+        const gaps  = set.slice(1).map((n,i)=>n-set[i]);
+        const goodGaps = gaps.filter(g=>g>=5&&g<=10).length;
+        const hasCons = gaps.some(g=>g===1);
+        const hasClust = hotClusters.some(p=>p.every(x=>set.includes(x)));
+        return {sum,evens,span,goodGaps,hasCons,hasClust};
       }
 
-      function meetsWhite(a) {
-        return a.evens>=2 && a.evens<=3 &&
-               a.sum>=155 && a.sum<=195 &&
-               a.span>=30 && a.span<=45 &&
-               a.goodGaps>=3 &&
-               a.hasCons && a.hasClust;
+      function meetsWhite(stats) {
+        return stats.evens>=2 && stats.evens<=3 &&
+               stats.sum>=155 && stats.sum<=195 &&
+               stats.span>=30 && stats.span<=45 &&
+               stats.goodGaps>=3 &&
+               stats.hasCons && stats.hasClust;
       }
 
       function drawWhite() {
-        let pick;
+        let pick, stats;
         do {
-          const pool = Array.from({length:56},(_,i)=>i+1);
+          let temp = Array.from({length:56},(_,i)=>i+1);
           pick = [];
-          let temp = [...pool];
           for (let i=0; i<5; i++) {
             const n = weightedPick(whiteFreq, temp);
             pick.push(n);
             temp = temp.filter(x=>x!==n);
           }
           pick.sort((a,b)=>a-b);
-        } while (!meetsWhite(analyze(pick)));
+          stats = analyze(pick);
+        } while (!meetsWhite(stats));
         return pick;
       }
 
@@ -253,7 +232,7 @@
         return weightedPick(megaFreq, Array.from({length:25},(_,i)=>i+1));
       }
 
-      function generate() {
+      function generateNumbers() {
         const whites = drawWhite();
         const mega   = drawMega();
         const balls  = document.getElementById('balls');
@@ -261,21 +240,20 @@
         whites.forEach((n,i) => {
           const d = document.createElement('div');
           d.className = 'ball white-ball';
-          d.style.animationDelay = `${i * 0.1}s`;
+          d.style.animationDelay = (i*0.1)+'s';
           d.textContent = n;
           balls.appendChild(d);
         });
         const m = document.createElement('div');
         m.className = 'ball mega-ball';
-        m.style.animationDelay = `0.6s`;
+        m.style.animationDelay = '0.6s';
         m.textContent = mega;
         balls.appendChild(m);
       }
 
-      // Bind & first draw
-      window.addEventListener('DOMContentLoaded', () => {
-        document.querySelector('.generate-btn').addEventListener('click', generate);
-        generate();
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('generate-btn').addEventListener('click', generateNumbers);
+        generateNumbers();
       });
     })();
   </script>
