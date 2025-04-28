@@ -2,174 +2,197 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <title>Next-Gen Mega Millions Generator</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Smart Mega Millions Generator</title>
   <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: 'Roboto', sans-serif;
       margin: 0;
       padding: 2rem;
-      background: #fafafa;
+      font-family: 'Roboto', sans-serif;
+      background: #eef2f7;
       color: #333;
+    }
+    .container {
       max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      padding: 2rem;
+      overflow: hidden;
     }
     h1 {
       text-align: center;
       color: #4a90e2;
+      margin-bottom: 1.5rem;
     }
     #output {
       font-size: 2.5rem;
       text-align: center;
-      margin: 1rem 0;
-      color: #4a90e2;
+      margin: 1rem 0 2rem;
       letter-spacing: .5rem;
+      transition: transform .4s ease, opacity .4s ease;
+    }
+    #output.animate {
+      animation: pop 0.5s ease;
+    }
+    @keyframes pop {
+      0%   { transform: scale(0.8); opacity: 0; }
+      60%  { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1);   opacity: 1; }
     }
     button {
       display: block;
       margin: 0 auto 2rem;
-      background: #4a90e2;
-      color: white;
+      background: linear-gradient(135deg,#4a90e2,#357ab8);
       border: none;
-      padding: .75rem 1.5rem;
-      font-size: 1rem;
-      border-radius: 25px;
+      color: #fff;
+      padding: .75rem 2rem;
+      font-size: 1.1rem;
+      border-radius: 30px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
       cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease;
     }
     button:hover {
-      background: #357ab8;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.2);
     }
     .info {
-      background: white;
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      background: #fafcff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
       line-height: 1.5;
+      transition: box-shadow .3s ease, transform .3s ease;
     }
-    .info h2 {
-      margin-top: 0;
-      color: #4a90e2;
+    .info:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
     }
-    .info p, .info ul {
-      margin: .5rem 0;
+    .info h2 { margin-top: 0; color: #4a90e2; }
+    .info ul { padding-left: 1.2rem; }
+    .historical {
+      font-size: .9rem;
+      color: #555;
+      background: #fff;
+      margin-top: 2rem;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
     }
+    .historical h2 { margin-top: 0; }
   </style>
 </head>
 <body>
 
-  <h1>Smart Mega Millions Generator</h1>
+  <div class="container">
+    <h1>Next-Gen Mega Millions Generator</h1>
+    <button onclick="generate()">Generate</button>
+    <div id="output">-- -- -- -- -- --</div>
 
-  <button onclick="generate()">Generate Numbers</button>
-  <div id="output">-- -- -- -- -- --</div>
+    <div class="info" id="explanation">
+      <h2>Patterns Applied</h2>
+      <ul>
+        <li>3 Even / 3 Odd split</li>
+        <li>Sum between 155–195 (ideal 175–185)</li>
+        <li>Span (max–min) between 35–45</li>
+        <li>At least one consecutive pair</li>
+        <li>At least one clustered hot pair (17&32, 23&44, 49&12)</li>
+        <li>Majority of gaps (3+ of 5) between 5–10</li>
+        <li>Weighted toward your hot numbers (12,17,23,32,44,49)</li>
+      </ul>
+    </div>
 
-  <div class="info" id="explanation">
-    <h2>Click “Generate” to see your numbers</h2>
-    <p>Each set respects the most common patterns in past draws:</p>
-    <ul>
-      <li>**3 Even / 3 Odd** split</li>
-      <li>**Sum** in the 155–195 range (ideal 175–185)</li>
-      <li>At least **one consecutive pair**</li>
-      <li>At least one of the top **clustered pairs** (17&32, 23&44, 49&12)</li>
-      <li>**Weighted** toward the “hot” numbers: 17, 23, 32, 44, 49, 12</li>
-    </ul>
+    <div class="historical">
+      <h2>Historical Hot Numbers</h2>
+      <p><strong>Top White Balls (your data):</strong> 12 (146), 17 (163), 23 (158), 32 (154), 44 (151), 49 (149).</p>
+      <p><strong>Top Mega Balls:</strong> 3 (115), 9 (111), 1 (111), 15 (106), 7 (106) :contentReference[oaicite:0]{index=0}.</p>
+    </div>
   </div>
 
   <script>
-    // frequencies from historical tallies (only top-6 listed; others default to 100)
-    const frequencies = { 12:146, 17:163, 23:158, 32:154, 44:151, 49:149 };
+    const frequencies = {12:146,17:163,23:158,32:154,44:151,49:149};
     const hotPairs = [[17,32],[23,44],[49,12]];
 
-    function weightedDraw(pool) {
-      // pool: [{n: number, w: weight}, …]
-      const total = pool.reduce((sum,p)=>sum+p.w, 0);
-      let r = Math.random() * total, acc = 0;
-      for (let p of pool) {
-        acc += p.w;
-        if (r <= acc) return p.n;
+    function weightedDraw(opts) {
+      let total = opts.reduce((s,o)=>s+o.w,0), r=Math.random()*total, acc=0;
+      for (let o of opts) {
+        acc+=o.w;
+        if (r<=acc) return o.n;
       }
-      return pool[pool.length-1].n;
+      return opts[opts.length-1].n;
     }
 
-    function generateOne() {
-      // build candidate six‐number set
-      let available = Array.from({length:56}, (_,i)=>i+1);
-      let picks = [];
-      for (let i=0; i<6; i++) {
-        const pool = available.map(n => ({
-          n,
-          w: frequencies[n] || 100
-        }));
-        const choice = weightedDraw(pool);
-        picks.push(choice);
-        available = available.filter(n => n !== choice);
+    function draw() {
+      let pool=Array.from({length:56},(_,i)=>i+1), pick=[];
+      while(pick.length<6){
+        let opts=pool.map(n=>({n,w:frequencies[n]||100}));
+        let n=weightedDraw(opts);
+        pick.push(n);
+        pool=pool.filter(x=>x!==n);
       }
-      return picks.sort((a,b)=>a-b);
+      return pick.sort((a,b)=>a-b);
     }
 
-    function meetsCriteria(p) {
-      const even = p.filter(n=>n%2===0).length;
-      if (even !== 3) return false;
-      const sum = p.reduce((a,b)=>a+b,0);
-      if (sum < 155 || sum > 195) return false;
-      const hasConsec = p.some((n,i)=>i>0 && n - p[i-1] === 1);
-      if (!hasConsec) return false;
-      const hasCluster = hotPairs.some(pair =>
-        pair.every(x => p.includes(x))
-      );
-      if (!hasCluster) return false;
-      return true;
+    function meets(a){
+      return a.e%2===3 &&
+             a.sum>=155&&a.sum<=195 &&
+             a.span>=35&&a.span<=45 &&
+             a.goodGaps>=3 &&
+             a.consec&&
+             a.cluster;
     }
 
-    function scoreCriteria(p) {
-      let score = 50; // base confidence
-      // +10 for each satisfied rule
-      const even = p.filter(n=>n%2===0).length;
-      if (even === 3) score += 10;
-      const sum = p.reduce((a,b)=>a+b,0);
-      if (sum >= 175 && sum <= 185) score += 10;
-      if (sum >= 155 && sum <= 195) score += 5;
-      if (p.some((n,i)=>i>0 && n - p[i-1] === 1)) score += 10;
-      if (hotPairs.some(pair => pair.every(x=>p.includes(x)))) score += 10;
-      // +5 for each of the six “hottest” numbers included
-      const hotCount = [12,17,23,32,44,49].filter(x=>p.includes(x)).length;
-      score += hotCount * 5;
-      return Math.min(score, 100);
+    function analyze(set){
+      let sum=set.reduce((s,n)=>s+n,0),
+          evens=set.filter(n=>n%2===0).length,
+          span=set[5]-set[0],
+          gaps=set.slice(1).map((n,i)=>n-set[i]),
+          goodGaps=gaps.filter(g=>g>=5&&g<=10).length,
+          consec=gaps.some(g=>g===1),
+          cluster=hotPairs.some(p=>p.every(x=>set.includes(x)));
+      return { sum, e:evens, span, gaps, goodGaps, consec, cluster };
     }
 
-    function generate() {
-      let picks, tries=0;
+    function generate(){
+      let set, a, tries=0;
       do {
-        picks = generateOne();
+        set=draw();
+        a=analyze(set);
         tries++;
-      } while (!meetsCriteria(picks) && tries < 2000);
+      } while(!meets(a)&&tries<5000);
 
-      const sum = picks.reduce((a,b)=>a+b,0);
-      const even = picks.filter(n=>n%2===0).length;
-      const consecPairs = picks
-        .map((n,i)=> i>0 && n - picks[i-1] === 1 ? `${picks[i-1]}-${n}` : null)
-        .filter(x=>x);
-      const clusterHits = hotPairs
-        .filter(pair => pair.every(x=>picks.includes(x)))
-        .map(pair=>`${pair[0]} & ${pair[1]}`);
+      const out=document.getElementById('output');
+      out.textContent=set.join('  ');
+      out.classList.remove('animate');
+      void out.offsetWidth;
+      out.classList.add('animate');
 
-      const conf = scoreCriteria(picks);
+      const cons=a.gaps
+        .map((g,i)=> g===1 ? `${set[i]}–${set[i+1]}` : null)
+        .filter(Boolean);
+      const clus=hotPairs
+        .filter(p=>p.every(x=>set.includes(x)))
+        .map(p=>p.join('&'));
 
-      document.getElementById('output').textContent = picks.join('  ');
-      document.getElementById('explanation').innerHTML = `
-        <h2>Your Generated Set</h2>
-        <p><strong>${picks.join('  ')}</strong> &nbsp; (sum = ${sum})</p>
-        <h3>Why these?</h3>
+      document.getElementById('explanation').innerHTML=`
+        <h2>Your Pick</h2>
+        <p><strong>${set.join('  ')}</strong> &nbsp;(sum=${a.sum}, span=${a.span})</p>
+        <h2>Why?</h2>
         <ul>
-          <li><strong>Even/Odd:</strong> ${even} even, ${6-even} odd</li>
-          <li><strong>Sum:</strong> ${sum} (${sum>=155&&sum<=195? 'in range' : 'out of range'})</li>
-          <li><strong>Consecutive:</strong> ${consecPairs.length ? consecPairs.join(', ') : 'none'}</li>
-          <li><strong>Cluster Pair:</strong> ${clusterHits.length ? clusterHits.join('; ') : 'none'}</li>
-          <li><strong>Hot Numbers:</strong> ${hotCount = [12,17,23,32,44,49].filter(x=>picks.includes(x)).join(', ') || 'none'}</li>
+          <li>Even/Odd: ${a.e} even / ${6-a.e} odd</li>
+          <li>Sum: ${a.sum}</li>
+          <li>Span: ${a.span}</li>
+          <li>Gaps 5–10: ${a.goodGaps}/5</li>
+          <li>Consecutive: ${cons.join(', ')||'none'}</li>
+          <li>Clustered pair: ${clus.join('; ')||'none'}</li>
         </ul>
-        <p><strong>Confidence:</strong> ${conf}%</p>
-        <p><small>No guarantee of a win—this is a data-driven suggestion based on historical patterns.</small></p>
+        <p><small>Confidence: ${Math.min(50 + (a.e===3)*10 + (a.sum>=175&&a.sum<=185?10: a.sum>=155?5:0) + (a.span>=35&&a.span<=45?10:0) + (a.goodGaps>=3?10:0) + (a.consec?10:0) + (a.cluster?10:0) + set.filter(n=>[12,17,23,32,44,49].includes(n)).length*5,100)}%</small></p>
+        <p><small>No guarantee—data-driven patterns only.</small></p>
       `;
     }
   </script>
