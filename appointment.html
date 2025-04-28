@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Ultra-Mega Millions Generator</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <title>Recency-Aware Mega Millions Generator</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap" rel="stylesheet"/>
   <style>
     :root {
       --primary: #4A90E2;
@@ -12,250 +12,231 @@
       --accent: #F5A623;
       --bg-start: #EDF2F7;
       --bg-end: #D6E2F0;
-      --card-bg: #FFFFFF;
-      --text: #333333;
-      --text-muted: #555555;
+      --card-bg: #FFF;
+      --text: #333;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing:border-box; margin:0; padding:0 }
     body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
-      color: var(--text);
-      padding: 2rem 1rem;
-      display: flex;
-      justify-content: center;
+      font-family:'Inter',sans-serif;
+      background: linear-gradient(135deg,var(--bg-start),var(--bg-end));
+      padding:2rem 1rem;
+      display:flex; justify-content:center;
+      color:var(--text);
     }
     .container {
-      width: 100%;
-      max-width: 700px;
-      background: var(--card-bg);
-      border-radius: 20px;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.1);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      width:100%; max-width:720px;
+      background:var(--card-bg);
+      border-radius:20px;
+      box-shadow:0 12px 32px rgba(0,0,0,0.1);
+      overflow:hidden;
     }
     header {
       background: var(--primary);
-      padding: 1.5rem;
-      text-align: center;
+      padding:1.5rem; text-align:center;
     }
     header h1 {
-      color: #fff;
-      font-weight: 600;
-      font-size: 1.75rem;
+      color:#fff; font-weight:600; font-size:1.75rem;
     }
     main {
-      padding: 2rem;
+      padding:2rem;
     }
     #generate-btn {
-      display: block;
-      margin: 0 auto 1.5rem;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: #fff;
-      border: none;
-      border-radius: 30px;
-      padding: 0.75rem 2rem;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-      transition: transform 0.2s, box-shadow 0.2s;
+      display:block;
+      margin:0 auto 1.5rem;
+      background: linear-gradient(135deg,var(--primary),var(--primary-dark));
+      color:#fff; border:none; border-radius:30px;
+      padding:.75rem 2rem; font-size:1rem; font-weight:500;
+      cursor:pointer; box-shadow:0 8px 24px rgba(0,0,0,0.1);
+      transition:transform .2s, box-shadow .2s;
     }
     #generate-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+      transform:translateY(-2px);
+      box-shadow:0 12px 32px rgba(0,0,0,0.15);
     }
     .balls {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(60px,1fr));
-      gap: 1rem;
-      justify-items: center;
-      margin-bottom: 2rem;
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(60px,1fr));
+      gap:1rem; justify-items:center; margin-bottom:2rem;
     }
     .ball {
-      width: 60px; height: 60px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 1.2rem;
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-      opacity: 0;
-      transform: scale(0.5);
-      animation: pop 0.4s forwards ease-out;
+      width:60px; height:60px;
+      border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:600; font-size:1.2rem;
+      color:#fff;
+      box-shadow:0 4px 16px rgba(0,0,0,0.08);
+      opacity:0; transform:scale(.5);
+      animation:pop .4s forwards ease-out;
     }
-    @keyframes pop {
-      to { opacity:1; transform:scale(1); }
-    }
+    @keyframes pop { to{opacity:1;transform:scale(1)} }
     .white-ball {
-      background: #fff;
-      color: var(--primary);
-      border: 3px solid var(--primary);
+      background:#fff; color:var(--primary);
+      border:3px solid var(--primary);
     }
-    .mega-ball {
-      background: var(--accent);
-    }
-    .section { margin-bottom: 2rem; }
+    .mega-ball { background:var(--accent); }
+    .section { margin-bottom:2rem; }
     .section h2 {
-      font-size: 1.25rem;
-      margin-bottom: 0.75rem;
-      color: var(--primary);
-      border-bottom: 2px solid var(--bg-end);
-      padding-bottom: 0.25rem;
+      font-size:1.25rem; margin-bottom:.75rem;
+      color:var(--primary);
+      border-bottom:2px solid var(--bg-end);
+      padding-bottom:.25rem;
     }
-    .patterns ul, .history ul {
-      list-style: inside disc;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-    .patterns ul li, .history ul li { margin-bottom: 0.5rem; }
     .grid-two {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:1.5rem;
     }
-    @media (max-width:500px) {
-      .grid-two { grid-template-columns: 1fr; }
+    .grid-two ul {
+      list-style:inside disc;
+      line-height:1.5;
+      color: #555;
     }
+    @media(max-width:500px){ .grid-two{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
   <div class="container">
-    <header><h1>Ultra-Modern Mega Millions</h1></header>
+    <header><h1>Recency-Aware Mega Millions</h1></header>
     <main>
       <button id="generate-btn">Generate Numbers</button>
       <div class="balls" id="balls"></div>
 
-      <div class="section patterns">
-        <h2>Applied Patterns</h2>
+      <div class="section">
+        <h2>Patterns & Weights</h2>
         <div class="grid-two">
           <ul>
             <li><strong>Even/Odd:</strong> 2–3 evens</li>
             <li><strong>Sum:</strong> 155–195 (ideal 175–185)</li>
             <li><strong>Span:</strong> 30–45</li>
-            <li><strong>Consec Pair:</strong> ≥1 (e.g. 22–23)</li>
+            <li><strong>Consec Pair:</strong> ≥1</li>
           </ul>
           <ul>
             <li><strong>Gaps:</strong> ≥3 of 4 between 5–10</li>
-            <li><strong>Hot Cluster:</strong> 17&32, 23&44, or 49&12</li>
-            <li><strong>White Weights:</strong> Top whites (31,17,10,20,29…)</li>
-            <li><strong>Mega Weight:</strong> Top megas (22,11,24,4,9…)</li>
+            <li><strong>Hot Clusters:</strong> 17&32, 23&44, 49&12</li>
+            <li><strong>All-Time Weights:</strong>
+              Whites→31,17,10,20,29…; Megas→22,11,24,4,9…
+            </li>
+            <li><strong>Recency Decay:</strong> draws every Tue/Fri back to Apr 25, 2025</li>
           </ul>
-        </div>
-      </div>
-
-      <div class="section history">
-        <h2>Historical Hot Numbers</h2>
-        <div class="grid-two">
-          <div>
-            <h3>White Balls</h3>
-            <ul>
-              <li>31 (279)</li>
-              <li>17 (275)</li>
-              <li>10 (271)</li>
-              <li>20 (270)</li>
-              <li>29 (265)</li>
-            </ul>
-          </div>
-          <div>
-            <h3>Mega Balls</h3>
-            <ul>
-              <li>22 (43)</li>
-              <li>11 (40)</li>
-              <li>24 (38)</li>
-              <li>4 (35)</li>
-              <li>9 (35)</li>
-            </ul>
-          </div>
         </div>
       </div>
     </main>
   </div>
 
   <script>
-    (function(){
-      // all-time frequencies
-      const whiteFreq = {31:279,17:275,10:271,20:270,29:265,14:262,4:260,39:260};
-      const megaFreq  = {22:43,11:40,24:38,4:35,9:35,13:35};
-      const hotClusters = [[17,32],[23,44],[49,12]];
+  (function(){
+    // ───── YOUR PAST DRAWS (most recent first) ─────
+    // Format: [w1,w2,w3,w4,w5,mega]
+    const recentDraws = [
+      /* Paste your full list here, most recent first.
+         e.g. [12,44,15,18,1,42], [14,15,48,4,24,41], … */
+    ];
 
-      function weightedPick(freq, pool) {
-        const opts = pool.map(n=>({n,w:freq[n]||100}));
-        const total = opts.reduce((s,o)=>s+o.w,0);
-        let r = Math.random()*total, acc = 0;
-        for (let o of opts) {
-          acc += o.w;
-          if (r <= acc) return o.n;
+    // All-time frequency weights (fallback default = 100)
+    const allTimeWhite = {31:279,17:275,10:271,20:270,29:265,14:262,4:260,39:260};
+    const allTimeMega  = {22:43,11:40,24:38,4:35,9:35,13:35};
+
+    // Recency decay per draw (exponential)
+    const decay = 0.9;
+    const recWhite = {}, recMega = {};
+    recentDraws.forEach((draw,i) => {
+      const w = Math.pow(decay, i);
+      draw.slice(0,5).forEach(n => recWhite[n] = (recWhite[n]||0) + w);
+      recMega[ draw[5] ] = (recMega[draw[5]]||0) + w;
+    });
+
+    // clustering pairs
+    const clusters = [[17,32],[23,44],[49,12]];
+
+    function weightedPick(freqMap, recMap, pool) {
+      return pool.map(n => {
+        // combine: base + recency*50
+        const base = freqMap[n]||100;
+        const extra = (recMap[n]||0)*50;
+        return {n, w: base + extra};
+      }).reduce((accOpts, o) => {
+        const total = accOpts.total + o.w;
+        accOpts.total = total;
+        accOpts.opts.push(o);
+        return accOpts;
+      }, {opts:[], total:0})
+      .opts.reduce((found, o) => {
+        if (found !== null) return found;
+        const r = Math.random() * this.total;
+        this.acc = (this.acc||0) + o.w;
+        if (this.acc >= r) return o.n;
+        return null;
+      }, null);
+    }
+
+    function analyze(ws) {
+      const sum   = ws.reduce((s,n)=>s+n,0);
+      const evens = ws.filter(n=>n%2===0).length;
+      const span  = ws[ws.length-1]-ws[0];
+      const gaps  = ws.slice(1).map((n,i)=>n-ws[i]);
+      return {
+        sum, evens, span,
+        good: gaps.filter(g=>g>=5&&g<=10).length,
+        consec: gaps.some(g=>g===1),
+        clust: clusters.some(p=>p.every(x=>ws.includes(x)))
+      };
+    }
+
+    function meets(ws, stats) {
+      return stats.evens >=2 && stats.evens<=3 &&
+             stats.sum>=155 && stats.sum<=195 &&
+             stats.span>=30 && stats.span<=45 &&
+             stats.good>=3 && stats.consec && stats.clust;
+    }
+
+    function drawWhites() {
+      let w, stats;
+      do {
+        const pool = Array.from({length:56},(_,i)=>i+1);
+        w = [];
+        for (let i=0;i<5;i++) {
+          const n = weightedPick.call({total:0,acc:0},
+            allTimeWhite, recWhite, pool);
+          w.push(n);
+          pool.splice(pool.indexOf(n),1);
         }
-        return opts[opts.length-1].n;
-      }
+        w.sort((a,b)=>a-b);
+        stats = analyze(w);
+      } while (!meets(w,stats));
+      return w;
+    }
 
-      function analyze(set) {
-        const sum   = set.reduce((s,n)=>s+n,0);
-        const evens = set.filter(n=>n%2===0).length;
-        const span  = set[set.length-1] - set[0];
-        const gaps  = set.slice(1).map((n,i)=>n-set[i]);
-        const goodGaps = gaps.filter(g=>g>=5&&g<=10).length;
-        const hasCons = gaps.some(g=>g===1);
-        const hasClust = hotClusters.some(p=>p.every(x=>set.includes(x)));
-        return {sum,evens,span,goodGaps,hasCons,hasClust};
-      }
+    function drawMega() {
+      const pool = Array.from({length:25},(_,i)=>i+1);
+      return weightedPick.call({total:0,acc:0},
+        allTimeMega, recMega, pool);
+    }
 
-      function meetsWhite(stats) {
-        return stats.evens>=2 && stats.evens<=3 &&
-               stats.sum>=155 && stats.sum<=195 &&
-               stats.span>=30 && stats.span<=45 &&
-               stats.goodGaps>=3 &&
-               stats.hasCons && stats.hasClust;
-      }
-
-      function drawWhite() {
-        let pick, stats;
-        do {
-          let temp = Array.from({length:56},(_,i)=>i+1);
-          pick = [];
-          for (let i=0; i<5; i++) {
-            const n = weightedPick(whiteFreq, temp);
-            pick.push(n);
-            temp = temp.filter(x=>x!==n);
-          }
-          pick.sort((a,b)=>a-b);
-          stats = analyze(pick);
-        } while (!meetsWhite(stats));
-        return pick;
-      }
-
-      function drawMega() {
-        return weightedPick(megaFreq, Array.from({length:25},(_,i)=>i+1));
-      }
-
-      function generateNumbers() {
-        const whites = drawWhite();
-        const mega   = drawMega();
-        const balls  = document.getElementById('balls');
-        balls.innerHTML = '';
-        whites.forEach((n,i) => {
-          const d = document.createElement('div');
-          d.className = 'ball white-ball';
-          d.style.animationDelay = (i*0.1)+'s';
-          d.textContent = n;
-          balls.appendChild(d);
-        });
-        const m = document.createElement('div');
-        m.className = 'ball mega-ball';
-        m.style.animationDelay = '0.6s';
-        m.textContent = mega;
-        balls.appendChild(m);
-      }
-
-      document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('generate-btn').addEventListener('click', generateNumbers);
-        generateNumbers();
+    function render() {
+      const whites = drawWhites();
+      const mega   = drawMega();
+      const container = document.getElementById('balls');
+      container.innerHTML = '';
+      whites.forEach((n,i) => {
+        const d = document.createElement('div');
+        d.className = 'ball white-ball';
+        d.style.animationDelay = (i*.1)+'s';
+        d.textContent = n;
+        container.appendChild(d);
       });
-    })();
+      const m = document.createElement('div');
+      m.className = 'ball mega-ball';
+      m.style.animationDelay = '.6s';
+      m.textContent = mega;
+      container.appendChild(m);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('generate-btn')
+        .addEventListener('click', render);
+      render(); // initial
+    });
+  })();
   </script>
 </body>
 </html>
