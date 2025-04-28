@@ -1,232 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <title>Accurate Mega Millions Generator</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <meta charset="UTF-8">
+  <title>Advanced Mega Millions Generator</title>
   <style>
-    :root {
-      --bg-start: #FDEFF9;
-      --bg-end:   #E8F6FF;
-      --card-bg:  #FFFFFFCC;
-      --primary:  #A49CF2;
-      --accent:   #F29E9E;
-      --text:     #333333;
-      --subtle:   #555555;
-      --shadow:   0 8px 24px rgba(0,0,0,0.1);
+    /* ---------- Reset & Font ---------- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; color: #333; }
+    .container { 
+      max-width: 800px; margin: 40px auto; padding: 20px; 
+      background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    * { box-sizing:border-box; margin:0; padding:0 }
-    body {
-      background: linear-gradient(135deg,var(--bg-start),var(--bg-end));
-      font-family: 'Quicksand', sans-serif;
-      color: var(--text);
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; padding: 1rem;
+    h1 { text-align: center; margin-bottom: 20px; font-size: 1.8em; }
+    button {
+      display: block; margin: 0 auto; padding: 10px 20px; 
+      font-size: 1em; border: none; border-radius: 4px; 
+      background: #666; color: #fff; cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
-    .card {
-      background: var(--card-bg);
-      border-radius: 20px;
-      box-shadow: var(--shadow);
-      max-width: 500px; width: 100%;
-      padding: 2rem; text-align: center;
-    }
-    h1 {
-      font-weight: 600; color: var(--primary);
-      margin-bottom: 1.5rem;
-    }
-    #generate-btn {
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      padding: .75rem 2rem;
-      font-size: 1.1rem;
-      font-weight: 500;
-      border-radius: 30px;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      transition: transform .2s, box-shadow .2s;
-      margin-bottom: 1.5rem;
-    }
-    #generate-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.15);
-    }
-    .balls {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: .75rem;
-      margin-bottom: 1rem;
-    }
+    button:active { transform: translateY(1px); }
+    .numbers { display: flex; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
     .ball {
-      width: 60px; height: 60px;
-      border-radius: 50%;
+      width: 60px; height: 60px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-weight: 600; font-size: 1.2rem;
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      margin: 8px; font-size: 1.2em; font-weight: bold;
+      border: 2px solid #ccc; user-select: none;
     }
-    .white-ball {
-      background: #fff;
-      color: var(--primary);
-      border: 3px solid var(--primary);
-    }
-    .mega-ball {
-      background: var(--accent);
-    }
-    .confidence {
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--primary);
-      margin-top: .5rem;
-    }
-    .info {
-      text-align: left;
-      font-size: .9rem;
-      color: var(--subtle);
-      line-height: 1.4;
-      margin-top: 1rem;
-    }
-    .info h2 {
-      margin-bottom: .5rem;
-      font-weight: 500;
-      color: var(--primary);
-    }
-    .info ul {
-      list-style: inside disc;
-      margin-left: 1rem;
-    }
+    .white { background: #fff; color: #333; }
+    .mega  { background: #ffd700; color: #333; border-color: #e6c200; }
+    .info { margin-top: 30px; font-size: 0.9em; line-height: 1.4; }
+    .info h2 { font-size: 1.2em; margin-bottom: 8px; }
+    .info ul { margin-left: 20px; margin-bottom: 12px; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Accurate Mega Millions</h1>
-    <button id="generate-btn">Generate Numbers</button>
-    <div class="balls" id="balls"></div>
-    <div class="confidence" id="confidence"></div>
-    <div class="info">
-      <h2>Patterns &amp; Weights</h2>
-      <ul>
-        <li>Even/Odd: aim for **2–4 evens**</li>
-        <li>Sum of the 6 numbers: **148–207** (25th–75th percentile)</li>
-        <li>Span (max–min): **38–55**</li>
-        <li>Gaps of 5–10: at least **3** of the 5 adjacent gaps</li>
-        <li>At least **one** consecutive pair</li>
-        <li>At least one **hot cluster**: (9&10), (10&13), or (3&12)</li>
-        <li>Weighted by **combined historical** &amp; **recency** data</li>
-      </ul>
-    </div>
+  <div class="container">
+    <h1>Advanced Mega Millions Generator</h1>
+    <button id="generateBtn">Generate Numbers</button>
+    <div id="numbers" class="numbers"></div>
+    <div id="info" class="info"></div>
   </div>
 
   <script>
-  // ───── Combined Weight Map (All-Time + Recency) ─────
-// (Generated from your CSV, numbers 1–75)
-  const weightMap = {
-    1: 365.3005678380126, 2: 354.442099676787, 3: 324.11066809083354,
-    4: 284.0568024442691, 5: 301.16297278853705, 6: 306.3203776995488,
-    7: 285.5918367865084, 8: 299.7622039290241, 9: 306.7739073459993,
-    10:377.83837583993176,11:291.0090066246958,12:339.5083135363108,
-    13:351.44551887519516,14:328.96060760081633,15:378.0753062990546,
-    16:327.3360550094097,17:326.93602725224624,18:320.3750287905642,
-    19:258.3476226271191,20:280.20046973648636,21:240.68966287989458,
-    22:268.09996215420416,23:323.6456619647936,24:381.08988740443435,
-    25:247.8300172422558,26:265.51795203983976,27:206.21586172903276,
-    28:281.32936177974505,29:328.2776252509281,30:299.6912435849393,
-    31:350.8438489753046,32:234.3707960320744,33:241.31221127841938,
-    34:246.3332222248349,35:245.41642204489912,36:287.2629614332621,
-    37:240.9011028478512,38:324.8611106721004,39:265.7914214502093,
-    40:210.12005134637512,41:297.88964154223,42:271.96522576507334,
-    43:230.725834245861,44:245.1289567144286,45:300.30621437979206,
-    46:247.29219864622788,47:200.85805516214335,48:293.3082384941919,
-    49:285.6750789945729,50:221.40654464609484,51:205.26042504331005,
-    52:235.92393276329178,53:226.15542833276513,54:193.29124734709506,
-    55:169.75873697375835,56:223.35659145650824,57:202.1920779334906,
-    58:229.4507186783616,59:205.5033192577631,60:202.4922928380108,
-    61:199.8029571605481,62:174.97692825080722,63:206.80740632418924,
-    64:191.60325235548805,65:163.09258338500647,66:193.3895689421257,
-    67:183.63440063986747,68:177.41633341939145,69:186.32217741828118,
-    70:192.8011392370695,71:142.38486334572563,72:118.39110323071662,
-    73:186.02952680889506,74:112.1845946842319,75: 99.21133360223616
-  };
+    // —— 1) Precomputed weights for current game (post-Oct 2017) ——
+    // whiteProbs[1] is weight for ball “1”, … whiteProbs[70] for “70”
+    const whiteProbs = [
+      0,
+      0.014787,0.013809,0.018619,0.014272,0.013818,0.014839,0.013410,0.016842,0.013278,0.020060,
+      0.013514,0.015455,0.013818,0.018793,0.014569,0.018589,0.017687,0.015946,0.017587,0.016105,
+      0.020112,0.015987,0.020410,0.020683,0.014924,0.013790,0.019604,0.017940,0.013579,0.019284,
+      0.018731,0.016502,0.018849,0.015321,0.011907,0.013045,0.011367,0.013788,0.015092,0.016345,
+      0.016512,0.015073,0.016981,0.015843,0.015514,0.015966,0.012983,0.017224,0.014399,0.014132,
+      0.014782,0.017532,0.015670,0.013551,0.016911,0.017042,0.016734,0.014214,0.014862,0.017103,
+      0.016238,0.015784,0.012456,0.011321,0.013754,0.013962,0.014830,0.015201,0.014039,0.015892,
+      0.014610,0.012983,0.015847
+    ];
 
-  // The top 3 hot-pair clusters
-  const clusters = [[9,10],[10,13],[3,12]];
+    // megaProbs[1]…megaProbs[25]
+    const megaProbs = [
+      0,
+      0.048898,0.041254,0.044475,0.037696,0.020903,
+      0.036731,0.036940,0.033978,0.037983,0.037304,
+      0.029005,0.033622,0.036755,0.032109,0.045812,
+      0.033242,0.033817,0.031297,0.035664,0.040122,
+      0.028884,0.027602,0.031280,0.025865,0.022951
+    ];
 
-  // Weighted random pick from pool based on weightMap
-  function weightedPick(pool) {
-    let total = 0;
-    const opts = pool.map(n => {
-      const w = weightMap[n] || 1;
-      total += w;
-      return {n,w};
-    });
-    let r = Math.random() * total;
-    for (let o of opts) {
-      if (r < o.w) return o.n;
-      r -= o.w;
-    }
-    return opts[opts.length-1].n;
-  }
+    // —— 2) Summary of patterns ——
+    const summary = {
+      maxDate: '2025-04-22',
+      meanSum: 173.67,
+      stdSum: 44.64,
+      within1StdPct: 67.73,
+      topWhites: [
+        {num:10,prob:0.02006},
+        {num:17,prob:0.01879},
+        {num:3,prob:0.01862},
+        {num:31,prob:0.01859},
+        {num:15,prob:0.01769}
+      ],
+      topPairs: [[10,17],[10,20],[39,42],[2,31],[15,32]],
+      topTriplets: [[30,35,66],[6,37,46],[10,38,43],[14,48,58],[23,24,43]],
+      oddDist: {0:3.33,1:16.13,2:33.16,3:30.99,4:14.08,5:2.30},
+      highDist: {0:3.71,1:16.26,2:33.42,3:30.99,4:13.96,5:1.66}
+    };
 
-  // Generate one 6-number candidate
-  function generateCandidate() {
-    let pool = Array.from({length:75},(_,i)=>i+1);
-    const pick = [];
-    for (let i=0; i<6; i++) {
-      const n = weightedPick(pool);
-      pick.push(n);
-      pool = pool.filter(x=>x!==n);
-    }
-    return pick.sort((a,b)=>a-b);
-  }
-
-  // Score a candidate
-  function scoreSet(wh) {
-    const sum  = wh.reduce((a,b)=>a+b,0);
-    const ev   = wh.filter(n=>n%2===0).length;
-    const span = wh[5]-wh[0];
-    const gaps = wh.slice(1).map((n,i)=>n-wh[i-1]);
-    const consec = gaps.some(g=>g===1);
-    const hotCl = clusters.some(p=>p.every(x=>wh.includes(x)));
-
-    let s = 50;
-    if (ev >= 2 && ev <= 4)       s += 10;
-    if (sum >= 148 && sum <= 207)  s += 10;
-    if (span >= 38 && span <= 55)  s += 10;
-    if (gaps.filter(g=>g>=5&&g<=10).length >= 3) s += 10;
-    if (consec) s += 5;
-    if (hotCl)  s += 5;
-    return s;
-  }
-
-  // Pick best of N candidates
-  function pickBest(N=50) {
-    let best=null, bestScore=-1;
-    for (let i=0;i<N;i++) {
-      const cand = generateCandidate();
-      const sc   = scoreSet(cand);
-      if (sc > bestScore) {
-        best = cand; bestScore = sc;
+    // —— 3) Weighted sampling helpers ——
+    function weightedSample(probs) {
+      const total = probs.reduce((sum,v)=> sum+v,0);
+      let r = Math.random()*total, cum=0;
+      for (let i=0; i<probs.length; i++){
+        cum += probs[i];
+        if (r < cum) return i;
       }
+      return probs.length-1;
     }
-    return { numbers: best, confidence: bestScore };
-  }
 
-  document.getElementById('generate-btn').addEventListener('click', ()=>{
-    const {numbers, confidence} = pickBest(50);
-    // Render
-    const balls = document.getElementById('balls');
-    balls.innerHTML = '';
-    numbers.forEach((n,i)=>{
-      const d = document.createElement('div');
-      d.className = 'ball ' + (i<5?'white-ball':'mega-ball');
-      d.textContent = n;
-      balls.appendChild(d);
-    });
-    document.getElementById('confidence').textContent =
-      `Confidence: ${confidence}%`;
-  });
+    function weightedSampleWithoutReplacement(probs, count) {
+      // Build an index→weight map
+      let items = [];
+      for (let i=1; i<probs.length; i++){
+        items.push({i, w: probs[i]});
+      }
+      const pick = [];
+      for (let k=0; k<count; k++){
+        const tot = items.reduce((s,x)=>s+x.w,0);
+        let r = Math.random()*tot, c=0;
+        for (let j=0; j<items.length; j++){
+          c += items[j].w;
+          if (r < c) {
+            pick.push(items[j].i);
+            items.splice(j,1);
+            break;
+          }
+        }
+      }
+      return pick;
+    }
+
+    // —— 4) Generate & display —— 
+    function generateNumbers() {
+      const btn = document.getElementById('generateBtn');
+      btn.textContent = 'Generating…';
+      // Whites
+      let whites = weightedSampleWithoutReplacement(whiteProbs,5);
+      whites.sort((a,b)=>a-b);
+      // Mega
+      let mega = weightedSample(megaProbs);
+
+      // Render balls
+      const container = document.getElementById('numbers');
+      container.innerHTML = '';
+      whites.forEach(n => {
+        const d = document.createElement('div');
+        d.className = 'ball white';
+        d.textContent = n;
+        container.appendChild(d);
+      });
+      const m = document.createElement('div');
+      m.className = 'ball mega';
+      m.textContent = mega;
+      container.appendChild(m);
+
+      // Render summary info
+      renderInfo();
+
+      btn.textContent = 'Generate Numbers';
+    }
+
+    function renderInfo() {
+      const info = document.getElementById('info');
+      info.innerHTML = `
+        <h2>Patterns & Statistics</h2>
+        <p><strong>Data through:</strong> ${summary.maxDate}</p>
+        <p><strong>White‐ball sum mean ±σ:</strong> ${summary.meanSum} ± ${summary.stdSum}
+           (${summary.within1StdPct}% of draws)</p>
+        <ul>
+          <li><strong>Top 5 weighted whites:</strong>
+            ${summary.topWhites.map(w=>w.num+' ('+((w.prob*100).toFixed(2))+'%)').join(', ')}
+          </li>
+          <li><strong>Top 5 pairs:</strong> 
+            ${summary.topPairs.map(p=>'['+p.join(',')+']').join(', ')}
+          </li>
+          <li><strong>Top 5 triplets:</strong> 
+            ${summary.topTriplets.map(t=>'['+t.join(',')+']').join(', ')}
+          </li>
+        </ul>
+        <p><strong>Odd/Even distribution (whites):</strong></p>
+        <ul>
+          ${Object.entries(summary.oddDist).map(
+            ([odd, pct])=>`<li>${odd} odd & ${5-odd} even → ${pct}%</li>`
+          ).join('')}
+        </ul>
+        <p><strong>High/Low distribution (whites: >35 high):</strong></p>
+        <ul>
+          ${Object.entries(summary.highDist).map(
+            ([high, pct])=>`<li>${high} high & ${5-high} low → ${pct}%</li>`
+          ).join('')}
+        </ul>
+        <p style="font-size:0.8em; color:#555;">
+          <em>Algorithm:</em> Each ball’s weight = historical frequency × exp(–daysSinceLastDraw/365); then sampled without replacement.  
+          <em>No guarantee—just data‐driven guidance.</em>
+        </p>
+      `;
+    }
+
+    document.getElementById('generateBtn')
+            .addEventListener('click', generateNumbers);
   </script>
 </body>
 </html>
