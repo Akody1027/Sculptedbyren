@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mega Millions Smart Generator (2017‑Now)</title>
+  <title>Mega Millions Smart Generator (2017-Now)</title>
   <style>
     :root{
       --white-ball:#f9f9f9;
@@ -20,16 +20,15 @@
     /* ---- buttons & balls ---- */
     button{background:var(--brand);color:#fff;border:none;padding:0.75rem 1.5rem;border-radius:0.75rem;font-size:1rem;cursor:pointer;box-shadow:0 4px 8px rgba(0,0,0,.15);transition:transform .15s;}
     button:hover{transform:translateY(-2px);}button:disabled{opacity:.5;cursor:progress;}
-    #numbers{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;}
-    .ball{width:3rem;height:3rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:1.1rem;box-shadow:0 2px 6px rgba(0,0,0,.1);}
-    .white{background:var(--white-ball);border:2px solid var(--white-border);} 
-    .mega{background:var(--mega-ball);border:2px solid #ffe88d;}
+    #numbers, .setRow{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;}
+    .ball{width:3rem;height:3rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:1.1rem;box-shadow:0 2px 6px rgba(0,0,0,.1);} .ball.small{width:2.4rem;height:2.4rem;font-size:.95rem;}
+    .white{background:var(--white-ball);border:2px solid var(--white-border);} .mega{background:var(--mega-ball);border:2px solid #ffe88d;}
 
-    /* ---- heat‑map ---- */
+    /* ---- heat-map ---- */
     .heatGrid{display:grid;gap:.4rem;justify-content:center;}
     #whiteHeat{grid-template-columns:repeat(10,2.4rem);} /* 70 balls */
     #megaHeat{grid-template-columns:repeat(6,2.4rem);}  /* 24 balls */
-    .heatBall{width:2.4rem;height:2.4rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:500;color:#333;border:1px solid #ccc;box-shadow:0 1px 3px rgba(0,0,0,.07);}
+    .heatBall{width:2.4rem;height:2.4rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:500;color:#333;border:1px solid #ccc;box-shadow:0 1px 3px rgba(0,0,0,.07);}  
     .legend{display:flex;align-items:center;gap:.5rem;font-size:.9rem;color:#555;flex-wrap:wrap;justify-content:center;}
     .swatch{width:1.2rem;height:1.2rem;border-radius:50%;border:1px solid #ccc;}
 
@@ -38,7 +37,7 @@
   </style>
 </head>
 <body>
-  <h1>Mega Millions Advanced Number Generator</h1>
+  <h1>Mega Millions Advanced Number Generator</h1>
 
   <section id="genSection">
     <h2>Pick Set</h2>
@@ -47,11 +46,18 @@
     <p id="status" style="min-height:1.2rem"></p>
   </section>
 
+  <!-- NEW multi-pick section -->
+  <section id="multiSection">
+    <h2>Five Bonus Picks</h2>
+    <div id="multiWrap"></div>
+    <button id="gen5Btn">Generate 5 Picks</button>
+  </section>
+
   <section id="heatSection">
-    <h2>Heat‑Map — Draw Activity (2017‑10‑31 → 2025‑04‑22)</h2>
-    <h3>White Balls (1‑70)</h3>
+    <h2>Heat-Map — Draw Activity (2017-10-31 → 2025-04-22)</h2>
+    <h3>White Balls (1-70)</h3>
     <div id="whiteHeat" class="heatGrid"></div>
-    <h3>Mega Balls (1‑24)</h3>
+    <h3>Mega Balls (1-24)</h3>
     <div id="megaHeat" class="heatGrid"></div>
     <div class="legend">
       <div class="swatch" style="background:hsl(55,80%,88%)"></div><span>Cool / less frequent</span>
@@ -61,23 +67,23 @@
   </section>
 
   <section id="docs">
-    <h2>Methodology & Quick Stats</h2>
+    <h2>Methodology & Quick Stats</h2>
     <details>
       <summary>Open full data snapshot</summary>
       <ul>
-        <li>Dataset: 781 draws (Oct 31 2017 → Apr 22 2025).</li>
-        <li>White‑ball Top 5: 10 (73), 3 (72), 31 (70), 17 (68), 14 (68).</li>
-        <li>Mega‑Ball Top 3: 22 (44), 11 (40), 18 (39).</li>
-        <li>Odd–even sweet‑spot: 2/3 or 3/2 (≈ 64 % of draws).</li>
-        <li>Typical sum band: 140 – 195 (middle 50 %).</li>
+        <li>Dataset: 781 draws (Oct 31 2017 → Apr 22 2025).</li>
+        <li>White-ball Top 5: 10 (73), 3 (72), 31 (70), 17 (68), 14 (68).</li>
+        <li>Mega-Ball Top 3: 22 (44), 11 (40), 18 (39).</li>
+        <li>Odd–even sweet-spot: 2/3 or 3/2 (≈ 64 % of draws).</li>
+        <li>Typical sum band: 140 – 195 (middle 50 %).</li>
         <li>Generator weights by frequency, validates odd/even mix and sum before finalizing.</li>
       </ul>
-      <h3>White‑ball Frequencies (Top 20)</h3>
+      <h3>White-ball Frequencies (Top 20)</h3>
       <table>
         <thead><tr><th>Number</th><th>Hits</th></tr></thead>
         <tbody id="whiteFreqTable"></tbody>
       </table>
-      <h3>Mega‑Ball Frequencies</h3>
+      <h3>Mega-Ball Frequencies</h3>
       <table>
         <thead><tr><th>Number</th><th>Hits</th></tr></thead>
         <tbody id="megaFreqTable"></tbody>
@@ -86,7 +92,7 @@
   </section>
 
 <script>
-/* === Data arrays (Oct 31 2017 → Apr 22 2025) === */
+/* === Data arrays (Oct 31 2017 → Apr 22 2025) === */
 const whiteFreq =[56,52,72,57,50,54,55,66,50,73,60,57,60,68,61,53,68,49,52,64,55,63,46,48,46,45,55,47,52,55,70,57,45,44,48,40,53,52,42,38,41,55,43,54,50,49,45,55,52,53,39,45,51,48,47,39,47,43,48,47,46,46,45,61,45,40,56,62,55,42];
 const megaFreq  =[33,28,31,35,22,27,27,24,35,28,40,28,39,29,26,27,29,39,31,29,27,44,24,38];
 const minWhite=Math.min(...whiteFreq),maxWhite=Math.max(...whiteFreq);
@@ -96,7 +102,13 @@ function weightedRandom(weights){const total=weights.reduce((a,b)=>a+b,0);let r=
 function generateSet(){let tries=0;while(tries++<150){const whites=new Set();while(whites.size<5){whites.add(weightedRandom(whiteFreq)+1);}const whiteArr=[...whites].sort((a,b)=>a-b);const sum=whiteArr.reduce((a,b)=>a+b,0);const odds=whiteArr.filter(n=>n%2).length;if((odds===2||odds===3)&&sum>=140&&sum<=195){const mega=weightedRandom(megaFreq)+1;return {white:whiteArr,mega,sum};}}return null;}
 /* === UI references === */
 const numbersDiv=document.getElementById('numbers');const btn=document.getElementById('generateBtn');const status=document.getElementById('status');
-btn.onclick=()=>{btn.disabled=true;status.textContent='Generating…';setTimeout(()=>{const res=generateSet();numbersDiv.innerHTML='';if(res){res.white.forEach(n=>{const d=document.createElement('div');d.className='ball white';d.textContent=n;numbersDiv.appendChild(d);});const m=document.createElement('div');m.className='ball mega';m.textContent=res.mega;numbersDiv.appendChild(m);status.textContent=`Odd/Evens OK · Sum ${res.sum}`;}else{status.textContent='Could not find set.';}btn.disabled=false;},120);} 
+const multiWrap=document.getElementById('multiWrap');const gen5Btn=document.getElementById('gen5Btn');
+/* single set button */
+btn.onclick=()=>{btn.disabled=true;status.textContent='Generating…';setTimeout(()=>{const res=generateSet();numbersDiv.innerHTML='';if(res){renderBallRow(res.white,res.mega,numbersDiv,false);status.textContent=`Odd/Evens OK · Sum ${res.sum}`;}else{status.textContent='Could not find set.';}btn.disabled=false;},100);} 
+/* five set button */
+gen5Btn.onclick=()=>{gen5Btn.disabled=true;multiWrap.innerHTML='';let created=0;while(created<5){const res=generateSet();if(res){const row=document.createElement('div');row.className='setRow';renderBallRow(res.white,res.mega,row,true);multiWrap.appendChild(row);created++;}}gen5Btn.disabled=false;};
+/* helper: render balls */
+function renderBallRow(whiteArr,megaNum,parent,small){whiteArr.forEach(n=>{const d=document.createElement('div');d.className='ball white'+(small?' small':'');d.textContent=n;parent.appendChild(d);});const m=document.createElement('div');m.className='ball mega'+(small?' small':'');m.textContent=megaNum;parent.appendChild(m);} 
 /* === Pastel red→yellow scale === */
 function heatColor(val,min,max){const ratio=(val-min)/(max-min);const hue=55-(ratio*55);const light=88-(ratio*16);return `hsl(${hue},80%,${light}%)`;}
 function buildHeat(gridElem,freqArr,min,max){freqArr.forEach((f,i)=>{const b=document.createElement('div');b.className='heatBall';b.textContent=i+1;b.style.background=heatColor(f,min,max);gridElem.appendChild(b);});}
@@ -105,9 +117,4 @@ buildHeat(document.getElementById('whiteHeat'),whiteFreq,minWhite,maxWhite);
 buildHeat(document.getElementById('megaHeat'),megaFreq,minMega,maxMega);
 /* === Docs tables === */
 function buildTable(arr,tbody){arr.forEach((v,i)=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${i+1}</td><td>${v}</td>`;tbody.appendChild(tr);});}
-const whiteTop20=whiteFreq.map((v,i)=>[i+1,v]).sort((a,b)=>b[1]-a[1]).slice(0,20);
-buildTable(whiteTop20.map(x=>x[1]),document.getElementById('whiteFreqTable'));
-buildTable(megaFreq,document.getElementById('megaFreqTable'));
-</script>
-</body>
-</html>
+const whiteTop20=whiteFreq.map((v,i)=>[i+1
