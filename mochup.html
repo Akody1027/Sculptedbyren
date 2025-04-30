@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- Responsive on mobile -->
+  <!-- Responsive -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>T-Shirt Mockup Creator</title>
   <style>
@@ -18,6 +18,25 @@
       width: 100%;
       margin: auto;
     }
+    /* Thumbnail strip */
+    .thumbnail-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .thumbnail-container img {
+      width: 80px;
+      height: auto;
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 4px;
+    }
+    .thumbnail-container img.selected {
+      border-color: #007bff;
+    }
+    /* Inputs & button */
     input[type="file"], button {
       width: 100%;
       margin: 10px 0;
@@ -65,12 +84,20 @@
   <div class="container">
     <h1>T-Shirt Mockup Creator</h1>
 
-    <label for="mockup-input">1. Select T-shirt mockup image:</label>
-    <input type="file" id="mockup-input" accept="image/*">
+    <!-- UPLOAD YOUR OWN MOCKUP -->
+    <label for="add-mockup-input">1. Upload additional mockup (JPG/PNG):</label>
+    <input type="file" id="add-mockup-input" accept="image/*">
 
-    <label for="design-input">2. Select design PNG:</label>
+    <!-- THUMBNAILS -->
+    <div id="mockup-thumbnails" class="thumbnail-container">
+      <!-- JS will inject black/white/thumbs here -->
+    </div>
+
+    <!-- DESIGN UPLOAD -->
+    <label for="design-input">2. Select your design (PNG):</label>
     <input type="file" id="design-input" accept="image/png">
 
+    <!-- SCALE & OFFSET CONTROLS -->
     <div class="controls">
       <div class="control-group">
         <label for="scale-range">Scale (Size): <span id="scale-val">0.70</span></label>
@@ -86,96 +113,168 @@
       </div>
     </div>
 
+    <!-- CANVAS & DOWNLOAD -->
     <canvas id="mockup-canvas"></canvas>
-
     <button id="download-btn">Download Mockup</button>
   </div>
 
   <script>
     const canvas = document.getElementById('mockup-canvas');
-    const ctx = canvas.getContext('2d');
+    const ctx    = canvas.getContext('2d');
 
-    let bgImg = new Image();
-    let designImg = null;
+    let mockupImages   = {};      // { label: dataURL, … }
+    let selectedMockup = null;    // current label
+    let designImg      = null;
 
     // controls
-    const scaleRange = document.getElementById('scale-range');
+    const scaleRange   = document.getElementById('scale-range');
     const offsetXRange = document.getElementById('offset-x-range');
     const offsetYRange = document.getElementById('offset-y-range');
-    const scaleVal  = document.getElementById('scale-val');
-    const offsetXVal= document.getElementById('offset-x-val');
-    const offsetYVal= document.getElementById('offset-y-val');
+    const scaleVal     = document.getElementById('scale-val');
+    const offsetXVal   = document.getElementById('offset-x-val');
+    const offsetYVal   = document.getElementById('offset-y-val');
 
-    // draw both images
+    // 1) Preload black.jpg & white.jpg into localStorage on first run
+    async function preloadMockups() {
+      const stored = localStorage.getItem('mockupImages');
+      if (stored) {
+        mockupImages = JSON.parse(stored);
+      } else {
+        for (let label of ['black','white']) {
+          const res  = await fetch(`${label}.jpg`);
+          const blob = await res.blob();
+          const dataURL = await new Promise(r => {
+            const reader = new FileReader();
+            reader.onload = () => r(reader.result);
+            reader.readAsDataURL(blob);
+          });
+          mockupImages[label] = dataURL;
+        }
+        localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
+      }
+    }
+
+    // 2) Render thumbnails
+    function renderThumbnails() {
+      const container = document.getElementById('mockup-thumbnails');
+      container.innerHTML = '';
+      Object.keys(mockupImages).forEach(label => {
+        const img = document.createElement('img');
+        img.src = mockupImages[label];
+        img.dataset.label = label;
+        if (label === localStorage.getItem('selectedMockup')) {
+          img.classList.add('selected');
+          selectedMockup = label;
+          loadMockup(label);
+        }
+        img.addEventListener('click', () => {
+          document.querySelectorAll('#mockup-thumbnails img')
+                  .forEach(i => i.classList.remove('selected'));
+          img.classList.add('selected');
+          localStorage.setItem('selectedMockup', label);
+          selectedMockup = label;
+          loadMockup(label);
+        });
+        container.appendChild(img);
+      });
+      // if none selected, pick the first
+      if (!selectedMockup) {
+        const first = Object.keys(mockupImages)[0];
+        document.querySelector(`#mockup-thumbnails img[data-label="${first}"]`)
+                .click();
+      }
+    }
+
+    // 3) Load chosen mockup into canvas
+    function loadMockup(label) {
+      const bg = new Image();
+      bg.onload = () => {
+        canvas.width  = bg.width;
+        canvas.height = bg.height;
+        drawCanvas();
+      };
+      bg.src = mockupImages[label];
+      window.bgImg = bg;
+    }
+
+    // 4) Draw both mockup + design
     function drawCanvas() {
-      if (!bgImg.src) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-
+      if (!window.bgImg) return;
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(window.bgImg, 0, 0, canvas.width, canvas.height);
       if (designImg) {
         const scale = parseFloat(scaleRange.value);
         const w = designImg.width * scale;
         const h = designImg.height * scale;
-
-        // center + offsets
         const xOff = parseInt(offsetXRange.value)/100 * canvas.width;
         const yOff = parseInt(offsetYRange.value)/100 * canvas.height;
         const x = (canvas.width - w)/2 + xOff;
         const y = (canvas.height - h)/2 + yOff;
-
         ctx.drawImage(designImg, x, y, w, h);
       }
     }
 
-    // update label displays
+    // 5) Update slider labels
     function updateLabels() {
       scaleVal.textContent   = parseFloat(scaleRange.value).toFixed(2);
       offsetXVal.textContent = offsetXRange.value;
       offsetYVal.textContent = offsetYRange.value;
     }
 
-    // file loaders
-    document.getElementById('mockup-input').addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      bgImg = new Image();
-      bgImg.onload = () => {
-        canvas.width  = bgImg.width;
-        canvas.height = bgImg.height;
-        drawCanvas();
-      };
-      bgImg.src = URL.createObjectURL(file);
-    });
-
-    document.getElementById('design-input').addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      designImg = new Image();
-      designImg.onload = () => {
-        updateLabels();
-        drawCanvas();
-      };
-      designImg.src = URL.createObjectURL(file);
-    });
-
-    // slider events
-    [scaleRange, offsetXRange, offsetYRange].forEach(range => {
-      range.addEventListener('input', () => {
-        updateLabels();
-        drawCanvas();
+    // DESIGN PNG upload
+    document.getElementById('design-input')
+      .addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        designImg = new Image();
+        designImg.onload = () => {
+          updateLabels();
+          drawCanvas();
+        };
+        designImg.src = URL.createObjectURL(file);
       });
-    });
 
-    // download
-    document.getElementById('download-btn').addEventListener('click', () => {
-      const link = document.createElement('a');
-      link.download = 'tshirt-mockup.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    });
+    // UPLOAD NEW MOCKUP
+    document.getElementById('add-mockup-input')
+      .addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataURL = reader.result;
+          const label = file.name;
+          mockupImages[label] = dataURL;
+          localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
+          localStorage.setItem('selectedMockup', label);
+          selectedMockup = label;
+          renderThumbnails();
+        };
+        reader.readAsDataURL(file);
+      });
 
-    // init labels
-    updateLabels();
+    // SLIDER events
+    [scaleRange, offsetXRange, offsetYRange].forEach(slider =>
+      slider.addEventListener('input', () => {
+        updateLabels();
+        drawCanvas();
+      })
+    );
+
+    // DOWNLOAD
+    document.getElementById('download-btn')
+      .addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = 'tshirt-mockup.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+
+    // INIT
+    (async () => {
+      await preloadMockups();
+      renderThumbnails();
+      updateLabels();
+    })();
   </script>
 </body>
 </html>
