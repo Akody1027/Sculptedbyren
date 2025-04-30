@@ -2,65 +2,95 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- Make it responsive on all devices -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>T-Shirt Mockup Creator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
       padding: 20px;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    input[type="file"], button {
+      width: 100%;
+      box-sizing: border-box;
+      margin: 10px 0;
+      padding: 12px;
+      font-size: 16px;
     }
     canvas {
-      border: 1px solid #ccc;
-      max-width: 100%;
+      width: 100%;
       height: auto;
+      border: 1px solid #ccc;
       display: block;
       margin: 20px auto;
     }
-    input[type="file"] {
-      margin: 10px;
-    }
     button {
-      padding: 10px 20px;
-      font-size: 16px;
       cursor: pointer;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    button:active {
+      opacity: 0.9;
     }
   </style>
 </head>
 <body>
-  <h1>T-Shirt Mockup Creator</h1>
+  <div class="container">
+    <h1>T-Shirt Mockup Creator</h1>
 
-  <div>
-    <label for="mockup-input">1. Select shirt mockup image:</label><br>
+    <label for="mockup-input">1. Select shirt mockup image:</label>
     <input type="file" id="mockup-input" accept="image/*">
-  </div>
 
-  <div>
-    <label for="design-input">2. Select design PNG:</label><br>
+    <label for="design-input">2. Select design PNG:</label>
     <input type="file" id="design-input" accept="image/png">
+
+    <canvas id="mockup-canvas"></canvas>
+
+    <button id="download-btn">Download Mockup</button>
   </div>
-
-  <canvas id="mockup-canvas"></canvas>
-
-  <button id="download-btn">Download Mockup</button>
 
   <script>
     const canvas = document.getElementById('mockup-canvas');
     const ctx = canvas.getContext('2d');
-
     let backgroundImg = new Image();
     let currentDesignImg = null;
 
-    const mockupInput   = document.getElementById('mockup-input');
-    const designInput   = document.getElementById('design-input');
-    const downloadBtn   = document.getElementById('download-btn');
+    document.getElementById('mockup-input').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      backgroundImg = new Image();
+      backgroundImg.onload = () => {
+        // match canvas to original image aspect ratio but let CSS scale it
+        canvas.width  = backgroundImg.width;
+        canvas.height = backgroundImg.height;
+        drawCanvas();
+      };
+      backgroundImg.src = URL.createObjectURL(file);
+    });
+
+    document.getElementById('design-input').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      currentDesignImg = new Image();
+      currentDesignImg.onload = drawCanvas;
+      currentDesignImg.src = URL.createObjectURL(file);
+    });
 
     function drawCanvas() {
       if (!backgroundImg.src) return;
-      // clear and draw shirt
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(backgroundImg, 0, 0);
+      ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
 
-      // then draw design if present
       if (currentDesignImg) {
         const maxW = canvas.width * 0.7;
         const maxH = canvas.height * 0.7;
@@ -74,30 +104,7 @@
       }
     }
 
-    // Load mockup image
-    mockupInput.addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      backgroundImg = new Image();
-      backgroundImg.onload = () => {
-        canvas.width  = backgroundImg.width;
-        canvas.height = backgroundImg.height;
-        drawCanvas();
-      };
-      backgroundImg.src = URL.createObjectURL(file);
-    });
-
-    // Load design PNG
-    designInput.addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      currentDesignImg = new Image();
-      currentDesignImg.onload = drawCanvas;
-      currentDesignImg.src = URL.createObjectURL(file);
-    });
-
-    // Download combined image
-    downloadBtn.addEventListener('click', () => {
+    document.getElementById('download-btn').addEventListener('click', () => {
       const link = document.createElement('a');
       link.download = 'tshirt-mockup.png';
       link.href = canvas.toDataURL('image/png');
