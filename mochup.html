@@ -29,7 +29,6 @@
       box-shadow: 0 6px 18px var(--shadow);
       width: 100%; max-width: 680px;
       padding: 32px;
-      overflow: hidden;
       animation: fadeIn 0.5s ease-out;
     }
     @keyframes fadeIn {
@@ -42,45 +41,30 @@
       text-align: center;
     }
     label {
-      display: block;
-      font-weight: 500;
-      margin: 16px 0 8px;
+      display: block; font-weight: 500; margin: 16px 0 8px;
       opacity: 0; transform: translateX(-20px);
       animation: slideIn 0.4s forwards;
     }
     @keyframes slideIn {
       to { opacity:1; transform: translateX(0) }
     }
-    input[type="file"],
-    select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      background: #fafafa;
-      cursor: pointer;
+    input[type="file"], select {
+      width: 100%; padding: 10px 12px; border: 1px solid #ccc;
+      border-radius: 8px; background: #fafafa; cursor: pointer;
       opacity: 0; transform: translateX(-20px);
-      animation: slideIn 0.4s forwards;
-      animation-delay: 0.1s;
+      animation: slideIn 0.4s forwards; animation-delay: 0.1s;
     }
     .thumbnail-container {
-      display: flex; flex-wrap: wrap;
-      justify-content: center; gap: 12px;
-      margin: 16px 0;
-      opacity: 0; transform: translateY(10px);
-      animation: fadeIn 0.5s forwards;
-      animation-delay: 0.2s;
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;
+      margin: 16px 0; opacity: 0; transform: translateY(10px);
+      animation: fadeIn 0.5s forwards; animation-delay: 0.2s;
     }
     .thumbnail-container img {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 8px;
-      cursor: pointer;
+      width: 80px; height: 80px; object-fit: cover;
+      border-radius: 8px; cursor: pointer;
       border: 2px solid transparent;
       box-shadow: 0 4px 12px var(--shadow);
-      opacity: 0;
-      animation: fadeInUp 0.4s forwards;
+      opacity: 0; animation: fadeInUp 0.4s forwards;
     }
     @keyframes fadeInUp {
       from { opacity:0; transform: translateY(10px) }
@@ -95,67 +79,48 @@
       box-shadow: 0 4px 12px var(--shadow);
     }
     .no-mockups {
-      text-align: center; color: #777;
-      margin: 16px 0; font-size: 0.9rem;
+      text-align: center; color: #777; margin: 16px 0; font-size: 0.9rem;
       opacity: 0; transform: translateY(10px);
-      animation: fadeIn 0.5s forwards;
-      animation-delay: 0.2s;
+      animation: fadeIn 0.5s forwards; animation-delay: 0.2s;
     }
     .controls {
-      margin: 32px 0;
-      display: grid; gap: 20px;
+      margin: 32px 0; display: grid; gap: 20px;
       opacity: 0; transform: translateY(10px);
-      animation: fadeIn 0.5s forwards;
-      animation-delay: 0.3s;
+      animation: fadeIn 0.5s forwards; animation-delay: 0.3s;
     }
-    .control-group {
-      display: flex; flex-direction: column;
-    }
-    .control-group label {
-      margin-bottom: 6px; font-size: 0.95rem;
-    }
+    .control-group { display: flex; flex-direction: column; }
+    .control-group label { margin-bottom: 6px; font-size: 0.95rem; }
     .slider-wrapper {
       display: flex; align-items: center; gap: 8px;
     }
     input[type="range"] {
-      flex: 1;
-      accent-color: var(--accent);
+      flex: 1; accent-color: var(--accent);
       height: 6px; border-radius: 4px;
     }
     .arrow-btn {
-      width: 32px; height: 32px;
-      border: none; border-radius: 50%;
-      background: #eee; color: var(--accent);
+      width: 32px; height: 32px; border: none;
+      border-radius: 50%; background: #eee; color: var(--accent);
       font-size: 1rem; cursor: pointer;
       box-shadow: 0 4px 12px var(--shadow);
       transition: background 0.2s, color 0.2s, transform 0.2s;
     }
     .arrow-btn:hover {
-      background: var(--accent);
-      color: #fff;
-      transform: scale(1.1);
+      background: var(--accent); color: #fff; transform: scale(1.1);
     }
     canvas {
-      width: 100%; height: auto;
-      border-radius: 8px;
-      box-shadow: 0 6px 18px var(--shadow);
-      margin: 32px 0;
+      width: 100%; height: auto; border-radius: 8px;
+      box-shadow: 0 6px 18px var(--shadow); margin: 32px 0;
       opacity: 0; transform: scale(0.98);
-      animation: fadeIn 0.5s forwards;
-      animation-delay: 0.4s;
+      animation: fadeIn 0.5s forwards; animation-delay: 0.4s;
     }
     button#download-btn {
-      width: 100%;
-      padding: 14px;
-      font-size: 1rem; font-weight: 500;
-      color: #fff; background: var(--accent);
-      border: none; border-radius: 8px;
-      cursor: pointer;
+      width: 100%; padding: 14px; font-size: 1rem;
+      font-weight: 500; color: #fff; background: var(--accent);
+      border: none; border-radius: 8px; cursor: pointer;
       box-shadow: 0 4px 12px var(--shadow);
       transition: transform 0.2s, box-shadow 0.2s;
       opacity: 0; transform: translateY(10px);
-      animation: fadeIn 0.5s forwards;
-      animation-delay: 0.5s;
+      animation: fadeIn 0.5s forwards; animation-delay: 0.5s;
     }
     button#download-btn:hover {
       transform: translateY(-2px) scale(1.02);
@@ -247,12 +212,12 @@
         return;
       }
       noMockupsMsg.style.display = 'none';
-      labels.forEach((label,i) => {
+      labels.forEach((label, i) => {
         const img = document.createElement('img');
         img.src = mockupImages[label];
         img.alt = label;
         img.dataset.label = label;
-        img.style.animationDelay = `${i*0.1}s`;
+        img.style.animationDelay = `${i * 0.1}s`;
 
         // click to select
         img.addEventListener('click', () => {
@@ -270,8 +235,7 @@
         img.addEventListener('mouseleave', cancelPress);
         img.addEventListener('touchend', cancelPress);
 
-        function startPress(e) {
-          e.preventDefault();
+        function startPress() {
           pressTimer = setTimeout(() => removeMockup(label), 800);
         }
         function cancelPress() {
@@ -299,7 +263,7 @@
     function loadMockup(label) {
       const bg = new Image();
       bg.onload = () => {
-        canvas.width  = bg.width;
+        canvas.width = bg.width;
         canvas.height = bg.height;
         drawCanvas();
       };
@@ -309,28 +273,29 @@
 
     function drawCanvas() {
       if (!window.bgImg) return;
-      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(window.bgImg, 0, 0, canvas.width, canvas.height);
       if (designImg) {
-        const s    = parseFloat(scaleRange.value),
-              w    = designImg.width * s,
-              h    = designImg.height * s,
-              xOff = parseInt(offsetXRange.value)/100 * canvas.width,
-              yOff = parseInt(offsetYRange.value)/100 * canvas.height,
-              x    = (canvas.width - w)/2 + xOff,
-              y    = (canvas.height - h)/2 + yOff;
+        const s = parseFloat(scaleRange.value),
+              w = designImg.width * s,
+              h = designImg.height * s,
+              xOff = parseInt(offsetXRange.value) / 100 * canvas.width,
+              yOff = parseInt(offsetYRange.value) / 100 * canvas.height,
+              x = (canvas.width - w) / 2 + xOff,
+              y = (canvas.height - h) / 2 + yOff;
         ctx.drawImage(designImg, x, y, w, h);
       }
     }
 
     function updateLabels() {
-      scaleVal.textContent   = parseFloat(scaleRange.value).toFixed(2);
+      scaleVal.textContent = parseFloat(scaleRange.value).toFixed(2);
       offsetXVal.textContent = offsetXRange.value;
       offsetYVal.textContent = offsetYRange.value;
     }
 
     document.getElementById('add-mockup-input').onchange = e => {
-      const f = e.target.files[0]; if (!f) return;
+      const f = e.target.files[0];
+      if (!f) return;
       const r = new FileReader();
       r.onload = () => {
         mockupImages[f.name] = r.result;
@@ -343,9 +308,13 @@
     };
 
     document.getElementById('design-input').onchange = e => {
-      const f = e.target.files[0]; if (!f) return;
+      const f = e.target.files[0];
+      if (!f) return;
       designImg = new Image();
-      designImg.onload = () => { updateLabels(); drawCanvas(); };
+      designImg.onload = () => {
+        updateLabels();
+        drawCanvas();
+      };
       designImg.src = URL.createObjectURL(f);
     };
 
@@ -360,25 +329,28 @@
     });
 
     [scaleRange, offsetXRange, offsetYRange].forEach(slider => {
-      slider.oninput = () => { updateLabels(); drawCanvas(); };
+      slider.oninput = () => {
+        updateLabels();
+        drawCanvas();
+      };
     });
 
     document.getElementById('download-btn').onclick = () => {
-      const m    = parseInt(resolutionSelect.value,10),
-            ex   = document.createElement('canvas'),
-            exCtx= ex.getContext('2d');
-      ex.width  = canvas.width  * m;
+      const m = parseInt(resolutionSelect.value, 10),
+            ex = document.createElement('canvas'),
+            exCtx = ex.getContext('2d');
+      ex.width = canvas.width * m;
       ex.height = canvas.height * m;
-      exCtx.scale(m,m);
+      exCtx.scale(m, m);
       exCtx.drawImage(window.bgImg, 0, 0, canvas.width, canvas.height);
       if (designImg) {
-        const s    = parseFloat(scaleRange.value),
-              w    = designImg.width * s,
-              h    = designImg.height * s,
-              xOff = parseInt(offsetXRange.value)/100 * canvas.width,
-              yOff = parseInt(offsetYRange.value)/100 * canvas.height,
-              x    = (canvas.width - w)/2 + xOff,
-              y    = (canvas.height - h)/2 + yOff;
+        const s = parseFloat(scaleRange.value),
+              w = designImg.width * s,
+              h = designImg.height * s,
+              xOff = parseInt(offsetXRange.value) / 100 * canvas.width,
+              yOff = parseInt(offsetYRange.value) / 100 * canvas.height,
+              x = (canvas.width - w) / 2 + xOff,
+              y = (canvas.height - h) / 2 + yOff;
         exCtx.drawImage(designImg, x, y, w, h);
       }
       ex.toBlob(blob => {
@@ -391,7 +363,7 @@
     };
 
     // initialize
-    (()=>{
+    (() => {
       loadStoredMockups();
       renderThumbnails();
       updateLabels();
