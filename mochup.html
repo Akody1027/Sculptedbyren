@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Ultimate T-Shirt Mockup Creator</n<title>
+  <title>Ultimate T-Shirt Mockup Creator</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -124,9 +124,9 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px var(--shadow);
     }
-    .icon-btn img {
+    .icon-btn svg {
       width: 24px; height: 24px;
-      object-fit: contain;
+      fill: var(--accent);
     }
     canvas {
       width: 100%; height: auto;
@@ -209,68 +209,199 @@
   </div>
 
   <script>
-    const canvas = document.getElementById('mockup-canvas'),
-          ctx    = canvas.getContext('2d');
-    let mockupImages={}, selectedMockup=null, designImg=null, pressTimer=null;
-    const scaleRange=document.getElementById('scale-range'),
-          offsetXRange=document.getElementById('offset-x-range'),
-          offsetYRange=document.getElementById('offset-y-range'),
-          resolutionSelect=document.getElementById('resolution-select'),
-          scaleVal=document.getElementById('scale-val'),
-          offsetXVal=document.getElementById('offset-x-val'),
-          offsetYVal=document.getElementById('offset-y-val'),
-          thumbnails=document.getElementById('mockup-thumbnails'),
-          noMsg=document.getElementById('no-mockups-msg');
+    // Initialize core features
+    const canvas = document.getElementById('mockup-canvas'), ctx = canvas.getContext('2d');
+    let mockupImages = {}, selectedMockup = null, designImg = null, pressTimer = null;
+    const
+      addMockupInput = document.getElementById('add-mockup-input'),
+      thumbnails = document.getElementById('mockup-thumbnails'),
+      noMsg = document.getElementById('no-mockups-msg'),
+      designInput = document.getElementById('design-input'),
+      scaleRange = document.getElementById('scale-range'),
+      offsetXRange = document.getElementById('offset-x-range'),
+      offsetYRange = document.getElementById('offset-y-range'),
+      resolutionSelect = document.getElementById('resolution-select'),
+      scaleVal = document.getElementById('scale-val'),
+      offsetXVal = document.getElementById('offset-x-val'),
+      offsetYVal = document.getElementById('offset-y-val');
 
-    function loadStoredMockups(){
-      const s=JSON.parse(localStorage.getItem('mockupImages')||'{}');
-      ['black','white','black.jpg','white.jpg'].forEach(k=>delete s[k]);
-      mockupImages=s;localStorage.setItem('mockupImages',JSON.stringify(s));
+    function loadStoredMockups() {
+      const stored = JSON.parse(localStorage.getItem('mockupImages') || '{}');
+      ['black','white','black.jpg','white.jpg'].forEach(k => delete stored[k]);
+      mockupImages = stored;
+      localStorage.setItem('mockupImages', JSON.stringify(stored));
     }
-    function renderThumbnails(){
-      thumbnails.innerHTML='';const keys=Object.keys(mockupImages);
-      if(!keys.length){noMsg.style.display='block';return;}noMsg.style.display='none';
-      keys.forEach(label=>{
-        const img=document.createElement('img');img.src=mockupImages[label];img.alt=label;
-        img.onclick=()=>{document.querySelectorAll('.thumbnail-container img')
-          .forEach(i=>i.classList.remove('selected'));
-          img.classList.add('selected');selectedMockup=label;
-          localStorage.setItem('selectedMockup',label);loadMockup(label);
-        };
-        img.addEventListener('mousedown',startPress);
-        img.addEventListener('touchstart',startPress);
-        img.addEventListener('mouseup',cancelPress);
-        img.addEventListener('mouseleave',cancelPress);
-        img.addEventListener('touchend',cancelPress);
-        function startPress(){pressTimer=setTimeout(()=>removeMockup(label),800);}        
-        function cancelPress(){clearTimeout(pressTimer);}        
+
+    function renderThumbnails() {
+      thumbnails.innerHTML = '';
+      const keys = Object.keys(mockupImages);
+      if (!keys.length) {
+        noMsg.style.display = 'block';
+        return;
+      }
+      noMsg.style.display = 'none';
+      keys.forEach(label => {
+        const img = document.createElement('img');
+        img.src = mockupImages[label];
+        img.alt = label;
+        img.onclick = () => selectMockup(label, img);
+        img.addEventListener('mousedown', startPress(label));
+        img.addEventListener('touchstart', startPress(label));
+        img.addEventListener('mouseup', cancelPress);
+        img.addEventListener('mouseleave', cancelPress);
+        img.addEventListener('touchend', cancelPress);
         thumbnails.appendChild(img);
       });
-      if(!selectedMockup&&keys.length)thumbnails.firstChild.click();
+      if (!selectedMockup && keys.length) {
+        const first = thumbnails.querySelector('img');
+        first && first.click();
+      }
     }
-    function removeMockup(label){if(!confirm(`Remove “${label}”?`))return;delete mockupImages[label];
-      localStorage.setItem('mockupImages',JSON.stringify(mockupImages));
-      if(selectedMockup===label){localStorage.removeItem('selectedMockup');selectedMockup=null;}
-      renderThumbnails();}
-    function loadMockup(label){const bg=new Image();bg.onload=()=>{canvas.width=bg.width;canvas.height=bg.height;drawCanvas();};
-      bg.src=mockupImages[label];window.bgImg=bg;}
-    function drawCanvas(){if(!window.bgImg)return;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(window.bgImg,0,0,canvas.width,canvas.height);
-      if(designImg){const s=parseFloat(scaleRange.value),w=designImg.width*s,h=designImg.height*s,xOff=parseInt(offsetXRange.value)/100*canvas.width,yOff=parseInt(offsetYRange.value)/100*canvas.height,x=(canvas.width-w)/2+xOff,y=(canvas.height-h)/2+yOff;ctx.drawImage(designImg,x,y,w,h);}    }
-    function updateLabels(){scaleVal.textContent=parseFloat(scaleRange.value).toFixed(2);offsetXVal.textContent=offsetXRange.value;offsetYVal.textContent=offsetYRange.value;}
-    document.getElementById('add-mockup-input').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{mockupImages[f.name]=r.result;localStorage.setItem('mockupImages',JSON.stringify(mockupImages));localStorage.setItem('selectedMockup',f.name);selectedMockup=f.name;renderThumbnails();};r.readAsDataURL(f);};
-    document.getElementById('design-input').onchange=e=>{const f=e.target.files[0];if(!f)return;designImg=new Image();designImg.onload=()=>{updateLabels();drawCanvas();};designImg.src=URL.createObjectURL(f);};
-    document.querySelectorAll('.arrow-btn').forEach(btn=>btn.onclick=()=>{const s=document.getElementById(btn.dataset.target),step=parseFloat(btn.dataset.step),v=Math.min(Math.max(parseFloat(s.value)+step,parseFloat(s.min)),parseFloat(s.max));s.value=v.toFixed(s.step.split('.')[1]?.length||0);s.dispatchEvent(new Event('input'));});
-    [scaleRange,offsetXRange,offsetYRange].forEach(slider=>slider.oninput=()=>{updateLabels();drawCanvas();});
-    document.getElementById('download-btn').onclick=()=>{const m=parseInt(resolutionSelect.value,10),ex=document.createElement('canvas'),exCtx=ex.getContext('2d');ex.width=canvas.width*m;ex.height=canvas.height*m;exCtx.scale(m,m);exCtx.drawImage(window.bgImg,0,0,canvas.width,canvas.height);if(designImg){const s=parseFloat(scaleRange.value),w=designImg.width*s,h=designImg.height*s,xOff=parseInt(offsetXRange.value)/100*canvas.width,yOff=parseInt(offsetYRange.value)/100*canvas.height,x=(canvas.width-w)/2+xOff,y=(canvas.height-h)/2+yOff;exCtx.drawImage(designImg,x,y,w,h);}ex.toBlob(blob=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`tshirt-mockup@${m}x.png`;a.click();URL.revokeObjectURL(a.href);},'image/png');};
-    // Populate icons grid
-    const featureList=[/*same fn list*/];
-    const iconsGrid=document.getElementById('icons-grid');featureList.forEach(fn=>{const btn=document.createElement('button');btn.className='icon-btn';const img=document.createElement('img');img.src=`icons/${fn}.svg`;img.alt=fn;btn.appendChild(img);iconsGrid.appendChild(btn);});
-    document.getElementById('toggle-menu').addEventListener('click',()=>document.getElementById('options-menu').classList.toggle('open'));
-    // init
-    (()=>{
-nloadStoredMockups();renderThumbnails();updateLabels();
+
+    function startPress(label) {
+      return () => { pressTimer = setTimeout(() => removeMockup(label), 800); };
+    }
+
+    function cancelPress() {
+      clearTimeout(pressTimer);
+    }
+
+    function selectMockup(label, imgEl) {
+      thumbnails.querySelectorAll('img').forEach(i => i.classList.remove('selected'));
+      imgEl.classList.add('selected');
+      selectedMockup = label;
+      localStorage.setItem('selectedMockup', label);
+      loadMockup(label);
+    }
+
+    function removeMockup(label) {
+      if (!confirm(`Remove “${label}”?`)) return;
+      delete mockupImages[label];
+      localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
+      if (selectedMockup === label) {
+        localStorage.removeItem('selectedMockup');
+        selectedMockup = null;
+      }
+      renderThumbnails();
+    }
+
+    function loadMockup(label) {
+      const bg = new Image();
+      bg.onload = () => {
+        canvas.width = bg.width;
+        canvas.height = bg.height;
+        drawCanvas();
+      };
+      bg.src = mockupImages[label];
+      window.bgImg = bg;
+    }
+
+    function drawCanvas() {
+      if (!window.bgImg) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(window.bgImg, 0, 0);
+      if (designImg) {
+        const s = parseFloat(scaleRange.value),
+              w = designImg.width * s,
+              h = designImg.height * s,
+              xOff = parseInt(offsetXRange.value) / 100 * canvas.width,
+              yOff = parseInt(offsetYRange.value) / 100 * canvas.height,
+              x = (canvas.width - w) / 2 + xOff,
+              y = (canvas.height - h) / 2 + yOff;
+        ctx.drawImage(designImg, x, y, w, h);
+      }
+    }
+
+    function updateLabels() {
+      scaleVal.textContent = parseFloat(scaleRange.value).toFixed(2);
+      offsetXVal.textContent = offsetXRange.value;
+      offsetYVal.textContent = offsetYRange.value;
+    }
+
+    addMockupInput.onchange = e => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        mockupImages[file.name] = reader.result;
+        localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
+        localStorage.setItem('selectedMockup', file.name);
+        selectedMockup = file.name;
+        renderThumbnails();
+      };
+      reader.readAsDataURL(file);
+    };
+
+    designInput.onchange = e => {
+      const file = e.target.files[0]; if (!file) return;
+      designImg = new Image();
+      designImg.onload = () => { updateLabels(); drawCanvas(); };
+      designImg.src = URL.createObjectURL(file);
+    };
+
+    Array.from(document.querySelectorAll('.arrow-btn')).forEach(btn => {
+      btn.onclick = () => {
+        const s = document.getElementById(btn.dataset.target),
+              step = parseFloat(btn.dataset.step),
+              v = Math.min(Math.max(parseFloat(s.value) + step, parseFloat(s.min)), parseFloat(s.max));
+        s.value = v.toFixed(s.step.split('.')[1]?.length || 0);
+        s.dispatchEvent(new Event('input'));
+      };
+    });
+
+    [scaleRange, offsetXRange, offsetYRange].forEach(slider => {
+      slider.oninput = () => { updateLabels(); drawCanvas(); };
+    });
+
+    document.getElementById('download-btn').onclick = () => {
+      const m = parseInt(resolutionSelect.value, 10),
+            ex = document.createElement('canvas'),
+            exCtx = ex.getContext('2d');
+      ex.width = canvas.width * m;
+      ex.height = canvas.height * m;
+      exCtx.scale(m, m);
+      exCtx.drawImage(window.bgImg, 0, 0);
+      if (designImg) {
+        const s = parseFloat(scaleRange.value),
+              w = designImg.width * s,
+              h = designImg.height * s,
+              xOff = parseInt(offsetXRange.value) / 100 * canvas.width,
+              yOff = parseInt(offsetYRange.value) / 100 * canvas.height,
+              x = (canvas.width - w) / 2 + xOff,
+              y = (canvas.height - h) / 2 + yOff;
+        exCtx.drawImage(designImg, x, y, w, h);
+      }
+      ex.toBlob(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `tshirt-mockup@${m}x.png`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }, 'image/png');
+    };
+
+    // populate icons with inline SVG placeholders
+    const featureList = Array.from(document.querySelectorAll('.icon-btn'));
+    const iconsGrid = document.getElementById('icons-grid');
+    const svgPlaceholder = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>`;
+    // add 70 generic icon buttons
+    for (let i = 0; i < 72; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'icon-btn';
+      btn.innerHTML = svgPlaceholder;
+      iconsGrid.appendChild(btn);
+    }
+
+    // toggle menu
+    document.getElementById('toggle-menu').addEventListener('click', () => {
+      document.getElementById('options-menu').classList.toggle('open');
+    });
+
+    // initialize
+    (function() {
+      loadStoredMockups();
+      renderThumbnails();
+      updateLabels();
     })();
   </script>
 </body>
-  </html>
-    
+</html>
