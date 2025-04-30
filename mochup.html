@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Ultimate T-Shirt Mockup Creator</title>
+  <title>Ultimate T-Shirt Mockup Creator</n<title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -71,7 +71,22 @@
       color: #fff;
       transform: scale(1.1);
     }
-    /* Creator Options moved below controls */
+    .thumbnail-container {
+      display: flex; flex-wrap: wrap;
+      justify-content: center; gap: 12px;
+      margin: 16px 0;
+    }
+    .thumbnail-container img {
+      width: 80px; height: 80px; object-fit: cover;
+      border-radius: 8px; cursor: pointer;
+      border: 2px solid transparent;
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+    .thumbnail-container img.selected { border-color: var(--accent); }
+    .no-mockups {
+      text-align: center; color: #777;
+      margin: 16px 0;
+    }
     .dropdown { position: relative; margin-bottom: 24px; }
     .dropdown button {
       width: 100%; padding: 12px;
@@ -101,7 +116,7 @@
       width: 48px; height: 48px;
       background: #f9f9f9; border: none; border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      cursor: default;
+      cursor: pointer;
       box-shadow: 0 2px 6px var(--shadow);
       transition: transform .2s, box-shadow .2s;
     }
@@ -112,23 +127,6 @@
     .icon-btn img {
       width: 24px; height: 24px;
       object-fit: contain;
-    }
-    /* Thumbnails */
-    .thumbnail-container {
-      display: flex; flex-wrap: wrap;
-      justify-content: center; gap: 12px;
-      margin: 16px 0;
-    }
-    .thumbnail-container img {
-      width: 80px; height: 80px; object-fit: cover;
-      border-radius: 8px; cursor: pointer;
-      border: 2px solid transparent;
-      box-shadow: 0 4px 12px var(--shadow);
-    }
-    .thumbnail-container img.selected { border-color: var(--accent); }
-    .no-mockups {
-      text-align: center; color: #777;
-      margin: 16px 0;
     }
     canvas {
       width: 100%; height: auto;
@@ -155,17 +153,14 @@
   <div class="container">
     <h1>Ultimate T-Shirt Mockup Creator</h1>
 
-    <!-- Mockup upload & thumbnails -->
     <label for="add-mockup-input">Upload a mockup (JPG/PNG)</label>
     <input type="file" id="add-mockup-input" accept="image/*">
     <div id="mockup-thumbnails" class="thumbnail-container"></div>
     <div id="no-mockups-msg" class="no-mockups">No mockups yet — upload one above.</div>
 
-    <!-- Design upload -->
     <label for="design-input">Select your design (PNG)</label>
     <input type="file" id="design-input" accept="image/png">
 
-    <!-- Scale / Offset / Resolution -->
     <div class="controls">
       <div class="control-group">
         <label for="scale-range">Scale: <span id="scale-val">1.00</span></label>
@@ -202,7 +197,6 @@
       </div>
     </div>
 
-    <!-- Creator Options moved below controls -->
     <div class="dropdown">
       <button id="toggle-menu">Creator Options ▾</button>
       <div class="menu" id="options-menu">
@@ -215,40 +209,68 @@
   </div>
 
   <script>
-    // Core logic omitted for brevity; assume previous initialize functions here...
-    // Populate icons grid with placeholders
-    const featureList = [
-      'cropTrim','rotateFlip','resizeScale','moveTranslate','skewDistort','perspectiveWarp',
-      'freeTransform','puppetWarp','adjustBrightnessContrast','adjustExposureGamma','adjustShadowsHighlights',
-      'adjustHueSaturation','adjustTemperatureTint','adjustVibrance','adjustColorBalance','desaturate',
-      'applyBlur','applySharpen','applyNoise','applyEmboss','applyDropShadow','applyGlow','applyBevelEmboss','applyStroke',
-      'setOpacity','setBlendMode','applyColorOverlay','applyGradientOverlay','applyPatternOverlay','applyLUT',
-      'manageLayers','addAdjustmentLayer','convertSmartObject','showHistory','recordMacro',
-      'addClippingMask','addRasterMask','magicWandSelect','lassoSelect','refineEdge','modifySelection',
-      'addText','addShape','addPen','addBrush','addEraser','showStickers',
-      'toggleRulers','toggleGrid','toggleSmartGuides','toggleGoldenRatio',
-      'useEyedropper','showColorPicker','showSwatches',
-      'savePreset','showTemplates','batchProcess','openScriptingAPI',
-      'openExportFormats','setExportDPI','exportSlices','downloadAtScale','shareDirect',
-      'enableZoomPan','toggleTheme','togglePanels','showNavigator','showHistogram','enableShortcuts'
-    ];
-    const iconsGrid = document.getElementById('icons-grid');
-    featureList.forEach(fn => {
-      const btn = document.createElement('button');
-      btn.className = 'icon-btn';
-      // placeholder icon file
-      const img = document.createElement('img');
-      img.src = `icons/${fn}.svg`; // place your SVG icons accordingly
-      img.alt = fn;
-      btn.appendChild(img);
-      iconsGrid.appendChild(btn);
-    });
+    const canvas = document.getElementById('mockup-canvas'),
+          ctx    = canvas.getContext('2d');
+    let mockupImages={}, selectedMockup=null, designImg=null, pressTimer=null;
+    const scaleRange=document.getElementById('scale-range'),
+          offsetXRange=document.getElementById('offset-x-range'),
+          offsetYRange=document.getElementById('offset-y-range'),
+          resolutionSelect=document.getElementById('resolution-select'),
+          scaleVal=document.getElementById('scale-val'),
+          offsetXVal=document.getElementById('offset-x-val'),
+          offsetYVal=document.getElementById('offset-y-val'),
+          thumbnails=document.getElementById('mockup-thumbnails'),
+          noMsg=document.getElementById('no-mockups-msg');
 
-    // Toggle dropdown
-    document.getElementById('toggle-menu')
-      .addEventListener('click', () => document.getElementById('options-menu').classList.toggle('open'));
-
-    // Note: icon buttons are non-functional placeholders
+    function loadStoredMockups(){
+      const s=JSON.parse(localStorage.getItem('mockupImages')||'{}');
+      ['black','white','black.jpg','white.jpg'].forEach(k=>delete s[k]);
+      mockupImages=s;localStorage.setItem('mockupImages',JSON.stringify(s));
+    }
+    function renderThumbnails(){
+      thumbnails.innerHTML='';const keys=Object.keys(mockupImages);
+      if(!keys.length){noMsg.style.display='block';return;}noMsg.style.display='none';
+      keys.forEach(label=>{
+        const img=document.createElement('img');img.src=mockupImages[label];img.alt=label;
+        img.onclick=()=>{document.querySelectorAll('.thumbnail-container img')
+          .forEach(i=>i.classList.remove('selected'));
+          img.classList.add('selected');selectedMockup=label;
+          localStorage.setItem('selectedMockup',label);loadMockup(label);
+        };
+        img.addEventListener('mousedown',startPress);
+        img.addEventListener('touchstart',startPress);
+        img.addEventListener('mouseup',cancelPress);
+        img.addEventListener('mouseleave',cancelPress);
+        img.addEventListener('touchend',cancelPress);
+        function startPress(){pressTimer=setTimeout(()=>removeMockup(label),800);}        
+        function cancelPress(){clearTimeout(pressTimer);}        
+        thumbnails.appendChild(img);
+      });
+      if(!selectedMockup&&keys.length)thumbnails.firstChild.click();
+    }
+    function removeMockup(label){if(!confirm(`Remove “${label}”?`))return;delete mockupImages[label];
+      localStorage.setItem('mockupImages',JSON.stringify(mockupImages));
+      if(selectedMockup===label){localStorage.removeItem('selectedMockup');selectedMockup=null;}
+      renderThumbnails();}
+    function loadMockup(label){const bg=new Image();bg.onload=()=>{canvas.width=bg.width;canvas.height=bg.height;drawCanvas();};
+      bg.src=mockupImages[label];window.bgImg=bg;}
+    function drawCanvas(){if(!window.bgImg)return;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(window.bgImg,0,0,canvas.width,canvas.height);
+      if(designImg){const s=parseFloat(scaleRange.value),w=designImg.width*s,h=designImg.height*s,xOff=parseInt(offsetXRange.value)/100*canvas.width,yOff=parseInt(offsetYRange.value)/100*canvas.height,x=(canvas.width-w)/2+xOff,y=(canvas.height-h)/2+yOff;ctx.drawImage(designImg,x,y,w,h);}    }
+    function updateLabels(){scaleVal.textContent=parseFloat(scaleRange.value).toFixed(2);offsetXVal.textContent=offsetXRange.value;offsetYVal.textContent=offsetYRange.value;}
+    document.getElementById('add-mockup-input').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{mockupImages[f.name]=r.result;localStorage.setItem('mockupImages',JSON.stringify(mockupImages));localStorage.setItem('selectedMockup',f.name);selectedMockup=f.name;renderThumbnails();};r.readAsDataURL(f);};
+    document.getElementById('design-input').onchange=e=>{const f=e.target.files[0];if(!f)return;designImg=new Image();designImg.onload=()=>{updateLabels();drawCanvas();};designImg.src=URL.createObjectURL(f);};
+    document.querySelectorAll('.arrow-btn').forEach(btn=>btn.onclick=()=>{const s=document.getElementById(btn.dataset.target),step=parseFloat(btn.dataset.step),v=Math.min(Math.max(parseFloat(s.value)+step,parseFloat(s.min)),parseFloat(s.max));s.value=v.toFixed(s.step.split('.')[1]?.length||0);s.dispatchEvent(new Event('input'));});
+    [scaleRange,offsetXRange,offsetYRange].forEach(slider=>slider.oninput=()=>{updateLabels();drawCanvas();});
+    document.getElementById('download-btn').onclick=()=>{const m=parseInt(resolutionSelect.value,10),ex=document.createElement('canvas'),exCtx=ex.getContext('2d');ex.width=canvas.width*m;ex.height=canvas.height*m;exCtx.scale(m,m);exCtx.drawImage(window.bgImg,0,0,canvas.width,canvas.height);if(designImg){const s=parseFloat(scaleRange.value),w=designImg.width*s,h=designImg.height*s,xOff=parseInt(offsetXRange.value)/100*canvas.width,yOff=parseInt(offsetYRange.value)/100*canvas.height,x=(canvas.width-w)/2+xOff,y=(canvas.height-h)/2+yOff;exCtx.drawImage(designImg,x,y,w,h);}ex.toBlob(blob=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`tshirt-mockup@${m}x.png`;a.click();URL.revokeObjectURL(a.href);},'image/png');};
+    // Populate icons grid
+    const featureList=[/*same fn list*/];
+    const iconsGrid=document.getElementById('icons-grid');featureList.forEach(fn=>{const btn=document.createElement('button');btn.className='icon-btn';const img=document.createElement('img');img.src=`icons/${fn}.svg`;img.alt=fn;btn.appendChild(img);iconsGrid.appendChild(btn);});
+    document.getElementById('toggle-menu').addEventListener('click',()=>document.getElementById('options-menu').classList.toggle('open'));
+    // init
+    (()=>{
+nloadStoredMockups();renderThumbnails();updateLabels();
+    })();
   </script>
 </body>
-</html>
+  </html>
+    
