@@ -9,130 +9,154 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f5f5f5;
-      --card-bg: #ffffff;
+      --bg: #f0f2f5;
+      --card: #ffffff;
       --text: #333333;
-      --accent: #556ee6;
-      --shadow: rgba(0, 0, 0, 0.1);
+      --accent: #4A90E2;
+      --shadow: rgba(0,0,0,0.1);
     }
-    * { box-sizing: border-box; transition: all 0.25s ease; }
+    * { box-sizing: border-box; }
     body {
-      margin: 0; padding: 0;
+      margin: 0; padding: 20px;
       font-family: 'Inter', sans-serif;
       background: var(--bg);
       color: var(--text);
       display: flex; justify-content: center;
-      padding: 20px;
     }
     .container {
-      background: var(--card-bg);
+      background: var(--card);
       border-radius: 12px;
-      box-shadow: 0 4px 12px var(--shadow);
-      width: 100%; max-width: 650px;
-      padding: 24px;
-      animation: fadeIn 0.4s ease-out;
+      box-shadow: 0 6px 18px var(--shadow);
+      width: 100%; max-width: 680px;
+      padding: 32px;
+      overflow: hidden;
+      animation: fadeIn 0.5s ease-out;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px) }
-      to   { opacity: 1; transform: translateY(0) }
+      from { opacity:0; transform: translateY(-10px) }
+      to   { opacity:1; transform: translateY(0) }
     }
     h1 {
-      margin: 0 0 16px;
-      font-size: 1.75rem;
+      margin: 0 0 24px;
+      font-size: 2rem; font-weight: 600;
       text-align: center;
-      font-weight: 600;
     }
     label {
       display: block;
       font-weight: 500;
-      margin: 16px 0 6px;
+      margin: 16px 0 8px;
+      opacity: 0; transform: translateX(-20px);
+      animation: slideIn 0.4s forwards;
+    }
+    @keyframes slideIn {
+      to { opacity:1; transform: translateX(0) }
     }
     input[type="file"] {
       width: 100%;
-      padding: 8px 12px;
+      padding: 10px 12px;
       border: 1px solid #ccc;
       border-radius: 8px;
       background: #fafafa;
       cursor: pointer;
+      opacity: 0; transform: translateX(-20px);
+      animation: slideIn 0.4s forwards;
+      animation-delay: 0.1s;
     }
     .thumbnail-container {
       display: flex; flex-wrap: wrap;
       justify-content: center; gap: 12px;
       margin: 16px 0;
+      opacity: 0; transform: translateY(10px);
+      animation: fadeIn 0.5s forwards;
+      animation-delay: 0.2s;
     }
     .thumbnail-container img {
-      width: 80px; height: auto;
-      border-radius: 8px;
+      width: 80px; border-radius: 8px;
       cursor: pointer;
       border: 2px solid transparent;
-      box-shadow: 0 2px 6px var(--shadow);
+      box-shadow: 0 4px 12px var(--shadow);
+      opacity: 0;
+      animation: fadeInUp 0.4s forwards;
     }
     .thumbnail-container img:hover {
       transform: translateY(-4px) scale(1.05);
-      box-shadow: 0 6px 16px var(--shadow);
+      box-shadow: 0 8px 24px var(--shadow);
+    }
+    @keyframes fadeInUp {
+      from { opacity:0; transform: translateY(10px) }
+      to   { opacity:1; transform: translateY(0) }
     }
     .thumbnail-container img.selected {
       border-color: var(--accent);
       box-shadow: 0 4px 12px var(--shadow);
     }
     .no-mockups {
-      text-align: center;
-      color: #777;
-      margin: 16px 0;
-      font-size: 0.9rem;
+      text-align: center; color: #777;
+      margin: 16px 0; font-size: 0.9rem;
+      opacity: 0; transform: translateY(10px);
+      animation: fadeIn 0.5s forwards;
+      animation-delay: 0.2s;
     }
     .controls {
-      margin: 24px 0;
-      display: grid;
-      gap: 16px;
+      margin: 32px 0;
+      display: grid; gap: 20px;
+      opacity: 0; transform: translateY(10px);
+      animation: fadeIn 0.5s forwards;
+      animation-delay: 0.3s;
+    }
+    .control-group {
+      display: flex; flex-direction: column;
     }
     .control-group label {
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       font-size: 0.95rem;
     }
     .slider-wrapper {
       display: flex; align-items: center; gap: 8px;
     }
-    .slider-wrapper input[type="range"] {
+    input[type="range"] {
       flex: 1;
       accent-color: var(--accent);
-      height: 6px;
-      border-radius: 4px;
+      height: 6px; border-radius: 4px;
     }
     .arrow-btn {
       width: 32px; height: 32px;
       border: none; border-radius: 50%;
       background: #eee; color: var(--accent);
-      font-size: 1rem; line-height: 1;
-      cursor: pointer;
-      box-shadow: 0 2px 6px var(--shadow);
-      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; cursor: pointer;
+      box-shadow: 0 4px 12px var(--shadow);
+      transition: background 0.2s, color 0.2s, transform 0.2s;
     }
     .arrow-btn:hover {
       background: var(--accent);
       color: #fff;
+      transform: scale(1.1);
     }
     canvas {
       width: 100%; height: auto;
       border-radius: 8px;
-      box-shadow: 0 4px 12px var(--shadow);
-      margin: 24px 0;
+      box-shadow: 0 6px 18px var(--shadow);
+      margin: 32px 0;
+      opacity: 0; transform: scale(0.98);
+      animation: fadeIn 0.5s forwards;
+      animation-delay: 0.4s;
     }
     button#download-btn {
       width: 100%;
       padding: 14px;
-      font-size: 1rem;
-      font-weight: 500;
-      color: #fff;
-      background: var(--accent);
-      border: none;
-      border-radius: 8px;
+      font-size: 1rem; font-weight: 500;
+      color: #fff; background: var(--accent);
+      border: none; border-radius: 8px;
       cursor: pointer;
-      box-shadow: 0 2px 6px var(--shadow);
+      box-shadow: 0 4px 12px var(--shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+      opacity: 0; transform: translateY(10px);
+      animation: fadeIn 0.5s forwards;
+      animation-delay: 0.5s;
     }
     button#download-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px var(--shadow);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 24px var(--shadow);
     }
   </style>
 </head>
@@ -140,18 +164,15 @@
   <div class="container">
     <h1>T-Shirt Mockup Creator</h1>
 
-    <!-- upload mockups -->
     <label for="add-mockup-input">Upload a mockup (JPG/PNG)</label>
     <input type="file" id="add-mockup-input" accept="image/*">
 
     <div id="mockup-thumbnails" class="thumbnail-container"></div>
     <div id="no-mockups-msg" class="no-mockups">No mockups yet — upload one above.</div>
 
-    <!-- design -->
     <label for="design-input">Select your design (PNG)</label>
     <input type="file" id="design-input" accept="image/png">
 
-    <!-- controls with arrows -->
     <div class="controls">
       <div class="control-group">
         <label for="scale-range">Scale: <span id="scale-val">1.00</span></label>
@@ -188,7 +209,7 @@
           ctx    = canvas.getContext('2d');
     let mockupImages = {}, selectedMockup = null, designImg = null;
 
-    // controls
+    // Controls
     const scaleRange   = document.getElementById('scale-range'),
           offsetXRange = document.getElementById('offset-x-range'),
           offsetYRange = document.getElementById('offset-y-range'),
@@ -197,29 +218,39 @@
           offsetYVal   = document.getElementById('offset-y-val'),
           noMockupsMsg = document.getElementById('no-mockups-msg');
 
+    // Load and purge any old black/white defaults
     function loadStoredMockups() {
-      const stored = localStorage.getItem('mockupImages');
-      mockupImages = stored ? JSON.parse(stored) : {};
+      const stored = JSON.parse(localStorage.getItem('mockupImages')||'{}');
+      // remove any “black” or “white” keys
+      ['black','white','black.jpg','white.jpg'].forEach(k => delete stored[k]);
+      mockupImages = stored;
+      localStorage.setItem('mockupImages', JSON.stringify(stored));
     }
 
+    // Render thumbnails with staggered animation
     function renderThumbnails() {
       const container = document.getElementById('mockup-thumbnails');
       container.innerHTML = '';
       const labels = Object.keys(mockupImages);
-      if (!labels.length) { noMockupsMsg.style.display = 'block'; return; }
+      if (!labels.length) {
+        noMockupsMsg.style.display = 'block';
+        return;
+      }
       noMockupsMsg.style.display = 'none';
-      labels.forEach(label => {
+      labels.forEach((label,i) => {
         const img = document.createElement('img');
         img.src = mockupImages[label];
         img.alt = label;
         img.dataset.label = label;
+        img.style.animationDelay = `${i*0.1}s`;
         if (label === localStorage.getItem('selectedMockup')) {
           img.classList.add('selected');
-          selectedMockup = label; loadMockup(label);
+          selectedMockup = label;
+          loadMockup(label);
         }
         img.onclick = () => {
           document.querySelectorAll('#mockup-thumbnails img')
-                  .forEach(i => i.classList.remove('selected'));
+                  .forEach(i=>i.classList.remove('selected'));
           img.classList.add('selected');
           selectedMockup = label;
           localStorage.setItem('selectedMockup', label);
@@ -234,7 +265,7 @@
     function loadMockup(label) {
       const bg = new Image();
       bg.onload = () => {
-        canvas.width = bg.width;
+        canvas.width  = bg.width;
         canvas.height = bg.height;
         drawCanvas();
       };
@@ -247,13 +278,13 @@
       ctx.clearRect(0,0,canvas.width,canvas.height);
       ctx.drawImage(window.bgImg, 0,0,canvas.width,canvas.height);
       if (designImg) {
-        const scale = parseFloat(scaleRange.value),
-              w     = designImg.width * scale,
-              h     = designImg.height * scale,
-              xOff  = parseInt(offsetXRange.value)/100 * canvas.width,
-              yOff  = parseInt(offsetYRange.value)/100 * canvas.height,
-              x     = (canvas.width - w)/2 + xOff,
-              y     = (canvas.height - h)/2 + yOff;
+        const s = parseFloat(scaleRange.value),
+              w = designImg.width * s,
+              h = designImg.height * s,
+              xOff = parseInt(offsetXRange.value)/100 * canvas.width,
+              yOff = parseInt(offsetYRange.value)/100 * canvas.height,
+              x = (canvas.width - w)/2 + xOff,
+              y = (canvas.height - h)/2 + yOff;
         ctx.drawImage(designImg, x,y,w,h);
       }
     }
@@ -264,42 +295,45 @@
       offsetYVal.textContent = offsetYRange.value;
     }
 
+    // Upload a new mockup
     document.getElementById('add-mockup-input').onchange = e => {
-      const file = e.target.files[0]; if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        mockupImages[file.name] = reader.result;
+      const f = e.target.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        mockupImages[f.name] = r.result;
         localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
-        localStorage.setItem('selectedMockup', file.name);
-        selectedMockup = file.name;
+        localStorage.setItem('selectedMockup', f.name);
+        selectedMockup = f.name;
         renderThumbnails();
       };
-      reader.readAsDataURL(file);
+      r.readAsDataURL(f);
     };
 
+    // Upload design
     document.getElementById('design-input').onchange = e => {
-      const file = e.target.files[0]; if (!file) return;
+      const f = e.target.files[0]; if (!f) return;
       designImg = new Image();
       designImg.onload = () => { updateLabels(); drawCanvas(); };
-      designImg.src = URL.createObjectURL(file);
+      designImg.src = URL.createObjectURL(f);
     };
 
-    // arrow buttons
+    // Arrow buttons
     document.querySelectorAll('.arrow-btn').forEach(btn => {
       btn.onclick = () => {
-        const slider = document.getElementById(btn.dataset.target);
-        const step   = parseFloat(btn.dataset.step);
-        let val = parseFloat(slider.value) + step;
-        val = Math.min(Math.max(val, parseFloat(slider.min)), parseFloat(slider.max));
-        slider.value = val.toFixed(slider.step.split('.')[1]?.length || 0);
-        slider.dispatchEvent(new Event('input'));
+        const s = document.getElementById(btn.dataset.target),
+              step = parseFloat(btn.dataset.step),
+              v = Math.min(Math.max(parseFloat(s.value) + step, parseFloat(s.min)), parseFloat(s.max));
+        s.value = v.toFixed(s.step.split('.')[1]?.length||0);
+        s.dispatchEvent(new Event('input'));
       };
     });
 
-    [scaleRange, offsetXRange, offsetYRange].forEach(slider =>
-      slider.oninput = () => { updateLabels(); drawCanvas(); }
-    );
+    // Sliders
+    [scaleRange,offsetXRange,offsetYRange].forEach(slider=>{
+      slider.oninput = ()=>{ updateLabels(); drawCanvas(); };
+    });
 
+    // Download
     document.getElementById('download-btn').onclick = () => {
       const a = document.createElement('a');
       a.download = 'tshirt-mockup.png';
@@ -307,7 +341,7 @@
       a.click();
     };
 
-    // init
+    // Init
     (()=>{
       loadStoredMockups();
       renderThumbnails();
