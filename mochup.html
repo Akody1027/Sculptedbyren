@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Ultimate T-Shirt Mockup Creator</title>
+  <title>T-Shirt Mockup Creator</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -39,26 +39,19 @@
     .slider-wrapper { display: flex; align-items: center; gap: 8px; }
     input[type="range"] { flex: 1; height: 6px; border-radius: 4px; accent-color: var(--accent); }
     .arrow-btn { width:32px; height:32px; border:none; border-radius:50%; background:#eee; color:var(--accent); cursor:pointer; }
-    /* Thumbnails */
+    .arrow-btn:hover { background: var(--accent); color: #fff; transform: scale(1.1); }
     .thumbnail-container { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin:16px 0; }
-    .thumbnail-container img { width:80px; height:80px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent; }
+    .thumbnail-container img { width:80px; height:80px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent; box-shadow: 0 4px 12px var(--shadow); }
     .thumbnail-container img.selected { border-color:var(--accent); }
     .no-mockups { text-align:center; color:#777; margin:16px 0; }
-    /* Dropdown */
-    .dropdown { position: relative; margin: 24px 0; }
-    #toggle-menu { width:100%; padding:12px; background:var(--accent); color:#fff; border:none; border-radius:8px; cursor:pointer; }
-    .menu { position:absolute; top:100%; left:0; right:0; background:var(--card); border:1px solid #ddd; border-radius:8px; display:none; max-height:300px; overflow-y:auto; padding:8px; }
-    .menu.open { display:block; }
-    .icons-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(48px,1fr)); gap:12px; }
-    .icon-btn { width:48px; height:48px; background:#f9f9f9; border:none; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-    /* Canvas & Download */
-    canvas { width:100%; height:auto; margin:32px 0; border-radius:8px; }
-    #download-btn { width:100%; padding:14px; background:var(--accent); color:#fff; border:none; border-radius:8px; cursor:pointer; }
+    canvas { width:100%; height:auto; margin:32px 0; border-radius:8px; box-shadow: 0 6px 18px var(--shadow); }
+    #download-btn { width:100%; padding:14px; background:var(--accent); color:#fff; border:none; border-radius:8px; font-size:1rem; cursor:pointer; box-shadow: 0 4px 12px var(--shadow); }
+    #download-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 24px var(--shadow); }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Ultimate T-Shirt Mockup Creator</h1>
+    <h1>T-Shirt Mockup Creator</h1>
 
     <label for="add-mockup-input">Upload a mockup (JPG/PNG)</label>
     <input type="file" id="add-mockup-input" accept="image/*">
@@ -70,7 +63,7 @@
 
     <div class="controls">
       <div class="control-group">
-        <label>Scale: <span id="scale-val">1.00</span></label>
+        <label for="scale-range">Scale: <span id="scale-val">1.00</span></label>
         <div class="slider-wrapper">
           <button class="arrow-btn" data-target="scale-range" data-step="-0.01">←</button>
           <input type="range" id="scale-range" min="0.1" max="2" step="0.01" value="1.0">
@@ -78,7 +71,7 @@
         </div>
       </div>
       <div class="control-group">
-        <label>X Offset: <span id="offset-x-val">0</span>%</label>
+        <label for="offset-x-range">X Offset: <span id="offset-x-val">0</span>%</label>
         <div class="slider-wrapper">
           <button class="arrow-btn" data-target="offset-x-range" data-step="-1">←</button>
           <input type="range" id="offset-x-range" min="-50" max="50" step="1" value="0">
@@ -86,7 +79,7 @@
         </div>
       </div>
       <div class="control-group">
-        <label>Y Offset: <span id="offset-y-val">0</span>%</label>
+        <label for="offset-y-range">Y Offset: <span id="offset-y-val">0</span>%</label>
         <div class="slider-wrapper">
           <button class="arrow-btn" data-target="offset-y-range" data-step="-1">←</button>
           <input type="range" id="offset-y-range" min="-50" max="50" step="1" value="0">
@@ -94,17 +87,13 @@
         </div>
       </div>
       <div class="control-group">
-        <label>Export Resolution</label>
+        <label for="resolution-select">Export Resolution</label>
         <select id="resolution-select">
-          <option>1×</option><option selected>2×</option><option>3×</option><option>4×</option>
+          <option value="1">1× (Original)</option>
+          <option value="2" selected>2× (Retina)</option>
+          <option value="3">3×</option>
+          <option value="4">4×</option>
         </select>
-      </div>
-    </div>
-
-    <div class="dropdown">
-      <button id="toggle-menu">Creator Options ▾</button>
-      <div class="menu" id="options-menu">
-        <div class="icons-grid" id="icons-grid"></div>
       </div>
     </div>
 
@@ -113,22 +102,47 @@
   </div>
 
   <script>
-    // Dropdown toggle
-    document.getElementById('toggle-menu').addEventListener('click', function() {
-      document.getElementById('options-menu').classList.toggle('open');
-    });
-
-    // Populate icons grid with labeled placeholders
-    const iconsGrid = document.getElementById('icons-grid');
-    const features = ['Crop', 'Rotate', 'Resize', 'Move', 'Skew', 'Warp', 'Free Transform', 'Puppet'];
-    features.forEach(name => {
-      const btn = document.createElement('button');
-      btn.className = 'icon-btn';
-      btn.title = name;
-      btn.innerHTML = `<svg viewBox='0 0 24 24'><circle cx='12' cy='12' r='10'/><text x='12' y='16' font-size='8' text-anchor='middle' fill='#333'>${name.charAt(0)}</text></svg>`;
-      btn.onclick = () => alert(name + ' clicked');
-      iconsGrid.appendChild(btn);
-    });
+    const canvas = document.getElementById('mockup-canvas'), ctx = canvas.getContext('2d');
+    let mockupImages = {}, selectedMockup = null, designImg = null, pressTimer = null;
+    const addMockupInput = document.getElementById('add-mockup-input'), thumbnails = document.getElementById('mockup-thumbnails'), noMsg = document.getElementById('no-mockups-msg'), designInput = document.getElementById('design-input'), scaleRange = document.getElementById('scale-range'), offsetXRange = document.getElementById('offset-x-range'), offsetYRange = document.getElementById('offset-y-range'), resolutionSelect = document.getElementById('resolution-select'), scaleVal = document.getElementById('scale-val'), offsetXVal = document.getElementById('offset-x-val'), offsetYVal = document.getElementById('offset-y-val');
+    function loadStoredMockups() {
+      const stored = JSON.parse(localStorage.getItem('mockupImages') || '{}');
+      mockupImages = stored;
+      localStorage.setItem('mockupImages', JSON.stringify(stored));
+    }
+    function renderThumbnails() {
+      thumbnails.innerHTML = '';
+      const keys = Object.keys(mockupImages);
+      if (!keys.length) { noMsg.style.display = 'block'; return; }
+      noMsg.style.display = 'none';
+      keys.forEach(label => {
+        const img = document.createElement('img'); img.src = mockupImages[label]; img.alt = label;
+        img.onclick = () => selectMockup(label, img);
+        img.addEventListener('mousedown', startPress(label)); img.addEventListener('touchstart', startPress(label));
+        img.addEventListener('mouseup', cancelPress); img.addEventListener('mouseleave', cancelPress); img.addEventListener('touchend', cancelPress);
+        thumbnails.appendChild(img);
+      });
+      if (!selectedMockup && keys.length) thumbnails.firstChild.click();
+    }
+    function startPress(label) { return () => { pressTimer = setTimeout(() => removeMockup(label), 800); }; }
+    function cancelPress() { clearTimeout(pressTimer); }
+    function selectMockup(label, imgEl) {
+      thumbnails.querySelectorAll('img').forEach(i => i.classList.remove('selected')); imgEl.classList.add('selected');
+      selectedMockup = label; localStorage.setItem('selectedMockup', label); loadMockup(label);
+    }
+    function removeMockup(label) { if (!confirm(`Remove ${label}?`)) return; delete mockupImages[label]; localStorage.setItem('mockupImages', JSON.stringify(mockupImages)); if (selectedMockup === label) { localStorage.removeItem('selectedMockup'); selectedMockup = null; } renderThumbnails(); }
+    function loadMockup(label) {
+      const bg = new Image(); bg.onload = () => { canvas.width = bg.width; canvas.height = bg.height; drawCanvas(); };
+      bg.src = mockupImages[label]; window.bgImg = bg;
+    }
+    function drawCanvas() { if (!window.bgImg) return; ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(window.bgImg, 0, 0); if (designImg) { const s = parseFloat(scaleRange.value), w = designImg.width * s, h = designImg.height * s, xOff = parseInt(offsetXRange.value) / 100 * canvas.width, yOff = parseInt(offsetYRange.value) / 100 * canvas.height, x = (canvas.width - w) / 2 + xOff, y = (canvas.height - h) / 2 + yOff; ctx.drawImage(designImg, x, y, w, h); } }
+    function updateLabels() { scaleVal.textContent = parseFloat(scaleRange.value).toFixed(2); offsetXVal.textContent = offsetXRange.value; offsetYVal.textContent = offsetYRange.value; }
+    addMockupInput.onchange = e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { mockupImages[f.name] = r.result; localStorage.setItem('mockupImages', JSON.stringify(mockupImages)); localStorage.setItem('selectedMockup', f.name); selectedMockup = f.name; renderThumbnails(); }; r.readAsDataURL(f); };
+    designInput.onchange = e => { const f = e.target.files[0]; if (!f) return; designImg = new Image(); designImg.onload = () => { updateLabels(); drawCanvas(); }; designImg.src = URL.createObjectURL(f); };
+    Array.from(document.querySelectorAll('.arrow-btn')).forEach(btn => { btn.onclick = () => { const s = document.getElementById(btn.dataset.target), step = parseFloat(btn.dataset.step), v = Math.min(Math.max(parseFloat(s.value) + step, parseFloat(s.min)), parseFloat(s.max)); s.value = v.toFixed(s.step.split('.')[1]?.length || 0); s.dispatchEvent(new Event('input')); }; });
+    [scaleRange, offsetXRange, offsetYRange].forEach(slider => { slider.oninput = () => { updateLabels(); drawCanvas(); }; });
+    document.getElementById('download-btn').onclick = () => { const m = parseInt(resolutionSelect.value, 10), ex = document.createElement('canvas'), exCtx = ex.getContext('2d'); ex.width = canvas.width * m; ex.height = canvas.height * m; exCtx.scale(m, m); exCtx.drawImage(window.bgImg, 0, 0); if (designImg) { const s = parseFloat(scaleRange.value), w = designImg.width * s, h = designImg.height * s, xOff = parseInt(offsetXRange.value) / 100 * canvas.width, yOff = parseInt(offsetYRange.value) / 100 * canvas.height, x = (canvas.width - w) / 2 + xOff, y = (canvas.height - h) / 2 + yOff; exCtx.drawImage(designImg, x, y, w, h); } ex.toBlob(blob => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `tshirt-mockup@${m}x.png`; a.click(); URL.revokeObjectURL(a.href); }, 'image/png'); };
+    (function() { loadStoredMockups(); renderThumbnails(); updateLabels(); })();
   </script>
 </body>
 </html>
