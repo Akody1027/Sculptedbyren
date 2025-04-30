@@ -15,7 +15,7 @@
       --accent: #4A90E2;
       --shadow: rgba(0,0,0,0.1);
     }
-    * { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; }
     body {
       margin: 0; padding: 20px;
       font-family: 'Inter', sans-serif;
@@ -72,20 +72,23 @@
       animation-delay: 0.2s;
     }
     .thumbnail-container img {
-      width: 80px; border-radius: 8px;
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
       cursor: pointer;
       border: 2px solid transparent;
       box-shadow: 0 4px 12px var(--shadow);
       opacity: 0;
       animation: fadeInUp 0.4s forwards;
     }
-    .thumbnail-container img:hover {
-      transform: translateY(-4px) scale(1.05);
-      box-shadow: 0 8px 24px var(--shadow);
-    }
     @keyframes fadeInUp {
       from { opacity:0; transform: translateY(10px) }
       to   { opacity:1; transform: translateY(0) }
+    }
+    .thumbnail-container img:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 8px 24px var(--shadow);
     }
     .thumbnail-container img.selected {
       border-color: var(--accent);
@@ -109,8 +112,7 @@
       display: flex; flex-direction: column;
     }
     .control-group label {
-      margin-bottom: 6px;
-      font-size: 0.95rem;
+      margin-bottom: 6px; font-size: 0.95rem;
     }
     .slider-wrapper {
       display: flex; align-items: center; gap: 8px;
@@ -217,19 +219,18 @@
   <script>
     const canvas = document.getElementById('mockup-canvas'),
           ctx    = canvas.getContext('2d');
-    let mockupImages = {}, selectedMockup = null, designImg = null;
+    let mockupImages = {}, selectedMockup = null, designImg = null, pressTimer = null;
 
     // controls
-    const scaleRange     = document.getElementById('scale-range'),
-          offsetXRange   = document.getElementById('offset-x-range'),
-          offsetYRange   = document.getElementById('offset-y-range'),
+    const scaleRange       = document.getElementById('scale-range'),
+          offsetXRange     = document.getElementById('offset-x-range'),
+          offsetYRange     = document.getElementById('offset-y-range'),
           resolutionSelect = document.getElementById('resolution-select'),
-          scaleVal       = document.getElementById('scale-val'),
-          offsetXVal     = document.getElementById('offset-x-val'),
-          offsetYVal     = document.getElementById('offset-y-val'),
-          noMockupsMsg   = document.getElementById('no-mockups-msg');
+          scaleVal         = document.getElementById('scale-val'),
+          offsetXVal       = document.getElementById('offset-x-val'),
+          offsetYVal       = document.getElementById('offset-y-val'),
+          noMockupsMsg     = document.getElementById('no-mockups-msg');
 
-    // purge old built-ins, load stored
     function loadStoredMockups() {
       const stored = JSON.parse(localStorage.getItem('mockupImages')||'{}');
       ['black','white','black.jpg','white.jpg'].forEach(k=>delete stored[k]);
@@ -237,7 +238,6 @@
       localStorage.setItem('mockupImages', JSON.stringify(stored));
     }
 
-    // thumbnails
     function renderThumbnails() {
       const cont = document.getElementById('mockup-thumbnails');
       cont.innerHTML = '';
@@ -247,33 +247,60 @@
         return;
       }
       noMockupsMsg.style.display = 'none';
-      labels.forEach((label,i)=>{
+      labels.forEach((label,i) => {
         const img = document.createElement('img');
         img.src = mockupImages[label];
         img.alt = label;
         img.dataset.label = label;
         img.style.animationDelay = `${i*0.1}s`;
-        if (label === localStorage.getItem('selectedMockup')) {
-          img.classList.add('selected');
-          selectedMockup = label; loadMockup(label);
-        }
-        img.onclick = ()=>{
-          cont.querySelectorAll('img').forEach(x=>x.classList.remove('selected'));
+
+        // click to select
+        img.addEventListener('click', () => {
+          cont.querySelectorAll('img').forEach(x => x.classList.remove('selected'));
           img.classList.add('selected');
           selectedMockup = label;
           localStorage.setItem('selectedMockup', label);
           loadMockup(label);
-        };
+        });
+
+        // long-press to remove
+        img.addEventListener('mousedown', startPress);
+        img.addEventListener('touchstart', startPress);
+        img.addEventListener('mouseup', cancelPress);
+        img.addEventListener('mouseleave', cancelPress);
+        img.addEventListener('touchend', cancelPress);
+
+        function startPress(e) {
+          e.preventDefault();
+          pressTimer = setTimeout(() => removeMockup(label), 800);
+        }
+        function cancelPress() {
+          clearTimeout(pressTimer);
+        }
+
         cont.appendChild(img);
       });
-      if (!selectedMockup && labels.length)
+      if (!selectedMockup && labels.length) {
         cont.querySelector('img').click();
+      }
+    }
+
+    function removeMockup(label) {
+      if (!confirm(`Remove mockup “${label}”?`)) return;
+      delete mockupImages[label];
+      localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
+      if (selectedMockup === label) {
+        localStorage.removeItem('selectedMockup');
+        selectedMockup = null;
+      }
+      renderThumbnails();
     }
 
     function loadMockup(label) {
       const bg = new Image();
-      bg.onload = ()=>{
-        canvas.width = bg.width; canvas.height = bg.height;
+      bg.onload = () => {
+        canvas.width  = bg.width;
+        canvas.height = bg.height;
         drawCanvas();
       };
       bg.src = mockupImages[label];
@@ -283,16 +310,16 @@
     function drawCanvas() {
       if (!window.bgImg) return;
       ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.drawImage(window.bgImg,0,0,canvas.width,canvas.height);
+      ctx.drawImage(window.bgImg, 0, 0, canvas.width, canvas.height);
       if (designImg) {
-        const s   = parseFloat(scaleRange.value),
-              w   = designImg.width * s,
-              h   = designImg.height * s,
-              xOff= parseInt(offsetXRange.value)/100 * canvas.width,
-              yOff= parseInt(offsetYRange.value)/100 * canvas.height,
-              x   = (canvas.width - w)/2 + xOff,
-              y   = (canvas.height - h)/2 + yOff;
-        ctx.drawImage(designImg, x,y,w,h);
+        const s    = parseFloat(scaleRange.value),
+              w    = designImg.width * s,
+              h    = designImg.height * s,
+              xOff = parseInt(offsetXRange.value)/100 * canvas.width,
+              yOff = parseInt(offsetYRange.value)/100 * canvas.height,
+              x    = (canvas.width - w)/2 + xOff,
+              y    = (canvas.height - h)/2 + yOff;
+        ctx.drawImage(designImg, x, y, w, h);
       }
     }
 
@@ -302,70 +329,68 @@
       offsetYVal.textContent = offsetYRange.value;
     }
 
-    // uploads
     document.getElementById('add-mockup-input').onchange = e => {
-      const f=e.target.files[0]; if(!f)return;
-      const r=new FileReader();
-      r.onload=()=>{
-        mockupImages[f.name]=r.result;
-        localStorage.setItem('mockupImages',JSON.stringify(mockupImages));
-        localStorage.setItem('selectedMockup',f.name);
-        selectedMockup=f.name;
+      const f = e.target.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        mockupImages[f.name] = r.result;
+        localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
+        localStorage.setItem('selectedMockup', f.name);
+        selectedMockup = f.name;
         renderThumbnails();
       };
       r.readAsDataURL(f);
     };
+
     document.getElementById('design-input').onchange = e => {
-      const f=e.target.files[0]; if(!f)return;
-      designImg=new Image();
-      designImg.onload=()=>{ updateLabels(); drawCanvas(); };
-      designImg.src=URL.createObjectURL(f);
+      const f = e.target.files[0]; if (!f) return;
+      designImg = new Image();
+      designImg.onload = () => { updateLabels(); drawCanvas(); };
+      designImg.src = URL.createObjectURL(f);
     };
 
-    // arrows
-    document.querySelectorAll('.arrow-btn').forEach(btn=>{
-      btn.onclick=()=>{
-        const s=document.getElementById(btn.dataset.target),
-              step=parseFloat(btn.dataset.step),
-              v=Math.min(Math.max(parseFloat(s.value)+step,parseFloat(s.min)),parseFloat(s.max));
-        s.value=v.toFixed(s.step.split('.')[1]?.length||0);
+    document.querySelectorAll('.arrow-btn').forEach(btn => {
+      btn.onclick = () => {
+        const s = document.getElementById(btn.dataset.target),
+              step = parseFloat(btn.dataset.step),
+              v = Math.min(Math.max(parseFloat(s.value) + step, parseFloat(s.min)), parseFloat(s.max));
+        s.value = v.toFixed(s.step.split('.')[1]?.length || 0);
         s.dispatchEvent(new Event('input'));
       };
     });
 
-    [scaleRange,offsetXRange,offsetYRange].forEach(slider=>{
-      slider.oninput=()=>{ updateLabels(); drawCanvas(); };
+    [scaleRange, offsetXRange, offsetYRange].forEach(slider => {
+      slider.oninput = () => { updateLabels(); drawCanvas(); };
     });
 
-    // download with resolution multiplier
     document.getElementById('download-btn').onclick = () => {
-      const m = parseInt(resolutionSelect.value,10),
-            ex = document.createElement('canvas'),
-            exCtx = ex.getContext('2d');
-      ex.width = canvas.width * m;
-      ex.height= canvas.height* m;
+      const m    = parseInt(resolutionSelect.value,10),
+            ex   = document.createElement('canvas'),
+            exCtx= ex.getContext('2d');
+      ex.width  = canvas.width  * m;
+      ex.height = canvas.height * m;
       exCtx.scale(m,m);
-      exCtx.drawImage(window.bgImg,0,0,canvas.width,canvas.height);
-      if(designImg){
-        const s   = parseFloat(scaleRange.value),
-              w   = designImg.width * s,
-              h   = designImg.height * s,
-              xOff= parseInt(offsetXRange.value)/100 * canvas.width,
-              yOff= parseInt(offsetYRange.value)/100 * canvas.height,
-              x   = (canvas.width-w)/2+xOff,
-              y   = (canvas.height-h)/2+yOff;
-        exCtx.drawImage(designImg,x,y,w,h);
+      exCtx.drawImage(window.bgImg, 0, 0, canvas.width, canvas.height);
+      if (designImg) {
+        const s    = parseFloat(scaleRange.value),
+              w    = designImg.width * s,
+              h    = designImg.height * s,
+              xOff = parseInt(offsetXRange.value)/100 * canvas.width,
+              yOff = parseInt(offsetYRange.value)/100 * canvas.height,
+              x    = (canvas.width - w)/2 + xOff,
+              y    = (canvas.height - h)/2 + yOff;
+        exCtx.drawImage(designImg, x, y, w, h);
       }
-      ex.toBlob(blob=>{
-        const a=document.createElement('a');
-        a.href=URL.createObjectURL(blob);
-        a.download=`tshirt-mockup@${m}x.png`;
+      ex.toBlob(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `tshirt-mockup@${m}x.png`;
         a.click();
         URL.revokeObjectURL(a.href);
-      },'image/png');
+      }, 'image/png');
     };
 
-    // init
+    // initialize
     (()=>{
       loadStoredMockups();
       renderThumbnails();
