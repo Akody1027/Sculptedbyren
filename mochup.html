@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>T-Shirt Mockup Creator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 20px auto;
+    }
+    input[type="file"] {
+      margin: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>T-Shirt Mockup Creator</h1>
+
+  <div>
+    <label for="mockup-input">1. Select shirt mockup image:</label><br>
+    <input type="file" id="mockup-input" accept="image/*">
+  </div>
+
+  <div>
+    <label for="design-input">2. Select design PNG:</label><br>
+    <input type="file" id="design-input" accept="image/png">
+  </div>
+
+  <canvas id="mockup-canvas"></canvas>
+
+  <button id="download-btn">Download Mockup</button>
+
+  <script>
+    const canvas = document.getElementById('mockup-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let backgroundImg = new Image();
+    let currentDesignImg = null;
+
+    const mockupInput   = document.getElementById('mockup-input');
+    const designInput   = document.getElementById('design-input');
+    const downloadBtn   = document.getElementById('download-btn');
+
+    function drawCanvas() {
+      if (!backgroundImg.src) return;
+      // clear and draw shirt
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(backgroundImg, 0, 0);
+
+      // then draw design if present
+      if (currentDesignImg) {
+        const maxW = canvas.width * 0.7;
+        const maxH = canvas.height * 0.7;
+        let w = currentDesignImg.width;
+        let h = currentDesignImg.height;
+        const scale = Math.min(maxW / w, maxH / h, 1);
+        w *= scale; h *= scale;
+        const x = (canvas.width - w) / 2;
+        const y = (canvas.height - h) / 2;
+        ctx.drawImage(currentDesignImg, x, y, w, h);
+      }
+    }
+
+    // Load mockup image
+    mockupInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      backgroundImg = new Image();
+      backgroundImg.onload = () => {
+        canvas.width  = backgroundImg.width;
+        canvas.height = backgroundImg.height;
+        drawCanvas();
+      };
+      backgroundImg.src = URL.createObjectURL(file);
+    });
+
+    // Load design PNG
+    designInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      currentDesignImg = new Image();
+      currentDesignImg.onload = drawCanvas;
+      currentDesignImg.src = URL.createObjectURL(file);
+    });
+
+    // Download combined image
+    downloadBtn.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'tshirt-mockup.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  </script>
+</body>
+</html>
