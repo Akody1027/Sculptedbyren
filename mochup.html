@@ -51,7 +51,8 @@
     @keyframes slideIn {
       to { opacity:1; transform: translateX(0) }
     }
-    input[type="file"] {
+    input[type="file"],
+    select {
       width: 100%;
       padding: 10px 12px;
       border: 1px solid #ccc;
@@ -198,6 +199,15 @@
           <button class="arrow-btn" data-target="offset-y-range" data-step="1">→</button>
         </div>
       </div>
+      <div class="control-group">
+        <label for="resolution-select">Export Resolution</label>
+        <select id="resolution-select">
+          <option value="1">1× (Original)</option>
+          <option value="2" selected>2× (Retina)</option>
+          <option value="3">3×</option>
+          <option value="4">4×</option>
+        </select>
+      </div>
     </div>
 
     <canvas id="mockup-canvas"></canvas>
@@ -209,35 +219,35 @@
           ctx    = canvas.getContext('2d');
     let mockupImages = {}, selectedMockup = null, designImg = null;
 
-    // Controls
-    const scaleRange   = document.getElementById('scale-range'),
-          offsetXRange = document.getElementById('offset-x-range'),
-          offsetYRange = document.getElementById('offset-y-range'),
-          scaleVal     = document.getElementById('scale-val'),
-          offsetXVal   = document.getElementById('offset-x-val'),
-          offsetYVal   = document.getElementById('offset-y-val'),
-          noMockupsMsg = document.getElementById('no-mockups-msg');
+    // controls
+    const scaleRange     = document.getElementById('scale-range'),
+          offsetXRange   = document.getElementById('offset-x-range'),
+          offsetYRange   = document.getElementById('offset-y-range'),
+          resolutionSelect = document.getElementById('resolution-select'),
+          scaleVal       = document.getElementById('scale-val'),
+          offsetXVal     = document.getElementById('offset-x-val'),
+          offsetYVal     = document.getElementById('offset-y-val'),
+          noMockupsMsg   = document.getElementById('no-mockups-msg');
 
-    // Load and purge any old black/white defaults
+    // purge old built-ins, load stored
     function loadStoredMockups() {
       const stored = JSON.parse(localStorage.getItem('mockupImages')||'{}');
-      // remove any “black” or “white” keys
-      ['black','white','black.jpg','white.jpg'].forEach(k => delete stored[k]);
+      ['black','white','black.jpg','white.jpg'].forEach(k=>delete stored[k]);
       mockupImages = stored;
       localStorage.setItem('mockupImages', JSON.stringify(stored));
     }
 
-    // Render thumbnails with staggered animation
+    // thumbnails
     function renderThumbnails() {
-      const container = document.getElementById('mockup-thumbnails');
-      container.innerHTML = '';
+      const cont = document.getElementById('mockup-thumbnails');
+      cont.innerHTML = '';
       const labels = Object.keys(mockupImages);
       if (!labels.length) {
         noMockupsMsg.style.display = 'block';
         return;
       }
       noMockupsMsg.style.display = 'none';
-      labels.forEach((label,i) => {
+      labels.forEach((label,i)=>{
         const img = document.createElement('img');
         img.src = mockupImages[label];
         img.alt = label;
@@ -245,28 +255,25 @@
         img.style.animationDelay = `${i*0.1}s`;
         if (label === localStorage.getItem('selectedMockup')) {
           img.classList.add('selected');
-          selectedMockup = label;
-          loadMockup(label);
+          selectedMockup = label; loadMockup(label);
         }
-        img.onclick = () => {
-          document.querySelectorAll('#mockup-thumbnails img')
-                  .forEach(i=>i.classList.remove('selected'));
+        img.onclick = ()=>{
+          cont.querySelectorAll('img').forEach(x=>x.classList.remove('selected'));
           img.classList.add('selected');
           selectedMockup = label;
           localStorage.setItem('selectedMockup', label);
           loadMockup(label);
         };
-        container.appendChild(img);
+        cont.appendChild(img);
       });
       if (!selectedMockup && labels.length)
-        container.querySelector('img').click();
+        cont.querySelector('img').click();
     }
 
     function loadMockup(label) {
       const bg = new Image();
-      bg.onload = () => {
-        canvas.width  = bg.width;
-        canvas.height = bg.height;
+      bg.onload = ()=>{
+        canvas.width = bg.width; canvas.height = bg.height;
         drawCanvas();
       };
       bg.src = mockupImages[label];
@@ -276,15 +283,15 @@
     function drawCanvas() {
       if (!window.bgImg) return;
       ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.drawImage(window.bgImg, 0,0,canvas.width,canvas.height);
+      ctx.drawImage(window.bgImg,0,0,canvas.width,canvas.height);
       if (designImg) {
-        const s = parseFloat(scaleRange.value),
-              w = designImg.width * s,
-              h = designImg.height * s,
-              xOff = parseInt(offsetXRange.value)/100 * canvas.width,
-              yOff = parseInt(offsetYRange.value)/100 * canvas.height,
-              x = (canvas.width - w)/2 + xOff,
-              y = (canvas.height - h)/2 + yOff;
+        const s   = parseFloat(scaleRange.value),
+              w   = designImg.width * s,
+              h   = designImg.height * s,
+              xOff= parseInt(offsetXRange.value)/100 * canvas.width,
+              yOff= parseInt(offsetYRange.value)/100 * canvas.height,
+              x   = (canvas.width - w)/2 + xOff,
+              y   = (canvas.height - h)/2 + yOff;
         ctx.drawImage(designImg, x,y,w,h);
       }
     }
@@ -295,53 +302,70 @@
       offsetYVal.textContent = offsetYRange.value;
     }
 
-    // Upload a new mockup
+    // uploads
     document.getElementById('add-mockup-input').onchange = e => {
-      const f = e.target.files[0]; if (!f) return;
-      const r = new FileReader();
-      r.onload = () => {
-        mockupImages[f.name] = r.result;
-        localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
-        localStorage.setItem('selectedMockup', f.name);
-        selectedMockup = f.name;
+      const f=e.target.files[0]; if(!f)return;
+      const r=new FileReader();
+      r.onload=()=>{
+        mockupImages[f.name]=r.result;
+        localStorage.setItem('mockupImages',JSON.stringify(mockupImages));
+        localStorage.setItem('selectedMockup',f.name);
+        selectedMockup=f.name;
         renderThumbnails();
       };
       r.readAsDataURL(f);
     };
-
-    // Upload design
     document.getElementById('design-input').onchange = e => {
-      const f = e.target.files[0]; if (!f) return;
-      designImg = new Image();
-      designImg.onload = () => { updateLabels(); drawCanvas(); };
-      designImg.src = URL.createObjectURL(f);
+      const f=e.target.files[0]; if(!f)return;
+      designImg=new Image();
+      designImg.onload=()=>{ updateLabels(); drawCanvas(); };
+      designImg.src=URL.createObjectURL(f);
     };
 
-    // Arrow buttons
-    document.querySelectorAll('.arrow-btn').forEach(btn => {
-      btn.onclick = () => {
-        const s = document.getElementById(btn.dataset.target),
-              step = parseFloat(btn.dataset.step),
-              v = Math.min(Math.max(parseFloat(s.value) + step, parseFloat(s.min)), parseFloat(s.max));
-        s.value = v.toFixed(s.step.split('.')[1]?.length||0);
+    // arrows
+    document.querySelectorAll('.arrow-btn').forEach(btn=>{
+      btn.onclick=()=>{
+        const s=document.getElementById(btn.dataset.target),
+              step=parseFloat(btn.dataset.step),
+              v=Math.min(Math.max(parseFloat(s.value)+step,parseFloat(s.min)),parseFloat(s.max));
+        s.value=v.toFixed(s.step.split('.')[1]?.length||0);
         s.dispatchEvent(new Event('input'));
       };
     });
 
-    // Sliders
     [scaleRange,offsetXRange,offsetYRange].forEach(slider=>{
-      slider.oninput = ()=>{ updateLabels(); drawCanvas(); };
+      slider.oninput=()=>{ updateLabels(); drawCanvas(); };
     });
 
-    // Download
+    // download with resolution multiplier
     document.getElementById('download-btn').onclick = () => {
-      const a = document.createElement('a');
-      a.download = 'tshirt-mockup.png';
-      a.href = canvas.toDataURL('image/png');
-      a.click();
+      const m = parseInt(resolutionSelect.value,10),
+            ex = document.createElement('canvas'),
+            exCtx = ex.getContext('2d');
+      ex.width = canvas.width * m;
+      ex.height= canvas.height* m;
+      exCtx.scale(m,m);
+      exCtx.drawImage(window.bgImg,0,0,canvas.width,canvas.height);
+      if(designImg){
+        const s   = parseFloat(scaleRange.value),
+              w   = designImg.width * s,
+              h   = designImg.height * s,
+              xOff= parseInt(offsetXRange.value)/100 * canvas.width,
+              yOff= parseInt(offsetYRange.value)/100 * canvas.height,
+              x   = (canvas.width-w)/2+xOff,
+              y   = (canvas.height-h)/2+yOff;
+        exCtx.drawImage(designImg,x,y,w,h);
+      }
+      ex.toBlob(blob=>{
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(blob);
+        a.download=`tshirt-mockup@${m}x.png`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      },'image/png');
     };
 
-    // Init
+    // init
     (()=>{
       loadStoredMockups();
       renderThumbnails();
