@@ -5,6 +5,8 @@
   <!-- Responsive -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>T-Shirt Mockup Creator</title>
+  <!-- Modern font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #f5f5f5;
@@ -13,63 +15,53 @@
       --accent: #556ee6;
       --shadow: rgba(0, 0, 0, 0.1);
     }
-    * {
-      box-sizing: border-box;
-      transition: all 0.3s ease;
-    }
+    * { box-sizing: border-box; transition: all 0.25s ease; }
     body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
+      margin: 0; padding: 0;
+      font-family: 'Inter', sans-serif;
       background: var(--bg);
       color: var(--text);
-      display: flex;
-      justify-content: center;
-      min-height: 100vh;
-      align-items: flex-start;
-      padding-top: 20px;
+      display: flex; justify-content: center;
+      padding: 20px;
     }
     .container {
       background: var(--card-bg);
       border-radius: 12px;
       box-shadow: 0 4px 12px var(--shadow);
+      width: 100%; max-width: 650px;
       padding: 24px;
-      width: 100%;
-      max-width: 650px;
-      animation: fadeIn 0.5s ease-out;
+      animation: fadeIn 0.4s ease-out;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(-10px) }
+      to   { opacity: 1; transform: translateY(0) }
     }
     h1 {
-      margin-top: 0;
-      font-size: 1.5rem;
+      margin: 0 0 16px;
+      font-size: 1.75rem;
       text-align: center;
-      margin-bottom: 16px;
+      font-weight: 600;
     }
     label {
       display: block;
       font-weight: 500;
-      margin: 12px 0 4px;
+      margin: 16px 0 6px;
     }
     input[type="file"] {
       width: 100%;
-      padding: 10px;
+      padding: 8px 12px;
       border: 1px solid #ccc;
       border-radius: 8px;
       background: #fafafa;
+      cursor: pointer;
     }
     .thumbnail-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 12px;
-      margin: 12px 0;
+      display: flex; flex-wrap: wrap;
+      justify-content: center; gap: 12px;
+      margin: 16px 0;
     }
     .thumbnail-container img {
-      width: 80px;
-      height: auto;
+      width: 80px; height: auto;
       border-radius: 8px;
       cursor: pointer;
       border: 2px solid transparent;
@@ -83,29 +75,50 @@
       border-color: var(--accent);
       box-shadow: 0 4px 12px var(--shadow);
     }
-    .controls {
+    .no-mockups {
+      text-align: center;
+      color: #777;
       margin: 16px 0;
+      font-size: 0.9rem;
+    }
+    .controls {
+      margin: 24px 0;
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
+      gap: 16px;
     }
     .control-group label {
       margin-bottom: 4px;
+      font-size: 0.95rem;
     }
-    input[type="range"] {
-      width: 100%;
+    .slider-wrapper {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .slider-wrapper input[type="range"] {
+      flex: 1;
       accent-color: var(--accent);
       height: 6px;
       border-radius: 4px;
     }
+    .arrow-btn {
+      width: 32px; height: 32px;
+      border: none; border-radius: 50%;
+      background: #eee; color: var(--accent);
+      font-size: 1rem; line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 2px 6px var(--shadow);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .arrow-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
     canvas {
-      width: 100%;
-      height: auto;
+      width: 100%; height: auto;
       border-radius: 8px;
       box-shadow: 0 4px 12px var(--shadow);
-      margin: 16px 0;
+      margin: 24px 0;
     }
-    button {
+    button#download-btn {
       width: 100%;
       padding: 14px;
       font-size: 1rem;
@@ -117,15 +130,9 @@
       cursor: pointer;
       box-shadow: 0 2px 6px var(--shadow);
     }
-    button:hover {
+    button#download-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 16px var(--shadow);
-    }
-    .no-mockups {
-      color: #777;
-      font-size: 0.9rem;
-      margin: 16px 0;
-      text-align: center;
     }
   </style>
 </head>
@@ -133,27 +140,42 @@
   <div class="container">
     <h1>T-Shirt Mockup Creator</h1>
 
-    <label for="add-mockup-input">1. Upload a mockup (JPG/PNG)</label>
+    <!-- upload mockups -->
+    <label for="add-mockup-input">Upload a mockup (JPG/PNG)</label>
     <input type="file" id="add-mockup-input" accept="image/*">
 
     <div id="mockup-thumbnails" class="thumbnail-container"></div>
     <div id="no-mockups-msg" class="no-mockups">No mockups yet — upload one above.</div>
 
-    <label for="design-input">2. Select your design (PNG)</label>
+    <!-- design -->
+    <label for="design-input">Select your design (PNG)</label>
     <input type="file" id="design-input" accept="image/png">
 
+    <!-- controls with arrows -->
     <div class="controls">
       <div class="control-group">
         <label for="scale-range">Scale: <span id="scale-val">1.00</span></label>
-        <input type="range" id="scale-range" min="0.1" max="2" step="0.01" value="1.0">
+        <div class="slider-wrapper">
+          <button class="arrow-btn" data-target="scale-range" data-step="-0.01">←</button>
+          <input type="range" id="scale-range" min="0.1" max="2" step="0.01" value="1.0">
+          <button class="arrow-btn" data-target="scale-range" data-step="0.01">→</button>
+        </div>
       </div>
       <div class="control-group">
         <label for="offset-x-range">X Offset: <span id="offset-x-val">0</span>%</label>
-        <input type="range" id="offset-x-range" min="-50" max="50" step="1" value="0">
+        <div class="slider-wrapper">
+          <button class="arrow-btn" data-target="offset-x-range" data-step="-1">←</button>
+          <input type="range" id="offset-x-range" min="-50" max="50" step="1" value="0">
+          <button class="arrow-btn" data-target="offset-x-range" data-step="1">→</button>
+        </div>
       </div>
       <div class="control-group">
         <label for="offset-y-range">Y Offset: <span id="offset-y-val">0</span>%</label>
-        <input type="range" id="offset-y-range" min="-50" max="50" step="1" value="0">
+        <div class="slider-wrapper">
+          <button class="arrow-btn" data-target="offset-y-range" data-step="-1">←</button>
+          <input type="range" id="offset-y-range" min="-50" max="50" step="1" value="0">
+          <button class="arrow-btn" data-target="offset-y-range" data-step="1">→</button>
+        </div>
       </div>
     </div>
 
@@ -162,19 +184,18 @@
   </div>
 
   <script>
-    const canvas = document.getElementById('mockup-canvas');
-    const ctx    = canvas.getContext('2d');
-    let mockupImages   = {};      
-    let selectedMockup = null;    
-    let designImg      = null;
+    const canvas = document.getElementById('mockup-canvas'),
+          ctx    = canvas.getContext('2d');
+    let mockupImages = {}, selectedMockup = null, designImg = null;
 
-    const scaleRange   = document.getElementById('scale-range');
-    const offsetXRange = document.getElementById('offset-x-range');
-    const offsetYRange = document.getElementById('offset-y-range');
-    const scaleVal     = document.getElementById('scale-val');
-    const offsetXVal   = document.getElementById('offset-x-val');
-    const offsetYVal   = document.getElementById('offset-y-val');
-    const noMockupsMsg = document.getElementById('no-mockups-msg');
+    // controls
+    const scaleRange   = document.getElementById('scale-range'),
+          offsetXRange = document.getElementById('offset-x-range'),
+          offsetYRange = document.getElementById('offset-y-range'),
+          scaleVal     = document.getElementById('scale-val'),
+          offsetXVal   = document.getElementById('offset-x-val'),
+          offsetYVal   = document.getElementById('offset-y-val'),
+          noMockupsMsg = document.getElementById('no-mockups-msg');
 
     function loadStoredMockups() {
       const stored = localStorage.getItem('mockupImages');
@@ -185,10 +206,7 @@
       const container = document.getElementById('mockup-thumbnails');
       container.innerHTML = '';
       const labels = Object.keys(mockupImages);
-      if (!labels.length) {
-        noMockupsMsg.style.display = 'block';
-        return;
-      }
+      if (!labels.length) { noMockupsMsg.style.display = 'block'; return; }
       noMockupsMsg.style.display = 'none';
       labels.forEach(label => {
         const img = document.createElement('img');
@@ -197,28 +215,26 @@
         img.dataset.label = label;
         if (label === localStorage.getItem('selectedMockup')) {
           img.classList.add('selected');
-          selectedMockup = label;
-          loadMockup(label);
+          selectedMockup = label; loadMockup(label);
         }
-        img.addEventListener('click', () => {
+        img.onclick = () => {
           document.querySelectorAll('#mockup-thumbnails img')
                   .forEach(i => i.classList.remove('selected'));
           img.classList.add('selected');
           selectedMockup = label;
           localStorage.setItem('selectedMockup', label);
           loadMockup(label);
-        });
+        };
         container.appendChild(img);
       });
-      if (!selectedMockup && labels.length) {
+      if (!selectedMockup && labels.length)
         container.querySelector('img').click();
-      }
     }
 
     function loadMockup(label) {
       const bg = new Image();
       bg.onload = () => {
-        canvas.width  = bg.width;
+        canvas.width = bg.width;
         canvas.height = bg.height;
         drawCanvas();
       };
@@ -229,16 +245,16 @@
     function drawCanvas() {
       if (!window.bgImg) return;
       ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.drawImage(window.bgImg, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(window.bgImg, 0,0,canvas.width,canvas.height);
       if (designImg) {
-        const scale = parseFloat(scaleRange.value);
-        const w = designImg.width * scale;
-        const h = designImg.height * scale;
-        const xOff = parseInt(offsetXRange.value)/100 * canvas.width;
-        const yOff = parseInt(offsetYRange.value)/100 * canvas.height;
-        const x = (canvas.width - w)/2 + xOff;
-        const y = (canvas.height - h)/2 + yOff;
-        ctx.drawImage(designImg, x, y, w, h);
+        const scale = parseFloat(scaleRange.value),
+              w     = designImg.width * scale,
+              h     = designImg.height * scale,
+              xOff  = parseInt(offsetXRange.value)/100 * canvas.width,
+              yOff  = parseInt(offsetYRange.value)/100 * canvas.height,
+              x     = (canvas.width - w)/2 + xOff,
+              y     = (canvas.height - h)/2 + yOff;
+        ctx.drawImage(designImg, x,y,w,h);
       }
     }
 
@@ -248,51 +264,51 @@
       offsetYVal.textContent = offsetYRange.value;
     }
 
-    document.getElementById('design-input')
-      .addEventListener('change', e => {
-        const file = e.target.files[0];
-        if (!file) return;
-        designImg = new Image();
-        designImg.onload = () => {
-          updateLabels();
-          drawCanvas();
-        };
-        designImg.src = URL.createObjectURL(file);
-      });
+    document.getElementById('add-mockup-input').onchange = e => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        mockupImages[file.name] = reader.result;
+        localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
+        localStorage.setItem('selectedMockup', file.name);
+        selectedMockup = file.name;
+        renderThumbnails();
+      };
+      reader.readAsDataURL(file);
+    };
 
-    document.getElementById('add-mockup-input')
-      .addEventListener('change', e => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          const dataURL = reader.result;
-          const label = file.name;
-          mockupImages[label] = dataURL;
-          localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
-          localStorage.setItem('selectedMockup', label);
-          selectedMockup = label;
-          renderThumbnails();
-        };
-        reader.readAsDataURL(file);
-      });
+    document.getElementById('design-input').onchange = e => {
+      const file = e.target.files[0]; if (!file) return;
+      designImg = new Image();
+      designImg.onload = () => { updateLabels(); drawCanvas(); };
+      designImg.src = URL.createObjectURL(file);
+    };
+
+    // arrow buttons
+    document.querySelectorAll('.arrow-btn').forEach(btn => {
+      btn.onclick = () => {
+        const slider = document.getElementById(btn.dataset.target);
+        const step   = parseFloat(btn.dataset.step);
+        let val = parseFloat(slider.value) + step;
+        val = Math.min(Math.max(val, parseFloat(slider.min)), parseFloat(slider.max));
+        slider.value = val.toFixed(slider.step.split('.')[1]?.length || 0);
+        slider.dispatchEvent(new Event('input'));
+      };
+    });
 
     [scaleRange, offsetXRange, offsetYRange].forEach(slider =>
-      slider.addEventListener('input', () => {
-        updateLabels();
-        drawCanvas();
-      })
+      slider.oninput = () => { updateLabels(); drawCanvas(); }
     );
 
-    document.getElementById('download-btn')
-      .addEventListener('click', () => {
-        const link = document.createElement('a');
-        link.download = 'tshirt-mockup.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-      });
+    document.getElementById('download-btn').onclick = () => {
+      const a = document.createElement('a');
+      a.download = 'tshirt-mockup.png';
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    };
 
-    (function init() {
+    // init
+    (()=>{
       loadStoredMockups();
       renderThumbnails();
       updateLabels();
