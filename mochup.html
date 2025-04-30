@@ -379,19 +379,60 @@
       }, 'image/png');
     };
 
-    // populate icons with inline SVG placeholders
-    const featureList = Array.from(document.querySelectorAll('.icon-btn'));
+        // populate icons with inline SVG placeholders and labels
+    const features = [
+      // Transform & Layout
+      {name: 'Crop & Trim', fn: 'cropTrim'},
+      {name: 'Rotate & Flip', fn: 'rotateFlip'},
+      {name: 'Resize & Scale', fn: 'resizeScale'},
+      {name: 'Move / Translate', fn: 'moveTranslate'},
+      {name: 'Skew & Distort', fn: 'skewDistort'},
+      {name: 'Perspective Warp', fn: 'perspectiveWarp'},
+      {name: 'Free Transform', fn: 'freeTransform'},
+      {name: 'Puppet Warp', fn: 'puppetWarp'},
+      // Color & Tone Adjustments
+      {name: 'Brightness/Contrast', fn: 'adjustBrightnessContrast'},
+      {name: 'Exposure/Gamma', fn: 'adjustExposureGamma'},
+      {name: 'Shadows/Highlights', fn: 'adjustShadowsHighlights'},
+      {name: 'Hue/Saturation', fn: 'adjustHueSaturation'},
+      {name: 'Temperature/Tint', fn: 'adjustTemperatureTint'},
+      {name: 'Vibrance', fn: 'adjustVibrance'},
+      {name: 'Color Balance', fn: 'adjustColorBalance'},
+      {name: 'Desaturate', fn: 'desaturate'},
+      // Filters & Effects
+      {name: 'Blur', fn: 'applyBlur'},
+      {name: 'Sharpen', fn: 'applySharpen'},
+      {name: 'Noise/Denoise', fn: 'applyNoise'},
+      {name: 'Emboss', fn: 'applyEmboss'},
+      {name: 'Drop Shadow', fn: 'applyDropShadow'},
+      {name: 'Glow', fn: 'applyGlow'},
+      {name: 'Bevel & Emboss', fn: 'applyBevelEmboss'},
+      {name: 'Stroke/Outline', fn: 'applyStroke'},
+      // Blend & Composite
+      {name: 'Opacity', fn: 'setOpacity'},
+      {name: 'Blend Modes', fn: 'setBlendMode'},
+      {name: 'Color Overlay', fn: 'applyColorOverlay'},
+      {name: 'Gradient Overlay', fn: 'applyGradientOverlay'},
+      {name: 'Pattern Overlay', fn: 'applyPatternOverlay'},
+      {name: 'LUTs & Presets', fn: 'applyLUT'},
+      // Other categories can be added similarly
+    ];
     const iconsGrid = document.getElementById('icons-grid');
-    const svgPlaceholder = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>`;
-    // add 70 generic icon buttons
-    for (let i = 0; i < 72; i++) {
+    const svgPlaceholder = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"/></svg>`;
+    features.forEach(f => {
       const btn = document.createElement('button');
       btn.className = 'icon-btn';
+      btn.title = f.name;
+      btn.dataset.fn = f.fn;
       btn.innerHTML = svgPlaceholder;
+      btn.onclick = () => alert(`${f.name} selected`);
       iconsGrid.appendChild(btn);
-    }
+    });
 
     // toggle menu
+    document.getElementById('toggle-menu').addEventListener('click', () => {
+      document.getElementById('options-menu').classList.toggle('open');
+    });
     document.getElementById('toggle-menu').addEventListener('click', () => {
       document.getElementById('options-menu').classList.toggle('open');
     });
