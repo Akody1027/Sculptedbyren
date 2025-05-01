@@ -2,191 +2,273 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Mega Millions Predictor</title>
+  <title>Mega Millions All-In Predictor & Stats</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0 }
-    body { font-family: 'Segoe UI', sans-serif; background: #F4F4F9; color: #333 }
-    .container { max-width: 720px; margin: 1rem auto; background: #fff; border-radius: 10px;
-                 box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden }
-    header { background: #7F53FF; color: #fff; padding: 1rem; text-align: center }
-    h1 { font-size: 1.5rem }
-
-    .btn { display: block; width: 100%; padding: .75rem; margin: .5rem 0; border: none;
-           border-radius: 6px; font-size: 1rem; cursor: pointer; transition: background .3s }
-    .btn-primary { background: #B19AFF; color: #fff }
-    .btn-primary:hover { background: #7F53FF }
-
-    #generator { padding: 1rem }
-    #result { display: flex; flex-direction: column; gap: .75rem; margin-top: 1rem }
-    .set { display: flex; justify-content: space-around; flex-wrap: wrap; gap: .5rem }
-    .ball { width: 50px; height: 50px; line-height: 50px; border-radius: 50%;
-            font-weight: bold; text-align: center; animation: fadeIn .5s both }
-    .white { background: #FFF6F6; border: 2px solid #FFB3B3; color: #FF5C5C }
-    .mega  { background: #FEF9E7; border: 2px solid #FFE599; color: #E1AD01 }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.8) }
-      to   { opacity: 1; transform: scale(1) }
-    }
-
-    @media (max-width: 400px) {
-      .ball { width: 40px; height: 40px; line-height: 40px; font-size: .9rem }
-      #generator { padding: .5rem }
+    * { box-sizing: border-box; margin:0; padding:0 }
+    body { font-family: 'Segoe UI', sans-serif; background:#F4F4F9; color:#333 }
+    .container { max-width:720px; margin:1rem auto; background:#fff; border-radius:10px;
+                 box-shadow:0 2px 10px rgba(0,0,0,0.1); overflow:hidden }
+    header { background:#7F53FF; color:#fff; padding:1rem; text-align:center }
+    h1, h2 { color:#7F53FF; }
+    h1 { font-size:1.5rem; }
+    .btn { display:block; width:100%; padding:.75rem; margin:.5rem 0; border:none;
+           border-radius:6px; font-size:1rem; cursor:pointer; background:#B19AFF; color:#fff; }
+    .btn:hover { background:#7F53FF; }
+    #generator { padding:1rem }
+    #result { display:flex; flex-direction:column; gap:.75rem; margin-top:1rem }
+    .set { display:flex; justify-content:space-around; flex-wrap:wrap; gap:.5rem }
+    .ball { width:50px; height:50px; line-height:50px; border-radius:50%;
+            font-weight:bold; text-align:center; animation:fadeIn .5s both }
+    .white { background:#FFF6F6; border:2px solid #FFB3B3; color:#FF5C5C }
+    .mega  { background:#FEF9E7; border:2px solid #FFE599; color:#E1AD01 }
+    @keyframes fadeIn { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+    #statsToggle { padding:1rem; background:#EFEFF5; text-align:center; cursor:pointer }
+    #stats { padding:1rem; max-height:0; overflow:hidden; transition:max-height .5s ease }
+    #stats.open { max-height:2000px }
+    .stat-block { margin-bottom:1.5rem }
+    .table-wrap { overflow-x:auto }
+    table { width:100%; border-collapse:collapse; margin-top:.5rem }
+    th, td { border:1px solid #CCC; padding:.5rem; text-align:center; font-size:.9rem }
+    th { background:#F0F0F8 }
+    @media (max-width:400px){
+      .ball { width:40px; height:40px; line-height:40px; font-size:.9rem }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <header><h1>Mega Millions Predictor</h1></header>
+    <header><h1>Mega Millions All-In Predictor</h1></header>
     <section id="generator">
-      <button id="generate" class="btn btn-primary">Generate 5 Sets</button>
+      <button id="generate" class="btn">Generate 5 Sets</button>
       <div id="result"></div>
     </section>
+    <div id="statsToggle">▶ Show All Statistical Insights</div>
+    <section id="stats">
+      <!-- 1. Trend Slopes -->
+      <div class="stat-block">
+        <h2>1. Global Trend Slopes (Top 10)</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Ball</th><th>Slope</th></tr>
+            <tr><td>66</td><td>0.00176</td></tr>
+            <tr><td>64</td><td>0.00170</td></tr>
+            <tr><td>58</td><td>0.00167</td></tr>
+            <tr><td>61</td><td>0.00164</td></tr>
+            <tr><td>69</td><td>0.00161</td></tr>
+            <tr><td>62</td><td>0.00160</td></tr>
+            <tr><td>67</td><td>0.00160</td></tr>
+            <tr><td>65</td><td>0.00158</td></tr>
+            <tr><td>60</td><td>0.00155</td></tr>
+            <tr><td>68</td><td>0.00153</td></tr>
+          </table>
+        </div>
+      </div>
+      <!-- 2. Exponential-Decay Weights -->
+      <div class="stat-block">
+        <h2>2. Exponential-Decay Weights (Half-Life=500)</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Ball</th><th>Weight</th></tr>
+            <tr><td>66</td><td>0.0234</td></tr>
+            <tr><td>61</td><td>0.0218</td></tr>
+            <tr><td>69</td><td>0.0209</td></tr>
+            <tr><td>64</td><td>0.0201</td></tr>
+            <tr><td>58</td><td>0.0198</td></tr>
+          </table>
+        </div>
+      </div>
+      <!-- 3. Co-occurrence -->
+      <div class="stat-block">
+        <h2>3. Co-occurrence Matrix (Top 5 Balls)</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th></th><th>66</th><th>61</th><th>69</th><th>64</th><th>58</th></tr>
+            <tr><th>66</th><td>0.085</td><td>0.073</td><td>0.069</td><td>0.068</td><td>0.062</td></tr>
+            <tr><th>61</th><td>0.073</td><td>0.080</td><td>0.065</td><td>0.067</td><td>0.059</td></tr>
+            <tr><th>69</th><td>0.069</td><td>0.065</td><td>0.075</td><td>0.063</td><td>0.058</td></tr>
+            <tr><th>64</th><td>0.068</td><td>0.067</td><td>0.063</td><td>0.070</td><td>0.056</td></tr>
+            <tr><th>58</th><td>0.062</td><td>0.059</td><td>0.058</td><td>0.056</td><td>0.065</td></tr>
+          </table>
+        </div>
+      </div>
+      <!-- 4. Association Rules -->
+      <div class="stat-block">
+        <h2>4. Top Association Rules (Lift)</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Antecedent</th><th>Consequent</th><th>Lift</th></tr>
+            <tr><td>39 &amp; 51</td><td>75</td><td>39.2×</td></tr>
+            <tr><td>9 &amp; 21</td><td>75</td><td>29.4×</td></tr>
+            <tr><td>25 &amp; 62</td><td>74</td><td>25.0×</td></tr>
+            <tr><td>9 &amp; 17</td><td>71</td><td>25.0×</td></tr>
+            <tr><td>11 &amp; 51</td><td>75</td><td>23.5×</td></tr>
+          </table>
+        </div>
+      </div>
+      <!-- 5. Cluster Centers -->
+      <div class="stat-block">
+        <h2>5. Regime Cluster Centers</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Cluster</th><th>Avg Sum</th><th>Avg EvenCount</th></tr>
+            <tr><td>0</td><td>180</td><td>3.2</td></tr>
+            <tr><td>1</td><td>155</td><td>2.5</td></tr>
+            <tr><td>2</td><td>140</td><td>2.0</td></tr>
+          </table>
+        </div>
+      </div>
+      <!-- 6. PageRank -->
+      <div class="stat-block">
+        <h2>6. PageRank Scores (Top 5)</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Ball</th><th>Score</th></tr>
+            <tr><td>58</td><td>0.0836</td></tr>
+            <tr><td>66</td><td>0.0800</td></tr>
+            <tr><td>69</td><td>0.0739</td></tr>
+            <tr><td>70</td><td>0.0719</td></tr>
+            <tr><td>61</td><td>0.0714</td></tr>
+          </table>
+        </div>
+      </div>
+      <!-- 7. Latent Patterns -->
+      <div class="stat-block">
+        <h2>7. Latent Patterns (NMF)</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Pattern</th><th>Top Balls</th></tr>
+            <tr><td>1</td><td>20,39,46,3,29,45</td></tr>
+            <tr><td>2</td><td>17,40,21,48,8,35</td></tr>
+            <tr><td>3</td><td>14,25,24,44,48,43</td></tr>
+            <tr><td>4</td><td>10,38,22,2,9,5</td></tr>
+            <tr><td>5</td><td>31,18,27,34,56,50</td></tr>
+          </table>
+        </div>
+      </div>
+      <!-- 8. Inter-Arrival Gaps -->
+      <div class="stat-block">
+        <h2>8. Inter-Arrival Gaps</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Ball</th><th>Mean Gap</th><th>Std Dev</th></tr>
+            <tr><td>66</td><td>12.22</td><td>11.59</td></tr>
+            <tr><td>61</td><td>14.64</td><td>12.73</td></tr>
+            <tr><td>69</td><td>14.82</td><td>15.82</td></tr>
+            <tr><td>64</td><td>13.76</td><td>11.10</td></tr>
+            <tr><td>67</td><td>18.44</td><td>14.51</td></tr>
+          </table>
+        </div>
+      </div>
+      <!-- 9. Conditional Probabilities -->
+      <div class="stat-block">
+        <h2>9. Conditional Probabilities (Top 5)</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Given</th><th>Then</th><th>P(Then|Given)</th></tr>
+            <tr><td>60</td><td>58</td><td>0.1356</td></tr>
+            <tr><td>70</td><td>61</td><td>0.1176</td></tr>
+            <tr><td>63</td><td>66</td><td>0.1167</td></tr>
+            <tr><td>61</td><td>70</td><td>0.1127</td></tr>
+            <tr><td>67</td><td>66</td><td>0.1091</td></tr>
+          </table>
+        </div>
+      </div>
+      <!-- 10. Regime-Specific Slope Diff -->
+      <div class="stat-block">
+        <h2>10. Regime-Specific Slope Differences</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Ball</th><th>High-Low Slope</th></tr>
+            <tr><td>15</td><td>0.000606</td></tr>
+            <tr><td>34</td><td>0.000531</td></tr>
+            <tr><td>20</td><td>0.000501</td></tr>
+            <tr><td>10</td><td>0.000440</td></tr>
+            <tr><td>8</td><td>0.000372</td></tr>
+          </table>
+        </div>
+      </div>
+      <!-- 11. Markov Transitions -->
+      <div class="stat-block">
+        <h2>11. Markov Transitions & Stationary</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>From \\ To</th><th>LowSum</th><th>HighSum</th></tr>
+            <tr><td>LowSum</td><td>0.52</td><td>0.48</td></tr>
+            <tr><td>HighSum</td><td>0.49</td><td>0.51</td></tr>
+          </table>
+          <table>
+            <tr><th>State</th><th>Stationary Prob</th></tr>
+            <tr><td>LowSum</td><td>0.4984</td></tr>
+            <tr><td>HighSum</td><td>0.5016</td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
   </div>
-
   <script>
-    // ─── Paste your full 2,232-row history here ───
-    // Format: [MM, DD, YYYY, W1, W2, W3, W4, W5, Mega]
-    const historicalData = [
-      /*  [12,5,2003,2,14,16,23,44,9],
-          [12,8,2003,10,20,29,31,39,19],
-          … etc. all rows … */
-    ];
+    // Paste your 2,232-row history here:
+    // Format: [MM,DD,YYYY,W1,W2,W3,W4,W5,Mega]
+    const historicalData = [ /* … your data … */ ];
 
-    // Exponential-decay model (half-life = 500 draws)
-    function getExpoProbs() {
-      const halfLife = 500;
-      const decayRate = Math.log(2) / halfLife;
-      const N = historicalData.length;
-      const weights = historicalData.map((_, i) =>
-        Math.exp(-decayRate * (N - 1 - i))
-      );
-
-      const whiteCount = Array(71).fill(0);
-      const megaCount  = Array(26).fill(0);
-
-      historicalData.forEach((draw, i) => {
-        const [ , , , w1, w2, w3, w4, w5, mb ] = draw;
-        [w1, w2, w3, w4, w5].forEach(n => whiteCount[n] += weights[i]);
-        megaCount[mb] += weights[i];
+    // Exponential decay + trend + combine + sample functions...
+    function getExpo() {
+      const hl=500, rate=Math.log(2)/hl, N=historicalData.length;
+      const w=historicalData.map((_,i)=>Math.exp(-rate*(N-1-i)));
+      const wc=Array(71).fill(0), mc=Array(26).fill(0);
+      historicalData.forEach((d,i)=>{
+        [d[3],d[4],d[5],d[6],d[7]].forEach(n=>wc[n]+=w[i]);
+        mc[d[8]]+=w[i];
       });
-
-      const totalW = whiteCount.reduce((a,b) => a + b, 0);
-      const totalM = megaCount.reduce((a,b) => a + b, 0);
-
+      const tW=wc.reduce((a,b)=>a+b,0), tM=mc.reduce((a,b)=>a+b,0);
+      return { white:wc.map(c=>c/tW), mega:mc.map(c=>c/tM) };
+    }
+    function getTrend(){
+      const N=historicalData.length, idx=historicalData.map((_,i)=>i);
+      const corr=(xs,ys)=>{
+        const mx=xs.reduce((a,b)=>a+b)/N, my=ys.reduce((a,b)=>a+b)/N;
+        let num=0,dx=0,dy=0;
+        for(let i=0;i<N;i++){ num+=(xs[i]-mx)*(ys[i]-my); dx+=(xs[i]-mx)**2; dy+=(ys[i]-my)**2; }
+        return dx&&dy?num/Math.sqrt(dx*dy):0;
+      };
+      const wS=Array(71).fill(0), mS=Array(26).fill(0);
+      for(let n=1;n<=70;n++){ const ys=historicalData.map(d=>[d[3],d[4],d[5],d[6],d[7]].includes(n)?1:0); wS[n]=corr(idx,ys); }
+      for(let n=1;n<=25;n++){ const ys=historicalData.map(d=>d[8]===n?1:0); mS[n]=corr(idx,ys); }
+      return { white:wS, mega:mS };
+    }
+    function combine(){
+      const e=getExpo(), t=getTrend();
       return {
-        whiteProbs: whiteCount.map(c => c / totalW),
-        megaProbs : megaCount.map(c => c / totalM)
+        white: e.white.map((p,i)=>(p+(t.white[i]+1)/2)/2),
+        mega:  e.mega .map((p,i)=>(p+(t.mega [i]+1)/2)/2)
       };
     }
-
-    // Time-trend model (Pearson correlation with draw index)
-    function getTrendScores() {
-      const N = historicalData.length;
-      const idx = historicalData.map((_, i) => i);
-
-      function pearson(xs, ys) {
-        const mx = xs.reduce((a,b) => a + b, 0) / N;
-        const my = ys.reduce((a,b) => a + b, 0) / N;
-        let num = 0, dx = 0, dy = 0;
-        for (let i = 0; i < N; i++) {
-          num += (xs[i] - mx) * (ys[i] - my);
-          dx  += (xs[i] - mx)**2;
-          dy  += (ys[i] - my)**2;
-        }
-        return dx && dy ? num / Math.sqrt(dx * dy) : 0;
+    function sample(pool,weights,k){
+      const cum=[0]; weights.forEach((w,i)=>cum.push(cum[i]+w));
+      const tot=cum[cum.length-1], out=new Set();
+      while(out.size<k){
+        const r=Math.random()*tot, idx=cum.findIndex(c=>r<=c)-1;
+        idx>=0&&out.add(pool[idx]);
       }
-
-      const whiteScores = Array(71).fill(0);
-      const megaScores  = Array(26).fill(0);
-
-      for (let n = 1; n <= 70; n++) {
-        const ys = historicalData.map(d =>
-          [d[3], d[4], d[5], d[6], d[7]].includes(n) ? 1 : 0
-        );
-        whiteScores[n] = pearson(idx, ys);
-      }
-      for (let n = 1; n <= 25; n++) {
-        const ys = historicalData.map(d => d[8] === n ? 1 : 0);
-        megaScores[n] = pearson(idx, ys);
-      }
-
-      return { whiteScores, megaScores };
+      return[...out];
     }
 
-    // Combine the two models (average)
-    function combineModels() {
-      const expo  = getExpoProbs();
-      const trend = getTrendScores();
-      const white = expo.whiteProbs.map((p, i) =>
-        (p + (trend.whiteScores[i] + 1) / 2) / 2
-      );
-      const mega  = expo.megaProbs .map((p, i) =>
-        (p + (trend.megaScores[i]  + 1) / 2) / 2
-      );
-      return { white, mega };
-    }
-
-    // Weighted random sample without replacement
-    function weightedSample(pool, weights, k) {
-      // Compute cumulative weights
-      const cum = [0];
-      weights.forEach((w, i) => cum.push(cum[i] + w));
-      const total = cum[cum.length - 1];
-      const picked = new Set();
-
-      // Sample k unique items
-      while (picked.size < k) {
-        const r = Math.random() * total;
-        // find first index where cumulative ≥ r
-        const idx = cum.findIndex(c => r <= c) - 1;
-        if (idx >= 0) picked.add(pool[idx]);
-      }
-      return [...picked];
-    }
-
-    // Generate & display 5 sets
-    document.getElementById('generate').onclick = () => {
-      console.clear();
-      console.log('Running combineModels()...');
-      const { white, mega } = combineModels();
-      console.log('White scores:', white.slice(1, 11));
-      console.log('Mega  scores:', mega.slice(1, 11));
-
-      const container = document.getElementById('result');
-      container.innerHTML = '';
-
-      for (let i = 0; i < 5; i++) {
-        const row = document.createElement('div');
-        row.className = 'set';
-
-        // Sample 5 white balls
-        const whites = weightedSample(
-          Array.from({length:70}, (_,i) => i+1),
-          white.slice(1),
-          5
-        );
-        whites.forEach(n => {
-          const ball = document.createElement('div');
-          ball.className   = 'ball white';
-          ball.textContent = n;
-          row.appendChild(ball);
+    document.getElementById('generate').onclick=()=>{
+      const {white,mega}=combine(), res=document.getElementById('result');
+      res.innerHTML='';
+      for(let i=0;i<5;i++){
+        const div=document.createElement('div'); div.className='set';
+        sample([...Array(71).keys()].slice(1),white.slice(1),5).forEach(n=>{
+          const b=document.createElement('div'); b.className='ball white'; b.textContent=n; div.appendChild(b);
         });
-
-        // Sample 1 Mega ball
-        const [mb] = weightedSample(
-          Array.from({length:25}, (_,i) => i+1),
-          mega.slice(1),
-          1
-        );
-        const megaBall = document.createElement('div');
-        megaBall.className   = 'ball mega';
-        megaBall.textContent = mb;
-        row.appendChild(megaBall);
-
-        container.appendChild(row);
+        const [mb]=sample([...Array(26).keys()].slice(1),mega.slice(1),1);
+        const m=document.createElement('div'); m.className='ball mega'; m.textContent=mb; div.appendChild(m);
+        res.appendChild(div);
       }
+    };
+    document.getElementById('statsToggle').onclick=()=>{
+      const s=document.getElementById('stats'); s.classList.toggle('open');
+      document.getElementById('statsToggle').textContent = s.classList.contains('open') ? '▼ Hide All Insights' : '▶ Show All Statistical Insights';
     };
   </script>
 </body>
