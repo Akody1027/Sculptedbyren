@@ -5,53 +5,45 @@
   <title>Mega Millions All-In Predictor</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    /* ---------- Global ---------- */
     * { box-sizing: border-box; margin:0; padding:0 }
-    body { font-family: 'Segoe UI', sans-serif; background:#F4F4F9; color:#333; }
+    body { font-family:'Segoe UI',sans-serif; background:#F4F4F9; color:#333 }
     .container { max-width:720px; margin:1rem auto; background:#fff; border-radius:10px;
                  box-shadow:0 2px 10px rgba(0,0,0,0.1); overflow:hidden }
     header { background:#7F53FF; color:#fff; padding:1rem; text-align:center }
-    h1 { font-size:1.5rem; }
+    h1 { font-size:1.5rem }
 
-    /* ---------- Buttons & Inputs ---------- */
-    .btn { display:block; width:100%; padding:.75rem; margin: .5rem 0; border:none;
-           border-radius:6px; font-size:1rem; cursor:pointer; transition:.3s; }
-    .btn-primary { background:#B19AFF; color:#fff; }
-    .btn-primary:hover { background:#7F53FF; }
-    textarea { width:100%; padding:.75rem; border:1px solid #DDD; border-radius:6px;
-               resize:none; font-size:1rem; margin: .5rem 0; }
-    textarea:focus { border-color:#7F53FF; outline:none; }
-    button:disabled { background:#CCC; cursor:not-allowed; }
+    .btn { display:block; width:100%; padding:.75rem; margin:.5rem 0; border:none;
+           border-radius:6px; font-size:1rem; cursor:pointer; transition:.3s }
+    .btn-primary { background:#B19AFF; color:#fff }
+    .btn-primary:hover { background:#7F53FF }
+    button:disabled { background:#CCC; cursor:not-allowed }
 
-    /* ---------- Generator ---------- */
-    #generator { padding:1rem; }
-    #result { display:flex; flex-direction:column; gap:.75rem; margin-top:1rem; }
-    .set { display:flex; justify-content:space-around; flex-wrap:wrap; gap:.5rem; }
+    #generator { padding:1rem }
+    #result { display:flex; flex-direction:column; gap:.75rem; margin-top:1rem }
+    .set { display:flex; justify-content:space-around; flex-wrap:wrap; gap:.5rem }
     .ball { width:50px; height:50px; line-height:50px; border-radius:50%;
-            font-weight:bold; text-align:center; animation:fadeIn .5s ease both; }
-    .white { background:#FFF6F6; border:2px solid #FFB3B3; color:#FF5C5C; }
-    .mega  { background:#FEF9E7; border:2px solid #FFE599; color:#E1AD01; }
+            font-weight:bold; text-align:center; animation:fadeIn .5s ease both }
+    .white { background:#FFF6F6; border:2px solid #FFB3B3; color:#FF5C5C }
+    .mega  { background:#FEF9E7; border:2px solid #FFE599; color:#E1AD01 }
 
     @keyframes fadeIn {
       from { opacity:0; transform:scale(0.8) }
-      to { opacity:1; transform:scale(1) }
+      to   { opacity:1; transform:scale(1) }
     }
 
-    /* ---------- Stats Section ---------- */
     #statsToggle { padding:1rem; background:#EFEFF5; cursor:pointer; text-align:center }
     #stats { display:none; padding:1rem; max-height:0; overflow:hidden;
-             transition: max-height .4s ease, padding .4s ease; }
-    #stats.open { display:block; max-height:2000px; padding:1rem; }
+             transition:max-height .4s ease, padding .4s ease }
+    #stats.open { display:block; max-height:2000px; padding:1rem }
 
-    .stat-block { margin-bottom:1.5rem; }
-    .stat-block h2 { font-size:1.1rem; margin-bottom:.5rem; color:#7F53FF; }
-    .table-wrap { overflow-x:auto; }
-    table { width:100%; border-collapse:collapse; margin-bottom:.5rem; }
+    .stat-block { margin-bottom:1.5rem }
+    .stat-block h2 { font-size:1.1rem; margin-bottom:.5rem; color:#7F53FF }
+    .table-wrap { overflow-x:auto }
+    table { width:100%; border-collapse:collapse; margin-bottom:.5rem }
     th,td { padding:.4rem .6rem; border:1px solid #CCC; text-align:center; font-size:.9rem }
-    th { background:#F0F0F8; }
+    th { background:#F0F0F8 }
 
-    /* ---------- Responsive ---------- */
-    @media (max-width:400px){
+    @media (max-width:400px) {
       .ball { width:40px; height:40px; line-height:40px; font-size:.9rem }
       #generator, #stats { padding:.5rem }
     }
@@ -63,156 +55,155 @@
       <h1>Mega Millions All-In Predictor</h1>
     </header>
 
-    <!-- GENERATOR UI -->
+    <!-- GENERATOR -->
     <section id="generator">
       <button id="generate" class="btn btn-primary">Generate 5 Sets</button>
       <div id="result"></div>
     </section>
 
-    <!-- ADD LATEST DRAW -->
-    <section id="addDrawSection" style="padding:1rem">
-      <textarea id="newDraw" rows="2" placeholder="Enter latest draw: MM-DD-YYYY W1 W2 W3 W4 W5 MB"></textarea>
-      <button id="addDraw" class="btn btn-primary">Add Draw &amp; Recalc Model</button>
-    </section>
-
     <!-- STATS TOGGLE -->
     <div id="statsToggle">▶ Show All Stats & Models</div>
 
-    <!-- ALL THE DATA WE FOUND -->
+    <!-- STATS & MODELS -->
     <section id="stats">
-      <!-- 1) Trend Slopes -->
+      <!-- 1) Global Trend Slopes -->
       <div class="stat-block">
         <h2>1. Global Trend Slopes (Top 10)</h2>
-        <div class="table-wrap"><table>
-          <tr><th>Ball</th><th>Slope</th></tr>
-          <tr><td>66</td><td>0.00176</td></tr>
-          <tr><td>64</td><td>0.00170</td></tr>
-          <tr><td>58</td><td>0.00167</td></tr>
-          <tr><td>61</td><td>0.00164</td></tr>
-          <tr><td>69</td><td>0.00161</td></tr>
-          <!-- …and 5 more -->
-        </table></div>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Ball</th><th>Slope</th></tr>
+            <tr><td>66</td><td>0.00176</td></tr>
+            <tr><td>64</td><td>0.00170</td></tr>
+            <tr><td>58</td><td>0.00167</td></tr>
+            <tr><td>61</td><td>0.00164</td></tr>
+            <tr><td>69</td><td>0.00161</td></tr>
+            <!-- …etc… -->
+          </table>
+        </div>
       </div>
 
       <!-- 2) Exponential-Decay Weights -->
       <div class="stat-block">
         <h2>2. Exponential-Decay Weights (Half-Life=500)</h2>
-        <div class="table-wrap"><table>
-          <tr><th>Ball</th><th>Weight</th></tr>
-          <tr><td>66</td><td>0.0234</td></tr>
-          <tr><td>61</td><td>0.0218</td></tr>
-          <tr><td>69</td><td>0.0209</td></tr>
-          <tr><td>64</td><td>0.0201</td></tr>
-          <tr><td>58</td><td>0.0198</td></tr>
-          <!-- … -->
-        </table></div>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Ball</th><th>Weight</th></tr>
+            <tr><td>66</td><td>0.0234</td></tr>
+            <tr><td>61</td><td>0.0218</td></tr>
+            <tr><td>69</td><td>0.0209</td></tr>
+            <tr><td>64</td><td>0.0201</td></tr>
+            <tr><td>58</td><td>0.0198</td></tr>
+            <!-- … -->
+          </table>
+        </div>
       </div>
 
-      <!-- 3) Co-occurrence (Last 1000 Draws) -->
+      <!-- 3) Co-occurrence Matrix -->
       <div class="stat-block">
-        <h2>3. Co-occurrence Matrix (Top 10 Balls)</h2>
-        <div class="table-wrap"><table>
-          <tr><th></th><th>66</th><th>61</th><th>69</th><!--…--></tr>
-          <tr><th>66</th><td>0.085</td><td>0.073</td><td>0.069</td><!--…--></tr>
-          <tr><th>61</th><td>0.073</td><td>0.080</td><td>0.065</td><!--…--></tr>
-          <tr><th>69</th><td>0.069</td><td>0.065</td><td>0.075</td><!--…--></tr>
-          <!--…-->
-        </table></div>
+        <h2>3. Co-occurrence (Last 1000 Draws, Top 10)</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th></th><th>66</th><th>61</th><th>69</th><!--…--></tr>
+            <tr><th>66</th><td>0.085</td><td>0.073</td><td>0.069</td><!--…--></tr>
+            <tr><th>61</th><td>0.073</td><td>0.080</td><td>0.065</td><!--…--></tr>
+            <tr><th>69</th><td>0.069</td><td>0.065</td><td>0.075</td><!--…--></tr>
+            <!--…-->
+          </table>
+        </div>
       </div>
 
       <!-- 4) Association Rules -->
       <div class="stat-block">
         <h2>4. Top Association Rules (Lift)</h2>
-        <div class="table-wrap"><table>
-          <tr><th>Antecedent</th><th>Consequent</th><th>Lift</th></tr>
-          <tr><td>39 &amp; 51</td><td>75</td><td>39.2×</td></tr>
-          <tr><td>9 &amp; 21</td><td>75</td><td>29.4×</td></tr>
-          <tr><td>25 &amp; 62</td><td>74</td><td>25.0×</td></tr>
-          <!--…-->
-        </table></div>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Antecedent</th><th>Consequent</th><th>Lift</th></tr>
+            <tr><td>39 &amp; 51</td><td>75</td><td>39.2×</td></tr>
+            <tr><td>9 &amp; 21</td><td>75</td><td>29.4×</td></tr>
+            <tr><td>25 &amp; 62</td><td>74</td><td>25.0×</td></tr>
+            <!--…-->
+          </table>
+        </div>
       </div>
 
       <!-- 5) Cluster Centers -->
       <div class="stat-block">
         <h2>5. Regime Cluster Centers (Sum vs EvenCount)</h2>
-        <div class="table-wrap"><table>
-          <tr><th>Cluster</th><th>Avg Sum</th><th>Avg EvenCount</th></tr>
-          <tr><td>0</td><td>180</td><td>3.2</td></tr>
-          <tr><td>1</td><td>155</td><td>2.5</td></tr>
-          <tr><td>2</td><td>140</td><td>2.0</td></tr>
-        </table></div>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Cluster</th><th>Avg Sum</th><th>Avg EvenCount</th></tr>
+            <tr><td>0</td><td>180</td><td>3.2</td></tr>
+            <tr><td>1</td><td>155</td><td>2.5</td></tr>
+            <tr><td>2</td><td>140</td><td>2.0</td></tr>
+          </table>
+        </div>
       </div>
 
       <!-- 6) PageRank Scores -->
       <div class="stat-block">
         <h2>6. PageRank on Conditional Graph</h2>
-        <div class="table-wrap"><table>
-          <tr><th>Ball</th><th>Score</th></tr>
-          <tr><td>58</td><td>0.0836</td></tr>
-          <tr><td>66</td><td>0.0800</td></tr>
-          <tr><td>69</td><td>0.0739</td></tr>
-          <tr><td>70</td><td>0.0719</td></tr>
-          <tr><td>61</td><td>0.0714</td></tr>
-        </table></div>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Ball</th><th>Score</th></tr>
+            <tr><td>58</td><td>0.0836</td></tr>
+            <tr><td>66</td><td>0.0800</td></tr>
+            <tr><td>69</td><td>0.0739</td></tr>
+            <tr><td>70</td><td>0.0719</td></tr>
+            <tr><td>61</td><td>0.0714</td></tr>
+          </table>
+        </div>
       </div>
 
-      <!-- 7) Latent Patterns (NMF) -->
+      <!-- 7) Latent Patterns -->
       <div class="stat-block">
-        <h2>7. Latent Patterns (Top 6 Balls)</h2>
-        <div class="table-wrap"><table>
-          <tr><th>Pattern</th><th>Balls</th></tr>
-          <tr><td>1</td><td>20,39,46,3,29,45</td></tr>
-          <tr><td>2</td><td>17,40,21,48,8,35</td></tr>
-          <tr><td>3</td><td>14,25,24,44,48,43</td></tr>
-          <tr><td>4</td><td>10,38,22,2,9,5</td></tr>
-          <tr><td>5</td><td>31,18,27,34,56,50</td></tr>
-        </table></div>
+        <h2>7. Latent Patterns (NMF Top 6 Balls)</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Pattern</th><th>Balls</th></tr>
+            <tr><td>1</td><td>20,39,46,3,29,45</td></tr>
+            <tr><td>2</td><td>17,40,21,48,8,35</td></tr>
+            <tr><td>3</td><td>14,25,24,44,48,43</td></tr>
+            <tr><td>4</td><td>10,38,22,2,9,5</td></tr>
+            <tr><td>5</td><td>31,18,27,34,56,50</td></tr>
+          </table>
+        </div>
       </div>
 
       <!-- 8) Gap Stats -->
       <div class="stat-block">
         <h2>8. Inter-Arrival Gaps (Top 5)</h2>
-        <div class="table-wrap"><table>
-          <tr><th>Ball</th><th>MeanGap</th><th>StdDev</th></tr>
-          <tr><td>66</td><td>12.22</td><td>11.59</td></tr>
-          <tr><td>61</td><td>14.64</td><td>12.73</td></tr>
-          <tr><td>69</td><td>14.82</td><td>15.82</td></tr>
-          <tr><td>64</td><td>13.76</td><td>11.10</td></tr>
-          <tr><td>67</td><td>18.44</td><td>14.51</td></tr>
-        </table></div>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Ball</th><th>MeanGap</th><th>StdDev</th></tr>
+            <tr><td>66</td><td>12.22</td><td>11.59</td></tr>
+            <tr><td>61</td><td>14.64</td><td>12.73</td></tr>
+            <tr><td>69</td><td>14.82</td><td>15.82</td></tr>
+            <tr><td>64</td><td>13.76</td><td>11.10</td></tr>
+            <tr><td>67</td><td>18.44</td><td>14.51</td></tr>
+          </table>
+        </div>
       </div>
     </section>
   </div>
 
   <script>
-  // ——— 1) Historical data placeholder —————————————
+  // ——— Paste your full history here ——————————————
   let historicalData = [
     // [MM,DD,YYYY,W1,W2,W3,W4,W5,Mega],
-    // … your 2,232 rows …
+    // … 2,232 rows …
   ];
 
-  // ——— 2) Toggle stats ——————————————————————————
+  // ——— Stats toggle ——————————————————————————
   document.getElementById('statsToggle').onclick = () => {
     const s = document.getElementById('stats');
     s.classList.toggle('open');
     document.getElementById('statsToggle').textContent =
-      s.classList.contains('open') ? '▼ Hide Stats & Models' : '▶ Show All Stats & Models';
+      s.classList.contains('open')
+        ? '▼ Hide Stats & Models'
+        : '▶ Show All Stats & Models';
   };
 
-  // ——— 3) Parse new draw & recalc —————————————
-  function parseNewDraw(str) {
-    const p = str.trim().split(/[\s,-]+/).map(Number);
-    return (p.length===9 && p.every(n=>!isNaN(n))) ? p : null;
-  }
-  document.getElementById('addDraw').onclick = () => {
-    const val = document.getElementById('newDraw').value;
-    const entry = parseNewDraw(val);
-    if(entry){ historicalData.push(entry);
-      alert('Draw added & model updated!'); document.getElementById('newDraw').value = '';
-    } else alert('Invalid format. Use: MM-DD-YYYY W1 W2 W3 W4 W5 MB');
-  };
-
-  // ——— 4) Exponential-decay & Trend models ————————
+  // ——— Exponential-decay & Trend models ————————
   function getExpoProbs(){
     const hl=500, λ=Math.log(2)/hl, N=historicalData.length;
     const w=historicalData.map((_,i)=>Math.exp(-λ*(N-1-i)));
@@ -222,7 +213,10 @@
       mc[d[8]]+=w[i];
     });
     const totW=wc.reduce((a,b)=>a+b,0), totM=mc.reduce((a,b)=>a+b,0);
-    return { whiteProbs:wc.map(c=>c/totW), megaProbs:mc.map(c=>c/totM) };
+    return {
+      whiteProbs: wc.map(c=>c/totW),
+      megaProbs:  mc.map(c=>c/totM)
+    };
   }
   function getTrendScores(){
     const N=historicalData.length, idx=historicalData.map((_,i)=>i);
@@ -233,7 +227,7 @@
         num+=(xs[i]-mx)*(ys[i]-my);
         dx+=(xs[i]-mx)**2; dy+=(ys[i]-my)**2;
       }
-      return (dx&&dy)?num/Math.sqrt(dx*dy):0;
+      return dx&&dy? num/Math.sqrt(dx*dy):0;
     };
     const wS=Array(71).fill(0), mS=Array(26).fill(0);
     for(let n=1;n<=70;n++){
@@ -247,20 +241,18 @@
     return { whiteScores:wS, megaScores:mS };
   }
 
-  // ——— 5) Combine & Normalize ————————————————
+  // ——— Combine models ————————————————
   function combineModels(){
     const { whiteProbs, megaProbs } = getExpoProbs();
     const { whiteScores, megaScores } = getTrendScores();
-    // map trend from [-1,1]→[0,1]
-    const w=whiteProbs.map((p,i)=> (p + (whiteScores[i]+1)/2)/2 );
-    const m=megaProbs .map((p,i)=> (p + (megaScores[i]+1)/2)/2 );
+    const w = whiteProbs.map((p,i)=>(p + (whiteScores[i]+1)/2)/2);
+    const m = megaProbs .map((p,i)=>(p + (megaScores[i]+1)/2)/2);
     return { white:w, mega:m };
   }
 
-  // ——— 6) Weighted sampler ————————————————
+  // ——— Weighted sampler ————————————————
   function weightedSample(pool, weights, k){
-    const cum=[0];
-    for(let i=0;i<weights.length;i++) cum.push(cum[i]+weights[i]);
+    const cum=[0]; weights.forEach((w,i)=>cum.push(cum[i]+w));
     const total=cum[cum.length-1], out=new Set();
     while(out.size<k){
       const r=Math.random()*total;
@@ -270,24 +262,27 @@
     return [...out];
   }
 
-  // ——— 7) Generate & Render ——————————————
-  const NUM=5;
+  // ——— Generate & render ——————————————
   document.getElementById('generate').onclick = ()=>{
     const { white, mega } = combineModels();
-    const res=document.getElementById('result');
-    res.innerHTML='';
-    for(let s=0;s<NUM;s++){
-      const div=document.createElement('div'); div.className='set';
-      const whites=weightedSample([...Array(71).keys()].slice(1), white.slice(1),5);
-      whites.forEach(n=>{
-        const b=document.createElement('div');
-        b.className='ball white'; b.textContent=n;
+    const res = document.getElementById('result');
+    res.innerHTML = '';
+    for(let i=0;i<5;i++){
+      const div = document.createElement('div');
+      div.className = 'set';
+      const ws = weightedSample([...Array(71).keys()].slice(1), white.slice(1), 5);
+      ws.forEach(n => {
+        const b = document.createElement('div');
+        b.className = 'ball white';
+        b.textContent = n;
         div.appendChild(b);
       });
-      const mb=weightedSample([...Array(26).keys()].slice(1), mega.slice(1),1)[0];
-      const bm=document.createElement('div');
-      bm.className='ball mega'; bm.textContent=mb;
+      const mb = weightedSample([...Array(26).keys()].slice(1), mega.slice(1), 1)[0];
+      const bm = document.createElement('div');
+      bm.className = 'ball mega';
+      bm.textContent = mb;
       div.appendChild(bm);
+
       res.appendChild(div);
     }
   };
