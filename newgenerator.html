@@ -2,195 +2,163 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Mega Millions All-In Predictor</title>
+  <title>Mega Millions Predictor</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    * { box-sizing:border-box; margin:0; padding:0 }
-    body { font-family:'Segoe UI',sans-serif; background:#F4F4F9; color:#333 }
-    .container { max-width:720px; margin:1rem auto; background:#fff; border-radius:10px;
-                 box-shadow:0 2px 10px rgba(0,0,0,0.1); overflow:hidden }
-    header { background:#7F53FF; color:#fff; padding:1rem; text-align:center }
-    h1 { font-size:1.5rem }
-    .btn { display:block; width:100%; padding:.75rem; margin:.5rem 0; border:none;
-           border-radius:6px; font-size:1rem; cursor:pointer; transition:.3s }
-    .btn-primary { background:#B19AFF; color:#fff }
-    .btn-primary:hover { background:#7F53FF }
-    button:disabled { background:#CCC; cursor:not-allowed }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #F4F4F9; color: #333; }
+    .container { max-width: 720px; margin: 1rem auto; background: #fff; border-radius: 10px;
+                 box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }
+    header { background: #7F53FF; color: #fff; padding: 1rem; text-align: center; }
+    h1 { font-size: 1.5rem; }
 
-    #generator { padding:1rem }
-    #result { display:flex; flex-direction:column; gap:.75rem; margin-top:1rem }
-    .set { display:flex; justify-content:space-around; flex-wrap:wrap; gap:.5rem }
-    .ball { width:50px; height:50px; line-height:50px; border-radius:50%;
-            font-weight:bold; text-align:center; animation:fadeIn .5s both }
-    .white { background:#FFF6F6; border:2px solid #FFB3B3; color:#FF5C5C }
-    .mega  { background:#FEF9E7; border:2px solid #FFE599; color:#E1AD01 }
+    .btn { display: block; width: 100%; padding: .75rem; margin: .5rem 0; border: none;
+           border-radius: 6px; font-size: 1rem; cursor: pointer; transition: .3s; }
+    .btn-primary { background: #B19AFF; color: #fff; }
+    .btn-primary:hover { background: #7F53FF; }
+    button:disabled { background: #CCC; cursor: not-allowed; }
+
+    #generator { padding: 1rem; }
+    #result { display: flex; flex-direction: column; gap: .75rem; margin-top: 1rem; }
+    .set { display: flex; justify-content: space-around; flex-wrap: wrap; gap: .5rem; }
+    .ball { width: 50px; height: 50px; line-height: 50px; border-radius: 50%;
+            font-weight: bold; text-align: center; animation: fadeIn .5s both; }
+    .white { background: #FFF6F6; border: 2px solid #FFB3B3; color: #FF5C5C; }
+    .mega  { background: #FEF9E7; border: 2px solid #FFE599; color: #E1AD01; }
 
     @keyframes fadeIn {
-      from { opacity:0; transform:scale(0.8) }
-      to   { opacity:1; transform:scale(1) }
+      from { opacity: 0; transform: scale(0.8); }
+      to   { opacity: 1; transform: scale(1); }
     }
 
-    #statsToggle { padding:1rem; background:#EFEFF5; cursor:pointer; text-align:center }
-    #stats { display:none; padding:1rem; max-height:0; overflow:hidden;
-             transition:max-height .4s, padding .4s }
-    #stats.open { display:block; max-height:2000px; padding:1rem }
-
-    .stat-block { margin-bottom:1.5rem }
-    .stat-block h2 { font-size:1.1rem; margin-bottom:.5rem; color:#7F53FF }
-    .table-wrap { overflow-x:auto }
-    table { width:100%; border-collapse:collapse; margin-bottom:.5rem }
-    th,td { padding:.4rem .6rem; border:1px solid #CCC; text-align:center; font-size:.9rem }
-    th { background:#F0F0F8 }
-
-    @media (max-width:400px) {
-      .ball { width:40px; height:40px; line-height:40px; font-size:.9rem }
-      #generator, #stats { padding:.5rem }
+    @media (max-width: 400px) {
+      .ball { width: 40px; height: 40px; line-height: 40px; font-size: .9rem; }
+      #generator { padding: .5rem; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <header><h1>Mega Millions All-In Predictor</h1></header>
+    <header>
+      <h1>Mega Millions Predictor</h1>
+    </header>
 
-    <!-- GENERATOR -->
     <section id="generator">
       <button id="generate" class="btn btn-primary">Generate 5 Sets</button>
       <div id="result"></div>
     </section>
-
-    <!-- STATS TOGGLE -->
-    <div id="statsToggle">▶ Show All Stats & Models</div>
-
-    <!-- STATS & MODELS -->
-    <section id="stats">
-      <!-- (All your tables from before go here unchanged) -->
-      <div class="stat-block">
-        <h2>1. Global Trend Slopes (Top 10)</h2>
-        <div class="table-wrap"><table>
-          <tr><th>Ball</th><th>Slope</th></tr>
-          <tr><td>66</td><td>0.00176</td></tr>
-          <tr><td>64</td><td>0.00170</td></tr>
-          <tr><td>58</td><td>0.00167</td></tr>
-          <tr><td>61</td><td>0.00164</td></tr>
-          <tr><td>69</td><td>0.00161</td></tr>
-          <!-- … -->
-        </table></div>
-      </div>
-      <!-- repeat for sections 2–8 as before -->
-    </section>
   </div>
 
   <script>
-  // —— 1) Paste your full 2,232‐row history here ———
-  let historicalData = [
-    // [MM,DD,YYYY,W1,W2,W3,W4,W5,Mega],
-    // … your data …
-  ];
+    // ---- Paste your historical data array here ----
+    // Format: [MM, DD, YYYY, W1, W2, W3, W4, W5, Mega]
+    // e.g. [12,5,2003,2,14,16,23,44,9],
+    const historicalData = [
+      /* … all 2,232 draw rows … */
+    ];
 
-  // —— 2) Stats toggle ————————————————
-  document.getElementById('statsToggle').onclick = () => {
-    const s = document.getElementById('stats');
-    s.classList.toggle('open');
-    document.getElementById('statsToggle').textContent =
-      s.classList.contains('open')
-        ? '▼ Hide Stats & Models'
-        : '▶ Show All Stats & Models';
-  };
-
-  // —— 3) Exponential‐decay & Trend models ——
-  function getExpoProbs(){
-    const hl=500, λ=Math.log(2)/hl, N=historicalData.length;
-    const w=historicalData.map((_,i)=>Math.exp(-λ*(N-1-i)));
-    const wc=Array(71).fill(0), mc=Array(26).fill(0);
-    historicalData.forEach((d,i)=>{
-      [d[3],d[4],d[5],d[6],d[7]].forEach(n=>wc[n]+=w[i]);
-      mc[d[8]]+=w[i];
-    });
-    const totalW=wc.reduce((a,b)=>a+b,0), totalM=mc.reduce((a,b)=>a+b,0);
-    return {
-      whiteProbs: wc.map(c=>c/totalW),
-      megaProbs:  mc.map(c=>c/totalM)
-    };
-  }
-  function getTrendScores(){
-    const N=historicalData.length, idx=historicalData.map((_,i)=>i);
-    const corr=(xs,ys)=>{
-      const mx=xs.reduce((a,b)=>a+b)/N, my=ys.reduce((a,b)=>a+b)/N;
-      let num=0,dx=0,dy=0;
-      for(let i=0;i<N;i++){
-        num+=(xs[i]-mx)*(ys[i]-my);
-        dx+=(xs[i]-mx)**2; dy+=(ys[i]-my)**2;
-      }
-      return (dx&&dy)? num/Math.sqrt(dx*dy): 0;
-    };
-    const wS=Array(71).fill(0), mS=Array(26).fill(0);
-    for(let n=1;n<=70;n++){
-      const ys=historicalData.map(d=>[d[3],d[4],d[5],d[6],d[7]].includes(n)?1:0);
-      wS[n]=corr(idx,ys);
-    }
-    for(let n=1;n<=25;n++){
-      const ys=historicalData.map(d=>d[8]===n?1:0);
-      mS[n]=corr(idx,ys);
-    }
-    return { whiteScores:wS, megaScores:mS };
-  }
-
-  // —— 4) Combine & normalize ——————————————————
-  function combineModels(){
-    if(!historicalData.length){
-      alert('⚠️ Please populate the historicalData array with past draws!');
-      return null;
-    }
-    const { whiteProbs, megaProbs } = getExpoProbs();
-    const { whiteScores, megaScores } = getTrendScores();
-    const w = whiteProbs.map((p,i)=> (p + (whiteScores[i]+1)/2)/2 );
-    const m = megaProbs .map((p,i)=> (p + (megaScores[i]+1)/2)/2 );
-    return { white:w, mega:m };
-  }
-
-  // —— 5) Weighted sampler ——————————————
-  function weightedSample(pool, weights, k){
-    const cum=[0];
-    weights.forEach((wt,i)=> cum.push(cum[i]+wt));
-    const total=cum[cum.length-1];
-    if(total <= 0) return pool.slice(0,k); // fallback
-    const out=new Set();
-    while(out.size<k){
-      const r=Math.random()*total;
-      const idx=cum.findIndex(c=>r<=c)-1;
-      if(idx>=0) out.add(pool[idx]);
-    }
-    return [...out];
-  }
-
-  // —— 6) Generate & render —————————————
-  document.getElementById('generate').onclick = () => {
-    const model = combineModels();
-    if(!model) return;
-    const { white, mega } = model;
-    const result = document.getElementById('result');
-    result.innerHTML = '';
-    for(let s=0; s<5; s++){
-      const row = document.createElement('div');
-      row.className = 'set';
-      // sample whites
-      const whites = weightedSample([...Array(71).keys()].slice(1), white.slice(1), 5);
-      whites.forEach(n=>{
-        const b = document.createElement('div');
-        b.className = 'ball white';
-        b.textContent = n;
-        row.appendChild(b);
+    // Exponential-decay model
+    function getExpoProbs() {
+      const hl = 500, λ = Math.log(2) / hl, N = historicalData.length;
+      const weights = historicalData.map((_, i) => Math.exp(-λ * (N - 1 - i)));
+      const whiteCount = Array(71).fill(0), megaCount = Array(26).fill(0);
+      historicalData.forEach((d,i) => {
+        [d[3],d[4],d[5],d[6],d[7]].forEach(n => whiteCount[n] += weights[i]);
+        megaCount[d[8]] += weights[i];
       });
-      // sample mega
-      const mball = weightedSample([...Array(26).keys()].slice(1), mega.slice(1),1)[0];
-      const mb = document.createElement('div');
-      mb.className = 'ball mega';
-      mb.textContent = mball;
-      row.appendChild(mb);
-
-      result.appendChild(row);
+      const totalW = whiteCount.reduce((a,b)=>a+b,0),
+            totalM = megaCount.reduce((a,b)=>a+b,0);
+      return {
+        whiteProbs: whiteCount.map(c => c / totalW),
+        megaProbs:  megaCount.map(c => c / totalM)
+      };
     }
-  };
+
+    // Time-trend (Pearson correlation with draw index)
+    function getTrendScores() {
+      const N = historicalData.length;
+      const idx = historicalData.map((_,i)=>i);
+      const corr = (xs, ys) => {
+        const mx = xs.reduce((a,b)=>a+b)/N, my = ys.reduce((a,b)=>a+b)/N;
+        let num=0, dx=0, dy=0;
+        for (let i=0; i<N; i++) {
+          num += (xs[i]-mx)*(ys[i]-my);
+          dx += (xs[i]-mx)**2;
+          dy += (ys[i]-my)**2;
+        }
+        return dx && dy ? num/Math.sqrt(dx*dx * dy*dy) : 0;
+      };
+      const whiteScores = Array(71).fill(0),
+            megaScores  = Array(26).fill(0);
+      for (let n=1; n<=70; n++) {
+        const ys = historicalData.map(d => [d[3],d[4],d[5],d[6],d[7]].includes(n) ? 1 : 0);
+        whiteScores[n] = corr(idx, ys);
+      }
+      for (let n=1; n<=25; n++) {
+        const ys = historicalData.map(d => d[8]===n ? 1 : 0);
+        megaScores[n] = corr(idx, ys);
+      }
+      return { whiteScores, megaScores };
+    }
+
+    // Combine models
+    function combineModels() {
+      const { whiteProbs, megaProbs } = getExpoProbs();
+      const { whiteScores, megaScores } = getTrendScores();
+      const white = whiteProbs.map((p,i)=> (p + (whiteScores[i]+1)/2)/2);
+      const mega  = megaProbs .map((p,i)=> (p + (megaScores[i]+1)/2)/2);
+      return { white, mega };
+    }
+
+    // Weighted random sample without replacement
+    function weightedSample(pool, weights, k) {
+      const cum=[0];
+      weights.forEach((w,i)=> cum.push(cum[i]+w));
+      const total = cum[cum.length-1];
+      const out = new Set();
+      while (out.size < k) {
+        const r = Math.random() * total;
+        const idx = cum.findIndex(c=>r<=c) - 1;
+        if (idx >= 0) out.add(pool[idx]);
+      }
+      return [...out];
+    }
+
+    // Render 5 sets
+    document.getElementById('generate').onclick = () => {
+      const model = combineModels();
+      const { white, mega } = model;
+      const result = document.getElementById('result');
+      result.innerHTML = '';
+      for (let s=0; s<5; s++) {
+        const row = document.createElement('div');
+        row.className = 'set';
+        // pick 5 white balls
+        const whites = weightedSample(
+          [...Array(71).keys()].slice(1),
+          white.slice(1),
+          5
+        );
+        whites.forEach(n => {
+          const b = document.createElement('div');
+          b.className = 'ball white';
+          b.textContent = n;
+          row.appendChild(b);
+        });
+        // pick 1 mega
+        const mb = weightedSample(
+          [...Array(26).keys()].slice(1),
+          mega.slice(1),
+          1
+        )[0];
+        const bm = document.createElement('div');
+        bm.className = 'ball mega';
+        bm.textContent = mb;
+        row.appendChild(bm);
+
+        result.appendChild(row);
+      }
+    };
   </script>
 </body>
 </html>
