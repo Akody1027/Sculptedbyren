@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mega Millions Predictor</title>
+  <style>
+    /* ---- Pastel Modern Styles ---- */
+    body {
+      background: #F4EFFF;
+      color: #333;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #FFFFFF;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      color: #7F53FF;
+      margin-bottom: 20px;
+    }
+    textarea, input, button {
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 6px;
+      border: 1px solid #DDD;
+      font-size: 1rem;
+      padding: 10px;
+      margin: 10px 0;
+      transition: all 0.3s ease;
+    }
+    textarea:focus, input:focus {
+      border-color: #B19AFF;
+      outline: none;
+    }
+    button {
+      background: #B19AFF;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #7F53FF;
+    }
+    #result {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+    .number {
+      width: 60px;
+      height: 60px;
+      line-height: 60px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: center;
+      opacity: 0;
+      transform: scale(0.8);
+      animation: fadeIn 0.6s forwards;
+    }
+    .white {
+      background: #FFF6F6;
+      border: 2px solid #FFB3B3;
+      color: #FF5C5C;
+    }
+    .mega {
+      background: #FEF9E7;
+      border: 2px solid #FFE599;
+      color: #E1AD01;
+    }
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mega Millions Predictor</h1>
+    <textarea id="newDraw" rows="2" placeholder="Enter latest draw: MM-DD-YYYY W1 W2 W3 W4 W5 MB"></textarea>
+    <button id="addDraw">Add Draw &amp; Recalculate Model</button>
+    <button id="generate">Generate Next Numbers</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+  // ---- 1) Your historical dataset ----
+  // Paste every draw as [MM,DD,YYYY,W1,W2,W3,W4,W5,Mega], e.g.:
+  // let historicalData = [
+  //   [12, 5, 2003, 2, 14, 16, 23, 44, 9],
+  //   [12, 8, 2003, 10, 20, 29, 31, 39, 19],
+  //   ... // all 2,232 rows through April 22, 2025
+  // ];
+  let historicalData = [
+    // … your full history goes here …
+  ];
+
+  // ---- 2) Utility to parse your manual input ----
+  function parseNewDraw(str) {
+    const parts = str.trim().split(/[\s,-]+/);
+    if (parts.length !== 9) return null;
+    return parts.map(Number);
+  }
+
+  // ---- 3) Add draw handler ----
+  document.getElementById('addDraw').onclick = () => {
+    const raw = document.getElementById('newDraw').value;
+    const entry = parseNewDraw(raw);
+    if (entry && entry.length === 9) {
+      historicalData.push(entry);
+      alert('✅ Draw added! Model updated.');
+      document.getElementById('newDraw').value = '';
+    } else {
+      alert('⚠️ Invalid format. Use: MM-DD-YYYY W1 W2 W3 W4 W5 MB');
+    }
+  };
+
+  // ---- 4) Exponential-decay model ----
+  function getExpoProbs() {
+    const halfLife = 500;
+    const lambda = Math.log(2) / halfLife;
+    const N = historicalData.length;
+    const w = historicalData.map((_, i) => Math.exp(-lambda * (N - 1 - i)));
+    // White probs
+    const whiteCounts = Array(71).fill(0);
+    historicalData.forEach((d,i) => {
+      [d[3], d[4], d[5], d[6], d[7]].forEach(n => whiteCounts[n] += w[i]);
+    });
+    const totalW = whiteCounts.reduce((a,b)=>a+b, 0);
+    const whiteProbs = whiteCounts.map(c => c / totalW);
+    // Mega probs
+    const megaCounts = Array(26).fill(0);
+    historicalData.forEach((d,i) => megaCounts[d[8]] += w[i]);
+    const totalM = megaCounts.reduce((a,b)=>a+b, 0);
+    const megaProbs = megaCounts.map(c => c / totalM);
+    return { whiteProbs, megaProbs };
+  }
+
+  // ---- 5) Simple time-trend score (corr with draw index) ----
+  function getTrendScores() {
+    const N = historicalData.length;
+    const idx = historicalData.map((_,i)=>i);
+    // Whites
+    const whiteScores = Array(71).fill(0);
+    for (let num=1; num<=70; num++) {
+      const ys = historicalData.map(d => 
+        [d[3],d[4],d[5],d[6],d[7]].includes(num)?1:0
+      );
+      const mx = idx.reduce((a,b)=>a+b,0)/N, my = ys.reduce((a,b)=>a+b,0)/N;
+      let nume=0, denx=0, deny=0;
+      for (let i=0;i<N;i++){
+        nume += (idx[i]-mx)*(ys[i]-my);
+        denx += (idx[i]-mx)**2;
+        deny += (ys[i]-my)**2;
+      }
+      whiteScores[num] = (denx && deny) ? nume/Math.sqrt(denx*deny) : 0;
+    }
+    // Megas
+    const megaScores = Array(26).fill(0);
+    for (let num=1; num<=25; num++) {
+      const ys = historicalData.map(d=>d[8]===num?1:0);
+      const mx = idx.reduce((a,b)=>a+b,0)/N, my = ys.reduce((a,b)=>a+b,0)/N;
+      let nume=0, denx=0, deny=0;
+      for (let i=0;i<N;i++){
+        nume += (idx[i]-mx)*(ys[i]-my);
+        denx += (idx[i]-mx)**2;
+        deny += (ys[i]-my)**2;
+      }
+      megaScores[num] = (denx && deny) ? nume/Math.sqrt(denx*deny) : 0;
+    }
+    return { whiteScores, megaScores };
+  }
+
+  // ---- 6) Combine and normalize ----
+  function combineModels() {
+    const expo = getExpoProbs();
+    const trend = getTrendScores();
+    // We normalize trend scores from [-1,1] to [0,1] by (score+1)/2
+    const white = expo.whiteProbs.map((p,i) => (p + (trend.whiteScores[i]+1)/2)/2 );
+    const mega = expo.megaProbs.map((p,i) => (p + (trend.megaScores[i]+1)/2)/2 );
+    return { white, mega };
+  }
+
+  // ---- 7) Generate & render ----
+  function generate() {
+    const { white, mega } = combineModels();
+    // pick top 5 whites (skip index 0)
+    const whites = white
+      .map((p,i)=>({i,p}))
+      .filter(o=>o.i>0)
+      .sort((a,b)=>b.p - a.p)
+      .slice(0,5)
+      .map(o=>o.i);
+    // pick top mega
+    const meg = mega
+      .map((p,i)=>({i,p}))
+      .slice(1) 
+      .sort((a,b)=>b.p - a.p)[0].i;
+
+    const res = document.getElementById('result');
+    res.innerHTML = '';
+    whites.forEach(n => {
+      const d = document.createElement('div');
+      d.className = 'number white';
+      d.textContent = n;
+      res.appendChild(d);
+    });
+    const dm = document.createElement('div');
+    dm.className = 'number mega';
+    dm.textContent = meg;
+    res.appendChild(dm);
+  }
+
+  document.getElementById('generate').onclick = generate;
+  </script>
+</body>
+</html>
