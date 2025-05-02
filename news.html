@@ -27,13 +27,13 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Global */
+    /* Global Styles */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #121212; color: #e0e0e0; font-family: 'Inter', sans-serif; }
     header { text-align: center; padding: 2rem 1rem; }
     header h1 { color: #fff; font-size: 2rem; font-weight: 600; }
 
-    /* Cards */
+    /* Card Styles */
     .container { display: flex; flex-direction: column; gap: 1rem; padding: 1rem; margin-bottom: 60px; }
     .card { background: #1e1e1e; border-radius: 8px; overflow: hidden; position: relative; }
     .channel-title, .video-title { padding: .75rem 1rem; background: #272727; color: #fff; font-weight: 600; }
@@ -187,12 +187,12 @@
       <div class="swipe-hint">→</div>
       <div class="card-buttons">
         <button class="save-btn" data-base="player-7">Save</button>
-        <a href="https://youtube.com/@stephengardner1" target="_blank">Open</a>
+        <a href="https://youtube.com/@stephengardner1?si=9lDKJ-SJbkDuNvZF" target="_blank">Open</a>
       </div>
     </div>
 
     <!-- 9. Ben Shapiro Show -->
-    <div class="card" data-base="player-8" data-playlist="UUlOuePXlJnw8-br7SXiuHqg">
+    <div class="card" data-base="player-8" data-playlist="UUnQC_G5Xsjhp9fEJKuIcrSw">
       <div class="channel-title">Ben Shapiro Show</div>
       <div class="video-title" id="title-8">Loading...</div>
       <div class="viewport">
@@ -202,15 +202,13 @@
       <div class="swipe-hint">→</div>
       <div class="card-buttons">
         <button class="save-btn" data-base="player-8">Save</button>
-        <a href="https://www.youtube.com/c/benjaminpshapiro" target="_blank">Open</a>
+        <a href="https://youtube.com/@benshapiro?si=S_m7AJ9pouV72IC6" target="_blank">Open</a>
       </div>
     </div>
 
   </main>
   <nav id="bottom-nav">
-    <button id="home-btn">Home</button>
-    <button id="save-all-btn">Save All</button>
-    <button id="search-btn">🔍</button>
+    <button id="home-btn">Home</button><button id="save-all-btn">Save All</button><button id="search-btn">🔍</button>
   </nav>
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
@@ -238,9 +236,10 @@
         height: '400', width: '100%',
         playerVars: { listType: 'playlist', list, index: idx, autoplay: 1, origin: location.origin },
         events: {
-          'onReady': e => { e.target.unMute(); e.target.playVideo(); },
+          'onReady': e => { e.target.mute(); e.target.playVideo(); },
           'onStateChange': e => {
             if (e.data === YT.PlayerState.PLAYING) {
+              e.target.unMute();
               document.getElementById('title-' + base.split('-')[1]).textContent = e.target.getVideoData().title;
             }
           }
