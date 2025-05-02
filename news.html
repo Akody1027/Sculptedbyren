@@ -215,13 +215,18 @@
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     const players = {}, nextIdx = {};
+    let total = 0, readyCount = 0;
 
     function onYouTubeIframeAPIReady() {
-      document.querySelectorAll('.card').forEach(card => {
+      const cards = document.querySelectorAll('.card');
+      total = cards.length;
+
+      cards.forEach(card => {
         const base = card.dataset.base, list = card.dataset.playlist;
         nextIdx[base] = 0;
         initPlayer(base, list);
 
+        // swipe
         let startX = 0;
         card.querySelector('.touch-overlay').addEventListener('touchstart', e => {
           startX = e.touches[0].clientX;
@@ -234,23 +239,20 @@
       });
 
       observe();
-
-      // **AS SOON AS API IS READY**: hide preloader + autoplay all
-      document.getElementById('preloader').style.display = 'none';
-      Object.values(players).forEach(p => {
-        p.playVideo();  // must play while still muted
-        p.unMute();     // then restore sound
-      });
     }
 
     function initPlayer(base, list) {
       const idx = nextIdx[base]++;
       if (players[base]) players[base].destroy();
+
       players[base] = new YT.Player(base, {
         height: '400', width: '100%',
         playerVars: { listType:'playlist', list, index:idx, autoplay:0, muted:1, origin:location.origin },
         events: {
-          onReady: e => e.target.mute(),
+          onReady: e => {
+            e.target.mute();
+            if (++readyCount === total) startAutoplay();
+          },
           onStateChange: e => {
             if (e.data === YT.PlayerState.PLAYING) {
               const id = base.split('-')[1];
@@ -258,6 +260,14 @@
             }
           }
         }
+      });
+    }
+
+    function startAutoplay() {
+      document.getElementById('preloader').style.display = 'none';
+      Object.values(players).forEach(p => {
+        p.playVideo();  // autoplay while muted
+        p.unMute();     // then restore sound
       });
     }
 
@@ -279,8 +289,8 @@
     }
 
     function observe() {
-      const obs = new IntersectionObserver(entries=>{
-        entries.forEach(entry=>{
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
           const base = entry.target.dataset.base;
           if (!players[base]) return;
           if (entry.isIntersecting) {
@@ -294,7 +304,6 @@
       document.querySelectorAll('.card').forEach(c => obs.observe(c));
     }
 
-    // Home button scroll
     window.addEventListener('load', () => {
       document.getElementById('home-btn').onclick = () =>
         window.scrollTo({ top:0, behavior:'smooth' });
