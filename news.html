@@ -7,86 +7,39 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     /* Preloader */
-    #preloader {
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: #000; display: flex;
-      flex-direction: column; align-items: center;
-      justify-content: center; z-index: 9999;
-      color: #fff; font-family: 'Inter', sans-serif;
-    }
-    .loader {
-      border: 8px solid #333; border-top: 8px solid #bb86fc;
-      border-radius: 50%; width: 60px; height: 60px;
-      margin-bottom: 1rem; animation: spin 1s linear infinite;
-    }
+    #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: #fff; font-family: 'Inter', sans-serif; }
+    .loader { border: 8px solid #333; border-top: 8px solid #bb86fc; border-radius: 50%; width: 60px; height: 60px; margin-bottom: 1rem; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* Global */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: #121212; color: #e0e0e0;
-      font-family: 'Inter', sans-serif; overflow-x: hidden;
-    }
+    body { background-color: #121212; color: #e0e0e0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
     header { text-align: center; padding: 2rem 1rem; }
     header h1 { color: #fff; font-size: 2rem; font-weight: 600; }
 
     /* Cards */
-    .container {
-      display: flex; flex-direction: column;
-      gap: 1rem; padding: 1rem;
-    }
-    .card {
-      background: #1e1e1e; border-radius: 8px;
-      overflow: hidden; position: relative;
-    }
-    .channel-title, .video-title {
-      padding: 0.75rem 1rem; background: #272727;
-      color: #fff; font-weight: 600;
-    }
+    .container { display: flex; flex-direction: column; gap: 1rem; padding: 1rem; }
+    .card { background: #1e1e1e; border-radius: 8px; overflow: hidden; position: relative; }
+    .channel-title, .video-title { padding: .75rem 1rem; background: #272727; color: #fff; font-weight: 600; }
     .channel-title { font-size: 1.1rem; }
     .video-title { font-size: 1rem; }
 
-    /* Horizontal carousel inside card */
-    .carousel {
-      display: flex; overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      width: 100%; height: 400px;
-    }
+    /* Carousel */
+    .carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; width: 100%; height: 400px; position: relative; }
     .carousel::-webkit-scrollbar { display: none; }
-    .video-item {
-      flex: 0 0 100%; scroll-snap-align: start;
-      position: relative; width: 100%; height: 100%;
-    }
-    .video-item iframe {
-      width: 100%; height: 100%; border: none;
-    }
+    .video-item { flex: 0 0 100%; scroll-snap-align: start; position: relative; width: 100%; height: 100%; }
+    .video-item iframe { width: 100%; height: 100%; border: none; }
 
-    .card-buttons {
-      display: flex; justify-content: flex-end;
-      gap: 0.5rem; padding: 0.5rem 1rem;
-      background: #1e1e1e;
-    }
-    .card-buttons button, .card-buttons a {
-      background: #bb86fc; color: #121212;
-      border: none; padding: 0.25rem 0.5rem;
-      font-size: 0.8rem; border-radius: 4px;
-      cursor: pointer; text-decoration: none;
-      transition: background 0.2s;
-    }
+    /* Scroll arrow hint */
+    .scroll-arrow { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); font-size: 2rem; color: #bb86fc; opacity: 0.7; pointer-events: none; }
+
+    .card-buttons { display: flex; justify-content: flex-end; gap: .5rem; padding: .5rem 1rem; background: #1e1e1e; }
+    .card-buttons button, .card-buttons a { background: #bb86fc; color: #121212; border: none; padding: .25rem .5rem; font-size: .8rem; border-radius: 4px; cursor: pointer; text-decoration: none; transition: background .2s; }
     .card-buttons button:hover, .card-buttons a:hover { background: #985eff; }
 
     /* Bottom nav */
-    #bottom-nav {
-      position: fixed; bottom: 0; width: 100%;
-      background: #272727; display: flex;
-      justify-content: space-around; padding: 0.5rem 0;
-      z-index: 1000;
-    }
-    #bottom-nav button {
-      background: none; border: none;
-      color: #e0e0e0; font-size: 1rem; cursor: pointer;
-    }
+    #bottom-nav { position: fixed; bottom: 0; width: 100%; background: #272727; display: flex; justify-content: space-around; padding: .5rem 0; z-index: 1000; }
+    #bottom-nav button { background: none; border: none; color: #e0e0e0; font-size: 1rem; cursor: pointer; }
     .highlight { border: 2px solid #bb86fc; }
   </style>
 </head>
@@ -98,78 +51,92 @@
   </div>
 
   <header><h1>Conservative Daily U.S. News Channels</h1></header>
-
   <main class="container">
-    <!-- Cards with carousel -->
-    <div class="card" data-playlist="UUaeO5vkdj5xOQHp4UmIN6dw" data-playerid="player-0">
+    <!-- Repeat for each channel -->
+    <div class="card" data-playlist="UUaeO5vkdj5xOQHp4UmIN6dw" data-base="player-0">
       <div class="channel-title">The Daily Wire</div>
       <div class="video-title" id="title-0">Loading...</div>
       <div class="carousel" id="carousel-0"></div>
+      <div class="scroll-arrow">→</div>
       <div class="card-buttons">
-        <button class="save-btn" data-pid="player-0">Save</button>
+        <button class="save-btn" data-base="player-0">Save</button>
         <a href="https://www.youtube.com/c/TheDailyWire" target="_blank">Open</a>
       </div>
     </div>
-    <div class="card" data-playlist="UUXIJgqnII2ZOINSWNOGFThA" data-playerid="player-1">
+    <!-- Fox News -->
+    <div class="card" data-playlist="UUXIJgqnII2ZOINSWNOGFThA" data-base="player-1">
       <div class="channel-title">Fox News</div>
       <div class="video-title" id="title-1">Loading...</div>
       <div class="carousel" id="carousel-1"></div>
+      <div class="scroll-arrow">→</div>
       <div class="card-buttons">
-        <button class="save-btn" data-pid="player-1">Save</button>
+        <button class="save-btn" data-base="player-1">Save</button>
         <a href="https://www.youtube.com/user/FoxNewsChannel" target="_blank">Open</a>
       </div>
     </div>
-    <div class="card" data-playlist="UUx6h-dWzJ5NpAlja1YsApdg" data-playerid="player-2">
+    <!-- Newsmax -->
+    <div class="card" data-playlist="UUx6h-dWzJ5NpAlja1YsApdg" data-base="player-2">
       <div class="channel-title">Newsmax</div>
       <div class="video-title" id="title-2">Loading...</div>
       <div class="carousel" id="carousel-2"></div>
+      <div class="scroll-arrow">→</div>
       <div class="card-buttons">
-        <button class="save-btn" data-pid="player-2">Save</button>
+        <button class="save-btn" data-base="player-2">Save</button>
         <a href="https://www.youtube.com/c/NewsmaxTV" target="_blank">Open</a>
       </div>
     </div>
-    <div class="card" data-playlist="UUNbIDJNNgaRrXOD7VllIMRQ" data-playerid="player-3">
+    <!-- OAN -->
+    <div class="card" data-playlist="UUNbIDJNNgaRrXOD7VllIMRQ" data-base="player-3">
       <div class="channel-title">One America News</div>
       <div class="video-title" id="title-3">Loading...</div>
       <div class="carousel" id="carousel-3"></div>
+      <div class="scroll-arrow">→</div>
       <div class="card-buttons">
-        <button class="save-btn" data-pid="player-3">Save</button>
+        <button class="save-btn" data-base="player-3">Save</button>
         <a href="https://www.youtube.com/c/OANNation" target="_blank">Open</a>
       </div>
     </div>
-    <div class="card" data-playlist="UUeLc4heXqG9dtL7jiPHMBfQ" data-playerid="player-4">
+    <!-- The Epoch Times -->
+    <div class="card" data-playlist="UUeLc4heXqG9dtL7jiPHMBfQ" data-base="player-4">
       <div class="channel-title">The Epoch Times</div>
       <div class="video-title" id="title-4">Loading...</div>
       <div class="carousel" id="carousel-4"></div>
+      <div class="scroll-arrow">→</div>
       <div class="card-buttons">
-        <button class="save-btn" data-pid="player-4">Save</button>
+        <button class="save-btn" data-base="player-4">Save</button>
         <a href="https://www.youtube.com/c/EpochTimesTV" target="_blank">Open</a>
       </div>
     </div>
-    <div class="card" data-playlist="UUKgJEs_v0JB-6jWb8lIy9Xw" data-playerid="player-5">
+    <!-- TheBlaze -->
+    <div class="card" data-playlist="UUKgJEs_v0JB-6jWb8lIy9Xw" data-base="player-5">
       <div class="channel-title">TheBlaze</div>
       <div class="video-title" id="title-5">Loading...</div>
       <div class="carousel" id="carousel-5"></div>
+      <div class="scroll-arrow">→</div>
       <div class="card-buttons">
-        <button class="save-btn" data-pid="player-5">Save</button>
+        <button class="save-btn" data-base="player-5">Save</button>
         <a href="https://www.youtube.com/c/TheBlazeTV" target="_blank">Open</a>
       </div>
     </div>
-    <div class="card" data-playlist="UULwNTXWEjVd2qIHLcXxQWxA" data-playerid="player-6">
+    <!-- Timcast IRL -->
+    <div class="card" data-playlist="UULwNTXWEjVd2qIHLcXxQWxA" data-base="player-6">
       <div class="channel-title">Timcast IRL</div>
       <div class="video-title" id="title-6">Loading...</div>
       <div class="carousel" id="carousel-6"></div>
+      <div class="scroll-arrow">→</div>
       <div class="card-buttons">
-        <button class="save-btn" data-pid="player-6">Save</button>
+        <button class="save-btn" data-base="player-6">Save</button>
         <a href="https://www.youtube.com/c/Timcast" target="_blank">Open</a>
       </div>
     </div>
-    <div class="card" data-playlist="UU3VlRtY0ARsTRR5Eq8QE1Yg" data-playerid="player-7">
+    <!-- Stephen Gardner -->
+    <div class="card" data-playlist="UU3VlRtY0ARsTRR5Eq8QE1Yg" data-base="player-7">
       <div class="channel-title">Stephen Gardner</div>
       <div class="video-title" id="title-7">Loading...</div>
       <div class="carousel" id="carousel-7"></div>
+      <div class="scroll-arrow">→</div>
       <div class="card-buttons">
-        <button class="save-btn" data-pid="player-7">Save</button>
+        <button class="save-btn" data-base="player-7">Save</button>
         <a href="https://youtube.com/@stephengardner1?si=9lDKJ-SJbkDuNvZF" target="_blank">Open</a>
       </div>
     </div>
@@ -184,73 +151,72 @@
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     const players = {};
-    const carouselLength = 5;
+    const items = 5;
 
     function onYouTubeIframeAPIReady() {
       document.querySelectorAll('.card').forEach(card => {
-        const pid = card.dataset.playerid;
+        const base = card.dataset.base;
         const list = card.dataset.playlist;
-        const carouselEl = document.getElementById('carousel-' + pid.split('-')[1]);
-        for (let i = 0; i < carouselLength; i++) {
-          const idx = i;
-          const itemId = pid + '-item-' + i;
-          const itemDiv = document.createElement('div');
-          itemDiv.className = 'video-item';
-          itemDiv.id = itemId;
-          carouselEl.appendChild(itemDiv);
-          // initialize player
-          players[itemId] = new YT.Player(itemId, {
+        const carousel = document.getElementById('carousel-' + base.split('-')[1]);
+        for (let i = 0; i < items; i++) {
+          const id = base + '-item-' + i;
+          const div = document.createElement('div'); div.className = 'video-item'; div.id = id;
+          carousel.appendChild(div);
+          players[id] = new YT.Player(id, {
             height: '400', width: '100%',
-            playerVars: { listType: 'playlist', list: list, index: i, origin: window.location.origin },
-            events: {
-              'onReady': event => {
-                if (i === 0) event.target.playVideo();
-              },
-              'onStateChange': evt => {
-                if (evt.data === YT.PlayerState.PLAYING && i === 0) {
-                  const info = evt.target.getVideoData();
-                  document.getElementById('title-' + pid.split('-')[1]).textContent = info.title;
-                }
-              }
-            }
+            playerVars: { listType: 'playlist', list: list, index: i, origin: location.origin },
+            events: { 'onReady': e => {}, 'onStateChange': onStateChange }
           });
         }
       });
+      observeItems();
     }
 
-    // Observe for autoplay/pause
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        const pidBase = entry.target.dataset.playerid;
-        if (!entry.isIntersecting) {
-          // pause first item
-          players[pidBase + '-item-0'] && players[pidBase + '-item-0'].pauseVideo();
-        } else {
-          players[pidBase + '-item-0'] && players[pidBase + '-item-0'].playVideo();
-        }
-      });
-    }, { threshold: 0.6 });
+    function onStateChange(event) {
+      if (event.data === YT.PlayerState.PLAYING) {
+        const id = event.target.getIframe().id;
+        event.target.unMute();
+        const prefix = id.split('-item-')[0];
+        // update title
+        const info = event.target.getVideoData();
+        document.getElementById('title-' + prefix.split('-')[1]).textContent = info.title;
+        // pause others in same carousel
+        Object.keys(players).forEach(key => {
+          if (key.startsWith(prefix) && key !== id) players[key].pauseVideo();
+        });
+      }
+    }
+
+    function observeItems() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const id = entry.target.id;
+          const player = players[id];
+          if (!player) return;
+          if (entry.isIntersecting) {
+            player.mute(); player.playVideo();
+          } else {
+            player.pauseVideo();
+          }
+        });
+      }, { threshold: 0.6 });
+      document.querySelectorAll('.video-item').forEach(item => observer.observe(item));
+    }
 
     window.addEventListener('load', () => {
       document.getElementById('preloader').style.display = 'none';
-      document.querySelectorAll('.card').forEach(card => observer.observe(card));
       document.getElementById('home-btn').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
       document.getElementById('save-all-btn').onclick = () => alert('Saved Videos: ' + (localStorage.getItem('savedVideos')||'[]'));
       document.getElementById('search-btn').onclick = () => {
-        const term = prompt('Search titles for:');
-        if (!term) return;
+        const term = prompt('Search titles for:'); if (!term) return;
         document.querySelectorAll('.video-title').forEach(el => el.parentElement.classList.toggle('highlight', el.textContent.toLowerCase().includes(term.toLowerCase())));
       };
-      // Save button listener
-      document.querySelectorAll('.save-btn').forEach(btn => {
-        btn.onclick = () => {
-          const pid = btn.dataset.pid;
-          const videoId = players[pid + '-item-0'].getVideoData().video_id;
-          const saved = JSON.parse(localStorage.getItem('savedVideos')||'[]');
-          if (!saved.includes(videoId)) saved.push(videoId);
-          localStorage.setItem('savedVideos', JSON.stringify(saved));
-          alert('Saved: ' + videoId);
-        };
+      document.querySelectorAll('.save-btn').forEach(btn => btn.onclick = () => {
+        const base = btn.dataset.base;
+        const videoId = players[base + '-item-0'].getVideoData().video_id;
+        const saved = JSON.parse(localStorage.getItem('savedVideos')||'[]'); if (!saved.includes(videoId)) saved.push(videoId);
+        localStorage.setItem('savedVideos', JSON.stringify(saved));
+        alert('Saved: ' + videoId);
       });
     });
   </script>
