@@ -31,7 +31,7 @@
     .video-item iframe { width: 100%; height: 100%; border: none; }
 
     /* Scroll arrow hint */
-    .scroll-arrow { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); font-size: 2rem; color: #bb86fc; opacity: 0.7; pointer-events: none; }
+    .scroll-arrow { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); font-size: 2rem; color: #bb86fc; background: rgba(0,0,0,0.3); padding: 0.25rem; border-radius: 50%; pointer-events: none; }
 
     .card-buttons { display: flex; justify-content: flex-end; gap: .5rem; padding: .5rem 1rem; background: #1e1e1e; }
     .card-buttons button, .card-buttons a { background: #bb86fc; color: #121212; border: none; padding: .25rem .5rem; font-size: .8rem; border-radius: 4px; cursor: pointer; text-decoration: none; transition: background .2s; }
@@ -52,7 +52,7 @@
 
   <header><h1>Conservative Daily U.S. News Channels</h1></header>
   <main class="container">
-    <!-- Repeat for each channel -->
+    <!-- Each channel card -->
     <div class="card" data-playlist="UUaeO5vkdj5xOQHp4UmIN6dw" data-base="player-0">
       <div class="channel-title">The Daily Wire</div>
       <div class="video-title" id="title-0">Loading...</div>
@@ -177,10 +177,8 @@
         const id = event.target.getIframe().id;
         event.target.unMute();
         const prefix = id.split('-item-')[0];
-        // update title
         const info = event.target.getVideoData();
         document.getElementById('title-' + prefix.split('-')[1]).textContent = info.title;
-        // pause others in same carousel
         Object.keys(players).forEach(key => {
           if (key.startsWith(prefix) && key !== id) players[key].pauseVideo();
         });
@@ -193,11 +191,8 @@
           const id = entry.target.id;
           const player = players[id];
           if (!player) return;
-          if (entry.isIntersecting) {
-            player.mute(); player.playVideo();
-          } else {
-            player.pauseVideo();
-          }
+          if (entry.isIntersecting) { player.unMute(); player.playVideo(); }
+          else { player.pauseVideo(); }
         });
       }, { threshold: 0.6 });
       document.querySelectorAll('.video-item').forEach(item => observer.observe(item));
