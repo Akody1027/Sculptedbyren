@@ -11,89 +11,62 @@
       position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
       background: #000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      color: #fff;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 9999; color: #fff;
       font-family: 'Inter', sans-serif;
     }
     .loader {
-      border: 8px solid #333;
-      border-top: 8px solid #bb86fc;
-      border-radius: 50%;
-      width: 60px; height: 60px;
-      margin-bottom: 1rem;
-      animation: spin 1s linear infinite;
+      border: 8px solid #333; border-top: 8px solid #bb86fc;
+      border-radius: 50%; width: 60px; height: 60px;
+      margin-bottom: 1rem; animation: spin 1s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* Global */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: #121212;
-      color: #e0e0e0;
-      font-family: 'Inter', sans-serif;
-      overflow-x: hidden;
+      background-color: #121212; color: #e0e0e0;
+      font-family: 'Inter', sans-serif; overflow-x: hidden;
     }
-    header {
-      text-align: center;
-      padding: 2rem 1rem;
-    }
+    header { text-align: center; padding: 2rem 1rem; }
     header h1 {
-      color: #fff;
-      font-size: 2rem;
-      font-weight: 600;
+      color: #fff; font-size: 2rem; font-weight: 600;
     }
 
     /* Cards list */
     .container {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      padding: 1rem;
+      display: flex; flex-direction: column;
+      gap: 1rem; padding: 1rem;
     }
     .card {
-      background-color: #1e1e1e;
-      border-radius: 8px;
-      overflow: hidden;
-      position: relative;
+      background-color: #1e1e1e; border-radius: 8px;
+      overflow: hidden; position: relative;
     }
     .channel-title, .video-title {
-      padding: 0.75rem 1rem;
-      background-color: #272727;
-      color: #fff;
-      font-weight: 600;
+      padding: 0.75rem 1rem; background-color: #272727;
+      color: #fff; font-weight: 600;
     }
     .channel-title { font-size: 1.1rem; }
     .video-title { font-size: 1rem; }
-    .viewport {
-      width: 100%; height: 400px;
-      background: #000;
-      touch-action: pan-y;
-      position: relative;
+    .viewport { width: 100%; height: 400px;
+      background: #000; touch-action: pan-y;
     }
     .card-buttons {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
+      display: flex; justify-content: flex-end;
+      gap: 0.5rem; padding: 0.5rem 1rem;
       background: #1e1e1e;
     }
     .card-buttons button, .card-buttons a {
-      background-color: #bb86fc;
-      color: #121212;
-      border: none;
-      padding: 0.25rem 0.5rem;
-      font-size: 0.8rem;
-      border-radius: 4px;
-      cursor: pointer;
-      text-decoration: none;
+      background-color: #bb86fc; color: #121212;
+      border: none; padding: 0.25rem 0.5rem;
+      font-size: 0.8rem; border-radius: 4px;
+      cursor: pointer; text-decoration: none;
       transition: background 0.2s;
     }
-    .card-buttons button:hover,
-    .card-buttons a:hover { background-color: #985eff; }
+    .card-buttons button:hover, .card-buttons a:hover {
+      background-color: #985eff;
+    }
 
     /* Bottom navigation */
     #bottom-nav {
@@ -123,7 +96,6 @@
   </header>
 
   <main class="container">
-    <!-- Template for channels -->
     <!-- Daily Wire -->
     <div class="card" data-playlist="UUaeO5vkdj5xOQHp4UmIN6dw" data-playerid="player-0">
       <div class="channel-title">The Daily Wire</div>
@@ -154,7 +126,7 @@
         <a href="https://www.youtube.com/c/NewsmaxTV" target="_blank">Open</a>
       </div>
     </div>
-    <!-- OAN -->
+    <!-- One America News -->
     <div class="card" data-playlist="UUNbIDJNNgaRrXOD7VllIMRQ" data-playerid="player-3">
       <div class="channel-title">One America News</div>
       <div class="video-title" id="title-3">Loading title...</div>
@@ -222,27 +194,24 @@
       document.querySelectorAll('.card').forEach(card => {
         const pid = card.dataset.playerid;
         const list = card.dataset.playlist;
-        // random initial index
         startIndices[pid] = Math.floor(Math.random() * 10);
         players[pid] = new YT.Player(pid, {
           height: '400', width: '100%',
-          playerVars: { listType: 'playlist', list: list, index: startIndices[pid], origin: window.location.origin }
+          playerVars: { listType: 'playlist', list: list, index: startIndices[pid], origin: window.location.origin },
+          events: { 'onReady': event => event.target.mute() }
         });
-        // update title on state change
         players[pid].addEventListener('onStateChange', e => {
           if (e.data === YT.PlayerState.PLAYING) {
             const info = players[pid].getVideoData();
             document.getElementById('title-' + pid.split('-')[1]).textContent = info.title;
           }
         });
-        // swipe detection
         let startX = 0;
         card.querySelector('.viewport').addEventListener('touchstart', e => startX = e.touches[0].clientX);
         card.querySelector('.viewport').addEventListener('touchend', e => {
           const dx = e.changedTouches[0].clientX - startX;
           if (dx < -50) players[pid].nextVideo();
         });
-        // save button
         card.querySelector('.save-btn').onclick = () => {
           const id = players[pid].getVideoData().video_id;
           const saved = JSON.parse(localStorage.getItem('savedVideos')||'[]');
@@ -253,13 +222,12 @@
       });
     }
 
-    // autoplay/pause
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         const pid = entry.target.dataset.playerid;
         const player = players[pid];
         if (!player) return;
-        entry.isIntersecting ? player.playVideo() : player.pauseVideo();
+        if (entry.isIntersecting) player.playVideo(); else player.pauseVideo();
       });
     }, { threshold: 0.6 });
 
@@ -275,7 +243,9 @@
         const term = prompt('Search titles for:');
         if (!term) return;
         document.querySelectorAll('.video-title').forEach(el => {
-          el.parentElement.classList.toggle('highlight', el.textContent.toLowerCase().includes(term.toLowerCase()));
+          el.parentElement.classList.toggle('highlight',
+            el.textContent.toLowerCase().includes(term.toLowerCase())
+          );
         });
       };
     });
