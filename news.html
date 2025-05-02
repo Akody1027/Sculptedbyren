@@ -7,8 +7,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     /* Preloader */
-    #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 9999; }
-    .loader { border: 8px solid #333; border-top: 8px solid #bb86fc; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
+    #preloader {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      z-index: 9999;
+    }
+    .loader {
+      border: 8px solid #333;
+      border-top: 8px solid #bb86fc;
+      border-radius: 50%;
+      width: 60px; height: 60px;
+      margin-bottom: 1rem;
+      animation: spin 1s linear infinite;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
     /* Global */
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -16,26 +35,88 @@
     header { text-align: center; padding: 2rem 1rem; }
     header h1 { color: #fff; font-size: 2rem; font-weight: 600; }
     /* Cards */
-    .container { padding: 1rem; margin-bottom: 60px; display: flex; flex-direction: column; gap: 1rem; }
-    .card { background: #1e1e1e; border-radius: 8px; overflow: hidden; position: relative; }
-    .channel-title, .video-title { padding: .75rem 1rem; background: #272727; color: #fff; font-weight: 600; }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+      margin-bottom: 60px;
+    }
+    .card {
+      background: #1e1e1e;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+    .channel-title, .video-title {
+      padding: .75rem 1rem;
+      background: #272727;
+      color: #fff;
+      font-weight: 600;
+    }
     .channel-title { font-size: 1.1rem; }
     .video-title { font-size: 1rem; }
-    .viewport { width: 100%; height: 400px; background: #000; touch-action: pan-y; }
-    .swipe-hint { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); font-size: 2rem; color: #bb86fc; background: rgba(0,0,0,0.5); padding: .25rem; border-radius: 50%; pointer-events: none; }
-    .card-buttons { display: flex; justify-content: space-between; padding: .5rem 1rem; background: #1e1e1e; }
-    .card-buttons button, .card-buttons a { background: #bb86fc; color: #121212; border: none; padding: .5rem 1rem; font-size: .9rem; border-radius: 4px; cursor: pointer; text-decoration: none; transition: background .2s; }
+    .viewport {
+      width: 100%; height: 400px;
+      background: #000;
+      touch-action: pan-y;
+    }
+    .swipe-hint {
+      position: absolute;
+      top: 50%; right: 16px;
+      transform: translateY(-50%);
+      font-size: 2rem;
+      color: #bb86fc;
+      background: rgba(0,0,0,0.5);
+      padding: .25rem;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .card-buttons {
+      display: flex;
+      justify-content: space-between;
+      padding: .5rem 1rem;
+      background: #1e1e1e;
+    }
+    .card-buttons button, .card-buttons a {
+      background: #bb86fc;
+      color: #121212;
+      border: none;
+      padding: .5rem 1rem;
+      font-size: .9rem;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .2s;
+    }
     .card-buttons button:hover, .card-buttons a:hover { background: #985eff; }
-    #bottom-nav { position: fixed; bottom: 0; width: 100%; height: 60px; background: #272727; display: flex; justify-content: space-around; align-items: center; }
-    #bottom-nav button { background: none; border: none; color: #e0e0e0; font-size: 1rem; cursor: pointer; }
+    #bottom-nav {
+      position: fixed;
+      bottom: 0; width: 100%; height: 60px;
+      background: #272727;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+    #bottom-nav button {
+      background: none;
+      border: none;
+      color: #e0e0e0;
+      font-size: 1rem;
+      cursor: pointer;
+    }
     .highlight { border: 2px solid #bb86fc; }
   </style>
 </head>
 <body>
-  <div id="preloader"><div class="loader"></div></div>
+  <div id="preloader">
+    <div class="loader"></div>
+    <h1>THE PURGE</h1>
+    <p>purging disinformation</p>
+  </div>
   <header><h1>Conservative Daily U.S. News Channels</h1></header>
   <main class="container">
-    <!-- Example Card: repeat for each channel -->
+    <!-- The Daily Wire -->
     <div class="card" data-playlist="UUaeO5vkdj5xOQHp4UmIN6dw" data-base="player-0">
       <div class="channel-title">The Daily Wire</div>
       <div class="video-title" id="title-0">Loading...</div>
@@ -46,7 +127,83 @@
         <a href="https://www.youtube.com/c/TheDailyWire" target="_blank">Open</a>
       </div>
     </div>
-    <!-- Add other cards with appropriate data-playlist & data-base -->
+    <!-- Fox News -->
+    <div class="card" data-playlist="UUXIJgqnII2ZOINSWNOGFThA" data-base="player-1">
+      <div class="channel-title">Fox News</div>
+      <div class="video-title" id="title-1">Loading...</div>
+      <div class="viewport" id="player-1"></div>
+      <div class="swipe-hint">→</div>
+      <div class="card-buttons">
+        <button class="save-btn" data-base="player-1">Save</button>
+        <a href="https://www.youtube.com/user/FoxNewsChannel" target="_blank">Open</a>
+      </div>
+    </div>
+    <!-- Newsmax -->
+    <div class="card" data-playlist="UUx6h-dWzJ5NpAlja1YsApdg" data-base="player-2">
+      <div class="channel-title">Newsmax</div>
+      <div class="video-title" id="title-2">Loading...</div>
+      <div class="viewport" id="player-2"></div>
+      <div class="swipe-hint">→</div>
+      <div class="card-buttons">
+        <button class="save-btn" data-base="player-2">Save</button>
+        <a href="https://www.youtube.com/c/NewsmaxTV" target="_blank">Open</a>
+      </div>
+    </div>
+    <!-- One America News -->
+    <div class="card" data-playlist="UUNbIDJNNgaRrXOD7VllIMRQ" data-base="player-3">
+      <div class="channel-title">One America News</div>
+      <div class="video-title" id="title-3">Loading...</div>
+      <div class="viewport" id="player-3"></div>
+      <div class="swipe-hint">→</div>
+      <div class="card-buttons">
+        <button class="save-btn" data-base="player-3">Save</button>
+        <a href="https://www.youtube.com/c/OANNation" target="_blank">Open</a>
+      </div>
+    </div>
+    <!-- The Epoch Times -->
+    <div class="card" data-playlist="UUeLc4heXqG9dtL7jiPHMBfQ" data-base="player-4">
+      <div class="channel-title">The Epoch Times</div>
+      <div class="video-title" id="title-4">Loading...</div>
+      <div class="viewport" id="player-4"></div>
+      <div class="swipe-hint">→</div>
+      <div class="card-buttons">
+        <button class="save-btn" data-base="player-4">Save</button>
+        <a href="https://www.youtube.com/c/EpochTimesTV" target="_blank">Open</a>
+      </div>
+    </div>
+    <!-- TheBlaze -->
+    <div class="card" data-playlist="UUKgJEs_v0JB-6jWb8lIy9Xw" data-base="player-5">
+      <div class="channel-title">TheBlaze</div>
+      <div class="video-title" id="title-5">Loading...</div>
+      <div class="viewport" id="player-5"></div>
+      <div class="swipe-hint">→</div>
+      <div class="card-buttons">
+        <button class="save-btn" data-base="player-5">Save</button>
+        <a href="https://www.youtube.com/c/TheBlazeTV" target="_blank">Open</a>
+      </div>
+    </div>
+    <!-- Timcast IRL -->
+    <div class="card" data-playlist="UULwNTXWEjVd2qIHLcXxQWxA" data-base="player-6">
+      <div class="channel-title">Timcast IRL</div>
+      <div class="video-title" id="title-6">Loading...</div>
+      <div class="viewport" id="player-6"></div>
+      <div class="swipe-hint">→</div>
+      <div class="card-buttons">
+        <button class="save-btn" data-base="player-6">Save</button>
+        <a href="https://www.youtube.com/c/Timcast" target="_blank">Open</a>
+      </div>
+    </div>
+    <!-- Stephen Gardner -->
+    <div class="card" data-playlist="UU3VlRtY0ARsTRR5Eq8QE1Yg" data-base="player-7">
+      <div class="channel-title">Stephen Gardner</div>
+      <div class="video-title" id="title-7">Loading...</div>
+      <div class="viewport" id="player-7"></div>
+      <div class="swipe-hint">→</div>
+      <div class="card-buttons">
+        <button class="save-btn" data-base="player-7">Save</button>
+        <a href="https://youtube.com/@stephengardner1?si=9lDKJ-SJbkDuNvZF" target="_blank">Open</a>
+      </div>
+    </div>
   </main>
   <nav id="bottom-nav">
     <button id="home-btn">Home</button>
@@ -60,25 +217,26 @@
       document.querySelectorAll('.card').forEach(card => {
         const base = card.dataset.base, list = card.dataset.playlist;
         nextIndex[base] = 0;
-        createPlayer(base, list);
-        // Swipe handler
-        let startX;
+        createOrNext(base, list);
+        let startX = 0;
         card.querySelector('.viewport').addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
         card.querySelector('.viewport').addEventListener('touchend', e => {
-          if (e.changedTouches[0].clientX < startX - 50) {
-            players[base].nextVideo();
+          if (startX - e.changedTouches[0].clientX > 50) {
+            createOrNext(base, list);
           }
         });
       });
       observeCards();
     }
-    function createPlayer(base, list) {
+    function createOrNext(base, list) {
+      // destroy existing before creating next
+      if (players[base]) players[base].destroy();
       const idx = nextIndex[base]++;
       players[base] = new YT.Player(base, {
         height: '400', width: '100%',
         playerVars: { listType: 'playlist', list, index: idx, origin: location.origin },
         events: {
-          'onReady': e => { e.target.unMute(); },
+          'onReady': e => { e.target.unMute(); e.target.playVideo(); },
           'onStateChange': e => {
             if (e.data === YT.PlayerState.PLAYING) {
               const info = e.target.getVideoData();
@@ -101,7 +259,7 @@
     window.addEventListener('load', () => {
       document.getElementById('preloader').style.display = 'none';
       document.getElementById('home-btn').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-      document.getElementById('save-all-btn').onclick = () => alert('Saved Videos: ' + (localStorage.getItem('savedVideos') || '[]'));
+      document.getElementById('save-all-btn').onclick = () => alert('Saved Videos: ' + (localStorage.getItem('savedVideos')||'[]'));
       document.getElementById('search-btn').onclick = () => {
         const term = prompt('Search titles:');
         document.querySelectorAll('.video-title').forEach(el => el.parentElement.classList.toggle('highlight', el.textContent.toLowerCase().includes(term.toLowerCase())));
@@ -109,10 +267,8 @@
       document.querySelectorAll('.save-btn').forEach(btn => btn.onclick = () => {
         const base = btn.dataset.base;
         const vid = players[base].getVideoData().video_id;
-        const arr = JSON.parse(localStorage.getItem('savedVideos')||'[]');
-        if (!arr.includes(vid)) arr.push(vid);
-        localStorage.setItem('savedVideos', JSON.stringify(arr));
-        alert('Saved: ' + vid);
+        const arr = JSON.parse(localStorage.getItem('savedVideos')||'[]'); if (!arr.includes(vid)) arr.push(vid);
+        localStorage.setItem('savedVideos', JSON.stringify(arr)); alert('Saved: ' + vid);
       });
     });
   </script>
