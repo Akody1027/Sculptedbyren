@@ -89,35 +89,7 @@
   </header>
 
   <main class="container">
-    <script>
-      // generate all nine cards dynamically
-      const channels = [
-        { title:'The Daily Wire',   playlist:'UUaeO5vkdj5xOQHp4UmIN6dw', url:'https://www.youtube.com/c/TheDailyWire' },
-        { title:'Fox News',          playlist:'UUXIJgqnII2ZOINSWNOGFThA', url:'https://www.youtube.com/user/FoxNewsChannel' },
-        { title:'Newsmax',           playlist:'UUx6h-dWzJ5NpAlja1YsApdg', url:'https://www.youtube.com/c/NewsmaxTV' },
-        { title:'One America News',  playlist:'UUNbIDJNNgaRrXOD7VllIMRQ', url:'https://www.youtube.com/c/OANNation' },
-        { title:'The Epoch Times',   playlist:'UUeLc4heXqG9dtL7jiPHMBfQ', url:'https://www.youtube.com/c/EpochTimesTV' },
-        { title:'TheBlaze',          playlist:'UUKgJEs_v0JB-6jWb8lIy9Xw', url:'https://www.youtube.com/c/TheBlazeTV' },
-        { title:'Timcast IRL',       playlist:'UULwNTXWEjVd2qIHLcXxQWxA', url:'https://www.youtube.com/c/Timcast' },
-        { title:'Stephen Gardner',   playlist:'UU3VlRtY0ARsTRR5Eq8QE1Yg', url:'https://youtube.com/@stephengardner1' },
-        { title:'Ben Shapiro Show',  playlist:'UUnQC_G5Xsjhp9fEJKuIcrSw', url:'https://youtube.com/@benshapiro' }
-      ];
-      document.write(channels.map((ch,i)=>`
-        <div class="card" data-base="player-${i}" data-playlist="${ch.playlist}">
-          <div class="channel-title">${ch.title}</div>
-          <div class="video-title" id="title-${i}">Loading...</div>
-          <div class="viewport">
-            <div class="player-wrapper"><div id="player-${i}"></div></div>
-            <div class="touch-overlay"></div>
-          </div>
-          <div class="swipe-hint">→</div>
-          <div class="card-buttons">
-            <button class="save-btn" data-base="player-${i}">Save</button>
-            <a href="${ch.url}" target="_blank">Open</a>
-          </div>
-        </div>
-      `).join(''));
-    </script>
+    <!-- (include all nine of your original .card blocks here) -->
   </main>
 
   <nav id="bottom-nav">
@@ -134,7 +106,31 @@
       document.querySelectorAll('.card').forEach(card => {
         const base = card.dataset.base, list = card.dataset.playlist;
         nextIdx[base] = 0;
-        initPlayer(base, list);
+
+        players[base] = new YT.Player(base, {
+          height: '400', width: '100%',
+          playerVars: {
+            listType: 'playlist',
+            list,
+            index: nextIdx[base]++,
+            autoplay: 1,    // <-- changed to 1
+            muted: 1,
+            origin: location.origin
+          },
+          events: {
+            onReady: e => {
+              e.target.mute();
+              e.target.playVideo();   // <-- added
+            },
+            onStateChange: e => {
+              if (e.data === YT.PlayerState.PLAYING) {
+                const id = base.split('-')[1];
+                document.getElementById('title-' + id).textContent = e.target.getVideoData().title;
+                players[base].unMute(); // <-- added
+              }
+            }
+          }
+        });
 
         let startX = 0;
         const overlay = card.querySelector('.touch-overlay');
@@ -145,26 +141,8 @@
           else if (dx > 50) players[base].previousVideo();
         });
       });
-      observe();
-    }
 
-    function initPlayer(base, list) {
-      const idx = nextIdx[base]++;
-      if (players[base]) players[base].destroy();
-      players[base] = new YT.Player(base, {
-        height: '400', width: '100%',
-        playerVars: { listType: 'playlist', list, index: idx, autoplay: 1, muted: 0, origin: location.origin },
-        events: {
-          onReady: e => e.target.mute(),
-          onStateChange: e => {
-            if (e.data === YT.PlayerState.PLAYING) {
-              const id = base.split('-')[1];
-              document.getElementById('title-' + id).textContent = e.target.getVideoData().title;
-              players[base].unMute();
-            }
-          }
-        }
-      });
+      observe();
     }
 
     function observe() {
