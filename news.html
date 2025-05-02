@@ -7,27 +7,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     /* Preloader */
-    #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 9999; color: #fff; font-family: 'Inter', sans-serif; }
+    #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 9999; }
     .loader { border: 8px solid #333; border-top: 8px solid #bb86fc; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
     /* Global */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #121212; color: #e0e0e0; font-family: 'Inter', sans-serif; }
     header { text-align: center; padding: 2rem 1rem; }
     header h1 { color: #fff; font-size: 2rem; font-weight: 600; }
-
     /* Cards */
-    .container { display: flex; flex-direction: column; gap: 1rem; padding: 1rem; margin-bottom: 60px; }
+    .container { padding: 1rem; margin-bottom: 60px; display: flex; flex-direction: column; gap: 1rem; }
     .card { background: #1e1e1e; border-radius: 8px; overflow: hidden; position: relative; }
     .channel-title, .video-title { padding: .75rem 1rem; background: #272727; color: #fff; font-weight: 600; }
     .channel-title { font-size: 1.1rem; }
     .video-title { font-size: 1rem; }
-    .viewport { width: 100%; height: 400px; background: #000; }
+    .viewport { width: 100%; height: 400px; background: #000; touch-action: pan-y; }
+    .swipe-hint { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); font-size: 2rem; color: #bb86fc; background: rgba(0,0,0,0.5); padding: .25rem; border-radius: 50%; pointer-events: none; }
     .card-buttons { display: flex; justify-content: space-between; padding: .5rem 1rem; background: #1e1e1e; }
     .card-buttons button, .card-buttons a { background: #bb86fc; color: #121212; border: none; padding: .5rem 1rem; font-size: .9rem; border-radius: 4px; cursor: pointer; text-decoration: none; transition: background .2s; }
     .card-buttons button:hover, .card-buttons a:hover { background: #985eff; }
-    .swipe-hint { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); font-size: 2rem; color: #bb86fc; background: rgba(0,0,0,0.5); padding: .25rem; border-radius: 50%; pointer-events: none; }
     #bottom-nav { position: fixed; bottom: 0; width: 100%; height: 60px; background: #272727; display: flex; justify-content: space-around; align-items: center; }
     #bottom-nav button { background: none; border: none; color: #e0e0e0; font-size: 1rem; cursor: pointer; }
     .highlight { border: 2px solid #bb86fc; }
@@ -37,7 +35,7 @@
   <div id="preloader"><div class="loader"></div></div>
   <header><h1>Conservative Daily U.S. News Channels</h1></header>
   <main class="container">
-    <!-- Example Card -->
+    <!-- Example Card: repeat for each channel -->
     <div class="card" data-playlist="UUaeO5vkdj5xOQHp4UmIN6dw" data-base="player-0">
       <div class="channel-title">The Daily Wire</div>
       <div class="video-title" id="title-0">Loading...</div>
@@ -48,7 +46,7 @@
         <a href="https://www.youtube.com/c/TheDailyWire" target="_blank">Open</a>
       </div>
     </div>
-    <!-- Repeat .card for other channels -->
+    <!-- Add other cards with appropriate data-playlist & data-base -->
   </main>
   <nav id="bottom-nav">
     <button id="home-btn">Home</button>
@@ -62,36 +60,40 @@
       document.querySelectorAll('.card').forEach(card => {
         const base = card.dataset.base, list = card.dataset.playlist;
         nextIndex[base] = 0;
-        initPlayer(base, list);
+        createPlayer(base, list);
+        // Swipe handler
         let startX;
-        card.querySelector('.viewport').addEventListener('touchstart', e => startX = e.touches[0].clientX);
+        card.querySelector('.viewport').addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
         card.querySelector('.viewport').addEventListener('touchend', e => {
-          if (e.changedTouches[0].clientX < startX - 50) loadNextVideo(base, list);
+          if (e.changedTouches[0].clientX < startX - 50) {
+            players[base].nextVideo();
+          }
         });
       });
       observeCards();
     }
-    function initPlayer(base, list) {
+    function createPlayer(base, list) {
       const idx = nextIndex[base]++;
       players[base] = new YT.Player(base, {
         height: '400', width: '100%',
         playerVars: { listType: 'playlist', list, index: idx, origin: location.origin },
         events: {
-          'onReady': e => { e.target.unMute(); e.target.playVideo(); },
-          'onStateChange': e => { if (e.data === YT.PlayerState.PLAYING) { document.getElementById('title-' + base.split('-')[1]).textContent = e.target.getVideoData().title; } }
+          'onReady': e => { e.target.unMute(); },
+          'onStateChange': e => {
+            if (e.data === YT.PlayerState.PLAYING) {
+              const info = e.target.getVideoData();
+              document.getElementById('title-' + base.split('-')[1]).textContent = info.title;
+            }
+          }
         }
       });
-    }
-    function loadNextVideo(base, list) {
-      if (players[base]) players[base].destroy();
-      initPlayer(base, list);
     }
     function observeCards() {
       const obs = new IntersectionObserver(entries => {
         entries.forEach(entry => {
           const base = entry.target.dataset.base;
-          if (!players[base]) return;
-          entry.isIntersecting ? players[base].playVideo() : players[base].pauseVideo();
+          const p = players[base]; if (!p) return;
+          entry.isIntersecting ? p.playVideo() : p.pauseVideo();
         });
       }, { threshold: 0.6 });
       document.querySelectorAll('.card').forEach(card => obs.observe(card));
@@ -99,7 +101,7 @@
     window.addEventListener('load', () => {
       document.getElementById('preloader').style.display = 'none';
       document.getElementById('home-btn').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-      document.getElementById('save-all-btn').onclick = () => alert('Saved Videos: ' + (localStorage.getItem('savedVideos')||'[]'));
+      document.getElementById('save-all-btn').onclick = () => alert('Saved Videos: ' + (localStorage.getItem('savedVideos') || '[]'));
       document.getElementById('search-btn').onclick = () => {
         const term = prompt('Search titles:');
         document.querySelectorAll('.video-title').forEach(el => el.parentElement.classList.toggle('highlight', el.textContent.toLowerCase().includes(term.toLowerCase())));
