@@ -197,11 +197,11 @@
         startIndices[pid] = Math.floor(Math.random() * 10);
         players[pid] = new YT.Player(pid, {
           height: '400', width: '100%',
-          playerVars: { listType: 'playlist', list: list, index: startIndices[pid], origin: window.location.origin },
-          events: { 'onReady': event => event.target.mute() }
+          playerVars: { listType: 'playlist', list: list, index: startIndices[pid], origin: window.location.origin }
         });
         players[pid].addEventListener('onStateChange', e => {
           if (e.data === YT.PlayerState.PLAYING) {
+            players[pid].unMute();
             const info = players[pid].getVideoData();
             document.getElementById('title-' + pid.split('-')[1]).textContent = info.title;
           }
@@ -227,7 +227,11 @@
         const pid = entry.target.dataset.playerid;
         const player = players[pid];
         if (!player) return;
-        if (entry.isIntersecting) player.playVideo(); else player.pauseVideo();
+        if (entry.isIntersecting) {
+          player.playVideo();
+        } else {
+          player.pauseVideo();
+        }
       });
     }, { threshold: 0.6 });
 
