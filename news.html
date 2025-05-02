@@ -1,216 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Conservative Daily U.S. News Channels</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Conservative Daily News Channels</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
+      margin: 0;
       background-color: #121212;
-      color: #e0e0e0;
-      font-family: 'Inter', sans-serif;
-      line-height: 1.5;
-    }
-    header {
-      text-align: center;
-      padding: 2rem 1rem;
-    }
-    header h1 {
       color: #fff;
-      font-size: 1.75rem;
-      font-weight: 600;
+      font-family: Arial, sans-serif;
     }
     .container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
-      gap: 1rem;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1rem;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 16px;
     }
-    .card {
-      background-color: #1e1e1e;
+    @media (min-width: 768px) {
+      .container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .video-container {
+      background-color: #000;
+      height: 500px;
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
       overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
     }
-    .card h3 {
-      background-color: #272727;
-      border-bottom: 1px solid #333;
-      font-size: 1.1rem;
-      font-weight: 600;
-      padding: 0.75rem 1rem;
-      color: #fff;
-    }
-    .viewport {
-      flex: 1;
+    .video-container iframe {
       width: 100%;
-      height: 360px;
+      height: 100%;
       border: none;
-      background: #000;
-    }
-    .note {
-      font-size: 0.8rem;
-      color: #999;
-      padding: 0.5rem 1rem;
-    }
-    .card a {
-      background-color: #bb86fc;
-      color: #121212;
-      display: block;
-      font-weight: 500;
-      padding: 0.75rem;
-      text-align: center;
-      text-decoration: none;
-      transition: background-color 0.2s;
-    }
-    .card a:hover {
-      background-color: #985eff;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Conservative Daily U.S. News Channels</h1>
-  </header>
-  <main class="container">
-
+  <div class="container">
     <!-- The Daily Wire -->
-    <div class="card">
-      <h3>The Daily Wire</h3>
-      <iframe class="viewport"
-        src="https://www.youtube.com/embed?listType=user_uploads&list=TheDailyWire"
+    <div class="video-container">
+      <iframe 
+        src="https://www.youtube.com/embed/videoseries?list=UUaeO5vkdj5xOQHp4UmIN6dw"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">If videos don’t load, try “Open Channel” below.</div>
-      <a href="https://www.youtube.com/c/TheDailyWire" target="_blank">Open Channel</a>
+        allowfullscreen
+        title="The Daily Wire - Daily News"></iframe>
     </div>
-
-    <!-- Fox News -->
-    <div class="card">
-      <h3>Fox News</h3>
-      <iframe class="viewport"
-        src="https://www.youtube.com/embed?listType=user_uploads&list=FoxNewsChannel"
+    <!-- Fox News Channel -->
+    <div class="video-container">
+      <iframe 
+        src="https://www.youtube.com/embed/videoseries?list=UUXIJgqnII2ZOINSWNOGFThA"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">If videos don’t load, try “Open Channel” below.</div>
-      <a href="https://www.youtube.com/user/FoxNewsChannel" target="_blank">Open Channel</a>
+        allowfullscreen
+        title="Fox News Channel - Daily News"></iframe>
     </div>
-
-    <!-- Newsmax -->
-    <div class="card">
-      <h3>Newsmax</h3>
-      <iframe class="viewport"
-        src="https://www.youtube.com/embed?listType=user_uploads&list=NewsmaxTV"
+    <!-- Newsmax TV -->
+    <div class="video-container">
+      <iframe 
+        src="https://www.youtube.com/embed/videoseries?list=UUx6h-dWzJ5NpAlja1YsApdg"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">If videos don’t load, try “Open Channel” below.</div>
-      <a href="https://www.youtube.com/c/NewsmaxTV" target="_blank">Open Channel</a>
+        allowfullscreen
+        title="Newsmax TV - Daily News"></iframe>
     </div>
-
-    <!-- OAN -->
-    <div class="card">
-      <h3>OAN (One America News)</h3>
-      <iframe class="viewport"
-        src="https://www.youtube.com/embed?listType=user_uploads&list=OANNation"
+    <!-- One America News -->
+    <div class="video-container">
+      <iframe 
+        src="https://www.youtube.com/embed/videoseries?list=UUNbIDJNNgaRrXOD7VllIMRQ"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">If videos don’t load, try “Open Channel” below.</div>
-      <a href="https://www.youtube.com/c/OANNation" target="_blank">Open Channel</a>
+        allowfullscreen
+        title="One America News - Daily News"></iframe>
     </div>
-
     <!-- The Epoch Times -->
-    <div class="card">
-      <h3>The Epoch Times</h3>
-      <iframe class="viewport"
-        src="https://www.youtube.com/embed?listType=user_uploads&list=EpochTimesTV"
+    <div class="video-container">
+      <iframe 
+        src="https://www.youtube.com/embed/videoseries?list=UUeLc4heXqG9dtL7jiPHMBfQ"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">If videos don’t load, try “Open Channel” below.</div>
-      <a href="https://www.youtube.com/c/EpochTimesTV" target="_blank">Open Channel</a>
+        allowfullscreen
+        title="The Epoch Times - Daily News"></iframe>
     </div>
-
-    <!-- TheBlaze -->
-    <div class="card">
-      <h3>TheBlaze</h3>
-      <iframe class="viewport"
-        src="https://www.youtube.com/embed?listType=user_uploads&list=TheBlazeTV"
+    <!-- TheBlaze TV -->
+    <div class="video-container">
+      <iframe 
+        src="https://www.youtube.com/embed/videoseries?list=UUKgJEs_v0JB-6jWb8lIy9Xw"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">If videos don’t load, try “Open Channel” below.</div>
-      <a href="https://www.youtube.com/c/TheBlazeTV" target="_blank">Open Channel</a>
+        allowfullscreen
+        title="TheBlaze TV - Daily News"></iframe>
     </div>
-
     <!-- Louder with Crowder -->
-    <div class="card">
-      <h3>Louder with Crowder</h3>
-      <iframe class="viewport"
-        src="https://www.youtube.com/embed?listType=user_uploads&list=StevenCrowder"
+    <div class="video-container">
+      <iframe 
+        src="https://www.youtube.com/embed/videoseries?list=UUIveFvW-ARp_B_RckhweNJw"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">If videos don’t load, try “Open Channel” below.</div>
-      <a href="https://www.youtube.com/user/StevenCrowder" target="_blank">Open Channel</a>
+        allowfullscreen
+        title="Louder with Crowder - Daily News"></iframe>
     </div>
-
-    <!-- Daily Caller -->
-    <div class="card">
-      <h3>Daily Caller</h3>
-      <iframe class="viewport"
-        src="https://www.youtube.com/embed?listType=user_uploads&list=dailycaller"
+    <!-- The Daily Caller -->
+    <div class="video-container">
+      <iframe 
+        src="https://www.youtube.com/embed/videoseries?list=UUCP4BdwPKyYnfRLjSNfGAPRA"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">If videos don’t load, try “Open Channel” below.</div>
-      <a href="https://www.youtube.com/c/dailycaller" target="_blank">Open Channel</a>
+        allowfullscreen
+        title="The Daily Caller - Daily News"></iframe>
     </div>
-
     <!-- PragerU -->
-    <div class="card">
-      <h3>PragerU</h3>
-      <iframe class="viewport"
-        src="https://www.youtube.com/embed?listType=user_uploads&list=PragerUniversity"
+    <div class="video-container">
+      <iframe 
+        src="https://www.youtube.com/embed/videoseries?list=UUZWlSUNDvCCS1hBiXV0zKcA"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">If videos don’t load, try “Open Channel” below.</div>
-      <a href="https://www.youtube.com/c/PragerUniversity" target="_blank">Open Channel</a>
+        allowfullscreen
+        title="PragerU - Daily News"></iframe>
     </div>
-
     <!-- Timcast IRL -->
-    <div class="card">
-      <h3>Timcast IRL</h3>
-      <iframe class="viewport"
-        src="https://www.youtube.com/embed?listType=user_uploads&list=Timcast"
+    <div class="video-container">
+      <iframe 
+        src="https://www.youtube.com/embed/videoseries?list=UULwNTXWEjVd2qIHLcXxQWxA"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">If videos don’t load, try “Open Channel” below.</div>
-      <a href="https://www.youtube.com/c/Timcast" target="_blank">Open Channel</a>
+        allowfullscreen
+        title="Timcast IRL - Daily News"></iframe>
     </div>
-
     <!-- Stephen Gardner -->
-    <div class="card">
-      <h3>Stephen Gardner</h3>
-      <iframe class="viewport"
-        src="https://www.youtube.com/embed?listType=user_uploads&list=stephengardner1"
+    <div class="video-container">
+      <iframe 
+        src="https://www.youtube.com/embed/videoseries?list=UU3VlRtY0ARsTRR5Eq8QE1Yg"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">If videos don’t load, try “Open Channel” below.</div>
-      <a href="https://youtube.com/@stephengardner1?si=9lDKJ-SJbkDuNvZF" target="_blank">Open Channel</a>
+        allowfullscreen
+        title="Stephen Gardner - Daily News"></iframe>
     </div>
-
-  </main>
+  </div>
 </body>
 </html>
