@@ -6,11 +6,11 @@
   <title>Conservative Daily U.S. News Channels</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
-    /* Base reset */
+    /* Reset & base */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #f5f7fa;
+      background-color: #f0f2f5;
       color: #333;
       line-height: 1.5;
     }
@@ -21,61 +21,56 @@
     header h1 {
       font-size: 1.75rem;
       font-weight: 600;
-      color: #1a1a1a;
     }
+
+    /* Grid container */
     .container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
       max-width: 1200px;
       margin: 0 auto;
       padding: 1rem;
     }
-    .card {
-      background: #ffffff;
-      border-radius: 12px;
+
+    /* Each channel card */
+    .channel-card {
+      background: #fff;
+      border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.05);
       overflow: hidden;
-      text-decoration: none;
-      color: inherit;
       display: flex;
       flex-direction: column;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-    }
-    .card-content {
-      padding: 1.5rem;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-    .card-content h2 {
-      font-size: 1.25rem;
-      margin-bottom: 0.5rem;
+    .channel-card h3 {
+      font-size: 1.1rem;
       font-weight: 600;
+      padding: 0.75rem 1rem;
+      background: #fafafa;
+      border-bottom: 1px solid #eee;
     }
-    .card-content p {
-      font-size: 0.9rem;
-      color: #666;
-      margin-bottom: 1rem;
+
+    /* Viewport window */
+    .viewport {
+      flex: 1;
+      width: 100%;
+      height: 250px;
+      border: none;
     }
-    .card-content .btn {
-      margin-top: auto;
-      padding: 0.5rem 1rem;
-      background-color: #0073e6;
+
+    /* Optional footer link */
+    .channel-card a.open-link {
+      display: block;
+      text-align: center;
+      padding: 0.75rem;
+      background: #0073e6;
       color: #fff;
-      border-radius: 6px;
-      font-weight: 500;
       text-decoration: none;
-      transition: background-color 0.2s;
+      font-weight: 500;
+      transition: background 0.2s;
     }
-    .card-content .btn:hover {
-      background-color: #005bb5;
+    .channel-card a.open-link:hover {
+      background: #005bb5;
     }
   </style>
 </head>
@@ -83,84 +78,117 @@
   <header>
     <h1>Conservative Daily U.S. News Channels</h1>
   </header>
+
   <main class="container">
-    <a class="card" href="https://www.youtube.com/c/TheDailyWire" target="_blank">
-      <div class="card-content">
-        <h2>The Daily Wire</h2>
-        <p>Ben Shapiro, Michael Knowles &amp; more</p>
-        <span class="btn">Visit Channel</span>
-      </div>
-    </a>
-    <a class="card" href="https://www.youtube.com/user/FoxNewsChannel" target="_blank">
-      <div class="card-content">
-        <h2>Fox News</h2>
-        <p>Live streams & daily recaps</p>
-        <span class="btn">Visit Channel</span>
-      </div>
-    </a>
-    <a class="card" href="https://www.youtube.com/c/NewsmaxTV" target="_blank">
-      <div class="card-content">
-        <h2>Newsmax</h2>
-        <p>“American Agenda” & prime-time highlights</p>
-        <span class="btn">Visit Channel</span>
-      </div>
-    </a>
-    <a class="card" href="https://www.youtube.com/c/OANNation" target="_blank">
-      <div class="card-content">
-        <h2>OAN (One America News)</h2>
-        <p>24/7 live news & briefings</p>
-        <span class="btn">Visit Channel</span>
-      </div>
-    </a>
-    <a class="card" href="https://www.youtube.com/c/EpochTimesTV" target="_blank">
-      <div class="card-content">
-        <h2>The Epoch Times</h2>
-        <p>Daily policy briefs & interviews</p>
-        <span class="btn">Visit Channel</span>
-      </div>
-    </a>
-    <a class="card" href="https://www.youtube.com/c/TheBlazeTV" target="_blank">
-      <div class="card-content">
-        <h2>TheBlaze</h2>
-        <p>Glenn Beck &amp; commentary segments</p>
-        <span class="btn">Visit Channel</span>
-      </div>
-    </a>
-    <a class="card" href="https://www.youtube.com/user/StevenCrowder" target="_blank">
-      <div class="card-content">
-        <h2>Louder with Crowder</h2>
-        <p>“Change My Mind” & daily takes</p>
-        <span class="btn">Visit Channel</span>
-      </div>
-    </a>
-    <a class="card" href="https://www.youtube.com/c/dailycaller" target="_blank">
-      <div class="card-content">
-        <h2>Daily Caller</h2>
-        <p>Headlines & panel discussions</p>
-        <span class="btn">Visit Channel</span>
-      </div>
-    </a>
-    <a class="card" href="https://www.youtube.com/c/PragerUniversity" target="_blank">
-      <div class="card-content">
-        <h2>PragerU</h2>
-        <p>Weekday “Daily Update” shorts</p>
-        <span class="btn">Visit Channel</span>
-      </div>
-    </a>
-    <a class="card" href="https://www.youtube.com/c/Timcast" target="_blank">
-      <div class="card-content">
-        <h2>Timcast IRL</h2>
-        <p>Near-daily live streams</p>
-        <span class="btn">Visit Channel</span>
-      </div>
-    </a>
-    <a class="card" href="https://www.youtube.com/c/StephenGardner" target="_blank">
-      <div class="card-content">
-        <h2>Stephen Gardner</h2>
-        <p>Daily briefings on U.S. politics</p>
-        <span class="btn">Visit Channel</span>
-      </div>
-    </a>
+    <div class="channel-card">
+      <h3>The Daily Wire</h3>
+      <iframe class="viewport"
+        src="https://www.youtube.com/c/TheDailyWire"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      <a class="open-link" href="https://www.youtube.com/c/TheDailyWire" target="_blank">Open Channel</a>
+    </div>
+
+    <div class="channel-card">
+      <h3>Fox News</h3>
+      <iframe class="viewport"
+        src="https://www.youtube.com/user/FoxNewsChannel"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      <a class="open-link" href="https://www.youtube.com/user/FoxNewsChannel" target="_blank">Open Channel</a>
+    </div>
+
+    <div class="channel-card">
+      <h3>Newsmax</h3>
+      <iframe class="viewport"
+        src="https://www.youtube.com/c/NewsmaxTV"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      <a class="open-link" href="https://www.youtube.com/c/NewsmaxTV" target="_blank">Open Channel</a>
+    </div>
+
+    <div class="channel-card">
+      <h3>OAN (One America News)</h3>
+      <iframe class="viewport"
+        src="https://www.youtube.com/c/OANNation"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      <a class="open-link" href="https://www.youtube.com/c/OANNation" target="_blank">Open Channel</a>
+    </div>
+
+    <div class="channel-card">
+      <h3>The Epoch Times</h3>
+      <iframe class="viewport"
+        src="https://www.youtube.com/c/EpochTimesTV"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      <a class="open-link" href="https://www.youtube.com/c/EpochTimesTV" target="_blank">Open Channel</a>
+    </div>
+
+    <div class="channel-card">
+      <h3>TheBlaze</h3>
+      <iframe class="viewport"
+        src="https://www.youtube.com/c/TheBlazeTV"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      <a class="open-link" href="https://www.youtube.com/c/TheBlazeTV" target="_blank">Open Channel</a>
+    </div>
+
+    <div class="channel-card">
+      <h3>Louder with Crowder</h3>
+      <iframe class="viewport"
+        src="https://www.youtube.com/user/StevenCrowder"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      <a class="open-link" href="https://www.youtube.com/user/StevenCrowder" target="_blank">Open Channel</a>
+    </div>
+
+    <div class="channel-card">
+      <h3>Daily Caller</h3>
+      <iframe class="viewport"
+        src="https://www.youtube.com/c/dailycaller"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      <a class="open-link" href="https://www.youtube.com/c/dailycaller" target="_blank">Open Channel</a>
+    </div>
+
+    <div class="channel-card">
+      <h3>PragerU</h3>
+      <iframe class="viewport"
+        src="https://www.youtube.com/c/PragerUniversity"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      <a class="open-link" href="https://www.youtube.com/c/PragerUniversity" target="_blank">Open Channel</a>
+    </div>
+
+    <div class="channel-card">
+      <h3>Timcast IRL</h3>
+      <iframe class="viewport"
+        src="https://www.youtube.com/c/Timcast"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      <a class="open-link" href="https://www.youtube.com/c/Timcast" target="_blank">Open Channel</a>
+    </div>
+
+    <div class="channel-card">
+      <h3>Stephen Gardner</h3>
+      <iframe class="viewport"
+        src="https://youtube.com/@stephengardner1?si=9lDKJ-SJbkDuNvZF"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      <a class="open-link" href="https://youtube.com/@stephengardner1?si=9lDKJ-SJbkDuNvZF" target="_blank">Open Channel</a>
+    </div>
   </main>
 </body>
 </html>
