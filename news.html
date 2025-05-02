@@ -8,55 +8,53 @@
   <style>
     /* Preloader */
     #preloader {
-      position:fixed; top:0; left:0; width:100%; height:100%;
-      background:#000; display:flex; align-items:center; justify-content:center;
-      color:#bb86fc; font-family:'Fjalla One',sans-serif; z-index:1000;
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:#000;display:flex;align-items:center;justify-content:center;
+      color:#bb86fc;font-family:'Fjalla One',sans-serif;z-index:1000;
     }
     .loader {
       border:6px solid rgba(187,134,252,0.3);
       border-top:6px solid #bb86fc;
-      border-radius:50%; width:40px; height:40px;
+      border-radius:50%;width:40px;height:40px;
       animation:spin 1s linear infinite;
     }
-    @keyframes spin { to { transform:rotate(360deg) } }
+    @keyframes spin{to{transform:rotate(360deg)}}
 
     /* Global */
-    * { box-sizing:border-box; margin:0; padding:0 }
-    body { background:#121212; color:#e0e0e0; font-family:'Inter',sans-serif }
-    header { text-align:center; padding:2rem 1rem }
-    header h1 { font-size:2rem; font-weight:600 }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#121212;color:#e0e0e0;font-family:'Inter',sans-serif}
+    header{text-align:center;padding:2rem 1rem}
+    header h1{font-size:2rem;font-weight:600}
 
     /* Cards */
-    .container { padding:1rem; margin-bottom:60px }
-    .card { background:#1e1e1e; border-radius:8px; margin-bottom:1rem; overflow:hidden; position:relative }
-    .channel-title, .video-title {
-      padding:.75rem 1rem; background:#272727; color:#fff; font-weight:600;
+    .container{padding:1rem;margin-bottom:60px}
+    .card{background:#1e1e1e;border-radius:8px;margin-bottom:1rem;overflow:hidden;position:relative}
+    .channel-title,.video-title{padding:.75rem 1rem;background:#272727;color:#fff;font-weight:600}
+    .video-title{font-size:1rem}
+    .viewport{position:relative;height:400px}
+    .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%}
+    .touch-overlay{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2}
+    .swipe-hint{
+      position:absolute;top:50%;right:16px;transform:translateY(-50%);
+      font-size:2rem;color:#bb86fc;background:rgba(0,0,0,0.5);
+      padding:.25rem;border-radius:50%;pointer-events:none;z-index:3
     }
-    .video-title { font-size:1rem }
-    .viewport { position:relative; height:400px }
-    .player-wrapper iframe { position:absolute; top:0; left:0; width:100%; height:100% }
-    .touch-overlay { position:absolute; top:0; left:0; width:100%; height:100%; z-index:2 }
-    .swipe-hint {
-      position:absolute; top:50%; right:16px; transform:translateY(-50%);
-      font-size:2rem; color:#bb86fc; background:rgba(0,0,0,0.5);
-      padding:.25rem; border-radius:50%; pointer-events:none; z-index:3;
+    .card-buttons{
+      display:flex;justify-content:space-between;padding:.5rem 1rem;background:#1e1e1e
     }
-    .card-buttons {
-      display:flex; justify-content:space-between; padding:.5rem 1rem; background:#1e1e1e;
+    .card-buttons button,.card-buttons a{
+      background:#bb86fc;color:#121212;border:none;
+      padding:.5rem 1rem;border-radius:4px;text-decoration:none;cursor:pointer
     }
-    .card-buttons button, .card-buttons a {
-      background:#bb86fc; color:#121212; border:none;
-      padding:.5rem 1rem; border-radius:4px; text-decoration:none; cursor:pointer;
-    }
-    .card-buttons button:hover, .card-buttons a:hover { background:#985eff }
+    .card-buttons button:hover,.card-buttons a:hover{background:#985eff}
 
     /* Bottom Nav */
-    #bottom-nav {
-      position:fixed; bottom:0; width:100%; height:60px;
-      background:#272727; display:flex; justify-content:space-around; align-items:center;
+    #bottom-nav{
+      position:fixed;bottom:0;width:100%;height:60px;
+      background:#272727;display:flex;justify-content:space-around;align-items:center
     }
-    #bottom-nav button {
-      background:none; border:none; color:#e0e0e0; font-size:1rem; cursor:pointer;
+    #bottom-nav button{
+      background:none;border:none;color:#e0e0e0;font-size:1rem;cursor:pointer
     }
   </style>
 </head>
@@ -72,7 +70,8 @@
       <div class="video-title" id="title-0">Loading…</div>
       <div class="viewport">
         <div class="player-wrapper"><div id="player-0"></div></div>
-        <div class="touch-overlay"></div><div class="swipe-hint">→</div>
+        <div class="touch-overlay"></div>
+        <div class="swipe-hint">→</div>
       </div>
       <div class="card-buttons">
         <button>Save</button>
@@ -85,7 +84,8 @@
       <div class="video-title" id="title-1">Loading…</div>
       <div class="viewport">
         <div class="player-wrapper"><div id="player-1"></div></div>
-        <div class="touch-overlay"></div><div class="swipe-hint">→</div>
+        <div class="touch-overlay"></div>
+        <div class="swipe-hint">→</div>
       </div>
       <div class="card-buttons">
         <button>Save</button>
@@ -98,7 +98,8 @@
       <div class="video-title" id="title-2">Loading…</div>
       <div class="viewport">
         <div class="player-wrapper"><div id="player-2"></div></div>
-        <div class="touch-overlay"></div><div class="swipe-hint">→</div>
+        <div class="touch-overlay"></div>
+        <div class="swipe-hint">→</div>
       </div>
       <div class="card-buttons">
         <button>Save</button>
@@ -111,7 +112,8 @@
       <div class="video-title" id="title-3">Loading…</div>
       <div class="viewport">
         <div class="player-wrapper"><div id="player-3"></div></div>
-        <div class="touch-overlay"></div><div class="swipe-hint">→</div>
+        <div class="touch-overlay"></div>
+        <div class="swipe-hint">→</div>
       </div>
       <div class="card-buttons">
         <button>Save</button>
@@ -124,7 +126,8 @@
       <div class="video-title" id="title-4">Loading…</div>
       <div class="viewport">
         <div class="player-wrapper"><div id="player-4"></div></div>
-        <div class="touch-overlay"></div><div class="swipe-hint">→</div>
+        <div class="touch-overlay"></div>
+        <div class="swipe-hint">→</div>
       </div>
       <div class="card-buttons">
         <button>Save</button>
@@ -137,7 +140,8 @@
       <div class="video-title" id="title-5">Loading…</div>
       <div class="viewport">
         <div class="player-wrapper"><div id="player-5"></div></div>
-        <div class="touch-overlay"></div><div class="swipe-hint">→</div>
+        <div class="touch-overlay"></div>
+        <div class="swipe-hint">→</div>
       </div>
       <div class="card-buttons">
         <button>Save</button>
@@ -150,7 +154,8 @@
       <div class="video-title" id="title-6">Loading…</div>
       <div class="viewport">
         <div class="player-wrapper"><div id="player-6"></div></div>
-        <div class="touch-overlay"></div><div class="swipe-hint">→</div>
+        <div class="touch-overlay"></div>
+        <div class="swipe-hint">→</div>
       </div>
       <div class="card-buttons">
         <button>Save</button>
@@ -163,7 +168,8 @@
       <div class="video-title" id="title-7">Loading…</div>
       <div class="viewport">
         <div class="player-wrapper"><div id="player-7"></div></div>
-        <div class="touch-overlay"></div><div class="swipe-hint">→</div>
+        <div class="touch-overlay"></div>
+        <div class="swipe-hint">→</div>
       </div>
       <div class="card-buttons">
         <button>Save</button>
@@ -176,7 +182,8 @@
       <div class="video-title" id="title-8">Loading…</div>
       <div class="viewport">
         <div class="player-wrapper"><div id="player-8"></div></div>
-        <div class="touch-overlay"></div><div class="swipe-hint">→</div>
+        <div class="touch-overlay"></div>
+        <div class="swipe-hint">→</div>
       </div>
       <div class="card-buttons">
         <button>Save</button>
@@ -198,47 +205,53 @@
       document.querySelectorAll('.card').forEach(card => {
         const base = card.dataset.base, list = card.dataset.playlist;
         nextIdx[base] = 0;
-
         players[base] = new YT.Player(base, {
-          height: '400', width: '100%',
-          playerVars: {
-            listType: 'playlist',
-            list,
-            index: nextIdx[base]++,
-            autoplay: 1,
-            mute: 1,
-            playsinline: 1,
-            origin: location.origin
+          height:'400', width:'100%',
+          playerVars:{
+            listType:'playlist', list, index:nextIdx[base]++,
+            autoplay:0, muted:1, origin:location.origin
           },
-          events: {
+          events:{
             onReady: e => {
-              // autoplay is already queued muted
-              // update title
-              const id = base.split('-')[1];
-              document.getElementById('title-'+id).textContent = e.target.getVideoData().title;
-            },
-            onStateChange: e => {
-              // nothing else here
+              // nothing here
             }
           }
         });
 
-        let startX = 0;
-        const overlay = card.querySelector('.touch-overlay');
-        overlay.addEventListener('touchstart', e => startX = e.touches[0].clientX);
-        overlay.addEventListener('touchend', e => {
-          const dx = e.changedTouches[0].clientX - startX;
-          if (dx < -50) players[base].nextVideo();
-          else if (dx > 50) players[base].previousVideo();
+        // swipe
+        let startX=0;
+        const overlay=card.querySelector('.touch-overlay');
+        overlay.addEventListener('touchstart',e=>startX=e.touches[0].clientX);
+        overlay.addEventListener('touchend',e=>{
+          const dx=e.changedTouches[0].clientX-startX;
+          if(dx<-50) players[base].nextVideo();
+          else if(dx>50) players[base].previousVideo();
         });
       });
 
-      // hide preloader when API is ready
-      document.getElementById('preloader').style.display = 'none';
+      // observe
+      const obs=new IntersectionObserver(entries=>{
+        entries.forEach(entry=>{
+          const base=entry.target.dataset.base, p=players[base];
+          if(!p)return;
+          if(entry.isIntersecting){
+            p.playVideo();
+            p.unMute();
+            const id=base.split('-')[1];
+            document.getElementById('title-'+id).textContent=p.getVideoData().title;
+          } else {
+            p.pauseVideo();
+          }
+        });
+      },{threshold:0.6});
+      document.querySelectorAll('.card').forEach(c=>obs.observe(c));
+
+      // hide preloader
+      document.getElementById('preloader').style.display='none';
     }
 
-    window.addEventListener('load', () => {
-      document.getElementById('home-btn').onclick = () =>
+    window.addEventListener('load',()=>{
+      document.getElementById('home-btn').onclick=()=>
         window.scrollTo({top:0,behavior:'smooth'});
     });
   </script>
