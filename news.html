@@ -6,12 +6,37 @@
   <title>Conservative Daily U.S. News Channels</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
+    /* Preloader */
+    #preloader {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+    }
+    .loader {
+      border: 8px solid #333;
+      border-top: 8px solid #bb86fc;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      margin-bottom: 1rem;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Page */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background-color: #121212;
       color: #e0e0e0;
       font-family: 'Inter', sans-serif;
-      line-height: 1.5;
     }
     header {
       text-align: center;
@@ -19,7 +44,7 @@
     }
     header h1 {
       color: #fff;
-      font-size: 1.75rem;
+      font-size: 2rem;
       font-weight: 600;
     }
     .container {
@@ -33,23 +58,19 @@
     .card {
       background-color: #1e1e1e;
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
       overflow: hidden;
+      position: relative;
     }
     .card h3 {
       background-color: #272727;
-      border-bottom: 1px solid #333;
+      padding: 0.75rem 1rem;
       font-size: 1.1rem;
       font-weight: 600;
-      padding: 0.75rem 1rem;
       color: #fff;
     }
     .viewport {
       width: 100%;
       height: 400px;
-      border: none;
       background: #000;
     }
     .note {
@@ -58,163 +79,138 @@
       padding: 0.5rem 1rem;
     }
     .card a {
+      display: block;
       background-color: #bb86fc;
       color: #121212;
-      display: block;
-      font-weight: 500;
-      padding: 0.75rem;
       text-align: center;
+      padding: 0.75rem;
       text-decoration: none;
-      transition: background-color 0.2s;
+      font-weight: 500;
     }
-    .card a:hover {
-      background-color: #985eff;
-    }
+    .card a:hover { background-color: #985eff; }
   </style>
 </head>
 <body>
+  <div id="preloader">
+    <div class="loader"></div>
+    <h1>the purge</h1>
+    <p>purging fake news</p>
+  </div>
+
   <header>
     <h1>Conservative Daily U.S. News Channels</h1>
   </header>
+
   <main class="container">
     <!-- The Daily Wire -->
-    <div class="card">
+    <div class="card" data-playlist="UUaeO5vkdj5xOQHp4UmIN6dw" data-playerid="player-0">
       <h3>The Daily Wire</h3>
-      <iframe
-        id="player-0"
-        class="viewport"
-        src="https://www.youtube.com/embed/videoseries?list=UUaeO5vkdj5xOQHp4UmIN6dw&enablejsapi=1"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">Scroll into view to play, scroll away to pause.</div>
+      <div class="viewport" id="player-0"></div>
+      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
       <a href="https://www.youtube.com/c/TheDailyWire" target="_blank">Open Channel</a>
     </div>
 
     <!-- Fox News -->
-    <div class="card">
+    <div class="card" data-playlist="UUXIJgqnII2ZOINSWNOGFThA" data-playerid="player-1">
       <h3>Fox News</h3>
-      <iframe
-        id="player-1"
-        class="viewport"
-        src="https://www.youtube.com/embed/videoseries?list=UUXIJgqnII2ZOINSWNOGFThA&enablejsapi=1"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">Scroll into view to play, scroll away to pause.</div>
+      <div class="viewport" id="player-1"></div>
+      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
       <a href="https://www.youtube.com/user/FoxNewsChannel" target="_blank">Open Channel</a>
     </div>
 
     <!-- Newsmax -->
-    <div class="card">
+    <div class="card" data-playlist="UUx6h-dWzJ5NpAlja1YsApdg" data-playerid="player-2">
       <h3>Newsmax</h3>
-      <iframe
-        id="player-2"
-        class="viewport"
-        src="https://www.youtube.com/embed/videoseries?list=UUx6h-dWzJ5NpAlja1YsApdg&enablejsapi=1"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">Scroll into view to play, scroll away to pause.</div>
+      <div class="viewport" id="player-2"></div>
+      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
       <a href="https://www.youtube.com/c/NewsmaxTV" target="_blank">Open Channel</a>
     </div>
 
-    <!-- OAN (One America News) -->
-    <div class="card">
+    <!-- OAN -->
+    <div class="card" data-playlist="UUNbIDJNNgaRrXOD7VllIMRQ" data-playerid="player-3">
       <h3>OAN (One America News)</h3>
-      <iframe
-        id="player-3"
-        class="viewport"
-        src="https://www.youtube.com/embed/videoseries?list=UUNbIDJNNgaRrXOD7VllIMRQ&enablejsapi=1"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">Scroll into view to play, scroll away to pause.</div>
+      <div class="viewport" id="player-3"></div>
+      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
       <a href="https://www.youtube.com/c/OANNation" target="_blank">Open Channel</a>
     </div>
 
     <!-- The Epoch Times -->
-    <div class="card">
+    <div class="card" data-playlist="UUeLc4heXqG9dtL7jiPHMBfQ" data-playerid="player-4">
       <h3>The Epoch Times</h3>
-      <iframe
-        id="player-4"
-        class="viewport"
-        src="https://www.youtube.com/embed/videoseries?list=UUeLc4heXqG9dtL7jiPHMBfQ&enablejsapi=1"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">Scroll into view to play, scroll away to pause.</div>
+      <div class="viewport" id="player-4"></div>
+      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
       <a href="https://www.youtube.com/c/EpochTimesTV" target="_blank">Open Channel</a>
     </div>
 
     <!-- TheBlaze -->
-    <div class="card">
+    <div class="card" data-playlist="UUKgJEs_v0JB-6jWb8lIy9Xw" data-playerid="player-5">
       <h3>TheBlaze</h3>
-      <iframe
-        id="player-5"
-        class="viewport"
-        src="https://www.youtube.com/embed/videoseries?list=UUKgJEs_v0JB-6jWb8lIy9Xw&enablejsapi=1"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">Scroll into view to play, scroll away to pause.</div>
+      <div class="viewport" id="player-5"></div>
+      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
       <a href="https://www.youtube.com/c/TheBlazeTV" target="_blank">Open Channel</a>
     </div>
 
     <!-- Timcast IRL -->
-    <div class="card">
+    <div class="card" data-playlist="UULwNTXWEjVd2qIHLcXxQWxA" data-playerid="player-6">
       <h3>Timcast IRL</h3>
-      <iframe
-        id="player-6"
-        class="viewport"
-        src="https://www.youtube.com/embed/videoseries?list=UULwNTXWEjVd2qIHLcXxQWxA&enablejsapi=1"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">Scroll into view to play, scroll away to pause.</div>
+      <div class="viewport" id="player-6"></div>
+      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
       <a href="https://www.youtube.com/c/Timcast" target="_blank">Open Channel</a>
     </div>
 
     <!-- Stephen Gardner -->
-    <div class="card">
+    <div class="card" data-playlist="UU3VlRtY0ARsTRR5Eq8QE1Yg" data-playerid="player-7">
       <h3>Stephen Gardner</h3>
-      <iframe
-        id="player-7"
-        class="viewport"
-        src="https://www.youtube.com/embed/videoseries?list=UU3VlRtY0ARsTRR5Eq8QE1Yg&enablejsapi=1"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      <div class="note">Scroll into view to play, scroll away to pause.</div>
+      <div class="viewport" id="player-7"></div>
+      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
       <a href="https://youtube.com/@stephengardner1?si=9lDKJ-SJbkDuNvZF" target="_blank">Open Channel</a>
     </div>
   </main>
 
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
-    const playerIds = [
-      'player-0','player-1','player-2','player-3',
-      'player-4','player-5','player-6','player-7'
-    ];
     const players = {};
 
     function onYouTubeIframeAPIReady() {
-      playerIds.forEach(id => {
-        players[id] = new YT.Player(id);
+      document.querySelectorAll('.card').forEach(card => {
+        const pid = card.dataset.playerid;
+        const list = card.dataset.playlist;
+        const randomIndex = Math.floor(Math.random() * 10);
+        players[pid] = new YT.Player(pid, {
+          playerVars: {
+            listType: 'playlist',
+            list: list,
+            index: randomIndex,
+            autoplay: 0,
+            origin: window.location.origin
+          }
+        });
+
+        // swipe detection
+        let startX = 0;
+        card.addEventListener('touchstart', e => startX = e.changedTouches[0].screenX);
+        card.addEventListener('touchend', e => {
+          const dx = e.changedTouches[0].screenX - startX;
+          if (dx > 50) players[pid].nextVideo();
+        });
       });
     }
 
+    // autoplay/pause on scroll
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
-        const iframe = entry.target.querySelector('iframe');
-        const player = players[iframe.id];
+        const pid = entry.target.dataset.playerid;
+        const player = players[pid];
         if (!player) return;
         if (entry.isIntersecting) player.playVideo();
         else player.pauseVideo();
       });
-    }, { threshold: 0.5 });
+    }, { threshold: 0.6 });
 
-    document.querySelectorAll('.card').forEach(card => observer.observe(card));
+    window.onload = () => {
+      document.getElementById('preloader').style.display = 'none';
+      document.querySelectorAll('.card').forEach(card => observer.observe(card));
+    };
   </script>
 </body>
 </html>
