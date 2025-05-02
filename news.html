@@ -153,7 +153,7 @@
       if (players[base]) players[base].destroy();
       players[base] = new YT.Player(base, {
         height: '400', width: '100%',
-        playerVars: { listType: 'playlist', list, index: idx, autoplay: 0, muted: 0, origin: location.origin },
+        playerVars: { listType: 'playlist', list, index: idx, autoplay: 1, muted: 0, origin: location.origin },
         events: {
           onReady: e => e.target.mute(),
           onStateChange: e => {
