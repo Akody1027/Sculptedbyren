@@ -24,19 +24,19 @@
       border: 8px solid #333;
       border-top: 8px solid #bb86fc;
       border-radius: 50%;
-      width: 60px;
-      height: 60px;
+      width: 60px; height: 60px;
       margin-bottom: 1rem;
       animation: spin 1s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Page */
+    /* Page styles */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background-color: #121212;
       color: #e0e0e0;
       font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
     }
     header {
       text-align: center;
@@ -47,54 +47,89 @@
       font-size: 2rem;
       font-weight: 600;
     }
+
+    /* Horizontal scroller */
     .container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+      display: flex;
+      overflow-x: auto;
       gap: 1rem;
-      max-width: 1200px;
-      margin: 0 auto;
       padding: 1rem;
+      scroll-snap-type: x mandatory;
     }
+    .container::-webkit-scrollbar { display: none; }
     .card {
+      flex: 0 0 90%;
+      max-width: 90%;
       background-color: #1e1e1e;
       border-radius: 8px;
       overflow: hidden;
       position: relative;
+      scroll-snap-align: start;
     }
-    .card h3 {
-      background-color: #272727;
+    .card:not(:last-child) { opacity: 0.8; }
+    .card:hover:not(:last-child) { opacity: 1; }
+
+    /* Channel & Video titles */
+    .channel-title, .video-title {
       padding: 0.75rem 1rem;
+      background-color: #272727;
+      color: #fff;
       font-size: 1.1rem;
       font-weight: 600;
-      color: #fff;
     }
+
     .viewport {
       width: 100%;
       height: 400px;
       background: #000;
     }
-    .note {
-      font-size: 0.8rem;
-      color: #999;
+
+    .card-buttons {
+      display: flex;
+      justify-content: space-between;
       padding: 0.5rem 1rem;
+      background: #1e1e1e;
     }
-    .card a {
-      display: block;
+    .card-buttons button, .card-buttons a {
       background-color: #bb86fc;
       color: #121212;
-      text-align: center;
-      padding: 0.75rem;
+      border: none;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+      border-radius: 4px;
       text-decoration: none;
-      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
     }
-    .card a:hover { background-color: #985eff; }
+    .card-buttons button:hover, .card-buttons a:hover {
+      background-color: #985eff;
+    }
+
+    /* Bottom nav */
+    #bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #272727;
+      display: flex;
+      justify-content: space-around;
+      padding: 0.5rem 0;
+      z-index: 1000;
+    }
+    #bottom-nav button {
+      background: none;
+      border: none;
+      color: #e0e0e0;
+      font-size: 1rem;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <div id="preloader">
     <div class="loader"></div>
-    <h1>the purge</h1>
-    <p>purging fake news</p>
+    <h1>THE PURGE</h1>
+    <p>purging disinformation</p>
   </div>
 
   <header>
@@ -102,70 +137,95 @@
   </header>
 
   <main class="container">
-    <!-- The Daily Wire -->
+    <!-- Sample card: repeat for each channel -->
     <div class="card" data-playlist="UUaeO5vkdj5xOQHp4UmIN6dw" data-playerid="player-0">
-      <h3>The Daily Wire</h3>
+      <div class="channel-title">The Daily Wire</div>
+      <div class="video-title" id="title-0">Loading title...</div>
       <div class="viewport" id="player-0"></div>
-      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
-      <a href="https://www.youtube.com/c/TheDailyWire" target="_blank">Open Channel</a>
+      <div class="card-buttons">
+        <button class="save-btn">Save Video</button>
+        <a href="https://www.youtube.com/c/TheDailyWire" target="_blank">Open</a>
+      </div>
     </div>
-
+    <!-- Repeat cards for other channels with appropriate data-playlist & links -->
     <!-- Fox News -->
     <div class="card" data-playlist="UUXIJgqnII2ZOINSWNOGFThA" data-playerid="player-1">
-      <h3>Fox News</h3>
+      <div class="channel-title">Fox News</div>
+      <div class="video-title" id="title-1">Loading title...</div>
       <div class="viewport" id="player-1"></div>
-      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
-      <a href="https://www.youtube.com/user/FoxNewsChannel" target="_blank">Open Channel</a>
+      <div class="card-buttons">
+        <button class="save-btn">Save Video</button>
+        <a href="https://www.youtube.com/user/FoxNewsChannel" target="_blank">Open</a>
+      </div>
     </div>
-
     <!-- Newsmax -->
     <div class="card" data-playlist="UUx6h-dWzJ5NpAlja1YsApdg" data-playerid="player-2">
-      <h3>Newsmax</h3>
+      <div class="channel-title">Newsmax</div>
+      <div class="video-title" id="title-2">Loading title...</div>
       <div class="viewport" id="player-2"></div>
-      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
-      <a href="https://www.youtube.com/c/NewsmaxTV" target="_blank">Open Channel</a>
+      <div class="card-buttons">
+        <button class="save-btn">Save Video</button>
+        <a href="https://www.youtube.com/c/NewsmaxTV" target="_blank">Open</a>
+      </div>
     </div>
-
     <!-- OAN -->
     <div class="card" data-playlist="UUNbIDJNNgaRrXOD7VllIMRQ" data-playerid="player-3">
-      <h3>OAN (One America News)</h3>
+      <div class="channel-title">OAN</div>
+      <div class="video-title" id="title-3">Loading title...</div>
       <div class="viewport" id="player-3"></div>
-      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
-      <a href="https://www.youtube.com/c/OANNation" target="_blank">Open Channel</a>
+      <div class="card-buttons">
+        <button class="save-btn">Save Video</button>
+        <a href="https://www.youtube.com/c/OANNation" target="_blank">Open</a>
+      </div>
     </div>
-
     <!-- The Epoch Times -->
     <div class="card" data-playlist="UUeLc4heXqG9dtL7jiPHMBfQ" data-playerid="player-4">
-      <h3>The Epoch Times</h3>
+      <div class="channel-title">The Epoch Times</div>
+      <div class="video-title" id="title-4">Loading title...</div>
       <div class="viewport" id="player-4"></div>
-      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
-      <a href="https://www.youtube.com/c/EpochTimesTV" target="_blank">Open Channel</a>
+      <div class="card-buttons">
+        <button class="save-btn">Save Video</button>
+        <a href="https://www.youtube.com/c/EpochTimesTV" target="_blank">Open</a>
+      </div>
     </div>
-
     <!-- TheBlaze -->
     <div class="card" data-playlist="UUKgJEs_v0JB-6jWb8lIy9Xw" data-playerid="player-5">
-      <h3>TheBlaze</h3>
+      <div class="channel-title">TheBlaze</div>
+      <div class="video-title" id="title-5">Loading title...</div>
       <div class="viewport" id="player-5"></div>
-      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
-      <a href="https://www.youtube.com/c/TheBlazeTV" target="_blank">Open Channel</a>
+      <div class="card-buttons">
+        <button class="save-btn">Save Video</button>
+        <a href="https://www.youtube.com/c/TheBlazeTV" target="_blank">Open</a>
+      </div>
     </div>
-
     <!-- Timcast IRL -->
     <div class="card" data-playlist="UULwNTXWEjVd2qIHLcXxQWxA" data-playerid="player-6">
-      <h3>Timcast IRL</h3>
+      <div class="channel-title">Timcast IRL</div>
+      <div class="video-title" id="title-6">Loading title...</div>
       <div class="viewport" id="player-6"></div>
-      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
-      <a href="https://www.youtube.com/c/Timcast" target="_blank">Open Channel</a>
+      <div class="card-buttons">
+        <button class="save-btn">Save Video</button>
+        <a href="https://www.youtube.com/c/Timcast" target="_blank">Open</a>
+      </div>
     </div>
-
     <!-- Stephen Gardner -->
     <div class="card" data-playlist="UU3VlRtY0ARsTRR5Eq8QE1Yg" data-playerid="player-7">
-      <h3>Stephen Gardner</h3>
+      <div class="channel-title">Stephen Gardner</div>
+      <div class="video-title" id="title-7">Loading title...</div>
       <div class="viewport" id="player-7"></div>
-      <div class="note">Scroll into view to play; swipe ➡️ for next video.</div>
-      <a href="https://youtube.com/@stephengardner1?si=9lDKJ-SJbkDuNvZF" target="_blank">Open Channel</a>
+      <div class="card-buttons">
+        <button class="save-btn">Save Video</button>
+        <a href="https://youtube.com/@stephengardner1?si=9lDKJ-SJbkDuNvZF" target="_blank">Open</a>
+      </div>
     </div>
   </main>
+
+  <!-- Bottom navigation -->
+  <nav id="bottom-nav">
+    <button id="home-btn">Home</button>
+    <button id="save-all-btn">Save Videos</button>
+    <button id="search-btn">🔍</button>
+  </nav>
 
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
@@ -175,41 +235,49 @@
       document.querySelectorAll('.card').forEach(card => {
         const pid = card.dataset.playerid;
         const list = card.dataset.playlist;
-        const randomIndex = Math.floor(Math.random() * 10);
         players[pid] = new YT.Player(pid, {
-          playerVars: {
-            listType: 'playlist',
-            list: list,
-            index: randomIndex,
-            autoplay: 0,
-            origin: window.location.origin
-          }
+          playerVars: { listType: 'playlist', list: list, origin: window.location.origin }
         });
-
-        // swipe detection
-        let startX = 0;
-        card.addEventListener('touchstart', e => startX = e.changedTouches[0].screenX);
-        card.addEventListener('touchend', e => {
-          const dx = e.changedTouches[0].screenX - startX;
-          if (dx > 50) players[pid].nextVideo();
+        // display title
+        players[pid].addEventListener('onReady', () => {
+          const info = players[pid].getVideoData();
+          document.getElementById('title-' + pid.split('-')[1]).textContent = info.title;
         });
+        // save button
+        card.querySelector('.save-btn').onclick = () => {
+          const videoId = players[pid].getVideoData().video_id;
+          const saved = JSON.parse(localStorage.getItem('savedVideos')||'[]');
+          if (!saved.includes(videoId)) saved.push(videoId);
+          localStorage.setItem('savedVideos', JSON.stringify(saved));
+          alert('Saved video: ' + videoId);
+        };
       });
     }
 
-    // autoplay/pause on scroll
+    // autoplay/pause
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
-        const pid = entry.target.dataset.playerid;
+        const card = entry.target;
+        const pid = card.dataset.playerid;
         const player = players[pid];
         if (!player) return;
-        if (entry.isIntersecting) player.playVideo();
-        else player.pauseVideo();
+        entry.isIntersecting ? player.playVideo() : player.pauseVideo();
       });
     }, { threshold: 0.6 });
 
     window.onload = () => {
       document.getElementById('preloader').style.display = 'none';
       document.querySelectorAll('.card').forEach(card => observer.observe(card));
+      // bottom nav actions
+      document.getElementById('home-btn').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('save-all-btn').onclick = () => alert('Saved Videos:\n' + (localStorage.getItem('savedVideos')||'None'));
+      document.getElementById('search-btn').onclick = () => {
+        const term = prompt('Search titles for:');
+        if (!term) return;
+        document.querySelectorAll('.video-title').forEach(el => {
+          el.parentElement.style.border = el.textContent.toLowerCase().includes(term.toLowerCase()) ? '2px solid #bb86fc' : '2px solid transparent';
+        });
+      };
     };
   </script>
 </body>
