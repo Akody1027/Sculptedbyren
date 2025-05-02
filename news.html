@@ -13,8 +13,6 @@
       align-items:center; justify-content:center;
       color:#bb86fc; font-family:'Fjalla One',sans-serif; z-index:9999;
     }
-    #preloader h1 { font-size:5rem; margin-bottom:.5rem; }
-    #preloader p  { font-size:1.2rem; margin-bottom:1rem; }
     .loader {
       border:6px solid rgba(187,134,252,0.3);
       border-top:6px solid #bb86fc;
@@ -23,142 +21,150 @@
     }
     @keyframes spin { to { transform:rotate(360deg); } }
 
-    /* Global */
+    /* Global & Cards */
     * { box-sizing:border-box; margin:0; padding:0; }
     body { background:#121212; color:#e0e0e0; font-family:'Inter',sans-serif; }
     header { text-align:center; padding:2rem 1rem; }
     header h1 { color:#fff; font-size:2rem; font-weight:600; }
 
-    /* Cards */
     .container { display:flex; flex-direction:column; gap:1rem; padding:1rem; margin-bottom:60px; }
     .card { background:#1e1e1e; border-radius:8px; overflow:hidden; position:relative; }
     .channel-title, .video-title {
       padding:.75rem 1rem; background:#272727; color:#fff; font-weight:600;
     }
-    .channel-title { font-size:1.1rem; }
-    .video-title   { font-size:1rem; }
     .viewport { position:relative; width:100%; height:400px; }
-    .player-wrapper { width:100%; height:100%; position:relative; }
-    .player-wrapper iframe { position:absolute; top:0; left:0; width:100%; height:100%; }
-    .touch-overlay { position:absolute; top:0; left:0; width:100%; height:100%; z-index:2; }
-    .swipe-hint {
-      position:absolute; top:50%; right:16px; transform:translateY(-50%);
-      font-size:2rem; color:#bb86fc; background:rgba(0,0,0,0.5);
-      padding:.25rem; border-radius:50%; pointer-events:none; z-index:3;
-    }
+    .player-wrapper iframe { width:100%; height:100%; }
     .card-buttons {
-      display:flex; justify-content:space-between; padding:.5rem 1rem; background:#1e1e1e;
+      display:flex; justify-content:space-between; padding:.5rem 1rem;
+      background:#1e1e1e;
     }
     .card-buttons button, .card-buttons a {
       background:#bb86fc; color:#121212; border:none;
-      padding:.5rem 1rem; font-size:.9rem; border-radius:4px;
-      cursor:pointer; text-decoration:none; transition:background .2s;
+      padding:.5rem 1rem; border-radius:4px; cursor:pointer;
+      text-decoration:none;
     }
     .card-buttons button:hover, .card-buttons a:hover { background:#985eff; }
 
-    /* Bottom Nav */
     #bottom-nav {
       position:fixed; bottom:0; width:100%; height:60px;
       background:#272727; display:flex; justify-content:space-around; align-items:center;
     }
-    #bottom-nav button {
-      background:none; border:none; color:#e0e0e0; font-size:1rem; cursor:pointer;
-    }
+    #bottom-nav button { background:none; border:none; color:#e0e0e0; cursor:pointer; }
   </style>
 </head>
 <body>
   <div id="preloader">
     <h1>Purge</h1>
-    <p>Purging Disinformation</p>
+    <p>Purging Disinformation …</p>
     <div class="loader"></div>
   </div>
 
-  <header>
-    <h1>Conservative Daily U.S. News Channels</h1>
-  </header>
+  <header><h1>Conservative Daily U.S. News Channels</h1></header>
 
   <main class="container">
-    <!-- (repeat these nine blocks exactly) -->
+    <!-- 9 channel cards -->
     <div class="card" data-base="player-0" data-playlist="UUaeO5vkdj5xOQHp4UmIN6dw">
       <div class="channel-title">The Daily Wire</div>
       <div class="video-title" id="title-0">Loading…</div>
-      <div class="viewport">
-        <div class="player-wrapper"><div id="player-0"></div></div>
-        <div class="touch-overlay"></div>
-      </div>
-      <div class="swipe-hint">→</div>
+      <div class="viewport"><div class="player-wrapper"><div id="player-0"></div></div></div>
       <div class="card-buttons">
-        <button class="save-btn" data-base="player-0">Save</button>
+        <button>Save</button>
         <a href="https://www.youtube.com/c/TheDailyWire" target="_blank">Open</a>
       </div>
     </div>
-    <!-- players 1–8 (Fox, Newsmax, OANN, Epoch, Blaze, Timcast, Gardner, Shapiro) -->
+    <div class="card" data-base="player-1" data-playlist="UUXIJgqnII2ZOINSWNOGFThA">
+      <div class="channel-title">Fox News</div><div class="video-title" id="title-1">Loading…</div>
+      <div class="viewport"><div class="player-wrapper"><div id="player-1"></div></div></div>
+      <div class="card-buttons"><button>Save</button><a href="https://www.youtube.com/user/FoxNewsChannel" target="_blank">Open</a></div>
+    </div>
+    <div class="card" data-base="player-2" data-playlist="UUx6h-dWzJ5NpAlja1YsApdg">
+      <div class="channel-title">Newsmax</div><div class="video-title" id="title-2">Loading…</div>
+      <div class="viewport"><div class="player-wrapper"><div id="player-2"></div></div></div>
+      <div class="card-buttons"><button>Save</button><a href="https://www.youtube.com/c/NewsmaxTV" target="_blank">Open</a></div>
+    </div>
+    <div class="card" data-base="player-3" data-playlist="UUNbIDJNNgaRrXOD7VllIMRQ">
+      <div class="channel-title">One America News</div><div class="video-title" id="title-3">Loading…</div>
+      <div class="viewport"><div class="player-wrapper"><div id="player-3"></div></div></div>
+      <div class="card-buttons"><button>Save</button><a href="https://www.youtube.com/c/OANNation" target="_blank">Open</a></div>
+    </div>
+    <div class="card" data-base="player-4" data-playlist="UUeLc4heXqG9dtL7jiPHMBfQ">
+      <div class="channel-title">The Epoch Times</div><div class="video-title" id="title-4">Loading…</div>
+      <div class="viewport"><div class="player-wrapper"><div id="player-4"></div></div></div>
+      <div class="card-buttons"><button>Save</button><a href="https://www.youtube.com/c/EpochTimesTV" target="_blank">Open</a></div>
+    </div>
+    <div class="card" data-base="player-5" data-playlist="UUKgJEs_v0JB-6jWb8lIy9Xw">
+      <div class="channel-title">TheBlaze</div><div class="video-title" id="title-5">Loading…</div>
+      <div class="viewport"><div class="player-wrapper"><div id="player-5"></div></div></div>
+      <div class="card-buttons"><button>Save</button><a href="https://www.youtube.com/c/TheBlazeTV" target="_blank">Open</a></div>
+    </div>
+    <div class="card" data-base="player-6" data-playlist="UULwNTXWEjVd2qIHLcXxQWxA">
+      <div class="channel-title">Timcast IRL</div><div class="video-title" id="title-6">Loading…</div>
+      <div class="viewport"><div class="player-wrapper"><div id="player-6"></div></div></div>
+      <div class="card-buttons"><button>Save</button><a href="https://www.youtube.com/c/Timcast" target="_blank">Open</a></div>
+    </div>
+    <div class="card" data-base="player-7" data-playlist="UU3VlRtY0ARsTRR5Eq8QE1Yg">
+      <div class="channel-title">Stephen Gardner</div><div class="video-title" id="title-7">Loading…</div>
+      <div class="viewport"><div class="player-wrapper"><div id="player-7"></div></div></div>
+      <div class="card-buttons"><button>Save</button><a href="https://youtube.com/@stephengardner1?si=9lDKJ-SJbkDuNvZF" target="_blank">Open</a></div>
+    </div>
+    <div class="card" data-base="player-8" data-playlist="UUnQC_G5Xsjhp9fEJKuIcrSw">
+      <div class="channel-title">Ben Shapiro Show</div><div class="video-title" id="title-8">Loading…</div>
+      <div class="viewport"><div class="player-wrapper"><div id="player-8"></div></div></div>
+      <div class="card-buttons"><button>Save</button><a href="https://youtube.com/@benshapiro?si=S_m7AJ9pouV72IC6" target="_blank">Open</a></div>
+    </div>
   </main>
 
   <nav id="bottom-nav">
     <button id="home-btn">Home</button>
     <button id="save-all-btn">Save All</button>
-    <button id="search-btn">🔍</button>
   </nav>
 
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
+    let readyCount = 0;
     const players = {}, nextIdx = {};
 
     function onYouTubeIframeAPIReady() {
-      document.querySelectorAll('.card').forEach(card => {
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card => {
         const base = card.dataset.base,
               list = card.dataset.playlist;
         nextIdx[base] = 0;
 
-        // initialize with autoplay=1 & muted=1
         players[base] = new YT.Player(base, {
-          height: '400', width: '100%',
+          height: '100%', width: '100%',
           playerVars: {
             listType: 'playlist',
             list,
             index: nextIdx[base]++,
-            autoplay: 1,
-            mute: 1,
+            autoplay: 0,  // we'll play manually
+            muted: 1,
             origin: location.origin
           },
           events: {
             onReady: e => {
               // update title
               const id = base.split('-')[1];
-              document.getElementById('title-'+id).textContent =
-                e.target.getVideoData().title;
-            },
-            onStateChange: e => {
-              if (e.data === YT.PlayerState.PLAYING) {
-                // ensure it's muted until we unmute below
-                e.target.mute();
+              document.getElementById('title-'+id).textContent = e.target.getVideoData().title;
+
+              // mute→play→unmute for each
+              e.target.mute();
+              e.target.playVideo();
+              e.target.unMute();
+
+              // track readiness
+              if (++readyCount === cards.length) {
+                document.getElementById('preloader').style.display = 'none';
               }
             }
           }
         });
-
-        // swipe overlay
-        let startX = 0;
-        card.querySelector('.touch-overlay')
-          .addEventListener('touchstart', e => startX = e.touches[0].clientX);
-        card.querySelector('.touch-overlay')
-          .addEventListener('touchend', e => {
-            const dx = e.changedTouches[0].clientX - startX;
-            if (dx < -50) players[base].nextVideo();
-            else if (dx > 50) players[base].previousVideo();
-          });
       });
-
-      // when iframe API is ready, hide preloader & unmute all
-      document.getElementById('preloader').style.display = 'none';
-      Object.values(players).forEach(p => p.unMute());
     }
 
-    // bottom nav
     window.addEventListener('load', () => {
       document.getElementById('home-btn').onclick = () =>
-        window.scrollTo({top:0,behavior:'smooth'});
+        window.scrollTo({ top:0, behavior:'smooth' });
     });
   </script>
 </body>
