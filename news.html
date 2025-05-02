@@ -29,11 +29,13 @@
       animation: spin 1s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
     /* Global */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #121212; color: #e0e0e0; font-family: 'Inter', sans-serif; }
     header { text-align: center; padding: 2rem 1rem; }
     header h1 { color: #fff; font-size: 2rem; font-weight: 600; }
+
     /* Cards */
     .container {
       display: flex;
@@ -90,6 +92,7 @@
       transition: background .2s;
     }
     .card-buttons button:hover, .card-buttons a:hover { background: #985eff; }
+
     #bottom-nav {
       position: fixed;
       bottom: 0; width: 100%; height: 60px;
@@ -212,39 +215,35 @@
   </nav>
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
-    const players = {}, nextIndex = {};
+    const players = {};
     function onYouTubeIframeAPIReady() {
       document.querySelectorAll('.card').forEach(card => {
         const base = card.dataset.base, list = card.dataset.playlist;
-        nextIndex[base] = 0;
-        createOrNext(base, list);
+        // Initialize player with autoplay and playlist
+        players[base] = new YT.Player(base, {
+          height: '400', width: '100%',
+          playerVars: { listType: 'playlist', list, autoplay: 1, origin: location.origin },
+          events: {
+            'onReady': e => { e.target.unMute(); },
+            'onStateChange': e => {
+              if (e.data === YT.PlayerState.PLAYING) {
+                const info = e.target.getVideoData();
+                document.getElementById('title-' + base.split('-')[1]).textContent = info.title;
+              }
+            }
+          }
+        });
+        // Swipe right to next
         let startX = 0;
-        card.querySelector('.viewport').addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
-        card.querySelector('.viewport').addEventListener('touchend', e => {
+        const vp = card.querySelector('.viewport');
+        vp.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+        vp.addEventListener('touchend', e => {
           if (startX - e.changedTouches[0].clientX > 50) {
-            createOrNext(base, list);
+            players[base].nextVideo();
           }
         });
       });
       observeCards();
-    }
-    function createOrNext(base, list) {
-      // destroy existing before creating next
-      if (players[base]) players[base].destroy();
-      const idx = nextIndex[base]++;
-      players[base] = new YT.Player(base, {
-        height: '400', width: '100%',
-        playerVars: { listType: 'playlist', list, index: idx, origin: location.origin },
-        events: {
-          'onReady': e => { e.target.unMute(); e.target.playVideo(); },
-          'onStateChange': e => {
-            if (e.data === YT.PlayerState.PLAYING) {
-              const info = e.target.getVideoData();
-              document.getElementById('title-' + base.split('-')[1]).textContent = info.title;
-            }
-          }
-        }
-      });
     }
     function observeCards() {
       const obs = new IntersectionObserver(entries => {
