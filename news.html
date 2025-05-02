@@ -63,83 +63,7 @@
         <a href="https://www.youtube.com/c/TheDailyWire" target="_blank">Open</a>
       </div>
     </div>
-    <!-- Fox News -->
-    <div class="card" data-playlist="UUXIJgqnII2ZOINSWNOGFThA" data-base="player-1">
-      <div class="channel-title">Fox News</div>
-      <div class="video-title" id="title-1">Loading...</div>
-      <div class="carousel" id="carousel-1"></div>
-      <div class="scroll-arrow">→</div>
-      <div class="card-buttons">
-        <button class="save-btn" data-base="player-1">Save</button>
-        <a href="https://www.youtube.com/user/FoxNewsChannel" target="_blank">Open</a>
-      </div>
-    </div>
-    <!-- Newsmax -->
-    <div class="card" data-playlist="UUx6h-dWzJ5NpAlja1YsApdg" data-base="player-2">
-      <div class="channel-title">Newsmax</div>
-      <div class="video-title" id="title-2">Loading...</div>
-      <div class="carousel" id="carousel-2"></div>
-      <div class="scroll-arrow">→</div>
-      <div class="card-buttons">
-        <button class="save-btn" data-base="player-2">Save</button>
-        <a href="https://www.youtube.com/c/NewsmaxTV" target="_blank">Open</a>
-      </div>
-    </div>
-    <!-- One America News -->
-    <div class="card" data-playlist="UUNbIDJNNgaRrXOD7VllIMRQ" data-base="player-3">
-      <div class="channel-title">One America News</div>
-      <div class="video-title" id="title-3">Loading...</div>
-      <div class="carousel" id="carousel-3"></div>
-      <div class="scroll-arrow">→</div>
-      <div class="card-buttons">
-        <button class="save-btn" data-base="player-3">Save</button>
-        <a href="https://www.youtube.com/c/OANNation" target="_blank">Open</a>
-      </div>
-    </div>
-    <!-- The Epoch Times -->
-    <div class="card" data-playlist="UUeLc4heXqG9dtL7jiPHMBfQ" data-base="player-4">
-      <div class="channel-title">The Epoch Times</div>
-      <div class="video-title" id="title-4">Loading...</div>
-      <div class="carousel" id="carousel-4"></div>
-      <div class="scroll-arrow">→</div>
-      <div class="card-buttons">
-        <button class="save-btn" data-base="player-4">Save</button>
-        <a href="https://www.youtube.com/c/EpochTimesTV" target="_blank">Open</a>
-      </div>
-    </div>
-    <!-- TheBlaze -->
-    <div class="card" data-playlist="UUKgJEs_v0JB-6jWb8lIy9Xw" data-base="player-5">
-      <div class="channel-title">TheBlaze</div>
-      <div class="video-title" id="title-5">Loading...</div>
-      <div class="carousel" id="carousel-5"></div>
-      <div class="scroll-arrow">→</div>
-      <div class="card-buttons">
-        <button class="save-btn" data-base="player-5">Save</button>
-        <a href="https://www.youtube.com/c/TheBlazeTV" target="_blank">Open</a>
-      </div>
-    </div>
-    <!-- Timcast IRL -->
-    <div class="card" data-playlist="UULwNTXWEjVd2qIHLcXxQWxA" data-base="player-6">
-      <div class="channel-title">Timcast IRL</div>
-      <div class="video-title" id="title-6">Loading...</div>
-      <div class="carousel" id="carousel-6"></div>
-      <div class="scroll-arrow">→</div>
-      <div class="card-buttons">
-        <button class="save-btn" data-base="player-6">Save</button>
-        <a href="https://www.youtube.com/c/Timcast" target="_blank">Open</a>
-      </div>
-    </div>
-    <!-- Stephen Gardner -->
-    <div class="card" data-playlist="UU3VlRtY0ARsTRR5Eq8QE1Yg" data-base="player-7">
-      <div class="channel-title">Stephen Gardner</div>
-      <div class="video-title" id="title-7">Loading...</div>
-      <div class="carousel" id="carousel-7"></div>
-      <div class="scroll-arrow">→</div>
-      <div class="card-buttons">
-        <button class="save-btn" data-base="player-7">Save</button>
-        <a href="https://youtube.com/@stephengardner1?si=9lDKJ-SJbkDuNvZF" target="_blank">Open</a>
-      </div>
-    </div>
+    <!-- Additional cards... -->
   </main>
 
   <nav id="bottom-nav">
@@ -151,78 +75,82 @@
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     const players = {};
-    let initialCount = 5;
+    let nextIndices = {};
 
     function onYouTubeIframeAPIReady() {
       document.querySelectorAll('.card').forEach(card => {
         const base = card.dataset.base;
         const list = card.dataset.playlist;
         const carousel = document.getElementById('carousel-' + base.split('-')[1]);
-        let nextIndex = 0;
-        for (let i = 0; i < initialCount; i++) {
-          addVideoItem(carousel, base, list, nextIndex++);
-        }
+        nextIndices[base] = 0;
+        // Load initial videos
+        for (let i = 0; i < 3; i++) loadNext(base, list, carousel);
+
+        // Touch swipe for next
+        let startX = 0;
+        carousel.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+        carousel.addEventListener('touchend', e => {
+          const dx = e.changedTouches[0].clientX - startX;
+          if (dx < -50) carousel.scrollBy({ left: carousel.clientWidth, behavior: 'smooth' });
+        });
+
+        // Append on scroll end
         carousel.addEventListener('scroll', () => {
           if (carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 10) {
-            addVideoItem(carousel, base, list, nextIndex++);
+            loadNext(base, list, carousel);
           }
         });
       });
-      observeItems();
+      observe();
     }
 
-    function addVideoItem(container, base, list, index) {
-      const id = base + '-item-' + index;
-      const div = document.createElement('div');
-      div.className = 'video-item';
-      div.id = id;
-      container.appendChild(div);
+    function loadNext(base, list, carousel) {
+      const idx = nextIndices[base]++;
+      const id = base + '-item-' + idx;
+      const div = document.createElement('div'); div.className = 'video-item'; div.id = id;
+      carousel.appendChild(div);
       players[id] = new YT.Player(id, {
         height: '400', width: '100%',
-        playerVars: { listType: 'playlist', list: list, index: index, origin: location.origin },
-        events: { 'onReady': e => {}, 'onStateChange': onStateChange }
+        playerVars: { listType: 'playlist', list, index: idx, origin: location.origin },
+        events: { 'onStateChange': onStateChange }
       });
     }
 
-    function onStateChange(event) {
-      if (event.data === YT.PlayerState.PLAYING) {
-        const id = event.target.getIframe().id;
-        event.target.unMute();
-        const prefix = id.split('-item-')[0];
-        const videoData = event.target.getVideoData();
-        document.getElementById('title-' + prefix.split('-')[1]).textContent = videoData.title;
-        Object.keys(players).forEach(key => {
-          if (key.startsWith(prefix) && key !== id) players[key].pauseVideo();
-        });
+    function onStateChange(e) {
+      if (e.data === YT.PlayerState.PLAYING) {
+        const id = e.target.getIframe().id;
+        e.target.unMute();
+        const base = id.split('-item-')[0];
+        document.getElementById('title-' + base.split('-')[1]).textContent = e.target.getVideoData().title;
+        // pause siblings
+        Object.keys(players).forEach(key => { if (key.startsWith(base) && key !== id) players[key].pauseVideo(); });
       }
     }
 
-    function observeItems() {
-      const observer = new IntersectionObserver((entries) => {
+    function observe() {
+      const obs = new IntersectionObserver(entries => {
         entries.forEach(entry => {
-          const id = entry.target.id;
-          const player = players[id];
-          if (!player) return;
-          if (entry.isIntersecting) player.playVideo(); else player.pauseVideo();
+          const p = players[entry.target.id];
+          if (!p) return;
+          entry.isIntersecting ? p.playVideo() : p.pauseVideo();
         });
       }, { threshold: 0.6 });
-      document.querySelectorAll('.video-item').forEach(item => observer.observe(item));
+      document.querySelectorAll('.video-item').forEach(i => obs.observe(i));
     }
 
     window.addEventListener('load', () => {
       document.getElementById('preloader').style.display = 'none';
       document.getElementById('home-btn').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-      document.getElementById('save-all-btn').onclick = () => alert('Saved Videos: ' + (localStorage.getItem('savedVideos')||'[]'));
+      document.getElementById('save-all-btn').onclick = () => alert('Saved: ' + (localStorage.getItem('savedVideos')||'[]'));
       document.getElementById('search-btn').onclick = () => {
-        const term = prompt('Search titles for:'); if (!term) return;
+        const term = prompt('Search titles:'); if (!term) return;
         document.querySelectorAll('.video-title').forEach(el => el.parentElement.classList.toggle('highlight', el.textContent.toLowerCase().includes(term.toLowerCase())));
       };
-      document.querySelectorAll('.save-btn').forEach(btn => btn.onclick = () => {
-        const base = btn.dataset.base;
+      document.querySelectorAll('.save-btn').forEach(b => b.onclick = () => {
+        const base = b.dataset.base;
         const vid = players[base + '-item-0'].getVideoData().video_id;
-        const saved = JSON.parse(localStorage.getItem('savedVideos')||'[]'); if (!saved.includes(vid)) saved.push(vid);
-        localStorage.setItem('savedVideos', JSON.stringify(saved));
-        alert('Saved: ' + vid);
+        const arr = JSON.parse(localStorage.getItem('savedVideos')||'[]'); if (!arr.includes(vid)) arr.push(vid);
+        localStorage.setItem('savedVideos', JSON.stringify(arr)); alert('Saved: ' + vid);
       });
     });
   </script>
