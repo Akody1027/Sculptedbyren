@@ -13,32 +13,26 @@
 
     /* Global */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background-color: #121212; color: #e0e0e0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+    body { background-color: #121212; color: #e0e0e0; font-family: 'Inter', sans-serif; }
     header { text-align: center; padding: 2rem 1rem; }
     header h1 { color: #fff; font-size: 2rem; font-weight: 600; }
 
     /* Cards */
-    .container { display: flex; flex-direction: column; gap: 1rem; padding: 1rem; }
+    .container { display: flex; flex-direction: column; gap: 1rem; padding: 1rem; overflow-y: auto; height: calc(100vh - 60px); }
     .card { background: #1e1e1e; border-radius: 8px; overflow: hidden; position: relative; }
     .channel-title, .video-title { padding: .75rem 1rem; background: #272727; color: #fff; font-weight: 600; }
     .channel-title { font-size: 1.1rem; }
     .video-title { font-size: 1rem; }
-
-    /* Carousel */
-    .carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; width: 100%; height: 400px; }
-    .carousel::-webkit-scrollbar { display: none; }
-    .video-item { flex: 0 0 100%; scroll-snap-align: start; position: relative; width: 100%; height: 100%; }
-    .video-item iframe { width: 100%; height: 100%; border: none; }
-
-    /* Scroll arrow hint */
-    .scroll-arrow { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); font-size: 2rem; color: #bb86fc; background: rgba(0,0,0,0.5); padding: 0.25rem; border-radius: 50%; pointer-events: none; }
-
-    .card-buttons { display: flex; justify-content: flex-end; gap: .5rem; padding: .5rem 1rem; background: #1e1e1e; }
-    .card-buttons button, .card-buttons a { background: #bb86fc; color: #121212; border: none; padding: .25rem .5rem; font-size: .8rem; border-radius: 4px; cursor: pointer; text-decoration: none; transition: background .2s; }
+    .viewport { width: 100%; height: 400px; background: #000; }
+    .card-buttons { display: flex; justify-content: space-between; gap: .5rem; padding: .5rem 1rem; background: #1e1e1e; }
+    .card-buttons button, .card-buttons a { background: #bb86fc; color: #121212; border: none; padding: .5rem 1rem; font-size: .9rem; border-radius: 4px; cursor: pointer; text-decoration: none; transition: background .2s; }
     .card-buttons button:hover, .card-buttons a:hover { background: #985eff; }
 
+    /* Swipe hint */
+    .swipe-hint { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); font-size: 2rem; color: #bb86fc; background: rgba(0,0,0,0.5); padding: .25rem; border-radius: 50%; pointer-events: none; }
+
     /* Bottom nav */
-    #bottom-nav { position: fixed; bottom: 0; width: 100%; background: #272727; display: flex; justify-content: space-around; padding: .5rem 0; z-index: 1000; }
+    #bottom-nav { position: fixed; bottom: 0; width: 100%; height: 60px; background: #272727; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
     #bottom-nav button { background: none; border: none; color: #e0e0e0; font-size: 1rem; cursor: pointer; }
     .highlight { border: 2px solid #bb86fc; }
   </style>
@@ -52,18 +46,18 @@
 
   <header><h1>Conservative Daily U.S. News Channels</h1></header>
   <main class="container">
-    <!-- Daily Wire -->
+    <!-- Channel cards -->
     <div class="card" data-playlist="UUaeO5vkdj5xOQHp4UmIN6dw" data-base="player-0">
       <div class="channel-title">The Daily Wire</div>
       <div class="video-title" id="title-0">Loading...</div>
-      <div class="carousel" id="carousel-0"></div>
-      <div class="scroll-arrow">→</div>
+      <div class="viewport" id="player-0"></div>
+      <div class="swipe-hint">→</div>
       <div class="card-buttons">
         <button class="save-btn" data-base="player-0">Save</button>
         <a href="https://www.youtube.com/c/TheDailyWire" target="_blank">Open</a>
       </div>
     </div>
-    <!-- Additional cards... -->
+    <!-- Repeat for other channels -->
   </main>
 
   <nav id="bottom-nav">
@@ -74,81 +68,70 @@
 
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
-    const players = {};
-    let nextIndices = {};
+    const players = {}, nextIndex = {};
 
     function onYouTubeIframeAPIReady() {
       document.querySelectorAll('.card').forEach(card => {
-        const base = card.dataset.base;
-        const list = card.dataset.playlist;
-        const carousel = document.getElementById('carousel-' + base.split('-')[1]);
-        nextIndices[base] = 0;
-        // Load initial videos
-        for (let i = 0; i < 3; i++) loadNext(base, list, carousel);
-
-        // Touch swipe for next
+        const base = card.dataset.base, list = card.dataset.playlist;
+        nextIndex[base] = 0;
+        initPlayer(base, list, card);
+        // swipe right to next video
         let startX = 0;
-        carousel.addEventListener('touchstart', e => startX = e.touches[0].clientX);
-        carousel.addEventListener('touchend', e => {
-          const dx = e.changedTouches[0].clientX - startX;
-          if (dx < -50) carousel.scrollBy({ left: carousel.clientWidth, behavior: 'smooth' });
-        });
-
-        // Append on scroll end
-        carousel.addEventListener('scroll', () => {
-          if (carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 10) {
-            loadNext(base, list, carousel);
-          }
+        card.querySelector('.viewport').addEventListener('touchstart', e => startX = e.touches[0].clientX);
+        card.querySelector('.viewport').addEventListener('touchend', e => {
+          if (e.changedTouches[0].clientX - startX < -50) loadNextVideo(base, list, card);
         });
       });
-      observe();
+      observeCards();
     }
 
-    function loadNext(base, list, carousel) {
-      const idx = nextIndices[base]++;
-      const id = base + '-item-' + idx;
-      const div = document.createElement('div'); div.className = 'video-item'; div.id = id;
-      carousel.appendChild(div);
-      players[id] = new YT.Player(id, {
+    function initPlayer(base, list, card) {
+      const idx = nextIndex[base]++;
+      const iframe = document.getElementById(base);
+      players[base] = new YT.Player(base, {
         height: '400', width: '100%',
         playerVars: { listType: 'playlist', list, index: idx, origin: location.origin },
-        events: { 'onStateChange': onStateChange }
+        events: { 'onReady': e => e.target.playVideo(), 'onStateChange': e => onVideoState(e, base) }
       });
     }
 
-    function onStateChange(e) {
-      if (e.data === YT.PlayerState.PLAYING) {
-        const id = e.target.getIframe().id;
-        e.target.unMute();
-        const base = id.split('-item-')[0];
-        document.getElementById('title-' + base.split('-')[1]).textContent = e.target.getVideoData().title;
-        // pause siblings
-        Object.keys(players).forEach(key => { if (key.startsWith(base) && key !== id) players[key].pauseVideo(); });
+    function loadNextVideo(base, list, card) {
+      // stop and destroy old
+      if (players[base]) players[base].destroy();
+      initPlayer(base, list, card);
+    }
+
+    function onVideoState(event, base) {
+      if (event.data === YT.PlayerState.PLAYING) {
+        event.target.unMute();
+        const info = event.target.getVideoData();
+        document.getElementById('title-' + base.split('-')[1]).textContent = info.title;
       }
     }
 
-    function observe() {
+    function observeCards() {
       const obs = new IntersectionObserver(entries => {
         entries.forEach(entry => {
-          const p = players[entry.target.id];
+          const base = entry.target.dataset.base;
+          const p = players[base];
           if (!p) return;
           entry.isIntersecting ? p.playVideo() : p.pauseVideo();
         });
       }, { threshold: 0.6 });
-      document.querySelectorAll('.video-item').forEach(i => obs.observe(i));
+      document.querySelectorAll('.card').forEach(card => obs.observe(card));
     }
 
     window.addEventListener('load', () => {
       document.getElementById('preloader').style.display = 'none';
       document.getElementById('home-btn').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-      document.getElementById('save-all-btn').onclick = () => alert('Saved: ' + (localStorage.getItem('savedVideos')||'[]'));
+      document.getElementById('save-all-btn').onclick = () => alert('Saved Videos: ' + (localStorage.getItem('savedVideos')||'[]'));
       document.getElementById('search-btn').onclick = () => {
         const term = prompt('Search titles:'); if (!term) return;
         document.querySelectorAll('.video-title').forEach(el => el.parentElement.classList.toggle('highlight', el.textContent.toLowerCase().includes(term.toLowerCase())));
       };
-      document.querySelectorAll('.save-btn').forEach(b => b.onclick = () => {
-        const base = b.dataset.base;
-        const vid = players[base + '-item-0'].getVideoData().video_id;
+      document.querySelectorAll('.save-btn').forEach(btn => btn.onclick = () => {
+        const base = btn.dataset.base;
+        const vid = players[base].getVideoData().video_id;
         const arr = JSON.parse(localStorage.getItem('savedVideos')||'[]'); if (!arr.includes(vid)) arr.push(vid);
         localStorage.setItem('savedVideos', JSON.stringify(arr)); alert('Saved: ' + vid);
       });
