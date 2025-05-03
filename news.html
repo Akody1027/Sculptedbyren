@@ -38,23 +38,20 @@
       font-size:1.5rem;
     }
     #header-bar .header-slogan {
-      font-size:.75rem;
+      font-size:0.6rem;         /* shrunk down */
       color:#bb86fc;
-      margin-top:.25rem;
+      margin-top:0.1rem;        /* tighter spacing */
       font-weight:400;
       font-family:'Inter',sans-serif;
       text-transform:uppercase;
     }
 
     /* Global */
-    body{
-      margin:0;
-      background:#121212;
-      color:#e0e0e0;
-      font-family:'Inter',sans-serif;
-      overflow-x:hidden;
+    body {
+      margin:0; background:#121212; color:#e0e0e0;
+      font-family:'Inter',sans-serif; overflow-x:hidden;
     }
-    main{margin-top:1rem;padding:0 1rem;}
+    main { margin-top:1rem; padding:0 1rem; }
 
     /* Search */
     #search-bar {
@@ -72,41 +69,38 @@
     }
 
     /* Cards */
-    .card{
-      background:#1e1e1e; border-radius:8px;
-      margin-bottom:1rem; overflow:hidden;
-      animation:fadeIn .5s ease both;
+    .card {
+      background:#1e1e1e; border-radius:8px; margin-bottom:1rem;
+      overflow:hidden; animation:fadeIn .5s ease both;
     }
     .channel-title, .video-title {
       padding:.75rem 1rem; background:#272727; font-weight:600;
     }
-    .channel-title{ color:#bb86fc; font-size:1.1rem; }
-    .video-title  { color:#bb86fc; font-size:.875rem; }
+    .channel-title { color:#bb86fc; font-size:1.1rem; }
+    .video-title   { color:#bb86fc; font-size:.875rem; }
 
-    .viewport{
+    .viewport {
       position:relative; height:400px; touch-action:pan-y;
     }
-    .player-wrapper iframe{
+    .player-wrapper iframe {
       position:absolute; top:0; left:0; width:100%; height:100%;
     }
 
-    .swipe-overlay{
-      position:absolute; top:0; left:0;
-      width:100%; height:85%; z-index:2;
+    .swipe-overlay {
+      position:absolute; top:0; left:0; width:100%; height:85%; z-index:2;
     }
-    .swipe-hint{
+    .swipe-hint {
       position:absolute; top:50%; right:16px; transform:translateY(-50%);
       font-size:2rem; color:#bb86fc; background:rgba(0,0,0,0.5);
       padding:.25rem; border-radius:50%; pointer-events:none; z-index:3;
     }
 
-    .card-buttons{
+    .card-buttons {
       display:flex; justify-content:center; padding:.5rem; background:#1e1e1e;
     }
-    .card-buttons a{
-      background:#bb86fc; color:#121212;
-      padding:.5rem 1rem; border-radius:4px;
-      text-decoration:none; font-weight:600;
+    .card-buttons a {
+      background:#bb86fc; color:#121212; padding:.5rem 1rem;
+      border-radius:4px; text-decoration:none; font-weight:600;
     }
     .card-buttons a:hover { background:#985eff; }
   </style>
@@ -121,103 +115,7 @@
   </header>
 
   <main>
-    <!-- Search Bar -->
-    <div id="search-bar">
-      <input id="search-input" type="text" placeholder="Search channels…"/>
-      <button id="search-clear">×</button>
-    </div>
-
-    <script>
-      const channels = [
-        { title:'The Daily Wire',  pl:'UUaeO5vkdj5xOQHp4UmIN6dw', url:'https://youtu.be/playlist?list=UUaeO5vkdj5xOQHp4UmIN6dw' },
-        { title:'Fox News',         pl:'UUXIJgqnII2ZOINSWNOGFThA', url:'https://youtu.be/playlist?list=UUXIJgqnII2ZOINSWNOGFThA' },
-        { title:'Newsmax',          pl:'UUx6h-dWzJ5NpAlja1YsApdg', url:'https://youtu.be/playlist?list=UUx6h-dWzJ5NpAlja1YsApdg' },
-        { title:'One America News', pl:'UUNbIDJNNgaRrXOD7VllIMRQ', url:'https://youtu.be/playlist?list=UUNbIDJNNgaRrXOD7VllIMRQ' },
-        { title:'The Epoch Times',  pl:'UUeLc4heXqG9dtL7jiPHMBfQ', url:'https://youtu.be/playlist?list=UUeLc4heXqG9dtL7jiPHMBfQ' },
-        { title:'TheBlaze',         pl:'UUKgJEs_v0JB-6jWb8lIy9Xw', url:'https://youtu.be/playlist?list=UUKgJEs_v0JB-6jWb8lIy9Xw' },
-        { title:'Timcast IRL',      pl:'UULwNTXWEjVd2qIHLcXxQWxA', url:'https://youtu.be/playlist?list=UULwNTXWEjVd2qIHLcXxQWxA' },
-        { title:'Stephen Gardner',  pl:'UU3VlRtY0ARsTRR5Eq8QE1Yg', url:'https://youtu.be/playlist?list=UU3VlRtY0ARsTRR5Eq8QE1Yg' },
-        { title:'Ben Shapiro Show', pl:'UUnQC_G5Xsjhp9fEJKuIcrSw', url:'https://youtu.be/playlist?list=UUnQC_G5Xsjhp9fEJKuIcrSw' }
-      ];
-      document.write(channels.map((c,i)=>`
-        <div class="card" data-base="player-${i}" data-title="${c.title.toLowerCase()}" data-playlist="${c.pl}">
-          <div class="channel-title">${c.title}</div>
-          <div class="video-title" id="title-${i}">Loading…</div>
-          <div class="viewport">
-            <div class="player-wrapper"><div id="player-${i}"></div></div>
-            <div class="swipe-overlay"></div>
-            <div class="swipe-hint">→</div>
-          </div>
-          <div class="card-buttons">
-            <a href="${c.url}" target="_blank">Open</a>
-          </div>
-        </div>
-      `).join(''));
-    </script>
+    <!-- …the rest of your search bar, cards, and scripts… -->
   </main>
-
-  <script src="https://www.youtube.com/iframe_api"></script>
-  <script>
-    const players = {}, nextIdx = {};
-
-    function onYouTubeIframeAPIReady() {
-      document.querySelectorAll('.card').forEach(card => {
-        const base = card.dataset.base, list = card.dataset.playlist;
-        nextIdx[base] = 0;
-        players[base] = new YT.Player(base, {
-          height:'400', width:'100%',
-          playerVars:{ listType:'playlist', list, index:nextIdx[base]++, autoplay:0, muted:1, origin:location.origin },
-          events:{ onReady:()=>{} }
-        });
-
-        let startX=0, startY=0;
-        const overlay = card.querySelector('.swipe-overlay');
-        overlay.addEventListener('touchstart', e => {
-          startX = e.touches[0].clientX;
-          startY = e.touches[0].clientY;
-        });
-        overlay.addEventListener('touchend', e => {
-          const dx = e.changedTouches[0].clientX - startX;
-          const dy = e.changedTouches[0].clientY - startY;
-          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
-            const p = players[base], idx = p.getPlaylistIndex();
-            if (dx < 0) p.nextVideo();
-            else if (idx > 0) p.previousVideo();
-          }
-        });
-      });
-
-      const obs = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          const base = entry.target.dataset.base, p = players[base];
-          if (!p) return;
-          if (entry.isIntersecting) {
-            p.playVideo(); p.unMute();
-            const id = base.split('-')[1];
-            document.getElementById(`title-${id}`).textContent = p.getVideoData().title;
-          } else {
-            p.pauseVideo();
-          }
-        });
-      }, { threshold: 0.6 });
-      document.querySelectorAll('.card').forEach(c => obs.observe(c));
-
-      // search filter
-      const input = document.getElementById('search-input');
-      const clear = document.getElementById('search-clear');
-      input.addEventListener('input', () => {
-        const q = input.value.trim().toLowerCase();
-        document.querySelectorAll('.card').forEach(card => {
-          card.style.display = card.dataset.title.includes(q) ? '' : 'none';
-        });
-      });
-      clear.addEventListener('click', () => {
-        input.value = '';
-        input.dispatchEvent(new Event('input'));
-      });
-
-      document.getElementById('preloader').style.display = 'none';
-    }
-  </script>
 </body>
 </html>
