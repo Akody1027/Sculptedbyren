@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <!-- Restored original viewport for full‐width layout -->
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>.Purge</title>
   <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
@@ -13,84 +12,80 @@
       to   { opacity:1; transform:translateY(0)    }
     }
     /* Preloader */
-    #preloader {
-      position:fixed; top:0; left:0; width:100%; height:100%;
-      background:#000; display:flex; align-items:center; justify-content:center;
-      color:#bb86fc; font-family:'Fjalla One',sans-serif; z-index:1000;
+    #preloader { position:fixed;top:0;left:0;width:100%;height:100%;background:#000;
+      display:flex;align-items:center;justify-content:center;color:#bb86fc;
+      font-family:'Fjalla One',sans-serif;z-index:1000;
     }
-    .loader {
-      border:6px solid rgba(187,134,252,0.3);
-      border-top:6px solid #bb86fc; border-radius:50%; width:40px; height:40px;
-      animation:spin 1s linear infinite;
+    .loader { border:6px solid rgba(187,134,252,0.3);border-top:6px solid #bb86fc;
+      border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;
     }
     @keyframes spin{to{transform:rotate(360deg)}}
 
     /* Header */
-    #header-bar {
-      position:sticky; top:0; width:100%; background:#272727;
-      padding:.75rem; text-align:center; z-index:999;
-      animation:fadeIn .5s ease both;
+    #header-bar { position:sticky;top:0;width:100%;background:#272727;
+      padding:.75rem;text-align:center;z-index:999;animation:fadeIn .5s ease both;
     }
     #header-bar .header-content {
-      color:#bb86fc; font-family:'Fjalla One',sans-serif; font-size:1.5rem;
+      color:#bb86fc;font-family:'Fjalla One',sans-serif;font-size:1.5rem;
     }
 
     /* Global */
-    body {
-      margin:0; background:#121212; color:#e0e0e0;
-      font-family:'Inter',sans-serif; overflow-x:hidden;
+    body{margin:0;background:#121212;color:#e0e0e0;font-family:'Inter',sans-serif;overflow-x:hidden;}
+    main{margin-top:1rem;padding:0 1rem;}
+
+    /* Search */
+    #search-bar {
+      width:100%; max-width:400px; margin:0 auto 1rem;
+      display:flex;
     }
-    main {
-      margin-top:1rem; padding:0 1rem;
+    #search-input {
+      flex:1; padding:.5rem; border:2px solid #bb86fc; border-radius:4px 0 0 4px;
+      background:#1e1e1e; color:#e0e0e0; font-size:1rem;
+    }
+    #search-clear {
+      background:#bb86fc; border:none; padding:0 .75rem; cursor:pointer;
+      border-radius:0 4px 4px 0; color:#121212;
     }
 
     /* Card */
-    .card {
-      background:#1e1e1e; border-radius:8px; margin-bottom:1rem;
-      overflow:hidden; animation:fadeIn .5s ease both;
+    .card{background:#1e1e1e;border-radius:8px;margin-bottom:1rem;overflow:hidden;
+      animation:fadeIn .5s ease both;
     }
-    .channel-title, .video-title {
-      padding:.75rem 1rem; background:#272727; font-weight:600;
+    .channel-title,.video-title {
+      padding:.75rem 1rem;background:#272727;font-weight:600;
     }
-    .channel-title { color:#bb86fc; font-size:1.1rem; }
-    .video-title   { color:#bb86fc; font-size:.875rem; }
+    .channel-title{color:#bb86fc;font-size:1.1rem;}
+    .video-title{color:#bb86fc;font-size:.875rem;}
 
-    .viewport {
-      position:relative; height:400px; touch-action:pan-y;
-    }
-    .player-wrapper iframe {
-      position:absolute; top:0; left:0; width:100%; height:100%;
-    }
+    .viewport{position:relative;height:400px;touch-action:pan-y;}
+    .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;}
 
-    /* swipe area covers top 85% so controls below remain interactive */
-    .swipe-overlay {
-      position:absolute; top:0; left:0; width:100%; height:85%; z-index:2;
-    }
-    .swipe-hint {
-      position:absolute; top:50%; right:16px; transform:translateY(-50%);
-      font-size:2rem; color:#bb86fc; background:rgba(0,0,0,0.5);
-      padding:.25rem; border-radius:50%; pointer-events:none; z-index:3;
+    .swipe-overlay{position:absolute;top:0;left:0;width:100%;height:85%;z-index:2;}
+    .swipe-hint{position:absolute;top:50%;right:16px;transform:translateY(-50%);
+      font-size:2rem;color:#bb86fc;background:rgba(0,0,0,0.5);padding:.25rem;
+      border-radius:50%;pointer-events:none;z-index:3;
     }
 
-    .card-buttons {
-      display:flex; justify-content:center; padding:.5rem; background:#1e1e1e;
+    .card-buttons{display:flex;justify-content:center;padding:.5rem;background:#1e1e1e;}
+    .card-buttons a{background:#bb86fc;color:#121212;padding:.5rem 1rem;
+      border-radius:4px;text-decoration:none;font-weight:600;
     }
-    .card-buttons a {
-      background:#bb86fc; color:#121212; padding:.5rem 1rem;
-      border-radius:4px; text-decoration:none; font-weight:600;
-    }
-    .card-buttons a:hover { background:#985eff; }
+    .card-buttons a:hover{background:#985eff;}
   </style>
 </head>
 <body>
 
   <div id="preloader"><div class="loader"></div></div>
 
-  <header id="header-bar">
-    <div class="header-content">.Purge</div>
-  </header>
+  <header id="header-bar"><div class="header-content">.Purge</div></header>
 
   <main>
+    <!-- Search Bar -->
+    <div id="search-bar">
+      <input id="search-input" type="text" placeholder="Search channels…"/>
+      <button id="search-clear">×</button>
+    </div>
+
     <script>
       const channels = [
         { title:'The Daily Wire',  pl:'UUaeO5vkdj5xOQHp4UmIN6dw', url:'https://youtu.be/playlist?list=UUaeO5vkdj5xOQHp4UmIN6dw' },
@@ -104,7 +99,7 @@
         { title:'Ben Shapiro Show', pl:'UUnQC_G5Xsjhp9fEJKuIcrSw', url:'https://youtu.be/playlist?list=UUnQC_G5Xsjhp9fEJKuIcrSw' }
       ];
       document.write(channels.map((c,i)=>`
-        <div class="card" data-base="player-${i}" data-playlist="${c.pl}">
+        <div class="card" data-base="player-${i}" data-title="${c.title.toLowerCase()}" data-playlist="${c.pl}">
           <div class="channel-title">${c.title}</div>
           <div class="video-title" id="title-${i}">Loading…</div>
           <div class="viewport">
@@ -123,6 +118,7 @@
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     const players = {}, nextIdx = {};
+
     function onYouTubeIframeAPIReady() {
       document.querySelectorAll('.card').forEach(card => {
         const base = card.dataset.base, list = card.dataset.playlist;
@@ -148,6 +144,7 @@
           }
         });
       });
+
       const obs = new IntersectionObserver(entries => {
         entries.forEach(entry => {
           const base = entry.target.dataset.base, p = players[base];
@@ -156,10 +153,27 @@
             p.playVideo(); p.unMute();
             const id = base.split('-')[1];
             document.getElementById(`title-${id}`).textContent = p.getVideoData().title;
-          } else p.pauseVideo();
+          } else {
+            p.pauseVideo();
+          }
         });
       }, { threshold: 0.6 });
       document.querySelectorAll('.card').forEach(c => obs.observe(c));
+
+      // search filter
+      const input = document.getElementById('search-input');
+      const clear = document.getElementById('search-clear');
+      input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        document.querySelectorAll('.card').forEach(card => {
+          card.style.display = card.dataset.title.includes(q) ? '' : 'none';
+        });
+      });
+      clear.addEventListener('click', () => {
+        input.value = '';
+        input.dispatchEvent(new Event('input'));
+      });
+
       document.getElementById('preloader').style.display = 'none';
     }
   </script>
