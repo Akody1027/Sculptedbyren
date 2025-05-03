@@ -9,28 +9,51 @@
     /* Fade-in */
     @keyframes fadeIn {
       from { opacity:0; transform:translateY(10px) }
-      to   { opacity:1; transform:translateY(0)    }
+      to   { opacity:1; transform:translateY(0) }
     }
+
     /* Preloader */
-    #preloader { position:fixed;top:0;left:0;width:100%;height:100%;background:#000;
-      display:flex;align-items:center;justify-content:center;color:#bb86fc;
-      font-family:'Fjalla One',sans-serif;z-index:1000;
+    #preloader {
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background:#000; display:flex; align-items:center; justify-content:center;
+      color:#bb86fc; font-family:'Fjalla One',sans-serif; z-index:1000;
     }
-    .loader { border:6px solid rgba(187,134,252,0.3);border-top:6px solid #bb86fc;
-      border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;
+    .loader {
+      border:6px solid rgba(187,134,252,0.3);
+      border-top:6px solid #bb86fc;
+      border-radius:50%; width:40px; height:40px;
+      animation:spin 1s linear infinite;
     }
-    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes spin { to { transform:rotate(360deg) } }
 
     /* Header */
-    #header-bar { position:sticky;top:0;width:100%;background:#272727;
-      padding:.75rem;text-align:center;z-index:999;animation:fadeIn .5s ease both;
+    #header-bar {
+      position:sticky; top:0; width:100%; background:#272727;
+      padding:.75rem; text-align:center; z-index:999;
+      animation:fadeIn .5s ease both;
     }
     #header-bar .header-content {
-      color:#bb86fc;font-family:'Fjalla One',sans-serif;font-size:1.5rem;
+      color:#bb86fc;
+      font-family:'Fjalla One',sans-serif;
+      font-size:1.5rem;
+    }
+    #header-bar .header-slogan {
+      font-size:.75rem;
+      color:#bb86fc;
+      margin-top:.25rem;
+      font-weight:400;
+      font-family:'Inter',sans-serif;
+      text-transform:uppercase;
     }
 
     /* Global */
-    body{margin:0;background:#121212;color:#e0e0e0;font-family:'Inter',sans-serif;overflow-x:hidden;}
+    body{
+      margin:0;
+      background:#121212;
+      color:#e0e0e0;
+      font-family:'Inter',sans-serif;
+      overflow-x:hidden;
+    }
     main{margin-top:1rem;padding:0 1rem;}
 
     /* Search */
@@ -39,45 +62,63 @@
       display:flex;
     }
     #search-input {
-      flex:1; padding:.5rem; border:2px solid #bb86fc; border-radius:4px 0 0 4px;
-      background:#1e1e1e; color:#e0e0e0; font-size:1rem;
+      flex:1; padding:.5rem; border:2px solid #bb86fc;
+      border-radius:4px 0 0 4px; background:#1e1e1e;
+      color:#e0e0e0; font-size:1rem;
     }
     #search-clear {
-      background:#bb86fc; border:none; padding:0 .75rem; cursor:pointer;
-      border-radius:0 4px 4px 0; color:#121212;
+      background:#bb86fc; border:none; padding:0 .75rem;
+      cursor:pointer; border-radius:0 4px 4px 0; color:#121212;
     }
 
-    /* Card */
-    .card{background:#1e1e1e;border-radius:8px;margin-bottom:1rem;overflow:hidden;
+    /* Cards */
+    .card{
+      background:#1e1e1e; border-radius:8px;
+      margin-bottom:1rem; overflow:hidden;
       animation:fadeIn .5s ease both;
     }
-    .channel-title,.video-title {
-      padding:.75rem 1rem;background:#272727;font-weight:600;
+    .channel-title, .video-title {
+      padding:.75rem 1rem; background:#272727; font-weight:600;
     }
-    .channel-title{color:#bb86fc;font-size:1.1rem;}
-    .video-title{color:#bb86fc;font-size:.875rem;}
+    .channel-title{ color:#bb86fc; font-size:1.1rem; }
+    .video-title  { color:#bb86fc; font-size:.875rem; }
 
-    .viewport{position:relative;height:400px;touch-action:pan-y;}
-    .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;}
-
-    .swipe-overlay{position:absolute;top:0;left:0;width:100%;height:85%;z-index:2;}
-    .swipe-hint{position:absolute;top:50%;right:16px;transform:translateY(-50%);
-      font-size:2rem;color:#bb86fc;background:rgba(0,0,0,0.5);padding:.25rem;
-      border-radius:50%;pointer-events:none;z-index:3;
+    .viewport{
+      position:relative; height:400px; touch-action:pan-y;
+    }
+    .player-wrapper iframe{
+      position:absolute; top:0; left:0; width:100%; height:100%;
     }
 
-    .card-buttons{display:flex;justify-content:center;padding:.5rem;background:#1e1e1e;}
-    .card-buttons a{background:#bb86fc;color:#121212;padding:.5rem 1rem;
-      border-radius:4px;text-decoration:none;font-weight:600;
+    .swipe-overlay{
+      position:absolute; top:0; left:0;
+      width:100%; height:85%; z-index:2;
     }
-    .card-buttons a:hover{background:#985eff;}
+    .swipe-hint{
+      position:absolute; top:50%; right:16px; transform:translateY(-50%);
+      font-size:2rem; color:#bb86fc; background:rgba(0,0,0,0.5);
+      padding:.25rem; border-radius:50%; pointer-events:none; z-index:3;
+    }
+
+    .card-buttons{
+      display:flex; justify-content:center; padding:.5rem; background:#1e1e1e;
+    }
+    .card-buttons a{
+      background:#bb86fc; color:#121212;
+      padding:.5rem 1rem; border-radius:4px;
+      text-decoration:none; font-weight:600;
+    }
+    .card-buttons a:hover { background:#985eff; }
   </style>
 </head>
 <body>
 
   <div id="preloader"><div class="loader"></div></div>
 
-  <header id="header-bar"><div class="header-content">.Purge</div></header>
+  <header id="header-bar">
+    <div class="header-content">.Purge</div>
+    <div class="header-slogan">Purging Disinformation</div>
+  </header>
 
   <main>
     <!-- Search Bar -->
@@ -128,6 +169,7 @@
           playerVars:{ listType:'playlist', list, index:nextIdx[base]++, autoplay:0, muted:1, origin:location.origin },
           events:{ onReady:()=>{} }
         });
+
         let startX=0, startY=0;
         const overlay = card.querySelector('.swipe-overlay');
         overlay.addEventListener('touchstart', e => {
