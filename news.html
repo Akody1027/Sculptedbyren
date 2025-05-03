@@ -2,51 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <!-- Prevent zooming -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <!-- Restored original viewport for full‐width layout -->
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>.Purge</title>
   <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
-    /* Center wrapper */
-    .wrapper {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1rem;
-    }
-    /* Fade-in animation */
+    /* Fade-in */
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px) }
-      to   { opacity: 1; transform: translateY(0)    }
+      from { opacity:0; transform:translateY(10px) }
+      to   { opacity:1; transform:translateY(0)    }
     }
     /* Preloader */
     #preloader {
-      position: fixed; top:0; left:0; width:100%; height:100%;
-      background: #000; display: flex; align-items:center; justify-content:center;
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background:#000; display:flex; align-items:center; justify-content:center;
       color:#bb86fc; font-family:'Fjalla One',sans-serif; z-index:1000;
     }
     .loader {
       border:6px solid rgba(187,134,252,0.3);
-      border-top:6px solid #bb86fc;
-      border-radius:50%; width:40px; height:40px;
+      border-top:6px solid #bb86fc; border-radius:50%; width:40px; height:40px;
       animation:spin 1s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg) } }
+    @keyframes spin{to{transform:rotate(360deg)}}
 
     /* Header */
     #header-bar {
-      position: sticky; top:0; width:100%; background:#272727;
+      position:sticky; top:0; width:100%; background:#272727;
       padding:.75rem; text-align:center; z-index:999;
-      animation: fadeIn .5s ease both;
+      animation:fadeIn .5s ease both;
     }
     #header-bar .header-content {
       color:#bb86fc; font-family:'Fjalla One',sans-serif; font-size:1.5rem;
     }
+
     /* Global */
     body {
       margin:0; background:#121212; color:#e0e0e0;
-      font-family:'Inter',sans-serif;
+      font-family:'Inter',sans-serif; overflow-x:hidden;
     }
-    /* Cards */
+    main {
+      margin-top:1rem; padding:0 1rem;
+    }
+
+    /* Card */
     .card {
       background:#1e1e1e; border-radius:8px; margin-bottom:1rem;
       overflow:hidden; animation:fadeIn .5s ease both;
@@ -54,14 +52,17 @@
     .channel-title, .video-title {
       padding:.75rem 1rem; background:#272727; font-weight:600;
     }
-    .channel-title { color:#bb86fc; font-size:1.1rem }
-    .video-title   { color:#bb86fc; font-size:.875rem }
+    .channel-title { color:#bb86fc; font-size:1.1rem; }
+    .video-title   { color:#bb86fc; font-size:.875rem; }
+
     .viewport {
       position:relative; height:400px; touch-action:pan-y;
     }
     .player-wrapper iframe {
       position:absolute; top:0; left:0; width:100%; height:100%;
     }
+
+    /* swipe area covers top 85% so controls below remain interactive */
     .swipe-overlay {
       position:absolute; top:0; left:0; width:100%; height:85%; z-index:2;
     }
@@ -70,6 +71,7 @@
       font-size:2rem; color:#bb86fc; background:rgba(0,0,0,0.5);
       padding:.25rem; border-radius:50%; pointer-events:none; z-index:3;
     }
+
     .card-buttons {
       display:flex; justify-content:center; padding:.5rem; background:#1e1e1e;
     }
@@ -77,45 +79,47 @@
       background:#bb86fc; color:#121212; padding:.5rem 1rem;
       border-radius:4px; text-decoration:none; font-weight:600;
     }
-    .card-buttons a:hover { background:#985eff }
+    .card-buttons a:hover { background:#985eff; }
   </style>
 </head>
 <body>
+
   <div id="preloader"><div class="loader"></div></div>
-  <div class="wrapper">
-    <header id="header-bar">
-      <div class="header-content">.Purge</div>
-    </header>
-    <main>
-      <script>
-        const channels = [
-          {title:'The Daily Wire',   pl:'UUaeO5vkdj5xOQHp4UmIN6dw', url:'https://youtu.be/playlist?list=UUaeO5vkdj5xOQHp4UmIN6dw'},
-          {title:'Fox News',          pl:'UUXIJgqnII2ZOINSWNOGFThA', url:'https://youtu.be/playlist?list=UUXIJgqnII2ZOINSWNOGFThA'},
-          {title:'Newsmax',           pl:'UUx6h-dWzJ5NpAlja1YsApdg', url:'https://youtu.be/playlist?list=UUx6h-dWzJ5NpAlja1YsApdg'},
-          {title:'One America News',  pl:'UUNbIDJNNgaRrXOD7VllIMRQ', url:'https://youtu.be/playlist?list=UUNbIDJNNgaRrXOD7VllIMRQ'},
-          {title:'The Epoch Times',   pl:'UUeLc4heXqG9dtL7jiPHMBfQ', url:'https://youtu.be/playlist?list=UUeLc4heXqG9dtL7jiPHMBfQ'},
-          {title:'TheBlaze',          pl:'UUKgJEs_v0JB-6jWb8lIy9Xw', url:'https://youtu.be/playlist?list=UUKgJEs_v0JB-6jWb8lIy9Xw'},
-          {title:'Timcast IRL',       pl:'UULwNTXWEjVd2qIHLcXxQWxA', url:'https://youtu.be/playlist?list=UULwNTXWEjVd2qIHLcXxQWxA'},
-          {title:'Stephen Gardner',   pl:'UU3VlRtY0ARsTRR5Eq8QE1Yg', url:'https://youtu.be/playlist?list=UU3VlRtY0ARsTRR5Eq8QE1Yg'},
-          {title:'Ben Shapiro Show',  pl:'UUnQC_G5Xsjhp9fEJKuIcrSw', url:'https://youtu.be/playlist?list=UUnQC_G5Xsjhp9fEJKuIcrSw'}
-        ];
-        document.write(channels.map((c,i)=>`
-          <div class="card" data-base="player-${i}" data-playlist="${c.pl}">
-            <div class="channel-title">${c.title}</div>
-            <div class="video-title" id="title-${i}">Loading…</div>
-            <div class="viewport">
-              <div class="player-wrapper"><div id="player-${i}"></div></div>
-              <div class="swipe-overlay"></div>
-              <div class="swipe-hint">→</div>
-            </div>
-            <div class="card-buttons">
-              <a href="${c.url}" target="_blank">Open</a>
-            </div>
+
+  <header id="header-bar">
+    <div class="header-content">.Purge</div>
+  </header>
+
+  <main>
+    <script>
+      const channels = [
+        { title:'The Daily Wire',  pl:'UUaeO5vkdj5xOQHp4UmIN6dw', url:'https://youtu.be/playlist?list=UUaeO5vkdj5xOQHp4UmIN6dw' },
+        { title:'Fox News',         pl:'UUXIJgqnII2ZOINSWNOGFThA', url:'https://youtu.be/playlist?list=UUXIJgqnII2ZOINSWNOGFThA' },
+        { title:'Newsmax',          pl:'UUx6h-dWzJ5NpAlja1YsApdg', url:'https://youtu.be/playlist?list=UUx6h-dWzJ5NpAlja1YsApdg' },
+        { title:'One America News', pl:'UUNbIDJNNgaRrXOD7VllIMRQ', url:'https://youtu.be/playlist?list=UUNbIDJNNgaRrXOD7VllIMRQ' },
+        { title:'The Epoch Times',  pl:'UUeLc4heXqG9dtL7jiPHMBfQ', url:'https://youtu.be/playlist?list=UUeLc4heXqG9dtL7jiPHMBfQ' },
+        { title:'TheBlaze',         pl:'UUKgJEs_v0JB-6jWb8lIy9Xw', url:'https://youtu.be/playlist?list=UUKgJEs_v0JB-6jWb8lIy9Xw' },
+        { title:'Timcast IRL',      pl:'UULwNTXWEjVd2qIHLcXxQWxA', url:'https://youtu.be/playlist?list=UULwNTXWEjVd2qIHLcXxQWxA' },
+        { title:'Stephen Gardner',  pl:'UU3VlRtY0ARsTRR5Eq8QE1Yg', url:'https://youtu.be/playlist?list=UU3VlRtY0ARsTRR5Eq8QE1Yg' },
+        { title:'Ben Shapiro Show', pl:'UUnQC_G5Xsjhp9fEJKuIcrSw', url:'https://youtu.be/playlist?list=UUnQC_G5Xsjhp9fEJKuIcrSw' }
+      ];
+      document.write(channels.map((c,i)=>`
+        <div class="card" data-base="player-${i}" data-playlist="${c.pl}">
+          <div class="channel-title">${c.title}</div>
+          <div class="video-title" id="title-${i}">Loading…</div>
+          <div class="viewport">
+            <div class="player-wrapper"><div id="player-${i}"></div></div>
+            <div class="swipe-overlay"></div>
+            <div class="swipe-hint">→</div>
           </div>
-        `).join(''));
-      </script>
-    </main>
-  </div>
+          <div class="card-buttons">
+            <a href="${c.url}" target="_blank">Open</a>
+          </div>
+        </div>
+      `).join(''));
+    </script>
+  </main>
+
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     const players = {}, nextIdx = {};
