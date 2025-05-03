@@ -12,9 +12,7 @@
       to   { opacity:1; transform:translateY(0)    }
     }
     /* Spin */
-    @keyframes spin {
-      to { transform: rotate(360deg) }
-    }
+    @keyframes spin { to { transform:rotate(360deg) } }
 
     /* Preloader */
     #preloader {
@@ -29,10 +27,10 @@
     }
     #preloader h1 {
       font-size: 3rem;
-      margin: 0.5rem 0 0.25rem;
+      margin: .5rem 0 .25rem;
     }
     #preloader p {
-      font-size: 0.875rem;
+      font-size: .875rem;
       margin: 0 0 1rem;
       font-family: 'Inter', sans-serif;
       text-transform: uppercase;
@@ -48,9 +46,9 @@
     /* Header */
     #header-bar {
       position: sticky; top: 0; width: 100%;
-      background: #272727; padding: 0.75rem;
+      background: #272727; padding: .75rem;
       text-align: center; z-index: 999;
-      animation: fadeIn 0.5s ease both;
+      animation: fadeIn .5s ease both;
     }
     #header-bar .header-content {
       color: #bb86fc;
@@ -73,13 +71,13 @@
       margin: 0 auto 1rem; display: flex;
     }
     #search-input {
-      flex: 1; padding: 0.5rem;
+      flex: 1; padding: .5rem;
       border: 2px solid #bb86fc; border-radius: 4px 0 0 4px;
       background: #1e1e1e; color: #e0e0e0; font-size: 1rem;
     }
     #search-clear {
       background: #bb86fc; border: none;
-      padding: 0 0.75rem; cursor: pointer;
+      padding: 0 .75rem; cursor: pointer;
       border-radius: 0 4px 4px 0; color: #121212;
     }
 
@@ -87,23 +85,23 @@
     .card {
       background: #1e1e1e; border-radius: 8px;
       margin-bottom: 1rem; overflow: hidden;
-      animation: fadeIn 0.5s ease both;
+      animation: fadeIn .5s ease both;
     }
     .channel-title, .video-title {
-      padding: 0.75rem 1rem; background: #272727; font-weight: 600;
+      padding: .75rem 1rem; background: #272727; font-weight: 600;
     }
     .channel-title {
       color: #bb86fc; font-size: 1.1rem;
     }
     .video-title {
-      color: #bb86fc; font-size: 0.875rem;
+      color: #bb86fc; font-size: .875rem;
     }
 
     .viewport {
       position: relative; height: 400px; touch-action: pan-y;
     }
     .player-wrapper iframe {
-      position: absolute; top:0; left:0; width:100%; height:100%;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     }
     .swipe-overlay {
       position: absolute; top: 0; left: 0;
@@ -113,17 +111,17 @@
       position: absolute; top: 50%; right: 16px;
       transform: translateY(-50%);
       font-size: 2rem; color: #bb86fc;
-      background: rgba(0,0,0,0.5); padding: 0.25rem;
+      background: rgba(0,0,0,0.5); padding: .25rem;
       border-radius: 50%; pointer-events: none; z-index: 3;
     }
 
     .card-buttons {
       display: flex; justify-content: center;
-      padding: 0.5rem; background: #1e1e1e;
+      padding: .5rem; background: #1e1e1e;
     }
     .card-buttons a {
       background: #bb86fc; color: #121212;
-      padding: 0.5rem 1rem; border-radius: 4px;
+      padding: .5rem 1rem; border-radius: 4px;
       text-decoration: none; font-weight: 600;
     }
     .card-buttons a:hover {
@@ -239,7 +237,10 @@
         input.dispatchEvent(new Event('input'));
       });
 
-      document.getElementById('preloader').style.display = 'none';
+      // hide preloader after 2s delay
+      setTimeout(() => {
+        document.getElementById('preloader').style.display = 'none';
+      }, 2000);
     }
   </script>
 </body>
