@@ -6,6 +6,12 @@
   <title>.Purge</title>
   <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
+    /* Simple fade-in animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
     /* Preloader */
     #preloader {
       position:fixed; top:0; left:0; width:100%; height:100%;
@@ -24,25 +30,35 @@
     #header-bar {
       position:sticky; top:0; width:100%; background:#272727;
       padding:.75rem 1rem; z-index:999;
+      text-align:center; /* center text */
+      animation: fadeIn 0.5s ease both;
     }
     #header-bar .header-content {
-      color:#bb86fc; font-family:'Fjalla One',sans-serif;
+      color:#bb86fc;
+      font-family:'Fjalla One',sans-serif;
       font-size:1.5rem;
     }
 
     /* Global */
     * { box-sizing:border-box; margin:0; padding:0 }
     body { background:#121212; color:#e0e0e0; font-family:'Inter',sans-serif }
-    main { padding:1rem; margin-top:1rem; margin-bottom:60px }
+    main { padding:1rem; margin-top:1rem }
 
     /* Cards */
-    .card { background:#1e1e1e; border-radius:8px; margin-bottom:1rem; overflow:hidden; position:relative }
+    .card {
+      background:#1e1e1e; border-radius:8px; margin-bottom:1rem;
+      overflow:hidden; position:relative;
+      animation: fadeIn 0.5s ease both;
+    }
     .channel-title, .video-title {
-      padding:.75rem 1rem; background:#272727; color:#fff; font-weight:600;
+      padding:.75rem 1rem; background:#272727; font-weight:600;
+    }
+    .channel-title {
+      font-size:1.1rem;
+      color:#bb86fc; /* purple */
     }
     .video-title {
-      font-size:.875rem;       /* slightly smaller */
-      color:#bb86fc;           /* purple */
+      font-size:.875rem; color:#bb86fc;
     }
     .viewport { position:relative; height:400px }
     .player-wrapper iframe { position:absolute; top:0; left:0; width:100%; height:100% }
@@ -112,42 +128,34 @@
         nextIdx[base]=0;
         players[base] = new YT.Player(base, {
           height:'400', width:'100%',
-          playerVars:{ listType:'playlist', list, index:nextIdx[base]++, autoplay:0, muted:1, origin:location.origin },
+          playerVars:{listType:'playlist',list,index:nextIdx[base]++,autoplay:0,muted:1,origin:location.origin},
           events:{ onReady:()=>{} }
         });
-
-        // swipe detection
         let startX=0, startY=0;
         const vp=card.querySelector('.viewport');
         vp.addEventListener('touchstart', e => {
-          startX = e.touches[0].clientX;
-          startY = e.touches[0].clientY;
+          startX=e.touches[0].clientX; startY=e.touches[0].clientY;
         });
         vp.addEventListener('touchend', e => {
           const dx=e.changedTouches[0].clientX-startX,
                 dy=e.changedTouches[0].clientY-startY;
-          if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>50){
-            if(dx<0) players[base].nextVideo();
-            else     players[base].previousVideo();
+          if (Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>50) {
+            dx<0 ? players[base].nextVideo() : players[base].previousVideo();
           }
         });
       });
-
-      // intersection observer to play/unmute in view
-      const obs = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
+      const obs=new IntersectionObserver(entries=>{
+        entries.forEach(entry=>{
           const base=entry.target.dataset.base, p=players[base];
-          if(!p) return;
+          if(!p)return;
           if(entry.isIntersecting){
             p.playVideo(); p.unMute();
             const id=base.split('-')[1];
-            document.getElementById(`title-${id}`).textContent = p.getVideoData().title;
+            document.getElementById(`title-${id}`).textContent=p.getVideoData().title;
           } else p.pauseVideo();
         });
-      }, { threshold: .6 });
+      },{threshold:.6});
       document.querySelectorAll('.card').forEach(c=>obs.observe(c));
-
-      // hide preloader
       document.getElementById('preloader').style.display='none';
     }
   </script>
