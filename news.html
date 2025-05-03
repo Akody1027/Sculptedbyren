@@ -6,18 +6,19 @@
   <title>.Purge</title>
   <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
+    /* Reserve space for scrollbar gutter */
     html {
       overflow-y: scroll;
       scrollbar-gutter: stable both-edges;
     }
+    /* Animations */
     @keyframes fadeIn  { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
     @keyframes fadeOut { from { opacity:1 } to { opacity:0 } }
     @keyframes spin    { to { transform:rotate(360deg) } }
-
     /* Preloader */
     #preloader {
-      position: fixed; top:0; left:0; width:100%; height:100%;
-      background: #000; display:flex; flex-direction:column;
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background:#000; display:flex; flex-direction:column;
       align-items:center; justify-content:center;
       color:#bb86fc; font-family:'Fjalla One',sans-serif; z-index:1000;
     }
@@ -25,7 +26,6 @@
     #preloader h1 { font-size:3rem; margin:.5rem 0 .25rem; }
     #preloader p  { font-size:.875rem; margin:0 0 1rem; font-family:'Inter',sans-serif; text-transform:uppercase }
     .loader      { border:4px solid rgba(187,134,252,0.3); border-top:4px solid #bb86fc; border-radius:50%; width:36px; height:36px; animation:spin 1s linear infinite; }
-
     /* Header */
     #header-bar {
       position:sticky; top:0; width:100%; background:#272727;
@@ -35,7 +35,6 @@
     #header-bar .header-content {
       color:#bb86fc; font-family:'Fjalla One',sans-serif; font-size:1.5rem;
     }
-
     /* Body & Centering */
     body {
       margin:0; background:#121212; color:#e0e0e0;
@@ -44,8 +43,7 @@
     main {
       max-width:1200px; margin:1rem auto; padding:0 1rem;
     }
-
-    /* Search */
+    /* Search Bar */
     #search-bar {
       width:100%; max-width:400px; margin:0 auto 1rem; display:flex;
     }
@@ -58,7 +56,6 @@
       background:#bb86fc; border:none; padding:0 .75rem;
       cursor:pointer; border-radius:0 4px 4px 0; color:#121212;
     }
-
     /* Video Cards */
     .card {
       background:#1e1e1e; border-radius:8px; margin-bottom:1rem;
@@ -69,7 +66,6 @@
     }
     .channel-title { color:#bb86fc; font-size:1.1rem; }
     .video-title   { color:#bb86fc; font-size:.875rem; }
-
     .viewport {
       position:relative; height:400px; touch-action:pan-y;
     }
@@ -99,6 +95,7 @@
   </header>
 
   <main>
+    <!-- Search Bar -->
     <div id="search-bar">
       <input id="search-input" type="text" placeholder="Search channels…"/>
       <button id="search-clear">×</button>
@@ -106,30 +103,31 @@
 
     <script>
       const channels = [
-        { title:'The Daily Wire',    pl:'UUaeO5vkdj5xOQHp4UmIN6dw' },
-        { title:'Fox News',           pl:'UUXIJgqnII2ZOINSWNOGFThA' },
-        { title:'Newsmax',            pl:'UUx6h-dWzJ5NpAlja1YsApdg' },
-        { title:'One America News',   pl:'UUNbIDJNNgaRrXOD7VllIMRQ' },
-        { title:'The Epoch Times',    pl:'UUeLc4heXqG9dtL7jiPHMBfQ' },
-        { title:'TheBlaze',           pl:'UUKgJEs_v0JB-6jWb8lIy9Xw' },
-        { title:'Timcast IRL',        pl:'UULwNTXWEjVd2qIHLcXxQWxA' },
-        { title:'Stephen Gardner',    pl:'UU3VlRtY0ARsTRR5Eq8QE1Yg' },
-        { title:'Ben Shapiro Show',   pl:'UUnQC_G5Xsjhp9fEJKuIcrSw' },
-
-        { title:'Charlie Kirk',       pl:'UUfaIu2jO-fppCQV_lchCRIQ' },
-        { title:'Mark Levin',         pl:'UUSDAWpftrPkMlGnqNl-Yafw' },
-        { title:'Matt Walsh',         pl:'UUO01ytfzgXYy4glnPJm4PPQ' },
-        { title:'Candace Owens',      pl:'UUL0u5uz7KZ9q-pe-VC8TY-w' },
-        { title:'The Federalist',     pl:'UUEBsWEmSBXAU3JqZZGMBGpQ' },
-        { title:'Project Veritas',    pl:'UUL9PlYkRD3Q-RZca6CCnPKw' },
-
-        { title:'Turning Point USA',  pl:'UUDPb0gejlVlcIRK6EhBQvIA' },
-        { title:'Washington Examiner',pl:'UU8BxSGcBKriJvoeyKOnJ6tA' },  /* :contentReference[oaicite:2]{index=2} */
-        { title:'Rebel News',         pl:'UUGy6uV7yqGWDeUWTZzT3ZEg' }   /* :contentReference[oaicite:3]{index=3} */
+        { title:'The Daily Wire',      pl:'UUaeO5vkdj5xOQHp4UmIN6dw' },
+        { title:'Fox News',             pl:'UUXIJgqnII2ZOINSWNOGFThA' },
+        { title:'Newsmax',              pl:'UUx6h-dWzJ5NpAlja1YsApdg' },
+        { title:'One America News',     pl:'UUNbIDJNNgaRrXOD7VllIMRQ' },
+        { title:'The Epoch Times',      pl:'UUeLc4heXqG9dtL7jiPHMBfQ' },
+        { title:'TheBlaze',             pl:'UUKgJEs_v0JB-6jWb8lIy9Xw' },
+        { title:'Timcast IRL',          pl:'UULwNTXWEjVd2qIHLcXxQWxA' },
+        { title:'Stephen Gardner',      pl:'UU3VlRtY0ARsTRR5Eq8QE1Yg' },
+        { title:'Ben Shapiro Show',     pl:'UUnQC_G5Xsjhp9fEJKuIcrSw' },
+        { title:'Charlie Kirk',         pl:'UUfaIu2jO-fppCQV_lchCRIQ' },
+        { title:'Mark Levin',           pl:'UUSDAWpftrPkMlGnqNl-Yafw' },
+        { title:'Matt Walsh',           pl:'UUO01ytfzgXYy4glnPJm4PPQ' },
+        { title:'Candace Owens',        pl:'UUL0u5uz7KZ9q-pe-VC8TY-w' },
+        { title:'The Federalist',       pl:'UUEBsWEmSBXAU3JqZZGMBGpQ' },
+        { title:'Project Veritas',      pl:'UUL9PlYkRD3Q-RZca6CCnPKw' },
+        { title:'Turning Point USA',    pl:'UUVrK_pMRp_q8IelpfUCTGLQ' },  // updated uploads ID
+        { title:'Washington Examiner',  pl:'UU8BxSGcBKriJvoeyKOnJ6tA' },
+        { title:'Rebel News',           pl:'UUGy6uV7yqGWDeUWTZzT3ZEg' }
       ];
 
       document.write(channels.map((c,i)=>`
-        <div class="card" data-base="player-${i}" data-title="${c.title.toLowerCase()}" data-playlist="${c.pl}">
+        <div class="card"
+             data-base="player-${i}"
+             data-title="${c.title.toLowerCase()}"
+             data-playlist="${c.pl}">
           <div class="channel-title">${c.title}</div>
           <div class="video-title" id="title-${i}">Loading…</div>
           <div class="viewport">
@@ -147,19 +145,19 @@
     const players = {}, nextIdx = {};
     function onYouTubeIframeAPIReady() {
       document.querySelectorAll('.card').forEach(card => {
-        const b = card.dataset.base, list = card.dataset.playlist;
-        nextIdx[b] = 0;
-        players[b] = new YT.Player(b, {
+        const base = card.dataset.base, list = card.dataset.playlist;
+        nextIdx[base] = 0;
+        players[base] = new YT.Player(base, {
           height:'400', width:'100%',
-          playerVars:{ listType:'playlist', list, index:nextIdx[b]++, autoplay:0, muted:1, origin:location.origin }
+          playerVars:{ listType:'playlist', list, index:nextIdx[base]++, autoplay:0, muted:1, origin:location.origin }
         });
-        let sx=0, sy=0;
+        let sx = 0, sy = 0;
         const ov = card.querySelector('.swipe-overlay');
-        ov.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; });
+        ov.addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; });
         ov.addEventListener('touchend', e => {
           const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
           if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
-            const p = players[b], idx = p.getPlaylistIndex();
+            const p = players[base], idx = p.getPlaylistIndex();
             dx < 0 ? p.nextVideo() : idx > 0 && p.previousVideo();
           }
         });
@@ -167,12 +165,11 @@
 
       const obs = new IntersectionObserver(entries => {
         entries.forEach(en => {
-          const b = en.target.dataset.base, p = players[b];
+          const base = en.target.dataset-base, p = players[base];
           if (!p) return;
           if (en.isIntersecting) {
             p.playVideo(); p.unMute();
-            const id = b.split('-')[1];
-            document.getElementById(`title-${id}`).textContent = p.getVideoData().title;
+            document.getElementById(`title-${base.split('-')[1]}`).textContent = p.getVideoData().title;
           } else {
             p.pauseVideo();
           }
@@ -180,15 +177,16 @@
       }, { threshold: 0.6 });
       document.querySelectorAll('.card').forEach(c => obs.observe(c));
 
-      const inp = document.getElementById('search-input'),
-            clr = document.getElementById('search-clear');
-      inp.addEventListener('input', e => {
+      document.getElementById('search-input').addEventListener('input', e => {
         const q = e.target.value.trim().toLowerCase();
         document.querySelectorAll('.card').forEach(card => {
           card.style.display = card.dataset.title.includes(q) ? '' : 'none';
         });
       });
-      clr.addEventListener('click', () => { inp.value = ''; inp.dispatchEvent(new Event('input')); });
+      document.getElementById('search-clear').addEventListener('click', () => {
+        const inp = document.getElementById('search-input');
+        inp.value = ''; inp.dispatchEvent(new Event('input'));
+      });
 
       setTimeout(() => {
         const p = document.getElementById('preloader');
