@@ -6,144 +6,98 @@
   <title>.Purge</title>
   <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
-    /* Reserve scrollbar space on both edges */
+    /* Reserve scrollbar gutter on both edges (modern + fallback) */
     html {
-      overflow-y: scroll;              /* fallback: always show scrollbar */
-      scrollbar-gutter: stable both-edges; /* modern browsers: gutter on both sides */
+      overflow-y: scroll;                  /* fallback: always show scrollbar */
+      scrollbar-gutter: stable both-edges; /* modern: reserve gutter on both sides */
     }
 
-    /* Fade-in */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px) }
-      to   { opacity: 1; transform: translateY(0)    }
-    }
-    /* Fade-out */
-    @keyframes fadeOut {
-      from { opacity: 1 }
-      to   { opacity: 0 }
-    }
-    /* Spin */
-    @keyframes spin {
-      to { transform: rotate(360deg) }
-    }
+    /* Fade-in/out animations */
+    @keyframes fadeIn { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
+    @keyframes fadeOut { from { opacity:1 } to { opacity:0 } }
+    @keyframes spin    { to { transform:rotate(360deg) } }
 
     /* Preloader */
     #preloader {
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: #000;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      color: #bb86fc;
-      font-family: 'Fjalla One', sans-serif;
-      z-index: 1000;
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background:#000; display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      color:#bb86fc; font-family:'Fjalla One',sans-serif; z-index:1000;
     }
-    #preloader.fade-out {
-      animation: fadeOut .5s ease forwards;
-    }
-    #preloader h1 {
-      font-size: 3rem;
-      margin: .5rem 0 .25rem;
-    }
-    #preloader p {
-      font-size: .875rem;
-      margin: 0 0 1rem;
-      font-family: 'Inter', sans-serif;
-      text-transform: uppercase;
-    }
-    .loader {
-      border: 4px solid rgba(187,134,252,0.3);
-      border-top: 4px solid #bb86fc;
-      border-radius: 50%;
-      width: 36px; height: 36px;
-      animation: spin 1s linear infinite;
-    }
+    #preloader.fade-out { animation:fadeOut .5s ease forwards; }
+    #preloader h1 { font-size:3rem; margin:.5rem 0 .25rem; }
+    #preloader p  { font-size:.875rem; margin:0 0 1rem; font-family:'Inter',sans-serif; text-transform:uppercase; }
+    .loader        { border:4px solid rgba(187,134,252,0.3); border-top:4px solid #bb86fc; border-radius:50%; width:36px; height:36px; animation:spin 1s linear infinite; }
 
     /* Header */
     #header-bar {
-      position: sticky; top: 0; width: 100%;
-      background: #272727; padding: .75rem;
-      text-align: center; z-index: 999;
-      animation: fadeIn .5s ease both;
+      position:sticky; top:0; width:100%; background:#272727;
+      padding:.75rem; text-align:center; z-index:999;
+      animation:fadeIn .5s ease both;
     }
     #header-bar .header-content {
-      color: #bb86fc;
-      font-family: 'Fjalla One', sans-serif;
-      font-size: 1.5rem;
+      color:#bb86fc; font-family:'Fjalla One',sans-serif; font-size:1.5rem;
     }
 
-    /* Global */
+    /* Global & Centering */
     body {
-      margin: 0;
-      background: #121212;
-      color: #e0e0e0;
-      font-family: 'Inter', sans-serif;
+      margin:0; background:#121212; color:#e0e0e0;
+      font-family:'Inter',sans-serif; overflow-x:hidden;
     }
     main {
-      max-width: 1200px;    /* centered column width */
-      margin: 1rem auto;    /* equal left/right gutters */
-      padding: 0 1rem;      /* equal 1rem padding each side */
+      max-width:1200px;    /* centered column width */
+      margin:1rem auto;    /* equal left/right gutters */
+      padding:0 1rem;      /* equal side padding */
     }
 
-    /* Search */
+    /* Search Bar */
     #search-bar {
-      width: 100%; max-width: 400px;
-      margin: 0 auto 1rem; display: flex;
+      width:100%; max-width:400px; margin:0 auto 1rem; display:flex;
     }
     #search-input {
-      flex: 1; padding: .5rem;
-      border: 2px solid #bb86fc;
-      border-radius: 4px 0 0 4px;
-      background: #1e1e1e; color: #e0e0e0; font-size: 1rem;
+      flex:1; padding:.5rem;
+      border:2px solid #bb86fc; border-radius:4px 0 0 4px;
+      background:#1e1e1e; color:#e0e0e0; font-size:1rem;
     }
     #search-clear {
-      background: #bb86fc; border: none;
-      padding: 0 .75rem; cursor: pointer;
-      border-radius: 0 4px 4px 0; color: #121212;
+      background:#bb86fc; border:none; padding:0 .75rem;
+      cursor:pointer; border-radius:0 4px 4px 0; color:#121212;
     }
 
-    /* Cards */
+    /* Video Cards */
     .card {
-      background: #1e1e1e; border-radius: 8px;
-      margin-bottom: 1rem; overflow: hidden;
-      animation: fadeIn .5s ease both;
+      background:#1e1e1e; border-radius:8px; margin-bottom:1rem;
+      overflow:hidden; animation:fadeIn .5s ease both;
     }
     .channel-title, .video-title {
-      padding: .75rem 1rem; background: #272727; font-weight: 600;
+      padding:.75rem 1rem; background:#272727; font-weight:600;
     }
-    .channel-title { color: #bb86fc; font-size: 1.1rem; }
-    .video-title   { color: #bb86fc; font-size: .875rem; }
+    .channel-title { color:#bb86fc; font-size:1.1rem; }
+    .video-title   { color:#bb86fc; font-size:.875rem; }
 
     .viewport {
-      position: relative; height: 400px; touch-action: pan-y;
+      position:relative; height:400px; touch-action:pan-y;
     }
     .player-wrapper iframe {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      position:absolute; top:0; left:0; width:100%; height:100%;
     }
     .swipe-overlay {
-      position: absolute; top: 0; left: 0;
-      width: 100%; height: 85%; z-index: 2;
+      position:absolute; top:0; left:0; width:100%; height:85%; z-index:2;
     }
     .swipe-hint {
-      position: absolute; top: 50%; right: 16px;
-      transform: translateY(-50%);
-      font-size: 2rem; color: #bb86fc;
-      background: rgba(0,0,0,0.5); padding: .25rem;
-      border-radius: 50%; pointer-events: none; z-index: 3;
+      position:absolute; top:50%; right:16px; transform:translateY(-50%);
+      font-size:2rem; color:#bb86fc; background:rgba(0,0,0,0.5);
+      padding:.25rem; border-radius:50%; pointer-events:none; z-index:3;
     }
 
     .card-buttons {
-      display: flex; justify-content: center;
-      padding: .5rem; background: #1e1e1e;
+      display:flex; justify-content:center; padding:.5rem; background:#1e1e1e;
     }
     .card-buttons a {
-      background: #bb86fc; color: #121212;
-      padding: .5rem 1rem; border-radius: 4px;
-      text-decoration: none; font-weight: 600;
+      background:#bb86fc; color:#121212; padding:.5rem 1rem;
+      border-radius:4px; text-decoration:none; font-weight:600;
     }
-    .card-buttons a:hover {
-      background: #985eff;
-    }
+    .card-buttons a:hover { background:#985eff; }
   </style>
 </head>
 <body>
@@ -221,7 +175,7 @@
       const obs=new IntersectionObserver(entries=>{
         entries.forEach(en=>{
           const b=en.target.dataset.base, p=players[b];
-          if(!p)return;
+          if(!p) return;
           if(en.isIntersecting){
             p.playVideo(); p.unMute();
             const id=b.split('-')[1];
@@ -231,8 +185,9 @@
       },{threshold:0.6});
       document.querySelectorAll('.card').forEach(c=>obs.observe(c));
 
-      // filter
-      const inp=document.getElementById('search-input'), clr=document.getElementById('search-clear');
+      // search filter
+      const inp=document.getElementById('search-input'),
+            clr=document.getElementById('search-clear');
       inp.addEventListener('input', e => {
         const q=e.target.value.trim().toLowerCase();
         document.querySelectorAll('.card').forEach(card => {
@@ -245,7 +200,7 @@
       setTimeout(() => {
         const p=document.getElementById('preloader');
         p.classList.add('fade-out');
-        p.addEventListener('animationend', ()=>p.style.display='none');
+        p.addEventListener('animationend', () => p.style.display='none');
       }, 2000);
     }
   </script>
