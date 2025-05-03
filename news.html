@@ -139,51 +139,51 @@
     const players = {}, nextIdx = {};
     function onYouTubeIframeAPIReady() {
       document.querySelectorAll('.card').forEach(card => {
-        const b = card.dataset.base, list = card.dataset.playlist;
-        nextIdx[b] = 0;
-        players[b] = new YT.Player(b, {
+        const b=card.dataset.base, list=card.dataset.playlist;
+        nextIdx[b]=0;
+        players[b]=new YT.Player(b,{
           height:'400', width:'100%',
           playerVars:{ listType:'playlist', list, index:nextIdx[b]++, autoplay:0, muted:1, origin:location.origin }
         });
         let sx=0, sy=0;
-        const ov = card.querySelector('.swipe-overlay');
-        ov.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; });
-        ov.addEventListener('touchend',   e => {
+        const ov=card.querySelector('.swipe-overlay');
+        ov.addEventListener('touchstart', e=>{ sx=e.touches[0].clientX; sy=e.touches[0].clientY; });
+        ov.addEventListener('touchend', e=>{
           const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
-          if (Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>50) {
+          if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>50){
             const p=players[b], idx=p.getPlaylistIndex();
             dx<0 ? p.nextVideo() : idx>0 && p.previousVideo();
           }
         });
       });
 
-      const obs = new IntersectionObserver(entries => {
-        entries.forEach(en => {
+      const obs=new IntersectionObserver(entries=>{
+        entries.forEach(en=>{
           const b=en.target.dataset.base, p=players[b];
-          if (!p) return;
-          if (en.isIntersecting) {
+          if(!p) return;
+          if(en.isIntersecting){
             p.playVideo(); p.unMute();
             document.getElementById(`title-${b.split('-')[1]}`)
-                    .textContent = p.getVideoData().title;
+                    .textContent=p.getVideoData().title;
           } else p.pauseVideo();
         });
       },{threshold:0.6});
-      document.querySelectorAll('.card').forEach(c => obs.observe(c));
+      document.querySelectorAll('.card').forEach(c=>obs.observe(c));
 
-      const inp = document.getElementById('search-input'),
-            clr = document.getElementById('search-clear');
-      inp.addEventListener('input', e => {
+      const inp=document.getElementById('search-input'),
+            clr=document.getElementById('search-clear');
+      inp.addEventListener('input', e=>{
         const q=e.target.value.trim().toLowerCase();
-        document.querySelectorAll('.card').forEach(card => {
-          card.style.display = card.dataset.title.includes(q)?'':'none';
+        document.querySelectorAll('.card').forEach(card=>{
+          card.style.display=card.dataset.title.includes(q)?'':'none';
         });
       });
-      clr.addEventListener('click', () => { inp.value=''; inp.dispatchEvent(new Event('input')); });
+      clr.addEventListener('click', ()=>{ inp.value=''; inp.dispatchEvent(new Event('input')); });
 
-      setTimeout(() => {
+      setTimeout(()=>{
         const p=document.getElementById('preloader');
         p.classList.add('fade-out');
-        p.addEventListener('animationend', () => p.style.display='none');
+        p.addEventListener('animationend', ()=>p.style.display='none');
       },2000);
     }
   </script>
