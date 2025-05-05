@@ -6,10 +6,7 @@
   <title>.Purge</title>
   <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
-    html {
-      overflow-y: scroll;
-      scrollbar-gutter: stable both-edges;
-    }
+    html { overflow-y: scroll; scrollbar-gutter: stable both-edges; }
     @keyframes fadeIn  { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
     @keyframes fadeOut { from { opacity:1 } to { opacity:0 } }
     @keyframes spin    { to { transform:rotate(360deg) } }
@@ -34,6 +31,20 @@
     }
     #header-bar .header-content {
       color:#bb86fc; font-family:'Fjalla One',sans-serif; font-size:1.5rem;
+    }
+
+    /* Video Settings Panel */
+    #video-settings {
+      background:#272727; color:#e0e0e0;
+      padding:0.5rem; text-align:center; font-family:'Inter',sans-serif;
+    }
+    #video-settings label, #video-settings button {
+      margin:0 0.5rem; font-size:0.9rem;
+      color:#e0e0e0;
+    }
+    #video-settings select {
+      margin-left:0.25rem; padding:0.25rem;
+      font-size:0.9rem;
     }
 
     /* Body & Centering */
@@ -84,6 +95,15 @@
       font-size:2rem; color:#bb86fc; background:rgba(0,0,0,0.5);
       padding:.25rem; border-radius:50%; pointer-events:none; z-index:3;
     }
+
+    /* Back to Top Button */
+    #back-to-top {
+      position:fixed; bottom:2rem; right:2rem;
+      padding:0.75rem 1rem; font-size:1rem; border:none;
+      border-radius:4px; background:#bb86fc; color:#121212;
+      cursor:pointer; display:none; z-index:1000;
+      font-family:'Inter',sans-serif;
+    }
   </style>
 </head>
 <body>
@@ -98,6 +118,22 @@
     <div class="header-content">.Purge</div>
   </header>
 
+  <!-- Video Settings Control Panel -->
+  <div id="video-settings">
+    <label>Speed:
+      <select id="playback-speed">
+        <option value="0.25">0.25x</option>
+        <option value="0.5">0.5x</option>
+        <option value="0.75">0.75x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+      </select>
+    </label>
+    <button id="mute-toggle">Mute All</button>
+  </div>
+
   <main>
     <div id="search-bar">
       <input id="search-input" type="text" placeholder="Search channels…"/>
@@ -106,26 +142,27 @@
 
     <script>
       const channels = [
-        { title:'The Daily Wire',    pl:'UUaeO5vkdj5xOQHp4UmIN6dw' },
-        { title:'Fox News',           pl:'UUXIJgqnII2ZOINSWNOGFThA' },
-        { title:'Newsmax',            pl:'UUx6h-dWzJ5NpAlja1YsApdg' },
-        { title:'One America News',   pl:'UUNbIDJNNgaRrXOD7VllIMRQ' },
-        { title:'The Epoch Times',    pl:'UUeLc4heXqG9dtL7jiPHMBfQ' },
-        { title:'TheBlaze',           pl:'UUKgJEs_v0JB-6jWb8lIy9Xw' },
-        { title:'Timcast IRL',        pl:'UULwNTXWEjVd2qIHLcXxQWxA' },
-        { title:'Stephen Gardner',    pl:'UU3VlRtY0ARsTRR5Eq8QE1Yg' },
-        { title:'Ben Shapiro Show',   pl:'UUnQC_G5Xsjhp9fEJKuIcrSw' },
+        { title:'The Daily Wire',      pl:'UUaeO5vkdj5xOQHp4UmIN6dw' },
+        { title:'Fox News',             pl:'UUXIJgqnII2ZOINSWNOGFThA' },
+        { title:'Newsmax',              pl:'UUx6h-dWzJ5NpAlja1YsApdg' },
+        { title:'One America News',     pl:'UUNbIDJNNgaRrXOD7VllIMRQ' },
+        { title:'The Epoch Times',      pl:'UUeLc4heXqG9dtL7jiPHMBfQ' },
+        { title:'TheBlaze',             pl:'UUKgJEs_v0JB-6jWb8lIy9Xw' },
+        { title:'Timcast IRL',          pl:'UULwNTXWEjVd2qIHLcXxQWxA' },
+        { title:'Stephen Gardner',      pl:'UU3VlRtY0ARsTRR5Eq8QE1Yg' },
+        { title:'Ben Shapiro Show',     pl:'UUnQC_G5Xsjhp9fEJKuIcrSw' },
 
-        { title:'Charlie Kirk',       pl:'UUfaIu2jO-fppCQV_lchCRIQ' },
-        { title:'Mark Levin',         pl:'UUSDAWpftrPkMlGnqNl-Yafw' },
-        { title:'Matt Walsh',         pl:'UUO01ytfzgXYy4glnPJm4PPQ' },
-        { title:'Candace Owens',      pl:'UUL0u5uz7KZ9q-pe-VC8TY-w' },
-        { title:'The Federalist',     pl:'UUEBsWEmSBXAU3JqZZGMBGpQ' },
-        { title:'Project Veritas',    pl:'UUL9PlYkRD3Q-RZca6CCnPKw' },
+        { title:'Charlie Kirk',         pl:'UUfaIu2jO-fppCQV_lchCRIQ' },
+        { title:'Mark Levin',           pl:'UUSDAWpftrPkMlGnqNl-Yafw' },
+        { title:'Matt Walsh',           pl:'UUO01ytfzgXYy4glnPJm4PPQ' },
+        { title:'Candace Owens',        pl:'UUL0u5uz7KZ9q-pe-VC8TY-w' },
+        { title:'The Federalist',       pl:'UUEBsWEmSBXAU3JqZZGMBGpQ' },
+        { title:'Project Veritas',      pl:'UUL9PlYkRD3Q-RZca6CCnPKw' },
 
-        { title:'Turning Point USA',  pl:'UUVrK_pMRp_q8IelpfUCTGLQ' },
-        { title:'Washington Examiner',pl:'UU8BxSGcBKriJvoeyKOnJ6tA' },  /* :contentReference[oaicite:2]{index=2} */
-        { title:'Rebel News',         pl:'UUGy6uV7yqGWDeUWTZzT3ZEg' }   /* :contentReference[oaicite:3]{index=3} */
+        { title:'Turning Point USA',    pl:'UUVrK_pMRp_q8IelpfUCTGLQ' },
+        { title:'RJ Talks TV',          pl:'UUxkBlK_PMsW2SROFPNHnoUQ' },
+        { title:'Washington Examiner',  pl:'UU8BxSGcBKriJvoeyKOnJ6tA' },
+        { title:'Rebel News',           pl:'UUGy6uV7yqGWDeUWTZzT3ZEg' }
       ];
 
       document.write(channels.map((c,i)=>`
@@ -142,9 +179,14 @@
     </script>
   </main>
 
+  <!-- Back to Top Button -->
+  <button id="back-to-top" title="Back to top">↑ Top</button>
+
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     const players = {}, nextIdx = {};
+    let allMuted = true;
+
     function onYouTubeIframeAPIReady() {
       document.querySelectorAll('.card').forEach(card => {
         const b = card.dataset.base, list = card.dataset.playlist;
@@ -153,6 +195,7 @@
           height:'400', width:'100%',
           playerVars:{ listType:'playlist', list, index:nextIdx[b]++, autoplay:0, muted:1, origin:location.origin }
         });
+
         let sx=0, sy=0;
         const ov = card.querySelector('.swipe-overlay');
         ov.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; });
@@ -180,6 +223,7 @@
       }, { threshold: 0.6 });
       document.querySelectorAll('.card').forEach(c => obs.observe(c));
 
+      // Search functionality
       const inp = document.getElementById('search-input'),
             clr = document.getElementById('search-clear');
       inp.addEventListener('input', e => {
@@ -190,6 +234,30 @@
       });
       clr.addEventListener('click', () => { inp.value = ''; inp.dispatchEvent(new Event('input')); });
 
+      // Video settings controls
+      const speedControl = document.getElementById('playback-speed');
+      speedControl.addEventListener('change', e => {
+        const rate = parseFloat(e.target.value);
+        Object.values(players).forEach(p => p.setPlaybackRate(rate));
+      });
+
+      const muteBtn = document.getElementById('mute-toggle');
+      muteBtn.addEventListener('click', () => {
+        allMuted = !allMuted;
+        Object.values(players).forEach(p => allMuted ? p.mute() : p.unMute());
+        muteBtn.textContent = allMuted ? 'Mute All' : 'Unmute All';
+      });
+
+      // Back to top functionality
+      const backBtn = document.getElementById('back-to-top');
+      window.addEventListener('scroll', () => {
+        backBtn.style.display = window.scrollY > 200 ? 'block' : 'none';
+      });
+      backBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      // Preloader fade out
       setTimeout(() => {
         const p = document.getElementById('preloader');
         p.classList.add('fade-out');
