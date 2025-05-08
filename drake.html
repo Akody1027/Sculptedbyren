@@ -2,52 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <title>Drakes Memorial Billboard</title>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>Drakes Memorial Billboard (Debug Build)</title>
   <style>
     html, body {
-      margin: 0; padding: 0; overflow: hidden; height: 100%;
-      font-family: sans-serif;
+      margin:0; padding:0; overflow:hidden; height:100%;
+      font-family:sans-serif;
     }
     #viewport {
-      width: 100vw; height: 100vh;
-      background: #f0f0f0; touch-action: none; position: relative;
+      width:100vw; height:100vh;
+      background:#eef; touch-action:none; position:relative;
     }
-    /* ** BILLBOARD FIXED TO TOP-LEFT ** */
     #billboard {
-      width: 5000px; height: 5000px;
-      position: absolute; top: 0; left: 0;
-      transform-origin: 0 0;
+      width:5000px; height:5000px;
+      position:absolute; top:0; left:0;
+      transform-origin:0 0;
+      background: repeating-linear-gradient(
+        45deg, #ddd 0, #ddd 1px, #fff 1px, #fff 20px
+      );
     }
     .media-item {
-      position: absolute;
-      max-width: 300px; max-height: 300px;
-      object-fit: cover;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      opacity: 0;
-      animation: fadeIn 0.5s forwards;
+      position:absolute; max-width:300px; max-height:300px;
+      object-fit:cover; box-shadow:0 4px 12px rgba(0,0,0,0.15);
+      opacity:0; animation:fadeIn 0.5s forwards;
     }
-    @keyframes fadeIn { to { opacity: 1; } }
+    @keyframes fadeIn { to { opacity:1; } }
 
-    /* FOOTER BAR */
     #footer-bar {
-      position: fixed; bottom: 0; left: 0; width: 100%;
-      background: #ffffff; border-top: 2px solid #007bff;
-      padding: 12px 0; display: flex;
-      justify-content: center; z-index: 1000;
+      position:fixed; bottom:0; left:0; width:100%;
+      background:#fff; border-top:2px solid #007bff;
+      padding:12px; display:flex; justify-content:space-around;
+      z-index:1000;
     }
-    #upload { display: none; }
-    .btn-upload {
-      display: inline-block;
-      background: #007bff; color: #fff;
-      padding: 10px 20px; border: none;
-      border-radius: 4px; cursor: pointer;
-      font-size: 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      transition: background 0.2s, transform 0.1s;
+    #upload { display:none; }
+    .btn {
+      background:#007bff; color:#fff; padding:10px 20px;
+      border:none; border-radius:4px; cursor:pointer;
+      font-size:16px; box-shadow:0 2px 6px rgba(0,0,0,0.2);
+      transition:background .2s, transform .1s;
     }
-    .btn-upload:hover { background: #0056b3; }
-    .btn-upload:active { transform: scale(0.97); }
+    .btn:hover { background:#0056b3; }
+    .btn:active { transform:scale(0.95); }
   </style>
 </head>
 <body>
@@ -58,79 +54,88 @@
 
   <div id="footer-bar">
     <input id="upload" type="file" accept="image/*,video/*" multiple />
-    <label for="upload" class="btn-upload">➕ Add Media</label>
+    <label for="upload" class="btn">➕ Add Media</label>
+    <button id="test" class="btn">🧪 Test Image</button>
   </div>
 
-  <!-- Panzoom -->
   <script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
-  <!-- Supabase client -->
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    import { createClient } 
+      from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
+    // ───── YOUR CONFIG ─────
     const supabaseUrl     = 'https://skztihotrqohgdomqhyy.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrenRpaG90cnFvaGdkb21xaHl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3MTEwMDksImV4cCI6MjA2MjI4NzAwOX0.jO5ERI5_2u6Cz5Obs01QZyXFFXhreYgQ8pNRy5v0f2I';
     const bucketName      = 'drakes';
+    // ──────────────────────
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     const billboard = document.getElementById('billboard');
 
-    // Panzoom setup
+    // Panzoom
     const panzoom = Panzoom(billboard, {
-      maxScale: 5, minScale: 0.2, contain: 'outside', step: 0.3
+      maxScale:5, minScale:0.2, contain:'outside', step:0.3
     });
     document.getElementById('viewport')
       .addEventListener('wheel', panzoom.zoomWithWheel);
 
-    const rand = (min, max) => Math.random() * (max - min) + min;
+    const rand = (min, max) => Math.random()*(max-min)+min;
 
     function placeURL(url) {
-      console.log('Rendering URL:', url);    // ← check in DevTools!
+      console.log('[placeURL]', url);
       const isVid = /\.(mp4|webm|ogg)$/i.test(url);
-      const el = document.createElement(isVid ? 'video' : 'img');
+      const el = document.createElement(isVid?'video':'img');
       el.src = url;
-      if (isVid) el.autoplay = el.loop = el.muted = true;
+      if(isVid) el.autoplay = el.loop = el.muted = true;
       el.className = 'media-item';
-      const [bw, bh] = [billboard.clientWidth, billboard.clientHeight];
-      el.style.left      = rand(0, bw - 300) + 'px';
-      el.style.top       = rand(0, bh - 300) + 'px';
+      const [bw,bh] = [billboard.clientWidth, billboard.clientHeight];
+      el.style.left      = rand(0,bw-300)+'px';
+      el.style.top       = rand(0,bh-300)+'px';
       el.style.transform = `rotate(${rand(-30,30)}deg)`;
       billboard.appendChild(el);
     }
 
     // 1) Load existing
     async function loadAll() {
+      console.log('» loadAll()');
       const { data, error } = await supabase
         .storage.from(bucketName)
-        .list('', { limit: 200, sortBy: { column: 'name', order: 'desc' } });
-      if (error) return console.error('List error:', error);
-      for (let entry of data) {
+        .list('', { limit:200, sortBy:{column:'name',order:'desc'} });
+      console.log('[list]', { data, error });
+      if(error) return;
+      data.forEach(entry => {
         const { data: urlData, error: urlErr } = supabase
           .storage.from(bucketName)
           .getPublicUrl(entry.name);
-        if (urlErr) console.error('URL error:', urlErr);
-        else placeURL(urlData.publicUrl);
-      }
+        console.log('[getPublicUrl]', entry.name, urlData, urlErr);
+        if(urlData) placeURL(urlData.publicUrl);
+      });
     }
 
     // 2) Upload new
-    document.getElementById('upload').addEventListener('change', async e => {
-      const files = [...e.target.files];
-      for (let file of files) {
-        const filename = `${Date.now()}_${file.name}`;
-        const { error: upErr } = await supabase
-          .storage.from(bucketName)
-          .upload(filename, file, { cacheControl: '3600', upsert: false });
-        if (upErr) {
-          console.error('Upload error:', upErr);
-          continue;
+    document.getElementById('upload')
+      .addEventListener('change', async e => {
+        console.log('» uploading', e.target.files);
+        for(let file of e.target.files) {
+          const filename = `${Date.now()}_${file.name}`;
+          const { error: upErr } = await supabase
+            .storage.from(bucketName)
+            .upload(filename, file, { upsert:false });
+          console.log('[upload]', filename, upErr);
+          if(!upErr) {
+            const { data:urlData, error:urlErr } = supabase
+              .storage.from(bucketName)
+              .getPublicUrl(filename);
+            console.log('[afterUpload getPublicUrl]', urlData, urlErr);
+            if(urlData) placeURL(urlData.publicUrl);
+          }
         }
-        const { data: urlData, error: urlErr } = supabase
-          .storage.from(bucketName)
-          .getPublicUrl(filename);
-        if (urlErr) console.error('URL error:', urlErr);
-        else placeURL(urlData.publicUrl);
-      }
-      e.target.value = '';
+        e.target.value = '';
+      });
+
+    // 3) Test button
+    document.getElementById('test').addEventListener('click', () => {
+      placeURL('https://via.placeholder.com/250'); 
     });
 
     loadAll();
