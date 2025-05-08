@@ -6,51 +6,51 @@
   <title>Drakes Memorial Billboard</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      height: 100%;
+      margin: 0; padding: 0; overflow: hidden; height: 100%;
+      font-family: sans-serif;
     }
     #viewport {
-      width: 100vw;
-      height: 100vh;
-      background: #fafafa;
-      touch-action: none;
-      position: relative;
+      width: 100vw; height: 100vh;
+      background: #f0f0f0; touch-action: none; position: relative;
     }
     #billboard {
-      width: 5000px;
-      height: 5000px;
-      position: absolute;
-      top: -2000px;
-      left: -2000px;
+      width: 5000px; height: 5000px;
+      position: absolute; top: -2000px; left: -2000px;
       transform-origin: 0 0;
     }
     .media-item {
       position: absolute;
-      max-width: 300px;
-      max-height: 300px;
+      max-width: 300px; max-height: 300px;
       object-fit: cover;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
     }
-    /* FOOTER UPLOAD BAR */
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    /* FOOTER BAR */
     #footer-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: rgba(255,255,255,0.95);
-      padding: 10px;
-      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      font-family: sans-serif;
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background: #ffffff; border-top: 2px solid #007bff;
+      padding: 12px 0; display: flex;
+      justify-content: center; z-index: 1000;
     }
-    #footer-bar input {
-      margin-right: 10px;
+    /* HIDDEN FILE INPUT */
+    #upload { display: none; }
+    /* STYLED BUTTON */
+    .btn-upload {
+      display: inline-block;
+      background: #007bff; color: #fff;
+      padding: 10px 20px; border: none;
+      border-radius: 4px; cursor: pointer;
+      font-size: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: background 0.2s, transform 0.1s;
     }
+    .btn-upload:hover { background: #0056b3; }
+    .btn-upload:active { transform: scale(0.97); }
   </style>
 </head>
 <body>
@@ -60,8 +60,9 @@
   </div>
 
   <div id="footer-bar">
+    <!-- Hidden file input + styled label as button -->
     <input id="upload" type="file" accept="image/*,video/*" multiple />
-    <label for="upload">Upload to “drakes” bucket</label>
+    <label for="upload" class="btn-upload">➕ Add Media</label>
   </div>
 
   <!-- Panzoom -->
@@ -70,21 +71,16 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    // ── YOUR SUPABASE CONFIG ─────────────────────────────────────────
     const supabaseUrl     = 'https://skztihotrqohgdomqhyy.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrenRpaG90cnFvaGdkb21xaHl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3MTEwMDksImV4cCI6MjA2MjI4NzAwOX0.jO5ERI5_2u6Cz5Obs01QZyXFFXhreYgQ8pNRy5v0f2I';
     const bucketName      = 'drakes';
-    // ────────────────────────────────────────────────────────────────
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     const billboard = document.getElementById('billboard');
 
-    // init Panzoom
+    // Init Panzoom
     const panzoom = Panzoom(billboard, {
-      maxScale: 5,
-      minScale: 0.2,
-      contain: 'outside',
-      step: 0.3
+      maxScale: 5, minScale: 0.2, contain: 'outside', step: 0.3
     });
     document.getElementById('viewport')
       .addEventListener('wheel', panzoom.zoomWithWheel);
@@ -104,7 +100,7 @@
       billboard.appendChild(el);
     }
 
-    // 1) Load existing files
+    // Load existing on startup
     async function loadAll() {
       const { data, error } = await supabase
         .storage.from(bucketName)
@@ -114,15 +110,11 @@
         const { data: urlData, error: urlErr } = supabase
           .storage.from(bucketName)
           .getPublicUrl(entry.name);
-        if (urlErr) {
-          console.error('getPublicUrl error:', urlErr);
-        } else {
-          placeURL(urlData.publicUrl);
-        }
+        if (!urlErr) placeURL(urlData.publicUrl);
       }
     }
 
-    // 2) Upload new files
+    // Handle new uploads
     document.getElementById('upload').addEventListener('change', async e => {
       const files = [...e.target.files];
       for (let file of files) {
@@ -134,14 +126,10 @@
           console.error('Upload error:', upErr);
           continue;
         }
-        const { data: urlData, error: urlErr } = supabase
+        const { data: urlData } = supabase
           .storage.from(bucketName)
           .getPublicUrl(filename);
-        if (urlErr) {
-          console.error('getPublicUrl error:', urlErr);
-        } else {
-          placeURL(urlData.publicUrl);
-        }
+        placeURL(urlData.publicUrl);
       }
       e.target.value = '';
     });
