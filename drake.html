@@ -29,7 +29,6 @@
     }
     @keyframes fadeIn { to { opacity:1; } }
 
-    /* FOOTER BAR */
     #footer-bar {
       position:fixed; bottom:0; left:0; width:100%;
       background:#fff; border-top:2px solid #007bff;
@@ -46,13 +45,11 @@
     .btn:hover { background:#0056b3; }
     .btn:active { transform:scale(0.95); }
 
-    /* Toast notifications */
     #toast {
       position:fixed; top:20px; left:50%; transform:translateX(-50%);
       background:rgba(0,0,0,0.8); color:#fff; padding:8px 16px;
       border-radius:4px; font-size:14px; opacity:0;
-      transition: opacity .3s;
-      pointer-events:none; z-index:2000;
+      transition: opacity .3s; pointer-events:none; z-index:2000;
     }
     #toast.show { opacity:1; }
   </style>
@@ -73,20 +70,20 @@
 
   <script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
   <script type="module">
-    import { createClient }
+    import { createClient } 
       from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    // ───── UPDATE THIS TO YOUR ACTUAL BUCKET NAME ─────
-    const bucketName      = 'Drake’s memorial';  // exactly as in Supabase
-    const supabaseUrl     = 'https://skztihotrqohgdomqhyy.supabase.co';
-    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.…';
-    // ──────────────────────────────────────────────────
+    // ───── YOUR SUPABASE CONFIG ─────
+    const supabaseUrl     = 'https://vfcucqummaxexqacunzt.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmY3VjcXVtbWF4ZXhxYWN1bnp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3MTUyMzgsImV4cCI6MjA2MjI5MTIzOH0.ugrPhlbI1byzAPFUnBfDWtK3iJsKbSfooM7_aX10dT4';
+    const bucketName      = 'drakes-memorial';  // make sure this bucket exists and is public
+    // ─────────────────────────────────
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     const billboard = document.getElementById('billboard');
     const toast     = document.getElementById('toast');
 
-    // Panzoom
+    // initialize Panzoom
     const panzoom = Panzoom(billboard, {
       maxScale:5, minScale:0.2, contain:'outside', step:0.3
     });
@@ -98,66 +95,60 @@
     function showToast(msg) {
       toast.textContent = msg;
       toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 1500);
+      setTimeout(()=> toast.classList.remove('show'), 1500);
     }
 
     function placeURL(url) {
-      console.log('[placeURL]', url);
       const isVid = /\.(mp4|webm|ogg)$/i.test(url);
-      const el = document.createElement(isVid?'video':'img');
+      const el = document.createElement(isVid ? 'video' : 'img');
       el.src = url;
       if (isVid) el.autoplay = el.loop = el.muted = true;
       el.className = 'media-item';
-      const [bw,bh] = [billboard.clientWidth, billboard.clientHeight];
-      el.style.left      = rand(0,bw-300)+'px';
-      el.style.top       = rand(0,bh-300)+'px';
+      const [bw, bh] = [billboard.clientWidth, billboard.clientHeight];
+      el.style.left      = rand(0, bw - 300) + 'px';
+      el.style.top       = rand(0, bh - 300) + 'px';
       el.style.transform = `rotate(${rand(-30,30)}deg)`;
       billboard.appendChild(el);
     }
 
-    // 1) Load existing
+    // 1) Load existing media
     async function loadAll() {
-      console.log('» loadAll()');
+      console.log('Loading bucket:', bucketName);
       const { data, error } = await supabase
         .storage.from(bucketName)
-        .list('', { limit:200, sortBy:{column:'name',order:'desc'} });
-      console.log('[list]', { data, error });
+        .list('', { limit:200, sortBy:{column:'name', order:'desc'} });
+      console.log('List result:', { data, error });
       if (error) return showToast('Error loading media');
       data.forEach(entry => {
         const { data:urlData, error:urlErr } = supabase
           .storage.from(bucketName)
           .getPublicUrl(entry.name);
-        console.log('[getPublicUrl]', entry.name, urlData, urlErr);
         if (urlData) placeURL(urlData.publicUrl);
       });
     }
 
-    // 2) Upload new
-    document.getElementById('upload')
-      .addEventListener('change', async e => {
-        console.log('» uploading', e.target.files);
-        for (let file of e.target.files) {
-          const filename = `${Date.now()}_${file.name}`;
-          const { error: upErr } = await supabase
+    // 2) Handle uploads
+    document.getElementById('upload').addEventListener('change', async e => {
+      for (let file of e.target.files) {
+        const filename = `${Date.now()}_${file.name}`;
+        const { error: upErr } = await supabase
+          .storage.from(bucketName)
+          .upload(filename, file, { upsert:false });
+        if (upErr) {
+          console.error(upErr);
+          showToast('Upload failed');
+        } else {
+          showToast('Uploaded!');
+          const { data:urlData } = supabase
             .storage.from(bucketName)
-            .upload(filename, file, { upsert:false });
-          console.log('[upload]', filename, upErr);
-          if (upErr) {
-            console.error(upErr);
-            showToast('Upload failed');
-          } else {
-            showToast('Uploaded!');
-            const { data:urlData, error:urlErr } = supabase
-              .storage.from(bucketName)
-              .getPublicUrl(filename);
-            console.log('[afterUpload getPublicUrl]', urlData, urlErr);
-            if (urlData) placeURL(urlData.publicUrl);
-          }
+            .getPublicUrl(filename);
+          if (urlData) placeURL(urlData.publicUrl);
         }
-        e.target.value = '';
-      });
+      }
+      e.target.value = '';
+    });
 
-    // 3) Test button
+    // 3) Test Image button
     document.getElementById('test').addEventListener('click', () => {
       placeURL('https://via.placeholder.com/250.png?text=Test');
     });
