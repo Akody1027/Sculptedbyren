@@ -13,9 +13,10 @@
       width: 100vw; height: 100vh;
       background: #f0f0f0; touch-action: none; position: relative;
     }
+    /* ** BILLBOARD FIXED TO TOP-LEFT ** */
     #billboard {
       width: 5000px; height: 5000px;
-      position: absolute; top: -2000px; left: -2000px;
+      position: absolute; top: 0; left: 0;
       transform-origin: 0 0;
     }
     .media-item {
@@ -26,9 +27,7 @@
       opacity: 0;
       animation: fadeIn 0.5s forwards;
     }
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
+    @keyframes fadeIn { to { opacity: 1; } }
 
     /* FOOTER BAR */
     #footer-bar {
@@ -37,9 +36,7 @@
       padding: 12px 0; display: flex;
       justify-content: center; z-index: 1000;
     }
-    /* HIDDEN FILE INPUT */
     #upload { display: none; }
-    /* STYLED BUTTON */
     .btn-upload {
       display: inline-block;
       background: #007bff; color: #fff;
@@ -60,7 +57,6 @@
   </div>
 
   <div id="footer-bar">
-    <!-- Hidden file input + styled label as button -->
     <input id="upload" type="file" accept="image/*,video/*" multiple />
     <label for="upload" class="btn-upload">➕ Add Media</label>
   </div>
@@ -78,7 +74,7 @@
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     const billboard = document.getElementById('billboard');
 
-    // Init Panzoom
+    // Panzoom setup
     const panzoom = Panzoom(billboard, {
       maxScale: 5, minScale: 0.2, contain: 'outside', step: 0.3
     });
@@ -88,6 +84,7 @@
     const rand = (min, max) => Math.random() * (max - min) + min;
 
     function placeURL(url) {
+      console.log('Rendering URL:', url);    // ← check in DevTools!
       const isVid = /\.(mp4|webm|ogg)$/i.test(url);
       const el = document.createElement(isVid ? 'video' : 'img');
       el.src = url;
@@ -100,21 +97,22 @@
       billboard.appendChild(el);
     }
 
-    // Load existing on startup
+    // 1) Load existing
     async function loadAll() {
       const { data, error } = await supabase
         .storage.from(bucketName)
-        .list('', { limit: 100, sortBy: { column: 'name', order: 'desc' } });
+        .list('', { limit: 200, sortBy: { column: 'name', order: 'desc' } });
       if (error) return console.error('List error:', error);
       for (let entry of data) {
         const { data: urlData, error: urlErr } = supabase
           .storage.from(bucketName)
           .getPublicUrl(entry.name);
-        if (!urlErr) placeURL(urlData.publicUrl);
+        if (urlErr) console.error('URL error:', urlErr);
+        else placeURL(urlData.publicUrl);
       }
     }
 
-    // Handle new uploads
+    // 2) Upload new
     document.getElementById('upload').addEventListener('change', async e => {
       const files = [...e.target.files];
       for (let file of files) {
@@ -126,10 +124,11 @@
           console.error('Upload error:', upErr);
           continue;
         }
-        const { data: urlData } = supabase
+        const { data: urlData, error: urlErr } = supabase
           .storage.from(bucketName)
           .getPublicUrl(filename);
-        placeURL(urlData.publicUrl);
+        if (urlErr) console.error('URL error:', urlErr);
+        else placeURL(urlData.publicUrl);
       }
       e.target.value = '';
     });
