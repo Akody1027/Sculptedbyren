@@ -5,28 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Beaver Built Furniture</title>
 
+  <!-- Modern font -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 
   <style>
     /* Reset & base */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow-x: hidden; font-family: 'Montserrat', sans-serif; }
-    body { padding-top: 80px; } /* reserve space for header */
-
-    /* Hide header/nav/button until loaded */
-    header, .menu-btn, .dropdown { display: none; }
-    body.loaded header,
-    body.loaded .menu-btn,
-    body.loaded .dropdown {
-      display: block;
-    }
+    body { padding-top: 80px; /* make room for fixed header */ }
 
     /* Preloader */
     #preloader {
       position: fixed; inset: 0;
       background-color: #fff;
       transition: opacity 1s ease-out;
-      z-index: 2000;
+      z-index: 2000; /* above header */
     }
     #preloader::before {
       content: '';
@@ -44,19 +37,47 @@
     }
     #preloader .spinner {
       position: fixed; top: 50%; left: 50%;
-      margin: -25px 0 0 -25px; /* center */
+      margin: -25px 0 0 -25px;
       width: 50px; height: 50px;
       border: 5px solid rgba(0,0,0,0.1);
-      border-top-color: #111; border-radius: 50%;
+      border-top-color: #111;
+      border-radius: 50%;
       animation: spin 1s linear infinite;
       z-index: 2001;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* Header (always present) */
+    header {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 80px;
+      background: rgba(17,17,17,0.9);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    header .logo {
+      position: fixed; top: 20px; left: 20px;
+      height: 50px; z-index: 1001;
+    }
+    .menu-btn {
+      position: fixed; top: 20px; right: 20px;
+      background: none; border: none; color: #fff;
+      font-size: 1.5rem; cursor: pointer; z-index: 1001;
+    }
+    .dropdown {
+      position: fixed; top: 60px; right: 20px;
+      display: none; background: #222; border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 1001;
+    }
+    .dropdown.open { display: block; }
+    .dropdown a {
+      display: block; padding: 0.75rem 1rem; color: #fff; white-space: nowrap;
+    }
+    .dropdown a:hover { background: rgba(255,255,255,0.1); }
+
     /* Page background & overlay */
     body {
       background: url('background.jpg') center/cover scroll;
-      position: relative;
     }
     body::before {
       content: ''; position: fixed; inset: 0;
@@ -69,33 +90,6 @@
     /* Fade-in */
     @keyframes fadeInUp { from { opacity:0; transform:translateY(20px);} to { opacity:1; transform:translateY(0);} }
     .fade-in { animation: fadeInUp 0.6s ease both; }
-
-    /* Header & Nav */
-    header {
-      position: fixed; top: 0; left: 0; right: 0;
-      height: 80px;
-      background: rgba(17,17,17,0.9);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      z-index: 2000;
-    }
-    header .logo {
-      position: fixed; top: 20px; left: 20px;
-      height: 50px; z-index: 2001;
-    }
-    .menu-btn {
-      position: fixed; top: 20px; right: 20px;
-      background: none; border: none; color: #fff;
-      font-size: 1.5rem; cursor: pointer; z-index: 2001;
-    }
-    .dropdown {
-      position: fixed; top: 60px; right: 20px;
-      background: #222; border-radius: 4px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 2001;
-    }
-    .dropdown a {
-      display: block; padding: 0.75rem 1rem; color: #fff; white-space: nowrap;
-    }
-    .dropdown a:hover { background: rgba(255,255,255,0.1); }
 
     /* Accent bar & section titles */
     .accent-bar { height: 6px; background: url('wood-texture.jpg') center/cover; }
@@ -130,7 +124,9 @@
     #about {
       background: rgba(34,34,34,0.85); color: #eee; padding: 4rem 1rem;
     }
-    #about p { max-width: 800px; margin: 0 auto; color: #ccc; animation: fadeInUp 0.8s ease both; }
+    #about p {
+      max-width: 800px; margin: 0 auto; color: #ccc; animation: fadeInUp 0.8s ease both;
+    }
 
     /* Services */
     #services .grid {
@@ -216,7 +212,7 @@
     <div class="spinner"></div>
   </div>
 
-  <!-- Header (hidden until loaded) -->
+  <!-- Header (always there, hidden only by preloader) -->
   <header>
     <img src="beaverlogo.jpg" alt="Beaver Built Furniture" class="logo">
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
@@ -317,7 +313,6 @@
     }
     window.addEventListener('load', () => {
       window.scrollTo(0,0);
-      document.body.classList.add('loaded');
       setTimeout(() => {
         const pre = document.getElementById('preloader');
         pre.classList.add('fade-out');
