@@ -16,18 +16,26 @@
     /* Preloader */
     #preloader {
       position: fixed; inset: 0;
-      background: rgba(255,255,255,0.85);
+      /* white base so it’s fully opaque */
+      background-color: #fff;
+      /* then your wood-grain image on top */
+      background-image: url('background.jpg');
+      background-size: cover;
+      background-position: center;
       display: flex; align-items: center; justify-content: center;
-      z-index: 2000; transition: opacity 0.6s ease;
+      z-index: 2000;
+      transition: opacity 0.6s ease;
     }
     #preloader .prelogo {
       position: absolute; top: 20px; left: 20px;
       height: 50px;
+      z-index: 1;
     }
     #preloader.fade-out {
       opacity: 0; pointer-events: none;
     }
     .spinner {
+      position: relative; z-index: 1;
       width: 50px; height: 50px;
       border: 5px solid rgba(0,0,0,0.1);
       border-top-color: #111;
