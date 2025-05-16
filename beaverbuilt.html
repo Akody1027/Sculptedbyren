@@ -16,25 +16,20 @@
     /* Preloader */
     #preloader {
       position: fixed; inset: 0;
-      /* wood texture underneath */
-      background: url('background.jpg') center/cover no-repeat;
+      background: rgba(255,255,255,0.85);
       display: flex; align-items: center; justify-content: center;
       z-index: 2000; transition: opacity 0.6s ease;
     }
-    /* white overlay at 20% opacity */
-    #preloader::after {
-      content: '';
-      position: absolute; inset: 0;
-      background-color: rgba(255,255,255,0.2);
+    #preloader .prelogo {
+      position: absolute; top: 20px; left: 20px;
+      height: 50px;
     }
-    /* logo & spinner above overlay */
-    #preloader .prelogo,
-    #preloader .spinner {
-      position: relative; z-index: 1;
+    #preloader.fade-out {
+      opacity: 0; pointer-events: none;
     }
     .spinner {
       width: 50px; height: 50px;
-      border: 5px solid rgba(255,255,255,0.7);
+      border: 5px solid rgba(0,0,0,0.1);
       border-top-color: #111;
       border-radius: 50%;
       animation: spin 1s linear infinite;
@@ -329,7 +324,7 @@
   <script>
     window.addEventListener('load', () => {
       window.scrollTo(0,0);
-      // keep preloader at least 2 seconds
+      // keep preloader visible for at least 2 seconds
       setTimeout(() => {
         const pre = document.getElementById('preloader');
         pre.classList.add('fade-out');
