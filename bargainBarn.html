@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lylia’s Bargain Barn</title>
+
+  <!-- 1) Load the Facebook SDK -->
+  <div id="fb-root"></div>
+  <script async defer crossorigin="anonymous"
+    src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v16.0">
+  </script>
+
+  <style>
+    /* Basic reset */
+    body { margin: 0; font-family: sans-serif; background: #fafafa; color: #333; }
+
+    /* Container for the live stream */
+    .live-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1rem;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .live-container h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Videos grid */
+    .videos {
+      width: 100%;
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .videos h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .fb-page {
+      width: 100% !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 2) Live Stream at Top -->
+  <section class="live-container">
+    <h1>📡 Live Now</h1>
+    <div class="fb-video"
+         data-href="https://www.facebook.com/LyliasBargainBarn/live/1AcugUjrRS"
+         data-width="auto"
+         data-show-text="false"
+         data-autoplay="true">
+    </div>
+  </section>
+
+  <!-- 3) Latest Videos -->
+  <section class="videos">
+    <h2>🎥 Latest Videos</h2>
+    <!-- Use the Page Plugin set to show Videos tab -->
+    <div class="fb-page"
+         data-href="https://www.facebook.com/LyliasBargainBarn"
+         data-tabs="videos"
+         data-width=""
+         data-height=""
+         data-small-header="false"
+         data-adapt-container-width="true"
+         data-hide-cover="true"
+         data-show-facepile="false">
+    </div>
+  </section>
+
+</body>
+</html>
