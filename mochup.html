@@ -11,89 +11,94 @@
       --card: #fff;
       --text: #333;
       --accent: #4A90E2;
-      --shadow: rgba(0,0,0,0.1);
+      --shadow-light: rgba(0,0,0,0.05);
+      --shadow-strong: rgba(0,0,0,0.15);
     }
     *, *::before, *::after { box-sizing: border-box; }
     body {
-      margin: 0;
-      padding: 20px;
+      margin: 0; padding: 20px;
       font-family: 'Inter', sans-serif;
       background: var(--bg);
       color: var(--text);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-bottom: 200px;
+      display: flex; flex-direction: column; align-items: center;
+      padding-bottom: 150px;
     }
     .container {
       background: var(--card);
       border-radius: 12px;
-      box-shadow: 0 6px 18px var(--shadow);
+      box-shadow: 0 4px 12px var(--shadow-light);
       width: 100%; max-width: 700px;
-      padding: 32px;
-      margin-bottom: 20px;
+      padding: 24px; margin-bottom: 20px;
     }
-    h1 { text-align: center; margin-bottom: 24px; font-size: 2rem; }
-    label { display: block; font-weight: 500; margin: 16px 0 8px; }
+    h1 { text-align: center; margin-bottom: 16px; font-size: 1.75rem; }
+    label { display: block; font-weight: 500; margin: 12px 0 6px; }
     input[type="file"] {
-      width: 100%; padding: 10px;
-      border: 1px solid #ccc; border-radius: 8px;
+      width: 100%; padding: 8px;
+      border: 1px solid #ccc; border-radius: 6px;
       background: #fafafa;
     }
     .thumbnail-container {
-      display: flex; flex-wrap: wrap;
-      gap: 12px; justify-content: center;
-      margin: 16px 0;
+      display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: center; margin: 12px 0;
     }
     .thumbnail-container img {
-      width: 80px; height: 80px;
-      object-fit: cover; border-radius: 8px;
-      cursor: pointer; border: 2px solid transparent;
-      box-shadow: 0 4px 12px var(--shadow);
+      width: 70px; height: 70px; object-fit: cover;
+      border-radius: 6px; cursor: pointer;
+      border: 2px solid transparent;
+      box-shadow: 0 2px 6px var(--shadow-light);
+      transition: transform 0.2s, box-shadow 0.2s;
     }
+    .thumbnail-container img:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--shadow-strong); }
     .thumbnail-container img.selected { border-color: var(--accent); }
-    .no-mockups { text-align: center; color: #777; margin: 16px 0; }
     canvas {
       width: 100%; height: auto;
-      margin: 32px 0; border-radius: 8px;
-      box-shadow: 0 6px 18px var(--shadow);
-      background: #fff;
-      touch-action: none;
+      margin: 24px 0; border-radius: 8px;
+      box-shadow: 0 4px 12px var(--shadow-light);
+      background: #fff; touch-action: none;
     }
     #controls-container {
       position: fixed; bottom: 0; left: 0;
       width: 100%; background: var(--card);
-      padding: 12px 20px;
-      box-shadow: 0 -4px 12px var(--shadow);
+      padding: 8px 10px;
+      box-shadow: 0 -2px 8px var(--shadow-light);
       display: flex; justify-content: space-between;
-      align-items: center;
-      z-index: 100;
+      align-items: center; z-index: 100;
     }
     .control-group {
-      display: flex; flex-direction: column;
-      gap: 6px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .control-group.horizontal {
+      flex-direction: row;
     }
     .control-btn {
-      background: #eee; border: none;
-      border-radius: 6px; padding: 8px;
+      background: #fff; border: none;
+      border-radius: 6px; padding: 10px;
       cursor: pointer; font-size: 1.2rem;
+      box-shadow: 0 2px 4px var(--shadow-light);
+      transition: transform 0.1s, box-shadow 0.1s;
     }
-    .control-btn:hover { background: var(--accent); color: #fff; }
+    .control-btn:hover {
+      transform: translateY(-1px) scale(1.05);
+      box-shadow: 0 4px 8px var(--shadow-strong);
+    }
     select {
-      padding: 6px 8px; border-radius: 6px;
-      border: 1px solid #ccc;
+      padding: 6px 10px; border-radius: 6px;
+      border: 1px solid #ccc; font-size: 0.95rem;
+      box-shadow: 0 1px 3px var(--shadow-light);
+      transition: box-shadow 0.2s;
     }
+    select:hover { box-shadow: 0 2px 6px var(--shadow-strong); }
     #download-btn {
-      padding: 10px 16px; background: var(--accent);
+      padding: 8px 14px; background: var(--accent);
       color: #fff; border: none;
-      border-radius: 8px; font-size: 1rem;
-      cursor: pointer; box-shadow: 0 4px 12px var(--shadow);
-      position: fixed; top: 20px; right: 20px;
-      z-index: 110;
+      border-radius: 6px; font-size: 0.95rem;
+      cursor: pointer; box-shadow: 0 2px 6px var(--shadow-light);
+      position: fixed; top: 16px; right: 16px; z-index: 110;
+      transition: transform 0.1s, box-shadow 0.1s;
     }
     #download-btn:hover {
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 8px 24px var(--shadow);
+      transform: translateY(-1px) scale(1.03);
+      box-shadow: 0 4px 12px var(--shadow-strong);
     }
   </style>
 </head>
@@ -104,6 +109,7 @@
     <input type="file" id="add-mockup-input" accept="image/*">
     <div id="mockup-thumbnails" class="thumbnail-container"></div>
     <div id="no-mockups-msg" class="no-mockups">No mockups yet — upload one above.</div>
+
     <label for="design-input">Select your design (PNG)</label>
     <input type="file" id="design-input" accept="image/png">
     <canvas id="mockup-canvas"></canvas>
@@ -112,14 +118,14 @@
   <button id="download-btn">Download</button>
 
   <div id="controls-container">
-    <!-- Y Offset Up/Down -->
+    <!-- Y Offset -->
     <div class="control-group">
       <button class="control-btn" data-target="offsetY" data-step="-1">▲</button>
       <button class="control-btn" data-target="offsetY" data-step="1">▼</button>
     </div>
-    <!-- Zoom In/Out -->
+    <!-- Zoom -->
     <div class="control-group">
-      <button class="control-btn" data-target="scale" data-step="0.01">+</button>
+      <button class="control-btn" data-target="scale" data-step="0.01">＋</button>
       <button class="control-btn" data-target="scale" data-step="-0.01">−</button>
     </div>
     <!-- Resolution -->
@@ -129,8 +135,8 @@
       <option value="3">3×</option>
       <option value="4">4×</option>
     </select>
-    <!-- X Offset Left/Right -->
-    <div class="control-group">
+    <!-- X Offset -->
+    <div class="control-group horizontal">
       <button class="control-btn" data-target="offsetX" data-step="-1">◀</button>
       <button class="control-btn" data-target="offsetX" data-step="1">▶</button>
     </div>
@@ -159,9 +165,7 @@
       if (!keys.length) { noMsg.style.display = 'block'; return; }
       noMsg.style.display = 'none';
       keys.forEach(label => {
-        const img = document.createElement('img');
-        img.src = mockupImages[label];
-        img.alt = label;
+        const img = document.createElement('img'); img.src = mockupImages[label]; img.alt = label;
         img.onclick = () => selectMockup(label, img);
         thumbnails.appendChild(img);
       });
@@ -173,8 +177,7 @@
       imgEl.classList.add('selected');
       const bg = new Image();
       bg.onload = () => { canvas.width = bg.width; canvas.height = bg.height; drawCanvas(); };
-      bg.src = mockupImages[label];
-      window.bgImg = bg;
+      bg.src = mockupImages[label]; window.bgImg = bg;
       localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
     }
 
@@ -183,8 +186,7 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(window.bgImg, 0, 0);
       if (designImg) {
-        const w = designImg.width * scale;
-        const h = designImg.height * scale;
+        const w = designImg.width * scale, h = designImg.height * scale;
         const x = (canvas.width - w) / 2 + (offsetX / 100) * canvas.width;
         const y = (canvas.height - h) / 2 + (offsetY / 100) * canvas.height;
         ctx.drawImage(designImg, x, y, w, h);
@@ -240,8 +242,7 @@
       ex.width = canvas.width * m; ex.height = canvas.height * m; exCtx.scale(m, m);
       exCtx.drawImage(window.bgImg, 0, 0);
       if (designImg) {
-        const w = designImg.width * scale;
-        const h = designImg.height * scale;
+        const w = designImg.width * scale, h = designImg.height * scale;
         const x = (canvas.width - w) / 2 + (offsetX / 100) * canvas.width;
         const y = (canvas.height - h) / 2 + (offsetY / 100) * canvas.height;
         exCtx.drawImage(designImg, x, y, w, h);
