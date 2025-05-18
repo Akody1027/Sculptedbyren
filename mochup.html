@@ -15,24 +15,19 @@
     }
     * { box-sizing: border-box; }
     body {
-      margin: 0;
-      padding: 20px;
+      margin: 0; padding: 20px;
       font-family: 'Inter', sans-serif;
       background: var(--bg);
       color: var(--text);
-      display: flex;
-      justify-content: center;
-      flex-direction: column;
+      display: flex; justify-content: center; flex-direction: column;
       padding-bottom: 200px;
     }
     .container {
       background: var(--card);
       border-radius: 12px;
       box-shadow: 0 6px 18px var(--shadow);
-      width: 100%;
-      max-width: 700px;
-      padding: 32px;
-      margin-bottom: 20px;
+      width: 100%; max-width: 700px;
+      padding: 32px; margin-bottom: 20px;
     }
     h1 { text-align: center; margin-bottom: 24px; font-size: 2rem; }
     label { display: block; font-weight: 500; margin: 16px 0 8px; }
@@ -46,9 +41,9 @@
     details.control-group { position: relative; }
     details.control-group summary { cursor: pointer; padding: 8px 12px; background: var(--accent); color: #fff; border-radius: 8px; font-weight: 500; outline: none; }
     details.control-group[open] summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-    details.control-group .content { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: var(--card); padding: 12px; border-radius: 8px; box-shadow: 0 -4px 12px var(--shadow); display: flex; flex-direction: column; gap: 8px; white-space: nowrap; z-index: 200; }
-    .slider-wrapper { display: flex; align-items: center; gap: 8px; }
-    input[type="range"] { flex: 1; height: 6px; border-radius: 4px; accent-color: var(--accent); }
+    details.control-group .content { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: var(--card); padding: 12px; border-radius: 8px; box-shadow: 0 -4px 12px var(--shadow); display: flex; gap: 8px; white-space: nowrap; z-index: 200; }
+    .btn-small { padding: 6px 10px; background: #eee; border: none; border-radius: 6px; font-size: 0.9rem; cursor: pointer; }
+    .btn-small:hover { background: var(--accent); color: #fff; }
     select { padding: 6px 8px; border-radius: 6px; border: 1px solid #ccc; }
     #download-btn { padding: 10px 16px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 12px var(--shadow); }
     #download-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 24px var(--shadow); }
@@ -67,96 +62,53 @@
     <button id="download-btn">Download Mockup</button>
   </div>
   <div id="controls-container">
-    <details class="control-group"><summary>Scale: <span id="scale-val">1.00</span></summary><div class="content"><input type="range" id="scale-range" min="0.1" max="2" step="0.01" value="1.0"></div></details>
-    <details class="control-group"><summary>X Offset: <span id="offset-x-val">0%</span></summary><div class="content"><input type="range" id="offset-x-range" min="-50" max="50" step="1" value="0"></div></details>
-    <details class="control-group"><summary>Y Offset: <span id="offset-y-val">0%</span></summary><div class="content"><input type="range" id="offset-y-range" min="-50" max="50" step="1" value="0"></div></details>
-    <details class="control-group"><summary>Resolution</summary><div class="content"><select id="resolution-select"><option value="1">1× (Original)</option><option value="2" selected>2× (Retina)</option><option value="3">3×</option><option value="4">4×</option></select></div></details>
+    <details class="control-group">
+      <summary>Scale: <span id="scale-val">1.00</span></summary>
+      <div class="content">
+        <button class="btn-small" data-target="scale" data-step="-0.01">–</button>
+        <button class="btn-small" data-target="scale" data-step="0.01">+</button>
+      </div>
+    </details>
+    <details class="control-group">
+      <summary>X Offset: <span id="offset-x-val">0%</span></summary>
+      <div class="content">
+        <button class="btn-small" data-target="offsetX" data-step="-1">←</button>
+        <button class="btn-small" data-target="offsetX" data-step="1">→</button>
+      </div>
+    </details>
+    <details class="control-group">
+      <summary>Y Offset: <span id="offset-y-val">0%</span></summary>
+      <div class="content">
+        <button class="btn-small" data-target="offsetY" data-step="-1">↑</button>
+        <button class="btn-small" data-target="offsetY" data-step="1">↓</button>
+      </div>
+    </details>
+    <details class="control-group">
+      <summary>Resolution</summary>
+      <div class="content">
+        <select id="resolution-select">
+          <option value="1">1×</option>
+          <option value="2" selected>2×</option>
+          <option value="3">3×</option>
+          <option value="4">4×</option>
+        </select>
+      </div>
+    </details>
   </div>
   <script>
     const canvas = document.getElementById('mockup-canvas'), ctx = canvas.getContext('2d');
-    let mockupImages = {}, selectedMockup = null, designImg = null;
-    let touchMode = null, lastTouch = {}, initialDistance = 0, initialScale = 1, initialOffset = { x: 0, y: 0 };
-    const addMockupInput = document.getElementById('add-mockup-input'), thumbnails = document.getElementById('mockup-thumbnails'), noMsg = document.getElementById('no-mockups-msg'), designInput = document.getElementById('design-input'), scaleRange = document.getElementById('scale-range'), offsetXRange = document.getElementById('offset-x-range'), offsetYRange = document.getElementById('offset-y-range'), resolutionSelect = document.getElementById('resolution-select'), scaleVal = document.getElementById('scale-val'), offsetXVal = document.getElementById('offset-x-val'), offsetYVal = document.getElementById('offset-y-val'), downloadBtn = document.getElementById('download-btn');
-    function loadStoredMockups() { mockupImages = JSON.parse(localStorage.getItem('mockupImages') || '{}'); }
-    function renderThumbnails() {
-      thumbnails.innerHTML = '';
-      const keys = Object.keys(mockupImages);
-      if (!keys.length) { noMsg.style.display = 'block'; return; } else noMsg.style.display = 'none';
-      keys.forEach(label => {
-        const img = document.createElement('img'); img.src = mockupImages[label]; img.alt = label;
-        img.onclick = () => selectMockup(label, img);
-        thumbnails.appendChild(img);
-      });
-      if (!selectedMockup) thumbnails.firstChild.click();
-    }
-    function selectMockup(label, imgEl) {
-      thumbnails.querySelectorAll('img').forEach(i => i.classList.remove('selected'));
-      imgEl.classList.add('selected'); selectedMockup = label; localStorage.setItem('selectedMockup', label); loadMockup(label);
-    }
-    function loadMockup(label) {
-      const bg = new Image(); bg.onload = () => { canvas.width = bg.width; canvas.height = bg.height; drawCanvas(); };
-      bg.src = mockupImages[label]; window.bgImg = bg;
-    }
-    function drawCanvas() {
-      if (!window.bgImg) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(window.bgImg, 0, 0);
-      if (designImg) {
-        const s = parseFloat(scaleRange.value), w = designImg.width * s, h = designImg.height * s;
-        const xOff = (parseInt(offsetXRange.value) / 100) * canvas.width;
-        const yOff = (parseInt(offsetYRange.value) / 100) * canvas.height;
-        const x = (canvas.width - w) / 2 + xOff, y = (canvas.height - h) / 2 + yOff;
-        ctx.drawImage(designImg, x, y, w, h);
-      }
-    }
-    function updateLabels() {
-      scaleVal.textContent = parseFloat(scaleRange.value).toFixed(2);
-      offsetXVal.textContent = offsetXRange.value + '%';
-      offsetYVal.textContent = offsetYRange.value + '%';
-    }
-    addMockupInput.onchange = e => {
-      const f = e.target.files[0]; if (!f) return;
-      const r = new FileReader(); r.onload = () => {
-        mockupImages[f.name] = r.result; localStorage.setItem('mockupImages', JSON.stringify(mockupImages)); renderThumbnails(); selectMockup(f.name, thumbnails.querySelector(`img[alt="${f.name}"]`)); };
-      r.readAsDataURL(f);
-    };
-    designInput.onchange = e => { const f = e.target.files[0]; if (!f) return; designImg = new Image(); designImg.onload = () => { updateLabels(); drawCanvas(); }; designImg.src = URL.createObjectURL(f); };
-    [scaleRange, offsetXRange, offsetYRange].forEach(slider => slider.oninput = () => { updateLabels(); drawCanvas(); });
-    downloadBtn.onclick = () => {
-      const m = parseInt(resolutionSelect.value, 10), ex = document.createElement('canvas'), exCtx = ex.getContext('2d');
-      ex.width = canvas.width * m; ex.height = canvas.height * m; exCtx.scale(m, m);
-      exCtx.drawImage(window.bgImg, 0, 0);
-      if (designImg) { const s = parseFloat(scaleRange.value), w = designImg.width * s, h = designImg.height * s;
-        const xOff = (parseInt(offsetXRange.value) / 100) * canvas.width;
-        const yOff = (parseInt(offsetYRange.value) / 100) * canvas.height;
-        const x = (canvas.width - w) / 2 + xOff, y = (canvas.height - h) / 2 + yOff;
-        exCtx.drawImage(designImg, x, y, w, h);
-      }
-      ex.toBlob(blob => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `mockup@${m}x.png`; a.click(); URL.revokeObjectURL(a.href); }, 'image/png');
-    };
-    // touch gestures
-    canvas.addEventListener('touchstart', e => {
-      e.preventDefault();
-      const t = e.touches;
-      if (t.length === 1) { touchMode = 'pan'; lastTouch = { x: t[0].clientX, y: t[0].clientY }; initialOffset = { x: parseInt(offsetXRange.value), y: parseInt(offsetYRange.value) }; }
-      else if (t.length === 2) {
-        touchMode = 'pinch'; initialDistance = Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); initialScale = parseFloat(scaleRange.value);
-      }
-    });
-    canvas.addEventListener('touchmove', e => {
-      e.preventDefault(); const t = e.touches;
-      if (touchMode === 'pan' && t.length === 1) {
-        const dx = (t[0].clientX - lastTouch.x) / canvas.width * 100;
-        const dy = (t[0].clientY - lastTouch.y) / canvas.height * 100;
-        offsetXRange.value = Math.min(Math.max(initialOffset.x + dx, parseInt(offsetXRange.min)), parseInt(offsetXRange.max));
-        offsetYRange.value = Math.min(Math.max(initialOffset.y + dy, parseInt(offsetYRange.min)), parseInt(offsetYRange.max)); updateLabels(); drawCanvas();
-      } else if (touchMode === 'pinch' && t.length === 2) {
-        const dist = Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
-        scaleRange.value = Math.min(Math.max((initialScale * dist / initialDistance).toFixed(2), parseFloat(scaleRange.min)), parseFloat(scaleRange.max)); updateLabels(); drawCanvas();
-      }
-    });
-    canvas.addEventListener('touchend', () => touchMode = null);
-    // init
+    let mockupImages = {}, designImg = null;
+    let scale = 1.00, offsetX = 0, offsetY = 0;
+    const addMockupInput = document.getElementById('add-mockup-input'), thumbnails = document.getElementById('mockup-thumbnails'), noMsg = document.getElementById('no-mockups-msg'), designInput = document.getElementById('design-input'), scaleVal = document.getElementById('scale-val'), offsetXVal = document.getElementById('offset-x-val'), offsetYVal = document.getElementById('offset-y-val'), downloadBtn = document.getElementById('download-btn');
+    function loadStoredMockups() { mockupImages = JSON.parse(localStorage.getItem('mockupImages')||'{}'); }
+    function renderThumbnails() { thumbnails.innerHTML = ''; const keys = Object.keys(mockupImages); if(!keys.length){noMsg.style.display='block';return;} noMsg.style.display='none'; keys.forEach(label=>{ const img=document.createElement('img');img.src=mockupImages[label];img.alt=label;img.onclick=()=>selectMockup(label,img);thumbnails.appendChild(img);}); selectMockup(keys[0],thumbnails.firstChild);}    
+    function selectMockup(label,imgEl){ document.querySelectorAll('.thumbnail-container img').forEach(i=>i.classList.remove('selected')); imgEl.classList.add('selected'); const bg=new Image(); bg.onload=()=>{canvas.width=bg.width;canvas.height=bg.height;drawCanvas();}; bg.src=mockupImages[label]; window.bgImg=bg; localStorage.setItem('mockupImages', JSON.stringify(mockupImages)); }
+    function drawCanvas(){ if(!window.bgImg) return; ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(window.bgImg,0,0); if(designImg){ const w=designImg.width*scale, h=designImg.height*scale; const x=(canvas.width-w)/2 + (offsetX/100)*canvas.width; const y=(canvas.height-h)/2 + (offsetY/100)*canvas.height; ctx.drawImage(designImg,x,y,w,h);} }
+    function updateLabels(){ scaleVal.textContent=scale.toFixed(2); offsetXVal.textContent=offsetX+'%'; offsetYVal.textContent=offsetY+'%'; }
+    addMockupInput.onchange=e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ mockupImages[f.name]=r.result; localStorage.setItem('mockupImages', JSON.stringify(mockupImages)); renderThumbnails(); }; r.readAsDataURL(f); };
+    designInput.onchange=e=>{ const f=e.target.files[0]; if(!f) return; designImg=new Image(); designImg.onload=()=>{ drawCanvas(); }; designImg.src=URL.createObjectURL(f); };
+    document.querySelectorAll('.btn-small').forEach(btn=>{ btn.onclick=()=>{ const step=parseFloat(btn.dataset.step), target=btn.dataset.target; if(target==='scale'){ scale=Math.min(Math.max(scale+step,0.1),2); } else if(target==='offsetX'){ offsetX=Math.min(Math.max(offsetX+step,-50),50);} else if(target==='offsetY'){ offsetY=Math.min(Math.max(offsetY+step,-50),50);} updateLabels(); drawCanvas(); }; });
+    downloadBtn.onclick=()=>{ const m=parseInt(document.getElementById('resolution-select').value,10), ex=document.createElement('canvas'), exCtx=ex.getContext('2d'); ex.width=canvas.width*m; ex.height=canvas.height*m; exCtx.scale(m,m); exCtx.drawImage(window.bgImg,0,0); if(designImg){ const w=designImg.width*scale, h=designImg.height*scale; const x=(canvas.width-w)/2 + (offsetX/100)*canvas.width; const y=(canvas.height-h)/2 + (offsetY/100)*canvas.height; exCtx.drawImage(designImg,x,y,w,h);} ex.toBlob(blob=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`mockup@${m}x.png`; a.click(); URL.revokeObjectURL(a.href); },'image/png'); };
     loadStoredMockups(); renderThumbnails(); updateLabels();
   </script>
 </body>
