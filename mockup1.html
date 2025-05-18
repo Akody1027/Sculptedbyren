@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mockup Creator with Upscaler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --card: #fff;
+      --text: #333;
+      --accent: #4A90E2;
+      --shadow-light: rgba(0,0,0,0.05);
+      --shadow-strong: rgba(0,0,0,0.15);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin:0; padding:20px; font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); display:flex; flex-direction:column; align-items:center; padding-bottom:150px; }
+    .container { background:var(--card); border-radius:12px; box-shadow:0 4px 12px var(--shadow-light); width:100%; max-width:700px; padding:20px; margin-bottom:20px; }
+    h1 { text-align:center; margin-bottom:12px; font-size:1.6rem; }
+    label { font-weight:500; margin:10px 0 4px; display:block; }
+    input[type="file"] { width:100%; padding:6px; border:1px solid #ccc; border-radius:6px; background:#fafafa; }
+    .thumbnail-container { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0; }
+    .thumbnail-container img { width:60px; height:60px; object-fit:cover; border-radius:6px; cursor:pointer; border:2px solid transparent; box-shadow:0 2px 6px var(--shadow-light); transition:transform .2s,box-shadow .2s; }
+    .thumbnail-container img:hover { transform:translateY(-2px); box-shadow:0 4px 12px var(--shadow-strong); }
+    .thumbnail-container img.selected { border-color:var(--accent); }
+    canvas { width:100%; height:auto; margin:20px 0; border-radius:6px; box-shadow:0 4px 12px var(--shadow-light); background:#fff; touch-action:none; }
+    #controls-container { position:fixed; bottom:60px; left:0; width:100%; background:var(--card); padding:6px 8px; box-shadow:0 -2px 8px var(--shadow-light); display:flex; justify-content:center; align-items:center; gap:20px; z-index:100; }
+    .control-group { display:flex; flex-direction:column; gap:4px; }
+    .control-group.horizontal { flex-direction:row; gap:4px; }
+    .control-btn { background:#fff; border:none; border-radius:6px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; cursor:pointer; box-shadow:0 1px 3px var(--shadow-light); transition:transform .1s,box-shadow .1s; padding:0; }
+    .control-btn:hover { transform:translateY(-1px) scale(1.1); box-shadow:0 3px 6px var(--shadow-strong); }
+    select { padding:4px 8px; border-radius:6px; border:1px solid #ccc; font-size:.9rem; box-shadow:0 1px 3px var(--shadow-light); transition:box-shadow .2s; height:32px; }
+    select:hover { box-shadow:0 2px 6px var(--shadow-strong); }
+    #upscaler-container { position:fixed; bottom:0; left:0; width:100%; background:var(--card); padding:8px; display:flex; justify-content:center; box-shadow:0 -2px 8px var(--shadow-light); }
+    #launch { padding:8px 16px; font-size:1rem; border:none; border-radius:6px; background:var(--accent); color:#fff; box-shadow:0 2px 6px var(--shadow-light); cursor:pointer; transition:transform .1s,box-shadow .1s; }
+    #launch:active { transform:translateY(1px); box-shadow:0 1px 3px var(--shadow-strong); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mockup Creator</h1>
+    <label for="add-mockup-input">Upload a mockup (JPG/PNG)</label>
+    <input type="file" id="add-mockup-input" accept="image/*">
+    <div id="mockup-thumbnails" class="thumbnail-container"></div>
+    <div id="no-mockups-msg" class="no-mockups">No mockups yet — upload one above.</div>
+    <label for="design-input">Select your design (PNG)</label>
+    <input type="file" id="design-input" accept="image/png">
+    <canvas id="mockup-canvas"></canvas>
+  </div>
+  <button id="download-btn">Download</button>
+  <div id="controls-container">
+    <div class="control-group">
+      <button class="control-btn" data-target="offsetY" data-step="-1">▲</button>
+      <button class="control-btn" data-target="offsetY" data-step="1">▼</button>
+    </div>
+    <div class="control-group">
+      <button class="control-btn" data-target="scale" data-step="0.01">＋</button>
+      <button class="control-btn" data-target="scale" data-step="-0.01">−</button>
+    </div>
+    <select id="resolution-select">
+      <option value="1">1×</option>
+      <option value="2" selected>2×</option>
+      <option value="3">3×</option>
+      <option value="4">4×</option>
+    </select>
+    <div class="control-group horizontal">
+      <button class="control-btn" data-target="offsetX" data-step="-1">◀</button>
+      <button class="control-btn" data-target="offsetX" data-step="1">▶</button>
+    </div>
+  </div>
+  <div id="upscaler-container">
+    <button id="launch">Launch Upscaler</button>
+  </div>
+  <script>
+    // Existing mockup logic ...
+    // (Keep all previous JS for mockup, pan/pinch, controls, download)
+
+    // Upscaler launcher
+    document.getElementById('launch').addEventListener('click', () => {
+      const win = window.open('https://imgupscaler.com','imgUpscaler','width=1280,height=800');
+      win.addEventListener('load', () => {
+        if (typeof win.run === 'function') win.run();
+        if (typeof win.operate === 'function') win.operate();
+      });
+    });
+
+    // Initialize mockup
+    loadStoredMockups(); renderThumbnails();
+  </script>
+</body>
+</html>
