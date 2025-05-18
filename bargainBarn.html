@@ -4,109 +4,101 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Lylia’s Bargain Barn</title>
-
-  <!-- 1) Load FB SDK without auto-parsing XFBML -->
-  <div id="fb-root"></div>
-  <script async defer crossorigin="anonymous"
-    src="https://connect.facebook.net/en_US/sdk.js#version=v16.0">
-  </script>
-
   <style>
     * { box-sizing: border-box; margin:0; padding:0 }
     body { font-family: sans-serif; background: #fafafa; color: #333 }
     .container { max-width: 900px; margin: 0 auto; padding: 1rem }
-
-    /* Live area */
-    #livePlaceholder {
-      text-align: center;
-      font-size: 1.25rem;
-      color: #777;
-      margin: 2rem 0;
-      display: none;
-    }
-    #liveContainer {
-      margin: 2rem 0;
-      display: none;
-    }
-
-    /* Video grid */
+    #livePlaceholder, #liveContainer { text-align: center; margin: 2rem 0; }
+    #livePlaceholder { font-size: 1.25rem; color: #777; }
     .video-grid {
       display: grid;
       gap: 1rem;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     }
-    .fb-video {
-      min-height: 150px;
-    }
+    .fb-video { min-height: 150px; }
   </style>
 </head>
 <body>
 
+  <!-- 1) Facebook SDK root and loader -->
+  <div id="fb-root"></div>
+  <script async defer crossorigin="anonymous"
+    src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v16.0">
+  </script>
+
   <div class="container">
 
-    <!-- LIVE SECTION -->
+    <!-- LIVE SECTION (hidden until parsed) -->
     <div id="livePlaceholder">Live coming soon…</div>
     <div id="liveContainer" class="fb-video"
          data-href="https://www.facebook.com/LyliasBargainBarn/live/1AcugUjrRS"
          data-width="auto"
          data-show-text="false"
-         data-autoplay="true">
+         data-autoplay="true"
+         style="display:none;">
     </div>
 
-    <!-- ALL OTHER VIDEOS -->
+    <!-- VIDEO GRID -->
     <div class="video-grid" id="videoGrid"></div>
 
   </div>
 
   <script>
-    // 2) Your other video URLs here:
+    // === 2) Populate this array with your video URLs ===
     const otherVideos = [
       // "https://www.facebook.com/LyliasBargainBarn/videos/1234567890/",
       // "https://www.facebook.com/LyliasBargainBarn/videos/0987654321/",
       // …etc…
     ];
 
-    // Populate grid
+    // Create fb-video containers for each URL
     const grid = document.getElementById('videoGrid');
     otherVideos.forEach(url => {
-      const div = document.createElement('div');
-      div.className = 'fb-video';
-      div.setAttribute('data-href', url);
-      div.setAttribute('data-width', 'auto');
-      div.setAttribute('data-show-text', 'false');
-      div.setAttribute('data-autoplay', 'true');  // autoplay when parsed
-      grid.appendChild(div);
+      const slot = document.createElement('div');
+      slot.className = 'fb-video';
+      slot.setAttribute('data-href', url);
+      slot.setAttribute('data-width', 'auto');
+      slot.setAttribute('data-show-text', 'false');
+      slot.setAttribute('data-autoplay', 'true');
+      grid.appendChild(slot);
     });
 
-    // 3) When SDK is ready, init and set up lazy-parse + live-toggle
-    window.fbAsyncInit = function() {
-      FB.init({ version: 'v16.0' });
+    // === 3) Once FB SDK is ready… ===
+    window.fbAsyncInit = () => {
+      FB.init({ xfbml: true, version: 'v16.0' });
 
-      // IntersectionObserver to parse each video when scrolled into view
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting && !entry.target.dataset.parsed) {
-            FB.XFBML.parse(entry.target);
-            entry.target.dataset.parsed = 'true';
+      // Parse liveContainer immediately
+      FB.XFBML.parse(document.getElementById('liveContainer'));
+
+      // After a moment, check if the live iframe appeared
+      setTimeout(() => {
+        const liveIf = document.querySelector('#liveContainer iframe');
+        if (liveIf && /live/.test(liveIf.src)) {
+          // A live stream is active
+          document.getElementById('liveContainer').style.display = 'block';
+          document.getElementById('livePlaceholder').style.display = 'none';
+        } else {
+          // No live -> keep placeholder visible
+          document.getElementById('livePlaceholder').style.display = 'block';
+        }
+      }, 1500);
+
+      // Lazy-load/parsing for video grid as they scroll into view
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting && !e.target.dataset.parsed) {
+            FB.XFBML.parse(e.target);
+            e.target.dataset.parsed = '1';
           }
         });
       }, { threshold: 0.5 });
 
-      // Observe all .fb-video containers
-      document.querySelectorAll('.fb-video').forEach(el => observer.observe(el));
-
-      // After a short delay, decide whether live is actually streaming
-      setTimeout(() => {
-        const liveFrame = document.querySelector('#liveContainer iframe');
-        if (liveFrame && /\\/live\\//.test(liveFrame.src)) {
-          // Show live embed
-          document.getElementById('liveContainer').style.display = 'block';
-        } else {
-          // No live: show placeholder
-          document.getElementById('livePlaceholder').style.display = 'block';
-        }
-      }, 2000);
+      document.querySelectorAll('.fb-video').forEach(el => {
+        // Skip liveContainer
+        if (el.id !== 'liveContainer') io.observe(el);
+      });
     };
   </script>
+
 </body>
 </html>
