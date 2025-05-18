@@ -12,42 +12,31 @@
   </script>
 
   <style>
-    /* Basic reset */
     body { margin: 0; font-family: sans-serif; background: #fafafa; color: #333; }
+    .videos { width: 100%; max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+    .videos h2 { font-size: 1.25rem; margin-bottom: 1rem; }
 
-    /* Container for the live stream */
-    .live-container {
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 1rem;
-      background: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .live-container h1 {
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
+    /* Grid for visible videos */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
     }
 
-    /* Videos grid */
-    .videos {
-      width: 100%;
-      max-width: 1000px;
-      margin: 2rem auto;
-      padding: 0 1rem;
+    /* Style for the “more” details */
+    details {
+      margin-top: 1rem;
     }
-    .videos h2 {
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
-    }
-    .fb-page {
-      width: 100% !important;
+    summary {
+      cursor: pointer;
+      font-weight: bold;
+      margin-bottom: .5rem;
     }
   </style>
 </head>
 <body>
 
-  <!-- 2) Live Stream at Top -->
+  <!-- Live Stream Section (same as before) -->
   <section class="live-container">
     <h1>📡 Live Now</h1>
     <div class="fb-video"
@@ -58,21 +47,52 @@
     </div>
   </section>
 
-  <!-- 3) Latest Videos -->
+  <!-- Videos Section -->
   <section class="videos">
-    <h2>🎥 Latest Videos</h2>
-    <!-- Use the Page Plugin set to show Videos tab -->
-    <div class="fb-page"
-         data-href="https://www.facebook.com/LyliasBargainBarn"
-         data-tabs="videos"
-         data-width=""
-         data-height=""
-         data-small-header="false"
-         data-adapt-container-width="true"
-         data-hide-cover="true"
-         data-show-facepile="false">
-    </div>
+    <h2>🎥 All Videos</h2>
+    <div id="videoGrid" class="video-grid"></div>
+
+    <details id="moreVideos">
+      <summary>More Videos ↓</summary>
+      <div id="hiddenGrid" class="video-grid"></div>
+    </details>
   </section>
+
+  <script>
+    // 1) Populate this array with *all* of Lylia's video URLs:
+    const videos = [
+      // e.g. "https://www.facebook.com/LyliasBargainBarn/videos/1234567890/",
+      //       "https://www.facebook.com/LyliasBargainBarn/videos/0987654321/",
+      // …and so on
+    ];
+
+    const grid    = document.getElementById('videoGrid');
+    const hidden  = document.getElementById('hiddenGrid');
+
+    videos.forEach((url, i) => {
+      // create the FB video embed container
+      const fbDiv = document.createElement('div');
+      fbDiv.className = 'fb-video';
+      fbDiv.setAttribute('data-href', url);
+      fbDiv.setAttribute('data-width', 'auto');
+      fbDiv.setAttribute('data-show-text', 'false');
+      fbDiv.setAttribute('data-autoplay', 'false');
+
+      // append to visible grid or hidden dropdown
+      if (i < 10) {
+        grid.appendChild(fbDiv);
+      } else {
+        hidden.appendChild(fbDiv);
+      }
+    });
+
+    // Because FB SDK parses only on load, re-run XFBML parse after adding elements
+    window.fbAsyncInit = function() {
+      FB.init({ xfbml: true, version: 'v16.0' });
+    };
+    // In case SDK was already loaded before we appended:
+    if (window.FB) FB.XFBML.parse();
+  </script>
 
 </body>
 </html>
