@@ -15,90 +15,25 @@
       --shadow-strong: rgba(0,0,0,0.15);
     }
     *, *::before, *::after { box-sizing: border-box; }
-    body {
-      margin: 0; padding: 20px;
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex; flex-direction: column; align-items: center;
-      padding-bottom: 150px;
-    }
-    .container {
-      background: var(--card);
-      border-radius: 12px;
-      box-shadow: 0 4px 12px var(--shadow-light);
-      width: 100%; max-width: 700px;
-      padding: 20px; margin-bottom: 20px;
-    }
-    h1 { text-align: center; margin-bottom: 12px; font-size: 1.6rem; }
-    label { display: block; font-weight: 500; margin: 10px 0 4px; }
-    input[type="file"] {
-      width: 100%; padding: 6px;
-      border: 1px solid #ccc; border-radius: 6px;
-      background: #fafafa;
-    }
-    .thumbnail-container {
-      display: flex; flex-wrap: wrap; gap: 8px;
-      justify-content: center; margin: 10px 0;
-    }
-    .thumbnail-container img {
-      width: 60px; height: 60px; object-fit: cover;
-      border-radius: 6px; cursor: pointer;
-      border: 2px solid transparent;
-      box-shadow: 0 2px 6px var(--shadow-light);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .thumbnail-container img:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--shadow-strong); }
-    .thumbnail-container img.selected { border-color: var(--accent); }
-    canvas {
-      width: 100%; height: auto;
-      margin: 20px 0; border-radius: 6px;
-      box-shadow: 0 4px 12px var(--shadow-light);
-      background: #fff; touch-action: none;
-    }
-    #controls-container {
-      position: fixed; bottom: 0; left: 0;
-      width: 100%; background: var(--card);
-      padding: 6px 8px;
-      box-shadow: 0 -2px 8px var(--shadow-light);
-      display: flex; justify-content: center;
-      align-items: center; gap: 20px; z-index: 100;
-    }
-    .control-group { display: flex; flex-direction: column; gap: 2px; }
-    .control-group.horizontal { flex-direction: row; }
-    .control-btn {
-      background: #fff; border: none;
-      border-radius: 6px; padding: 4px;
-      cursor: pointer; font-size: 1rem;
-      box-shadow: 0 1px 3px var(--shadow-light);
-      transition: transform 0.1s, box-shadow 0.1s;
-      width: 28px; height: 28px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .control-btn:hover {
-      transform: translateY(-1px) scale(1.1);
-      box-shadow: 0 3px 6px var(--shadow-strong);
-    }
-    select {
-      padding: 4px 8px; border-radius: 6px;
-      border: 1px solid #ccc; font-size: 0.9rem;
-      box-shadow: 0 1px 3px var(--shadow-light);
-      transition: box-shadow 0.2s;
-      height: 28px;
-    }
-    select:hover { box-shadow: 0 2px 6px var(--shadow-strong); }
-    #download-btn {
-      padding: 6px 12px; background: var(--accent);
-      color: #fff; border: none;
-      border-radius: 6px; font-size: 0.9rem;
-      cursor: pointer; box-shadow: 0 2px 6px var(--shadow-light);
-      position: fixed; top: 12px; right: 12px; z-index: 110;
-      transition: transform 0.1s, box-shadow 0.1s;
-    }
-    #download-btn:hover {
-      transform: translateY(-1px) scale(1.05);
-      box-shadow: 0 4px 12px var(--shadow-strong);
-    }
+    body { margin:0; padding:20px; font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); display:flex; flex-direction:column; align-items:center; padding-bottom:150px; }
+    .container { background:var(--card); border-radius:12px; box-shadow:0 4px 12px var(--shadow-light); width:100%; max-width:700px; padding:20px; margin-bottom:20px; }
+    h1 { text-align:center; margin-bottom:12px; font-size:1.6rem; }
+    label { font-weight:500; margin:10px 0 4px; display:block; }
+    input[type="file"] { width:100%; padding:6px; border:1px solid #ccc; border-radius:6px; background:#fafafa; }
+    .thumbnail-container { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0; }
+    .thumbnail-container img { width:60px; height:60px; object-fit:cover; border-radius:6px; cursor:pointer; border:2px solid transparent; box-shadow:0 2px 6px var(--shadow-light); transition:transform .2s,box-shadow .2s; }
+    .thumbnail-container img:hover { transform:translateY(-2px); box-shadow:0 4px 12px var(--shadow-strong); }
+    .thumbnail-container img.selected { border-color:var(--accent); }
+    canvas { width:100%; height:auto; margin:20px 0; border-radius:6px; box-shadow:0 4px 12px var(--shadow-light); background:#fff; touch-action:none; }
+    #controls-container { position:fixed; bottom:0; left:0; width:100%; background:var(--card); padding:6px 8px; box-shadow:0 -2px 8px var(--shadow-light); display:flex; justify-content:center; align-items:center; gap:20px; z-index:100; }
+    .control-group { display:flex; flex-direction:column; gap:4px; }
+    .control-group.horizontal { flex-direction:row; gap:4px; }
+    .control-btn { background:#fff; border:none; border-radius:6px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; cursor:pointer; box-shadow:0 1px 3px var(--shadow-light); transition:transform .1s,box-shadow .1s; padding:0; }
+    .control-btn:hover { transform:translateY(-1px) scale(1.1); box-shadow:0 3px 6px var(--shadow-strong); }
+    select { padding:4px 8px; border-radius:6px; border:1px solid #ccc; font-size:.9rem; box-shadow:0 1px 3px var(--shadow-light); transition:box-shadow .2s; height:32px; }
+    select:hover { box-shadow:0 2px 6px var(--shadow-strong); }
+    #download-btn { position:fixed; top:12px; right:12px; padding:6px 12px; background:var(--accent); color:#fff; border:none; border-radius:6px; font-size:.9rem; cursor:pointer; box-shadow:0 2px 6px var(--shadow-light); transition:transform .1s,box-shadow .1s; }
+    #download-btn:hover { transform:translateY(-1px) scale(1.05); box-shadow:0 4px 12px var(--shadow-strong); }
   </style>
 </head>
 <body>
@@ -108,76 +43,56 @@
     <input type="file" id="add-mockup-input" accept="image/*">
     <div id="mockup-thumbnails" class="thumbnail-container"></div>
     <div id="no-mockups-msg" class="no-mockups">No mockups yet — upload one above.</div>
-
     <label for="design-input">Select your design (PNG)</label>
     <input type="file" id="design-input" accept="image/png">
     <canvas id="mockup-canvas"></canvas>
   </div>
-
   <button id="download-btn">Download</button>
-
   <div id="controls-container">
-    <!-- Y Offset -->
     <div class="control-group">
       <button class="control-btn" data-target="offsetY" data-step="-1">▲</button>
       <button class="control-btn" data-target="offsetY" data-step="1">▼</button>
     </div>
-    <!-- Zoom -->
     <div class="control-group">
       <button class="control-btn" data-target="scale" data-step="0.01">＋</button>
       <button class="control-btn" data-target="scale" data-step="-0.01">−</button>
     </div>
-    <!-- Resolution -->
     <select id="resolution-select">
       <option value="1">1×</option>
       <option value="2" selected>2×</option>
       <option value="3">3×</option>
       <option value="4">4×</option>
     </select>
-    <!-- X Offset -->
     <div class="control-group horizontal">
       <button class="control-btn" data-target="offsetX" data-step="-1">◀</button>
       <button class="control-btn" data-target="offsetX" data-step="1">▶</button>
     </div>
   </div>
-
   <script>
     const canvas = document.getElementById('mockup-canvas'), ctx = canvas.getContext('2d');
     let mockupImages = {}, designImg = null;
     let scale = 1.00, offsetX = 0, offsetY = 0;
-    let touchMode = null, initDist = 0, initScale = 1, initOffset = { x: 0, y: 0 };
-
-    const addMockupInput = document.getElementById('add-mockup-input');
-    const thumbnails = document.getElementById('mockup-thumbnails');
-    const noMsg = document.getElementById('no-mockups-msg');
-    const designInput = document.getElementById('design-input');
-    const downloadBtn = document.getElementById('download-btn');
-    const resolutionSelect = document.getElementById('resolution-select');
-
-    function loadStoredMockups() { mockupImages = JSON.parse(localStorage.getItem('mockupImages') || '{}'); }
-    function renderThumbnails() {
-      thumbnails.innerHTML = '';
-      const keys = Object.keys(mockupImages);
-      if (!keys.length) { noMsg.style.display = 'block'; return; }
-      noMsg.style.display = 'none';
-      keys.forEach(label => { const img = document.createElement('img'); img.src = mockupImages[label]; img.alt = label; img.onclick = () => selectMockup(label,img); thumbnails.appendChild(img); });
-      selectMockup(keys[0], thumbnails.firstChild);
-    }
-    function selectMockup(label,imgEl) {
-      document.querySelectorAll('.thumbnail-container img').forEach(i=>i.classList.remove('selected'));
-      imgEl.classList.add('selected');
-      const bg=new Image(); bg.onload=()=>{canvas.width=bg.width;canvas.height=bg.height;drawCanvas();}; bg.src=mockupImages[label]; window.bgImg=bg;
-      localStorage.setItem('mockupImages',JSON.stringify(mockupImages));
-    }
-    function drawCanvas(){ if(!window.bgImg) return; ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(window.bgImg,0,0); if(designImg){ const w=designImg.width*scale, h=designImg.height*scale; const x=(canvas.width-w)/2+(offsetX/100)*canvas.width; const y=(canvas.height-h)/2+(offsetY/100)*canvas.height; ctx.drawImage(designImg,x,y,w,h);} }
-    addMockupInput.onchange=e=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ mockupImages[f.name]=r.result; localStorage.setItem('mockupImages',JSON.stringify(mockupImages)); renderThumbnails(); }; r.readAsDataURL(f); };
-    designInput.onchange=e=>{ const f=e.target.files[0]; if(!f)return; designImg=new Image(); designImg.onload=()=>drawCanvas(); designImg.src=URL.createObjectURL(f); };
-    document.querySelectorAll('.control-btn').forEach(btn=>{ btn.onclick=()=>{ const step=parseFloat(btn.dataset.step), tgt=btn.dataset.target; if(tgt==='scale')scale=Math.min(Math.max(scale+step,0.1),2); if(tgt==='offsetX')offsetX=Math.min(Math.max(offsetX+step,-50),50); if(tgt==='offsetY')offsetY=Math.min(Math.max(offsetY+step,-50),50); drawCanvas(); }; });
-    canvas.addEventListener('touchstart',e=>{ e.preventDefault(); const t=e.touches; if(t.length===1){touchMode='pan'; initOffset={x:offsetX,y:offsetY};}else if(t.length===2){touchMode='pinch'; initDist=Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY); initScale=scale;} });
-    canvas.addEventListener('touchmove',e=>{ e.preventDefault(); const t=e.touches; if(touchMode==='pan'&&t.length===1){ const dx=(t[0].clientX-e.target.getBoundingClientRect().left-canvas.width/2)/canvas.width*100; const dy=(t[0].clientY-e.target.getBoundingClientRect().top-canvas.height/2)/canvas.height*100; offsetX=Math.min(Math.max(initOffset.x+dx,-50),50); offsetY=Math.min(Math.max(initOffset.y+dy,-50),50); drawCanvas(); }else if(touchMode==='pinch'&&t.length===2){ const dist=Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY); scale=Math.min(Math.max(initScale*(dist/initDist),0.1),2); drawCanvas();} });
-    canvas.addEventListener('touchend',e=>{ if(e.touches.length===0)touchMode=null; });
-    downloadBtn.onclick=()=>{ const m=parseInt(resolutionSelect.value,10); const ex=document.createElement('canvas'), exCtx=ex.getContext('2d'); ex.width=canvas.width*m; ex.height=canvas.height*m; exCtx.scale(m,m); exCtx.drawImage(window.bgImg,0,0); if(designImg){ const w=designImg.width*scale,h=designImg.height*scale; const x=(canvas.width-w)/2+(offsetX/100)*canvas.width; const y=(canvas.height-h)/2+(offsetY/100)*canvas.height; exCtx.drawImage(designImg,x,y,w,h);} ex.toBlob(blob=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`mockup@${m}x.png`; a.click(); URL.revokeObjectURL(a.href);},'image/png'); };
-    loadStoredMockups(); renderThumbnails();
+    let touchMode = null, initDist = 0, initScale = 1, initOffset = {x:0,y:0}, lastTouch = {x:0,y:0};
+    const addMockupInput = document.getElementById('add-mockup-input'), thumbnails = document.getElementById('mockup-thumbnails'), noMsg = document.getElementById('no-mockups-msg'), designInput = document.getElementById('design-input'), downloadBtn = document.getElementById('download-btn'), resolutionSelect = document.getElementById('resolution-select');
+    function loadStoredMockups(){mockupImages=JSON.parse(localStorage.getItem('mockupImages')||'{}');}
+    function renderThumbnails(){thumbnails.innerHTML='';const keys=Object.keys(mockupImages);if(!keys.length){noMsg.style.display='block';return;}noMsg.style.display='none';keys.forEach(label=>{const img=document.createElement('img');img.src=mockupImages[label];img.alt=label;img.onclick=()=>selectMockup(label,img);thumbnails.appendChild(img);});selectMockup(keys[0],thumbnails.firstChild);}
+    function selectMockup(label,imgEl){document.querySelectorAll('.thumbnail-container img').forEach(i=>i.classList.remove('selected'));imgEl.classList.add('selected');const bg=new Image();bg.onload=()=>{canvas.width=bg.width;canvas.height=bg.height;drawCanvas();};bg.src=mockupImages[label];window.bgImg=bg;localStorage.setItem('mockupImages',JSON.stringify(mockupImages));}
+    function drawCanvas(){if(!window.bgImg)return;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(window.bgImg,0,0);if(designImg){const w=designImg.width*scale,h=designImg.height*scale,x=(canvas.width-w)/2+(offsetX/100)*canvas.width,y=(canvas.height-h)/2+(offsetY/100)*canvas.height;ctx.drawImage(designImg,x,y,w,h);}}
+    addMockupInput.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{mockupImages[f.name]=r.result;localStorage.setItem('mockupImages',JSON.stringify(mockupImages));renderThumbnails();};r.readAsDataURL(f);};
+    designInput.onchange=e=>{const f=e.target.files[0];if(!f)return;designImg=new Image();designImg.onload=()=>drawCanvas();designImg.src=URL.createObjectURL(f);};
+    let btnInterval;
+    document.querySelectorAll('.control-btn').forEach(btn=>{
+      const action=()=>{const step=parseFloat(btn.dataset.step),tgt=btn.dataset.target;if(tgt==='scale')scale=Math.min(Math.max(scale+step,0.1),2);if(tgt==='offsetX')offsetX=Math.min(Math.max(offsetX+step,-50),50);if(tgt==='offsetY')offsetY=Math.min(Math.max(offsetY+step,-50),50);drawCanvas();};
+      btn.addEventListener('mousedown',e=>{action();btnInterval=setInterval(action,100);});
+      btn.addEventListener('mouseup',e=>clearInterval(btnInterval));btn.addEventListener('mouseleave',e=>clearInterval(btnInterval));
+      btn.addEventListener('touchstart',e=>{e.preventDefault();action();btnInterval=setInterval(action,100);});
+      btn.addEventListener('touchend',e=>{clearInterval(btnInterval);});
+    });
+    canvas.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches;if(t.length===1){touchMode='pan';lastTouch={x:t[0].clientX,y:t[0].clientY};initOffset={x:offsetX,y:offsetY};}else if(t.length===2){touchMode='pinch';initDist=Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);initScale=scale;}});
+    canvas.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches;if(touchMode==='pan'&&t.length===1){const dx=(t[0].clientX-lastTouch.x)/canvas.width*100,dy=(t[0].clientY-lastTouch.y)/canvas.height*100;offsetX=Math.min(Math.max(initOffset.x+dx,-50),50);offsetY=Math.min(Math.max(initOffset.y+dy,-50),50);drawCanvas();}else if(touchMode==='pinch'&&t.length===2){const dist=Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);scale=Math.min(Math.max(initScale*(dist/initDist),0.1),2);drawCanvas();}});
+    canvas.addEventListener('touchend',e=>{if(e.touches.length===0)touchMode=null;});
+    downloadBtn.addEventListener('click',()=>{const m=parseInt(resolutionSelect.value,10),ex=document.createElement('canvas'),exCtx=ex.getContext('2d');ex.width=canvas.width*m;ex.height=canvas.height*m;exCtx.scale(m,m);exCtx.drawImage(window.bgImg,0,0);if(designImg){const w=designImg.width*scale,h=designImg.height*scale,x=(canvas.width-w)/2+(offsetX/100)*canvas.width,y=(canvas.height-h)/2+(offsetY/100)*canvas.height;exCtx.drawImage(designImg,x,y,w,h);}ex.toBlob(blob=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mockup@${m}x.png`;a.click();URL.revokeObjectURL(a.href);},'image/png');});
+    loadStoredMockups();renderThumbnails();
   </script>
 </body>
 </html>
