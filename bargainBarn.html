@@ -5,92 +5,158 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Lylia’s Bargain Barn</title>
 
-  <!-- 1) Load the Facebook SDK -->
+  <!-- 1) Facebook SDK -->
   <div id="fb-root"></div>
   <script async defer crossorigin="anonymous"
     src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v16.0">
   </script>
 
   <style>
-    body { margin: 0; font-family: sans-serif; background: #fafafa; color: #333; }
-    .videos { width: 100%; max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
-    .videos h2 { font-size: 1.25rem; margin-bottom: 1rem; }
+    /* Reset & base */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #fafafa; color: #333; }
+    img { display: block; max-width: 100%; height: auto; }
 
-    /* Grid for visible videos */
+    /* Header */
+    .site-header {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: url('YOUR_BANNER_IMAGE_URL') center/cover no-repeat;
+    }
+    .profile-pic {
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 80px;
+      border: 4px solid #fff;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    /* Container common */
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* Live section */
+    .live-container h1 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    /* First video */
+    .first-video {
+      margin: 2rem 0;
+    }
+    .first-video h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Videos grid */
+    .videos h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
     .video-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 1rem;
     }
 
-    /* Style for the “more” details */
+    /* “More” dropdown */
     details {
       margin-top: 1rem;
     }
     summary {
       cursor: pointer;
       font-weight: bold;
-      margin-bottom: .5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Responsive tweak */
+    @media(max-width: 500px) {
+      .site-header { height: 120px; }
+      .profile-pic { width: 60px; height: 60px; bottom: -30px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Live Stream Section (same as before) -->
-  <section class="live-container">
-    <h1>📡 Live Now</h1>
-    <div class="fb-video"
-         data-href="https://www.facebook.com/LyliasBargainBarn/live/1AcugUjrRS"
-         data-width="auto"
-         data-show-text="false"
-         data-autoplay="true">
-    </div>
-  </section>
+  <!-- HEADER -->
+  <header class="site-header">
+    <img src="YOUR_PROFILE_IMAGE_URL" alt="Lylia’s Profile" class="profile-pic" />
+  </header>
 
-  <!-- Videos Section -->
-  <section class="videos">
-    <h2>🎥 All Videos</h2>
-    <div id="videoGrid" class="video-grid"></div>
+  <div class="container">
 
-    <details id="moreVideos">
-      <summary>More Videos ↓</summary>
-      <div id="hiddenGrid" class="video-grid"></div>
-    </details>
-  </section>
+    <!-- LIVE STREAM -->
+    <section class="live-container">
+      <h1>📡 Live Now</h1>
+      <div class="fb-video"
+           data-href="https://www.facebook.com/LyliasBargainBarn/live/1AcugUjrRS"
+           data-width="auto"
+           data-show-text="false"
+           data-autoplay="true">
+      </div>
+    </section>
+
+    <!-- FIRST VIDEO -->
+    <section class="first-video">
+      <h2>🌟 First Posted Video</h2>
+      <div class="fb-video"
+           data-href="https://www.facebook.com/share/v/16Qavz1U9h/"
+           data-width="auto"
+           data-show-text="false"
+           data-autoplay="false">
+      </div>
+    </section>
+
+    <!-- ALL OTHER VIDEOS -->
+    <section class="videos">
+      <h2>🎥 More Videos</h2>
+      <div id="videoGrid" class="video-grid"></div>
+
+      <details id="moreVideos">
+        <summary>More Videos ↓</summary>
+        <div id="hiddenGrid" class="video-grid"></div>
+      </details>
+    </section>
+
+  </div>
 
   <script>
-    // 1) Populate this array with *all* of Lylia's video URLs:
-    const videos = [
-      // e.g. "https://www.facebook.com/LyliasBargainBarn/videos/1234567890/",
-      //       "https://www.facebook.com/LyliasBargainBarn/videos/0987654321/",
-      // …and so on
+    // 2) List every other video URL here (excluding the one above):
+    const otherVideos = [
+      // "https://www.facebook.com/LyliasBargainBarn/videos/1234567890/",
+      // "https://www.facebook.com/LyliasBargainBarn/videos/0987654321/",
+      // …etc…
     ];
 
-    const grid    = document.getElementById('videoGrid');
-    const hidden  = document.getElementById('hiddenGrid');
+    const grid   = document.getElementById('videoGrid');
+    const hidden = document.getElementById('hiddenGrid');
 
-    videos.forEach((url, i) => {
-      // create the FB video embed container
-      const fbDiv = document.createElement('div');
-      fbDiv.className = 'fb-video';
-      fbDiv.setAttribute('data-href', url);
-      fbDiv.setAttribute('data-width', 'auto');
-      fbDiv.setAttribute('data-show-text', 'false');
-      fbDiv.setAttribute('data-autoplay', 'false');
+    otherVideos.forEach((url, i) => {
+      const fb = document.createElement('div');
+      fb.className = 'fb-video';
+      fb.setAttribute('data-href', url);
+      fb.setAttribute('data-width', 'auto');
+      fb.setAttribute('data-show-text', 'false');
+      fb.setAttribute('data-autoplay', 'false');
 
-      // append to visible grid or hidden dropdown
-      if (i < 10) {
-        grid.appendChild(fbDiv);
-      } else {
-        hidden.appendChild(fbDiv);
-      }
+      if (i < 10) grid.appendChild(fb);
+      else        hidden.appendChild(fb);
     });
 
-    // Because FB SDK parses only on load, re-run XFBML parse after adding elements
-    window.fbAsyncInit = function() {
-      FB.init({ xfbml: true, version: 'v16.0' });
-    };
-    // In case SDK was already loaded before we appended:
+    // Re-parse XFBML in case SDK already loaded
+    window.fbAsyncInit = () => FB.init({ xfbml: true, version: 'v16.0' });
     if (window.FB) FB.XFBML.parse();
   </script>
 
