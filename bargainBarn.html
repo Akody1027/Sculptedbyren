@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Lylia’s Bargain Barn</title>
 
-  <!-- 1) Facebook SDK -->
+  <!-- Facebook SDK -->
   <div id="fb-root"></div>
   <script async defer crossorigin="anonymous"
     src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v16.0">
@@ -44,37 +44,27 @@
       padding: 1rem;
     }
 
-    /* Live section */
-    .live-container h1 {
-      font-size: 1.25rem;
-      margin-bottom: 0.5rem;
+    /* Sections */
+    section { margin-bottom: 2rem; }
+
+    .live-container h1,
+    .first-video h2,
+    .videos h2,
+    .page-plugin h2 {
       text-align: center;
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
     }
 
-    /* First video */
-    .first-video {
-      margin: 2rem 0;
-    }
-    .first-video h2 {
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
-    }
-
-    /* Videos grid */
-    .videos h2 {
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
-    }
+    /* Video grids */
     .video-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 1rem;
     }
 
-    /* “More” dropdown */
-    details {
-      margin-top: 1rem;
-    }
+    /* Dropdown */
+    details { margin-top: 1rem; }
     summary {
       cursor: pointer;
       font-weight: bold;
@@ -130,10 +120,25 @@
       </details>
     </section>
 
+    <!-- FACEBOOK PAGE PLUGIN -->
+    <section class="page-plugin">
+      <h2>👍 Follow Us on Facebook</h2>
+      <div class="fb-page"
+           data-href="https://www.facebook.com/LyliasBargainBarn"
+           data-tabs="timeline"
+           data-width="500"
+           data-height="600"
+           data-small-header="false"
+           data-adapt-container-width="true"
+           data-hide-cover="false"
+           data-show-facepile="true">
+      </div>
+    </section>
+
   </div>
 
   <script>
-    // 2) List every other video URL here (excluding the one above):
+    // List every other video URL here (excluding the first one above):
     const otherVideos = [
       // "https://www.facebook.com/LyliasBargainBarn/videos/1234567890/",
       // "https://www.facebook.com/LyliasBargainBarn/videos/0987654321/",
@@ -155,7 +160,7 @@
       else        hidden.appendChild(fb);
     });
 
-    // Re-parse XFBML in case SDK already loaded
+    // Re-parse XFBML if SDK already loaded
     window.fbAsyncInit = () => FB.init({ xfbml: true, version: 'v16.0' });
     if (window.FB) FB.XFBML.parse();
   </script>
