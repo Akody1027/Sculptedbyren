@@ -50,8 +50,8 @@
   <button id="download-btn">Download Mockup</button>
   <div id="controls-container">
     <div class="control-group">
-      <button class="control-btn" data-target="scale" data-step="0.05">＋</button>
-      <button class="control-btn" data-target="scale" data-step="-0.05">−</button>
+      <button class="control-btn" data-target="scale" data-step="0.02">＋</button>
+      <button class="control-btn" data-target="scale" data-step="-0.02">−</button>
     </div>
     <div class="control-group">
       <button class="control-btn" data-target="offsetX" data-step="-1">◀</button>
@@ -62,8 +62,8 @@
       <button class="control-btn" data-target="offsetY" data-step="1">▼</button>
     </div>
     <div class="control-group">
-      <button class="control-btn" data-target="rotation" data-step="5">⟲</button>
-      <button class="control-btn" data-target="rotation" data-step="-5">⟳</button>
+      <button class="control-btn" data-target="rotation" data-step="-5">⟲</button>
+      <button class="control-btn" data-target="rotation" data-step="5">⟳</button>
     </div>
     <select id="resolution-select">
       <option value="1">1×</option>
@@ -85,100 +85,187 @@
     const downloadBtn = document.getElementById('download-btn');
     const resolutionSelect = document.getElementById('resolution-select');
 
-    function loadStoredMockups(){
+    function loadStoredMockups() {
       mockupImages = JSON.parse(localStorage.getItem('mockupImages')||'{}');
     }
 
-    function renderThumbnails(){
+    function renderThumbnails() {
       thumbnails.innerHTML = '';
       const keys = Object.keys(mockupImages);
-      if(!keys.length){ noMsg.style.display = 'block'; return; }
+      if (!keys.length) {
+        noMsg.style.display = 'block';
+        return;
+      }
       noMsg.style.display = 'none';
 
-      keys.forEach(label=>{
+      keys.forEach(label => {
         const img = document.createElement('img');
-        img.src = mockupImages[label]; img.alt = label;
-        img.addEventListener('contextmenu', e=>e.preventDefault());
+        img.src = mockupImages[label];
+        img.alt = label;
+        img.addEventListener('contextmenu', e => e.preventDefault());
         let holdTimer;
-        img.addEventListener('pointerdown', e=>{ e.preventDefault(); holdTimer = setTimeout(()=>deleteMockup(label),500); e.currentTarget._downTime = e.timeStamp; });
-        img.addEventListener('pointerup', e=>{ clearTimeout(holdTimer); if(e.timeStamp - e.currentTarget._downTime < 500) selectMockup(label, img); });
-        img.addEventListener('pointermove', ()=>clearTimeout(holdTimer));
-        img.addEventListener('pointercancel', ()=>clearTimeout(holdTimer));
+        img.addEventListener('pointerdown', e => {
+          e.preventDefault();
+          holdTimer = setTimeout(() => deleteMockup(label), 500);
+        });
+        img.addEventListener('pointerup', e => {
+          clearTimeout(holdTimer);
+          selectMockup(label, img);
+        });
+        img.addEventListener('pointermove', () => clearTimeout(holdTimer));
+        img.addEventListener('pointercancel', () => clearTimeout(holdTimer));
         thumbnails.appendChild(img);
       });
 
-      if(keys.length) selectMockup(keys[0], thumbnails.querySelector('img'));
+      if (keys.length) selectMockup(keys[0], thumbnails.querySelector('img'));
     }
 
-    function selectMockup(label,imgEl){
-      document.querySelectorAll('.thumbnail-container img').forEach(i=>i.classList.remove('selected'));
-      if(imgEl) imgEl.classList.add('selected');
+    function selectMockup(label, imgEl) {
+      document.querySelectorAll('.thumbnail-container img').forEach(i => i.classList.remove('selected'));
+      if (imgEl) imgEl.classList.add('selected');
       const bg = new Image();
-      bg.onload=()=>{ canvas.width=bg.width; canvas.height=bg.height; drawCanvas(); };
-      bg.src=mockupImages[label]; window.bgImg=bg;
+      bg.onload = () => {
+        canvas.width = bg.width;
+        canvas.height = bg.height;
+        drawCanvas();
+      };
+      bg.src = mockupImages[label];
+      window.bgImg = bg;
     }
 
-    function deleteMockup(label){
-      if(!confirm('Delete this mockup?')) return;
-      delete mockupImages[label]; localStorage.setItem('mockupImages',JSON.stringify(mockupImages));
-      loadStoredMockups(); renderThumbnails();
+    function deleteMockup(label) {
+      if (!confirm('Delete this mockup?')) return;
+      delete mockupImages[label];
+      localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
+      loadStoredMockups();
+      renderThumbnails();
     }
 
-    function drawCanvas(){
-      if(!window.bgImg) return;
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.drawImage(window.bgImg,0,0);
-      if(designImg){
-        const w=designImg.width*scale, h=designImg.height*scale;
-        const cx=canvas.width/2 + (offsetX/100)*canvas.width;
-        const cy=canvas.height/2 + (offsetY/100)*canvas.height;
-        ctx.save(); ctx.translate(cx,cy); ctx.rotate(rotation*Math.PI/180);
-        ctx.drawImage(designImg,-w/2,-h/2,w,h); ctx.restore();
+    function drawCanvas() {
+      if (!window.bgImg) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(window.bgImg, 0, 0);
+      if (designImg) {
+        const w = designImg.width * scale;
+        const h = designImg.height * scale;
+        const cx = canvas.width / 2 + (offsetX / 100) * canvas.width;
+        const cy = canvas.height / 2 + (offsetY / 100) * canvas.height;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(rotation * Math.PI / 180);
+        ctx.drawImage(designImg, -w / 2, -h / 2, w, h);
+        ctx.restore();
       }
     }
 
-    addMockupInput.onchange=e=>{ const f=e.target.files[0]; if(!f)return;
-      const r=new FileReader(); r.onload=()=>{ mockupImages[f.name]=r.result; localStorage.setItem('mockupImages',JSON.stringify(mockupImages)); loadStoredMockups(); renderThumbnails(); };
+    addMockupInput.onchange = e => {
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        mockupImages[f.name] = r.result;
+        localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
+        loadStoredMockups();
+        renderThumbnails();
+      };
       r.readAsDataURL(f);
     };
 
-    designInput.onchange=e=>{ const f=e.target.files[0]; if(!f)return;
-      designImg=new Image(); designImg.onload=drawCanvas; designImg.src=URL.createObjectURL(f);
+    designInput.onchange = e => {
+      const f = e.target.files[0];
+      if (!f) return;
+      designImg = new Image();
+      designImg.onload = drawCanvas;
+      designImg.src = URL.createObjectURL(f);
     };
 
+    downloadBtn.addEventListener('click', () => {
+      const m = parseInt(resolutionSelect.value, 10);
+      const ex = document.createElement('canvas');
+      const exCtx = ex.getContext('2d');
+      ex.width = canvas.width * m;
+      ex.height = canvas.height * m;
+      exCtx.scale(m, m);
+      exCtx.drawImage(window.bgImg, 0, 0);
+      if (designImg) {
+        const w = designImg.width * scale;
+        const h = designImg.height * scale;
+        const cx = canvas.width / 2 + (offsetX / 100) * canvas.width;
+        const cy = canvas.height / 2 + (offsetY / 100) * canvas.height;
+        exCtx.save();
+        exCtx.translate(cx, cy);
+        exCtx.rotate(rotation * Math.PI / 180);
+        exCtx.drawImage(designImg, -w / 2, -h / 2, w, h);
+        exCtx.restore();
+      }
+      ex.toBlob(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `mockup@${m}x.png`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }, 'image/png');
+    });
+
     let btnInterval;
-    document.querySelectorAll('.control-btn').forEach(btn=>{
-      const action=()=>{
-        const step=parseFloat(btn.dataset.step), tgt=btn.dataset.target;
-        if(tgt==='scale') scale=Math.max(0.01,Math.min(scale+step,10));
-        if(tgt==='offsetX') offsetX=Math.min(Math.max(offsetX+step,-50),50);
-        if(tgt==='offsetY') offsetY=Math.min(Math.max(offsetY+step,-50),50);
-        if(tgt==='rotation') rotation=(rotation+step)%360;
+    document.querySelectorAll('.control-btn').forEach(btn => {
+      const action = () => {
+        const step = parseFloat(btn.dataset.step);
+        const tgt = btn.dataset.target;
+        if (tgt === 'scale') scale = Math.max(0.01, Math.min(scale + step, 10));
+        if (tgt === 'offsetX') offsetX = Math.min(Math.max(offsetX + step, -50), 50);
+        if (tgt === 'offsetY') offsetY = Math.min(Math.max(offsetY + step, -50), 50);
+        if (tgt === 'rotation') rotation = (rotation + step + 360) % 360;
         drawCanvas();
       };
-      btn.addEventListener('mousedown',()=>{ action(); btnInterval=setInterval(action,100); });
-      btn.addEventListener('mouseup',()=>clearInterval(btnInterval));
-      btn.addEventListener('mouseleave',()=>clearInterval(btnInterval));
-      btn.addEventListener('touchstart',e=>{ e.preventDefault(); action(); btnInterval=setInterval(action,100); });
-      btn.addEventListener('touchend',()=>clearInterval(btnInterval));
+      btn.addEventListener('mousedown', () => { action(); btnInterval = setInterval(action, 100); });
+      btn.addEventListener('mouseup', () => clearInterval(btnInterval));
+      btn.addEventListener('mouseleave', () => clearInterval(btnInterval));
+      btn.addEventListener('touchstart', e => { e.preventDefault(); action(); btnInterval = setInterval(action, 100); });
+      btn.addEventListener('touchend', () => clearInterval(btnInterval));
     });
 
-    let touchMode=null, initDist=0, initAngle=0, initScale=1, initRotation=0, initOffset={x:0,y:0}, lastTouch={x:0,y:0};
-    canvas.addEventListener('touchstart',e=>{ e.preventDefault(); const t=e.touches;
-      if(t.length===1){ touchMode='pan'; lastTouch={x:t[0].clientX,y:t[0].clientY}; initOffset={x:offsetX,y:offsetY}; }
-      else if(t.length===2){ touchMode='pinch'; const dx=t[1].clientX-t[0].clientX, dy=t[1].clientY-t[0].clientY;
-        initDist=Math.hypot(dx,dy); initAngle=Math.atan2(dy,dx); initScale=scale; initRotation=rotation; }
+    let touchMode = null, initDist = 0, initAngle = 0, initScale = 1, initRotation = 0, initOffset = { x: 0, y: 0 }, lastTouch = { x: 0, y: 0 };
+    canvas.addEventListener('touchstart', e => {
+      e.preventDefault();
+      const t = e.touches;
+      if (t.length === 1) {
+        touchMode = 'pan';
+        lastTouch = { x: t[0].clientX, y: t[0].clientY };
+        initOffset = { x: offsetX, y: offsetY };
+      } else if (t.length === 2) {
+        touchMode = 'pinch';
+        const dx = t[1].clientX - t[0].clientX;
+        const dy = t[1].clientY - t[0].clientY;
+        initDist = Math.hypot(dx, dy);
+        initAngle = Math.atan2(dy, dx);
+        initScale = scale;
+        initRotation = rotation;
+      }
     });
-    canvas.addEventListener('touchmove',e=>{ e.preventDefault(); const t=e.touches;
-      if(touchMode==='pan'&&t.length===1){ const dx=(t[0].clientX-lastTouch.x)/canvas.width*100, dy=(t[0].clientY-lastTouch.y)/canvas.height*100;
-        offsetX=Math.min(Math.max(initOffset.x+dx,-50),50); offsetY=Math.min(Math.max(initOffset.y+dy,-50),50); drawCanvas(); }
-      else if(touchMode==='pinch'&&t.length===2){ const dx=t[1].clientX-t[0].clientX, dy=t[1].clientY-t[0].clientY;
-        const dist=Math.hypot(dx,dy), angle=Math.atan2(dy,dx);
-        scale=Math.max(0.01,Math.min(initScale*(dist/initDist),10)); rotation=(initRotation+((angle-initAngle)*180/Math.PI))%360; drawCanvas(); }
+    canvas.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const t = e.touches;
+      if (touchMode === 'pan' && t.length === 1) {
+        const dx = (t[0].clientX - lastTouch.x) / canvas.width * 100;
+        const dy = (t[0].clientY - lastTouch.y) / canvas.height * 100;
+        offsetX = Math.min(Math.max(initOffset.x + dx, -50), 50);
+        offsetY = Math.min(Math.max(initOffset.y + dy, -50), 50);
+        drawCanvas();
+      } else if (touchMode === 'pinch' && t.length === 2) {
+        const dx = t[1].clientX - t[0].clientX;
+        const dy = t[1].clientY - t[0].clientY;
+        const dist = Math.hypot(dx, dy);
+        const angle = Math.atan2(dy, dx);
+        scale = Math.max(0.01, Math.min(initScale * (dist / initDist), 10));
+        rotation = (initRotation + ((angle - initAngle) * 180 / Math.PI) + 360) % 360;
+        drawCanvas();
+      }
     });
-    canvas.addEventListener('touchend',e=>{ if(e.touches.length===0)touchMode=null; });
+    canvas.addEventListener('touchend', e => { if (e.touches.length === 0) touchMode = null; });
 
-    loadStoredMockups(); renderThumbnails();
+    loadStoredMockups();
+    renderThumbnails();
   </script>
 </body>
 </html>
