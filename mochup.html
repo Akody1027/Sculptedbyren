@@ -15,96 +15,94 @@
       --shadow-strong: rgba(0,0,0,0.15);
     }
     *, *::before, *::after { box-sizing: border-box; }
-    html, body { margin:0; padding:0; height:100%; width:100%; }
+    html, body { margin: 0; padding: 0; height: 100%; width: 100%; }
     body {
-      padding:20px; font-family:'Inter',sans-serif;
-      background:var(--bg); color:var(--text);
-      display:flex; flex-direction:column; align-items:center;
-      min-height:100vh;
+      padding: 20px; font-family: 'Inter', sans-serif;
+      background: var(--bg); color: var(--text);
+      display: flex; flex-direction: column; align-items: center;
     }
     .container {
-      background:var(--card); border-radius:12px;
-      box-shadow:0 4px 12px var(--shadow-light);
-      width:100%; max-width:700px; padding:20px; margin-bottom:20px;
+      background: var(--card); border-radius: 12px;
+      box-shadow: 0 4px 12px var(--shadow-light);
+      width: 100%; max-width: 700px; padding: 20px; margin-bottom: 20px;
     }
-    h1 { text-align:center; margin-bottom:12px; font-size:1.6rem; }
-    label { font-weight:500; margin:10px 0 4px; display:block; }
+    h1 { text-align: center; margin-bottom: 12px; font-size: 1.6rem; }
+    label { font-weight: 500; margin: 10px 0 4px; display: block; }
     input[type="file"] {
-      width:100%; padding:6px; border:1px solid #ccc;
-      border-radius:6px; background:#fafafa;
+      width: 100%; padding: 6px; border: 1px solid #ccc;
+      border-radius: 6px; background: #fafafa;
     }
     .thumbnail-container {
-      display:flex; flex-wrap:wrap; gap:8px;
-      justify-content:center; margin:10px 0;
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center; margin: 10px 0;
     }
-    .thumb-wrapper {
-      position:relative; display:inline-block;
-    }
+    .thumb-wrapper { position: relative; display: inline-block; }
     .thumb-wrapper img {
-      width:60px; height:60px; object-fit:cover;
-      border-radius:6px; cursor:pointer;
-      border:2px solid transparent;
-      box-shadow:0 2px 6px var(--shadow-light);
-      transition:transform .2s,box-shadow .2s;
+      width: 60px; height: 60px; object-fit: cover;
+      border-radius: 6px; cursor: pointer;
+      border: 2px solid transparent;
+      box-shadow: 0 2px 6px var(--shadow-light);
+      transition: transform .2s, box-shadow .2s;
     }
-    .thumb-wrapper img.selected { border-color:var(--accent); }
+    .thumb-wrapper img.selected { border-color: var(--accent); }
     .minus {
-      position:absolute; top:-6px; right:-6px;
-      background:red; color:#fff; width:16px; height:16px;
-      border-radius:50%; display:none; align-items:center;
-      justify-content:center; font-size:12px; cursor:pointer;
-      z-index:10;
+      position: absolute; top: -6px; right: -6px;
+      background: red; color: #fff; width: 16px; height: 16px;
+      border-radius: 50%; display: none;
+      align-items: center; justify-content: center;
+      font-size: 12px; cursor: pointer; z-index: 10;
     }
     #no-mockups-msg {
-      text-align:center; margin:10px 0; color:#666;
+      text-align: center; margin: 10px 0; color: #666;
     }
     #design-thumb {
-      margin-top:10px; position:relative; display:none;
+      margin-top: 10px; position: relative; display: none;
     }
     #design-thumb img {
-      width:60px; height:60px; object-fit:cover;
-      border-radius:6px; border:2px solid var(--accent);
+      width: 60px; height: 60px; object-fit: cover;
+      border-radius: 6px; border: 2px solid var(--accent);
     }
     canvas {
-      width:100%; height:auto; margin:20px 0;
-      border-radius:6px; box-shadow:0 4px 12px var(--shadow-light);
-      background:#fff; touch-action:none;
+      width: 100%; height: auto; margin: 20px 0;
+      border-radius: 6px; box-shadow: 0 4px 12px var(--shadow-light);
+      background: #fff; touch-action: none;
     }
     #controls-container {
-      position:fixed; bottom:0; left:0; width:100%;
-      background:var(--card); padding:10px;
-      box-shadow:0 -2px 8px var(--shadow-light);
-      display:flex; justify-content:space-around;
-      align-items:center; flex-wrap:wrap; z-index:100;
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background: var(--card); padding: 10px;
+      box-shadow: 0 -2px 8px var(--shadow-light);
+      display: flex; justify-content: space-around;
+      align-items: center; flex-wrap: wrap; z-index: 100;
     }
-    .control-group { display:flex; gap:4px; }
+    .control-group { display: flex; gap: 4px; }
     .control-btn {
-      background:#fff; border:none; border-radius:6px;
-      width:36px; height:36px; display:flex;
-      align-items:center; justify-content:center;
-      font-size:1.2rem; cursor:pointer;
-      box-shadow:0 1px 3px var(--shadow-light);
-      transition:transform .1s,box-shadow .1s;
+      background: #fff; border: none; border-radius: 6px;
+      width: 36px; height: 36px; display: flex;
+      align-items: center; justify-content: center;
+      font-size: 1.2rem; cursor: pointer;
+      box-shadow: 0 1px 3px var(--shadow-light);
+      transition: transform .1s, box-shadow .1s;
     }
     .control-btn:hover {
-      transform:translateY(-1px) scale(1.1);
-      box-shadow:0 3px 6px var(--shadow-strong);
+      transform: translateY(-1px) scale(1.1);
+      box-shadow: 0 3px 6px var(--shadow-strong);
     }
     select {
-      padding:4px 8px; border-radius:6px; border:1px solid #ccc;
-      font-size:1rem; box-shadow:0 1px 3px var(--shadow-light);
-      height:36px;
+      padding: 4px 8px; border-radius: 6px; border: 1px solid #ccc;
+      font-size: 1rem; box-shadow: 0 1px 3px var(--shadow-light);
+      height: 36px;
     }
     #download-btn {
-      position:fixed; top:12px; right:12px;
-      padding:8px 14px; background:var(--accent); color:#fff;
-      border:none; border-radius:6px; font-size:1rem;
-      cursor:pointer; box-shadow:0 2px 6px var(--shadow-light);
-      transition:transform .1s,box-shadow .1s; z-index:100;
+      position: fixed; top: 12px; right: 12px;
+      padding: 8px 14px; background: var(--accent);
+      color: #fff; border: none; border-radius: 6px;
+      font-size: 1rem; cursor: pointer;
+      box-shadow: 0 2px 6px var(--shadow-light);
+      transition: transform .1s, box-shadow .1s; z-index: 100;
     }
     #download-btn:hover {
-      transform:translateY(-1px) scale(1.05);
-      box-shadow:0 4px 12px var(--shadow-strong);
+      transform: translateY(-1px) scale(1.05);
+      box-shadow: 0 4px 12px var(--shadow-strong);
     }
   </style>
 </head>
@@ -151,176 +149,177 @@
   <script>
   (function(){
     let mockupImages = {}, designImg = null;
-    let scale=1,offsetX=0,offsetY=0,rotation=0;
-    const canvas=document.getElementById('mockup-canvas'),
-          ctx=canvas.getContext('2d'),
-          thumbnails=document.getElementById('mockup-thumbnails'),
-          noMsg=document.getElementById('no-mockups-msg'),
-          addMockupInput=document.getElementById('add-mockup-input'),
-          designInput=document.getElementById('design-input'),
-          designThumbWrapper=document.getElementById('design-thumb'),
-          designThumbImg=designThumbWrapper.querySelector('img'),
-          designThumbMinus=designThumbWrapper.querySelector('.minus'),
-          downloadBtn=document.getElementById('download-btn'),
-          resolutionSelect=document.getElementById('resolution-select');
+    let scale = 1, offsetX = 0, offsetY = 0, rotation = 0;
+    const canvas = document.getElementById('mockup-canvas'),
+          ctx = canvas.getContext('2d'),
+          thumbnails = document.getElementById('mockup-thumbnails'),
+          noMsg = document.getElementById('no-mockups-msg'),
+          addMockupInput = document.getElementById('add-mockup-input'),
+          designInput = document.getElementById('design-input'),
+          designThumbWrapper = document.getElementById('design-thumb'),
+          designThumbImg = designThumbWrapper.querySelector('img'),
+          designThumbMinus = designThumbWrapper.querySelector('.minus'),
+          downloadBtn = document.getElementById('download-btn'),
+          resolutionSelect = document.getElementById('resolution-select');
 
     function loadStoredMockups(){
-      mockupImages=JSON.parse(localStorage.getItem('mockupImages')||'{}');
+      mockupImages = JSON.parse(localStorage.getItem('mockupImages')||'{}');
     }
 
     function renderThumbnails(){
-      thumbnails.innerHTML='';
-      const keys=Object.keys(mockupImages);
-      if(!keys.length){ noMsg.style.display='block'; return; }
-      noMsg.style.display='none';
+      thumbnails.innerHTML = '';
+      const keys = Object.keys(mockupImages);
+      if(!keys.length){
+        noMsg.style.display = 'block';
+        return;
+      }
+      noMsg.style.display = 'none';
       keys.forEach(label=>{
-        const wrapper=document.createElement('div');
-        wrapper.className='thumb-wrapper';
-        const img=document.createElement('img');
-        img.src=mockupImages[label];
-        img.alt=label;
-        const minus=document.createElement('div');
-        minus.className='minus';
-        minus.textContent='-';
-        wrapper.append(img,minus);
+        const wrapper = document.createElement('div');
+        wrapper.className = 'thumb-wrapper';
+        const img = document.createElement('img');
+        img.src = mockupImages[label];
+        img.alt = label;
+        const minus = document.createElement('div');
+        minus.className = 'minus';
+        minus.textContent = '-';
+        wrapper.append(img, minus);
         thumbnails.appendChild(wrapper);
 
         let timer;
-        wrapper.addEventListener('contextmenu',e=>e.preventDefault());
-        wrapper.addEventListener('pointerdown',e=>{
+        wrapper.addEventListener('contextmenu', e=> e.preventDefault());
+        wrapper.addEventListener('pointerdown', e=>{
           e.preventDefault();
-          timer=setTimeout(()=>minus.style.display='flex',500);
+          timer = setTimeout(()=> minus.style.display = 'flex', 500);
         });
-        wrapper.addEventListener('pointermove',()=>clearTimeout(timer));
-        wrapper.addEventListener('pointercancel',()=>clearTimeout(timer));
+        wrapper.addEventListener('pointermove', ()=> clearTimeout(timer));
+        wrapper.addEventListener('pointercancel', ()=> clearTimeout(timer));
 
-        minus.addEventListener('click',()=>{
+        minus.addEventListener('click', ()=>{
           delete mockupImages[label];
-          localStorage.setItem('mockupImages',JSON.stringify(mockupImages));
+          localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
           loadStoredMockups();
           renderThumbnails();
         });
 
-        wrapper.addEventListener('pointerup',e=>{
+        wrapper.addEventListener('pointerup', e=>{
           clearTimeout(timer);
-          if(e.target!==minus) selectMockup(label,img);
-          document.querySelectorAll('.minus').forEach(el=>el.style.display='none');
+          if(e.target !== minus) selectMockup(label, img);
+          document.querySelectorAll('.minus').forEach(el=> el.style.display='none');
         });
       });
-      selectMockup(Object.keys(mockupImages)[0],thumbnails.querySelector('img'));
+      selectMockup(Object.keys(mockupImages)[0], thumbnails.querySelector('img'));
     }
 
-    function selectMockup(label,img){
+    function selectMockup(label, img){
       document.querySelectorAll('.thumb-wrapper img')
-        .forEach(i=>i.classList.remove('selected'));
+        .forEach(i=> i.classList.remove('selected'));
       img.classList.add('selected');
-      const bg=new Image();
-      bg.onload=()=>{
-        canvas.width=bg.width;
-        canvas.height=bg.height;
+      const bg = new Image();
+      bg.onload = ()=>{
+        canvas.width = bg.width;
+        canvas.height = bg.height;
         drawCanvas();
       };
-      bg.src=mockupImages[label];
-      window.bgImg=bg;
+      bg.src = mockupImages[label];
+      window.bgImg = bg;
     }
 
     function drawCanvas(){
       if(!window.bgImg) return;
       ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.drawImage(window.bgImg,0,0);
+      ctx.drawImage(window.bgImg, 0, 0);
       if(designImg){
-        const w=designImg.width*scale,
-              h=designImg.height*scale,
-              cx=canvas.width/2+(offsetX/100)*canvas.width,
-              cy=canvas.height/2+(offsetY/100)*canvas.height;
+        const w = designImg.width * scale;
+        const h = designImg.height * scale;
+        const cx = canvas.width/2 + (offsetX/100)*canvas.width;
+        const cy = canvas.height/2 + (offsetY/100)*canvas.height;
         ctx.save();
-        ctx.translate(cx,cy);
-        ctx.rotate(rotation*Math.PI/180);
-        ctx.drawImage(designImg,-w/2,-h/2,w,h);
+        ctx.translate(cx, cy);
+        ctx.rotate(rotation * Math.PI/180);
+        ctx.drawImage(designImg, -w/2, -h/2, w, h);
         ctx.restore();
       }
     }
 
-    addMockupInput.onchange=e=>{
-      const f=e.target.files[0]; if(!f) return;
-      const r=new FileReader();
-      r.onload=()=>{
-        mockupImages[f.name]=r.result;
-        localStorage.setItem('mockupImages',JSON.stringify(mockupImages));
+    addMockupInput.onchange = e =>{
+      const f = e.target.files[0]; if(!f) return;
+      const r = new FileReader();
+      r.onload = ()=>{
+        mockupImages[f.name] = r.result;
+        localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
         loadStoredMockups();
         renderThumbnails();
       };
       r.readAsDataURL(f);
     };
 
-    designInput.onchange=e=>{
-      const f=e.target.files[0]; if(!f) return;
-      designImg=new Image();
-      designImg.onload=()=>{
+    designInput.onchange = e =>{
+      const f = e.target.files[0]; if(!f) return;
+      designImg = new Image();
+      designImg.onload = ()=>{
         drawCanvas();
-        designThumbImg.src=designImg.src;
-        designThumbWrapper.style.display='flex';
+        designThumbImg.src = designImg.src;
+        designThumbWrapper.style.display = 'flex';
       };
-      designImg.src=URL.createObjectURL(f);
+      designImg.src = URL.createObjectURL(f);
     };
 
-    designThumbMinus.addEventListener('click',()=>{
-      designImg=null;
-      designThumbWrapper.style.display='none';
+    designThumbMinus.addEventListener('click', ()=>{
+      designImg = null;
+      designThumbWrapper.style.display = 'none';
       drawCanvas();
     });
 
-    downloadBtn.addEventListener('click',()=>{
-      const m=parseInt(resolutionSelect.value,10),
-            ex=document.createElement('canvas'),
-            exCtx=ex.getContext('2d');
-      ex.width=canvas.width*m;
-      ex.height=canvas.height*m;
+    downloadBtn.addEventListener('click', ()=>{
+      const m = parseInt(resolutionSelect.value,10),
+            ex = document.createElement('canvas'),
+            exCtx = ex.getContext('2d');
+      ex.width = canvas.width * m;
+      ex.height = canvas.height * m;
       exCtx.scale(m,m);
       exCtx.drawImage(window.bgImg,0,0);
       if(designImg){
-        const w=designImg.width*scale,
-              h=designImg.height*scale,
-              cx=canvas.width/2+(offsetX/100)*canvas.width,
-              cy=canvas.height/2+(offsetY/100)*canvas.height;
+        const w = designImg.width * scale;
+        const h = designImg.height * scale;
+        const cx = canvas.width/2 + (offsetX/100)*canvas.width;
+        const cy = canvas.height/2 + (offsetY/100)*canvas.height;
         exCtx.save();
         exCtx.translate(cx,cy);
-        exCtx.rotate(rotation*Math.PI/180);
-        exCtx.drawImage(designImg,-w/2,-h/2,w,h);
+        exCtx.rotate(rotation * Math.PI/180);
+        exCtx.drawImage(designImg, -w/2, -h/2, w, h);
         exCtx.restore();
       }
       ex.toBlob(blob=>{
-        const url=URL.createObjectURL(blob),
-              a=document.createElement('a');
-        a.href=url;
-        a.download=`mockup@${m}x.png`;
-        document.body.appendChild(a);
+        const url = URL.createObjectURL(blob),
+              a = document.createElement('a');
+        a.href = url;
+        a.download = `mockup@${m}x.png`;
         a.click();
-        document.body.removeChild(a);
-        setTimeout(()=>URL.revokeObjectURL(url),1500);
-      },'image/png');
+        // **no revoke here** so you can download repeatedly
+      }, 'image/png');
     });
 
     document.querySelectorAll('.control-btn').forEach(btn=>{
       let interval;
-      const step=parseFloat(btn.dataset.step),
-            tgt=btn.dataset.target;
-      const action=()=>{
-        if(tgt==='scale') scale=Math.max(0.01,Math.min(scale+step,10));
-        if(tgt==='offsetX') offsetX=Math.min(Math.max(offsetX+step,-50),50);
-        if(tgt==='offsetY') offsetY=Math.min(Math.max(offsetY+step,-50),50);
-        if(tgt==='rotation') rotation=(rotation+step+360)%360;
+      const step = parseFloat(btn.dataset.step),
+            tgt  = btn.dataset.target;
+      const action = ()=>{
+        if(tgt==='scale') scale = Math.max(0.01,Math.min(scale+step,10));
+        if(tgt==='offsetX') offsetX = Math.min(Math.max(offsetX+step,-50),50);
+        if(tgt==='offsetY') offsetY = Math.min(Math.max(offsetY+step,-50),50);
+        if(tgt==='rotation') rotation = (rotation+step+360)%360;
         drawCanvas();
       };
-      btn.addEventListener('mousedown',()=>{ action(); interval=setInterval(action,100); });
-      btn.addEventListener('mouseup',()=>clearInterval(interval));
-      btn.addEventListener('mouseleave',()=>clearInterval(interval));
-      btn.addEventListener('touchstart',e=>{ e.preventDefault(); action(); interval=setInterval(action,100); });
-      btn.addEventListener('touchend',()=>clearInterval(interval));
+      btn.addEventListener('mousedown', ()=>{ action(); interval=setInterval(action,100); });
+      btn.addEventListener('mouseup', ()=>clearInterval(interval));
+      btn.addEventListener('mouseleave', ()=>clearInterval(interval));
+      btn.addEventListener('touchstart', e=>{ e.preventDefault(); action(); interval=setInterval(action,100); });
+      btn.addEventListener('touchend', ()=>clearInterval(interval));
     });
 
-    let touchMode,initDist,initAngle,initScale,initRotation,initOffset,lastTouch;
-    canvas.addEventListener('touchstart',e=>{
+    let touchMode, initDist, initAngle, initScale, initRotation, initOffset, lastTouch;
+    canvas.addEventListener('touchstart', e=>{
       e.preventDefault();
       const t=e.touches;
       if(t.length===1){
@@ -329,14 +328,13 @@
         initOffset={x:offsetX,y:offsetY};
       } else if(t.length===2){
         touchMode='pinch';
-        const dx=t[1].clientX-t[0].clientX,
-              dy=t[1].clientY-t[0].clientY;
+        const dx=t[1].clientX-t[0].clientX, dy=t[1].clientY-t[0].clientY;
         initDist=Math.hypot(dx,dy);
         initAngle=Math.atan2(dy,dx);
         initScale=scale; initRotation=rotation;
       }
     });
-    canvas.addEventListener('touchmove',e=>{
+    canvas.addEventListener('touchmove', e=>{
       e.preventDefault();
       const t=e.touches;
       if(touchMode==='pan'&&t.length===1){
@@ -346,18 +344,16 @@
         offsetY=Math.min(Math.max(initOffset.y+dy,-50),50);
         drawCanvas();
       } else if(touchMode==='pinch'&&t.length===2){
-        const dx=t[1].clientX-t[0].clientX,
-              dy=t[1].clientY-t[0].clientY,
-              dist=Math.hypot(dx,dy),
-              angle=Math.atan2(dy,dx);
+        const dx=t[1].clientX-t[0].clientX, dy=t[1].clientY-t[0].clientY;
+        const dist=Math.hypot(dx,dy), angle=Math.atan2(dy,dx);
         scale=Math.max(0.01,Math.min(initScale*(dist/initDist),10));
         rotation=(initRotation+((angle-initAngle)*180/Math.PI)+360)%360;
         drawCanvas();
       }
     });
-    canvas.addEventListener('touchend',e=>{ if(e.touches.length===0) touchMode=null; });
+    canvas.addEventListener('touchend', e=>{ if(e.touches.length===0) touchMode=null; });
 
-    // Initialize
+    // initialize
     loadStoredMockups();
     renderThumbnails();
   })();
