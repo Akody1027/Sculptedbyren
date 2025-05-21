@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>Mockup Creator</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -15,8 +15,8 @@
       --shadow-strong: rgba(0,0,0,0.15);
     }
     *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; width: 100%; }
     body {
-      margin: 0;
       padding: 20px;
       font-family: 'Inter', sans-serif;
       background: var(--bg);
@@ -24,8 +24,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding-bottom: 200px;
-      position: relative;
+      min-height: 100vh;
     }
     .container {
       background: var(--card);
@@ -59,7 +58,6 @@
       gap: 8px;
       justify-content: center;
       margin: 10px 0;
-      position: relative;
     }
     .thumb-wrapper {
       position: relative;
@@ -75,11 +73,6 @@
       box-shadow: 0 2px 6px var(--shadow-light);
       transition: transform .2s, box-shadow .2s;
     }
-    .thumb-wrapper img:hover,
-    .thumb-wrapper img.selected:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px var(--shadow-strong);
-    }
     .thumb-wrapper img.selected {
       border-color: var(--accent);
     }
@@ -88,7 +81,7 @@
       top: -6px;
       right: -6px;
       background: red;
-      color: white;
+      color: #fff;
       width: 16px;
       height: 16px;
       border-radius: 50%;
@@ -139,10 +132,7 @@
       flex-wrap: wrap;
       z-index: 100;
     }
-    .control-group {
-      display: flex;
-      gap: 4px;
-    }
+    .control-group { display: flex; gap: 4px; }
     .control-btn {
       background: #fff;
       border: none;
@@ -168,9 +158,6 @@
       font-size: 1rem;
       box-shadow: 0 1px 3px var(--shadow-light);
       height: 36px;
-    }
-    select:hover {
-      box-shadow: 0 2px 6px var(--shadow-strong);
     }
     #download-btn {
       position: fixed;
@@ -203,7 +190,8 @@
     <label for="design-input">Select your design (PNG)</label>
     <input type="file" id="design-input" accept="image/png">
     <div id="design-thumb" class="thumb-wrapper">
-      <img src="" alt="Design"><div class="minus">-</div>
+      <img src="" alt="Design">
+      <div class="minus">-</div>
     </div>
     <canvas id="mockup-canvas"></canvas>
   </div>
@@ -231,19 +219,20 @@
       <option value="3">3×</option>
       <option value="4">4×</option>
     </select>
-  ]
+  </div>
+
   <script>
-    const canvas = document.getElementById('mockup-canvas');
-    const ctx = canvas.getContext('2d');
+  (function() {
     let mockupImages = {}, designImg = null;
     let scale = 1, offsetX = 0, offsetY = 0, rotation = 0;
 
-    const thumbnails = document.getElementById('mockup-thumbnails');
-    const noMsg = document.getElementById('no-mockups-msg');
+    const canvas = document.getElementById('mockup-canvas'), ctx = canvas.getContext('2d');
+    const thumbnails = document.getElementById('mockup-thumbnails'), noMsg = document.getElementById('no-mockups-msg');
     const addMockupInput = document.getElementById('add-mockup-input');
     const designInput = document.getElementById('design-input');
-    const designThumb = document.querySelector('#design-thumb img');
-    const designMinus = document.querySelector('#design-thumb .minus');
+    const designThumbWrapper = document.getElementById('design-thumb');
+    const designThumbImg = designThumbWrapper.querySelector('img');
+    const designThumbMinus = designThumbWrapper.querySelector('.minus');
     const downloadBtn = document.getElementById('download-btn');
     const resolutionSelect = document.getElementById('resolution-select');
 
@@ -259,51 +248,45 @@
         return;
       }
       noMsg.style.display = 'none';
-
       keys.forEach(label => {
-        const wrapper = document.createElement('div'); wrapper.className = 'thumb-wrapper';
-        const img = document.createElement('img'); img.src = mockupImages[label]; img.alt = label;
-        const minus = document.createElement('div'); minus.className = 'minus'; minus.textContent = '-';
+        const wrapper = document.createElement('div');
+        wrapper.className = 'thumb-wrapper';
+        const img = document.createElement('img');
+        img.src = mockupImages[label];
+        img.alt = label;
+        const minus = document.createElement('div');
+        minus.className = 'minus';
+        minus.textContent = '-';
         wrapper.append(img, minus);
-        thumbnails.append(wrapper);
-        let timer;
+        thumbnails.appendChild(wrapper);
 
+        let timer;
         wrapper.addEventListener('contextmenu', e => e.preventDefault());
         wrapper.addEventListener('pointerdown', e => {
           e.preventDefault();
           timer = setTimeout(() => minus.style.display = 'flex', 500);
         });
-        wrapper.addEventListener('pointerup', e => {
-          clearTimeout(timer);
-          if (e.target === minus) {
-            deleteMockup(label);
-          } else {
-            selectMockup(label, img);
-          }
-          hideMinuses();
-        });
         wrapper.addEventListener('pointermove', () => clearTimeout(timer));
         wrapper.addEventListener('pointercancel', () => clearTimeout(timer));
+
+        minus.addEventListener('click', () => {
+          delete mockupImages[label];
+          localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
+          loadStoredMockups();
+          renderThumbnails();
+        });
+
+        wrapper.addEventListener('pointerup', e => {
+          clearTimeout(timer);
+          if (e.target !== minus) selectMockup(label, img);
+          document.querySelectorAll('.minus').forEach(el => el.style.display = 'none');
+        });
       });
-
-      selectMockup(Object.keys(mockupImages)[0], thumbnails.querySelector('img'));  
+      selectMockup(keys[0], thumbnails.querySelector('img'));
     }
-
-    function showMinuses() {
-      document.querySelectorAll('.minus').forEach(el => el.style.display = 'flex');
-    }
-    function hideMinuses() {
-      document.querySelectorAll('.minus').forEach(el => el.style.display = 'none');
-    }
-
-    document.body.addEventListener('pointerdown', e => {
-      if (!e.target.closest('.thumb-wrapper') && !e.target.closest('#design-thumb')) {
-        hideMinuses();
-      }
-    });
 
     function selectMockup(label, img) {
-      document.querySelectorAll('.thumbnail-container img').forEach(i => i.classList.remove('selected'));
+      document.querySelectorAll('.thumb-wrapper img').forEach(i => i.classList.remove('selected'));
       img.classList.add('selected');
       const bg = new Image();
       bg.onload = () => {
@@ -315,18 +298,10 @@
       window.bgImg = bg;
     }
 
-    function deleteMockup(label) {
-      if (!confirm('Delete this mockup?')) return;
-      delete mockupImages[label];
-      localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
-      loadStoredMockups();
-      renderThumbnails();
-    }
-
     function drawCanvas() {
       if (!window.bgImg) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(window.bgImg, 0, 0);
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(window.bgImg,0,0);
       if (designImg) {
         const w = designImg.width * scale;
         const h = designImg.height * scale;
@@ -335,7 +310,7 @@
         ctx.save();
         ctx.translate(cx, cy);
         ctx.rotate(rotation * Math.PI / 180);
-        ctx.drawImage(designImg, -w / 2, -h / 2, w, h);
+        ctx.drawImage(designImg, -w/2, -h/2, w, h);
         ctx.restore();
       }
     }
@@ -343,14 +318,14 @@
     addMockupInput.onchange = e => {
       const f = e.target.files[0];
       if (!f) return;
-      const r = new FileReader();
-      r.onload = () => {
-        mockupImages[f.name] = r.result;
+      const reader = new FileReader();
+      reader.onload = () => {
+        mockupImages[f.name] = reader.result;
         localStorage.setItem('mockupImages', JSON.stringify(mockupImages));
         loadStoredMockups();
         renderThumbnails();
       };
-      r.readAsDataURL(f);
+      reader.readAsDataURL(f);
     };
 
     designInput.onchange = e => {
@@ -359,22 +334,21 @@
       designImg = new Image();
       designImg.onload = () => {
         drawCanvas();
-        const thumb = document.querySelector('#design-thumb img');
-        thumb.src = designImg.src;
-        document.getElementById('design-thumb').style.display = 'block';
+        designThumbImg.src = designImg.src;
+        designThumbWrapper.style.display = 'flex';
       };
       designImg.src = URL.createObjectURL(f);
     };
-    designMinus.addEventListener('click', () => {
+
+    designThumbMinus.addEventListener('click', () => {
       designImg = null;
-      document.getElementById('design-thumb').style.display = 'none';
+      designThumbWrapper.style.display = 'none';
       drawCanvas();
     });
 
     downloadBtn.addEventListener('click', () => {
       const m = parseInt(resolutionSelect.value, 10);
-      const ex = document.createElement('canvas');
-      const exCtx = ex.getContext('2d');
+      const ex = document.createElement('canvas'), exCtx = ex.getContext('2d');
       ex.width = canvas.width * m;
       ex.height = canvas.height * m;
       exCtx.scale(m, m);
@@ -382,12 +356,12 @@
       if (designImg) {
         const w = designImg.width * scale;
         const h = designImg.height * scale;
-        const cx = canvas.width / 2 + (offsetX / 100) * canvas.width;
-        const cy = canvas.height / 2 + (offsetY / 100) * canvas.height;
+        const cx = canvas.width/2 + (offsetX/100)*canvas.width;
+        const cy = canvas.height/2 + (offsetY/100)*canvas.height;
         exCtx.save();
         exCtx.translate(cx, cy);
-        exCtx.rotate(rotation * Math.PI / 180);
-        exCtx.drawImage(designImg, -w / 2, -h / 2, w, h);
+        exCtx.rotate(rotation * Math.PI/180);
+        exCtx.drawImage(designImg, -w/2, -h/2, w, h);
         exCtx.restore();
       }
       ex.toBlob(blob => {
@@ -427,7 +401,8 @@
         initOffset = { x: offsetX, y: offsetY };
       } else if (t.length === 2) {
         touchMode = 'pinch';
-        const dx = t[1].clientX - t[0].clientX; const dy = t[1].clientY - t[0].clientY;
+        const dx = t[1].clientX - t[0].clientX;
+        const dy = t[1].clientY - t[0].clientY;
         initDist = Math.hypot(dx, dy);
         initAngle = Math.atan2(dy, dx);
         initScale = scale; initRotation = rotation;
@@ -436,23 +411,27 @@
     canvas.addEventListener('touchmove', e => {
       e.preventDefault();
       const t = e.touches;
-      if (touchMode === 'pan' && t.length === 1) {
-        const dx = (t[0].clientX - lastTouch.x) / canvas.width * 100; const dy = (t[0].clientY - lastTouch.y) / canvas.height * 100;
-        offsetX = Math.min(Math.max(initOffset.x + dx, -50), 50);
-        offsetY = Math.min(Math.max(initOffset.y + dy, -50), 50);
+      if (touchMode==='pan' && t.length===1) {
+        const dx = (t[0].clientX - lastTouch.x)/canvas.width*100;
+        const dy = (t[0].clientY - lastTouch.y)/canvas.height*100;
+        offsetX = Math.min(Math.max(initOffset.x+dx, -50),50);
+        offsetY = Math.min(Math.max(initOffset.y+dy, -50),50);
         drawCanvas();
-      } else if (touchMode === 'pinch' && t.length === 2) {
-        const dx = t[1].clientX - t[0].clientX; const dy = t[1].clientY - t[0].clientY;
-        const dist = Math.hypot(dx, dy);
-        const angle = Math.atan2(dy, dx);
-        scale = Math.max(0.01, Math.min(initScale * (dist / initDist), 10));
-        rotation = (initRotation + ((angle - initAngle) * 180 / Math.PI) + 360) % 360;
+      } else if (touchMode==='pinch' && t.length===2) {
+        const dx = t[1].clientX-t[0].clientX;
+        const dy = t[1].clientY-t[0].clientY;
+        const dist = Math.hypot(dx, dy), angle = Math.atan2(dy, dx);
+        scale = Math.max(0.01,Math.min(initScale*(dist/initDist),10));
+        rotation = (initRotation+((angle-initAngle)*180/Math.PI)+360)%360;
         drawCanvas();
       }
     });
-    canvas.addEventListener('touchend', e => { if (e.touches.length === 0) touchMode = null; });
+    canvas.addEventListener('touchend', e => { if (e.touches.length===0) touchMode = null; });
 
-    loadStoredMockups(); renderThumbnails();
+    // initialize
+    loadStoredMockups();
+    renderThumbnails();
+  })();
   </script>
 </body>
 </html>
