@@ -3,135 +3,282 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pop-Up Shop Store Editor</title>
+<title>Pop-Up Shop - Store Builder</title>
 <style>
-  body, html {
-    margin: 0; padding: 0; height: 100%; font-family: Arial, sans-serif;
-  }
-  #adminPopup {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0,0,0,0.75);
-    display: flex; justify-content: center; align-items: center;
-    z-index: 1000;
-  }
-  #adminPopupContent {
-    background: white; border-radius: 8px;
-    width: 400px; max-width: 90vw; padding: 20px;
-    box-sizing: border-box;
-  }
-  #adminPopupContent h1 {
-    margin-top: 0; margin-bottom: 20px; text-align: center;
-  }
-  .section {
-    margin-bottom: 20px;
-  }
-  label {
-    display: block; margin-bottom: 5px; font-weight: bold;
-  }
-  input[type="text"], input[type="password"] {
-    width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;
+  /* Reset and base */
+  body,html {
+    margin:0; padding:0; height:100%; font-family: Arial,sans-serif; background:#fafafa;
+    user-select:none;
   }
   button {
-    padding: 10px 15px; cursor: pointer;
-    background: #007bff; color: white; border: none; border-radius: 4px;
-    font-size: 1rem;
+    cursor:pointer;
   }
-  button:disabled {
-    background: #aaa;
+  /* Admin Popup */
+  #adminPopup {
+    position:fixed; top:0; left:0; width:100vw; height:100vh;
+    background:rgba(0,0,0,0.8);
+    display:flex; justify-content:center; align-items:center;
+    z-index:2000;
   }
-  #errorMsg {
-    color: red; margin-bottom: 10px; text-align: center;
+  #adminPopupContent {
+    background:#fff; border-radius:8px; width:420px; max-width:95vw; padding:20px;
+    box-sizing:border-box;
+    user-select:auto;
   }
-  #storeEditor {
-    display: none;
-    padding: 20px;
+  #adminPopupContent h1 {
+    margin:0 0 20px 0; text-align:center; font-weight:700;
   }
+  .section {
+    margin-bottom:20px;
+  }
+  label {
+    font-weight:700; display:block; margin-bottom:5px;
+  }
+  input[type=text], input[type=password] {
+    width:100%; padding:8px; margin-bottom:12px; box-sizing:border-box;
+    font-size:1rem; border-radius:4px; border:1px solid #ccc;
+  }
+  button.primary {
+    background:#0069ff; border:none; color:#fff; font-weight:700; padding:10px 15px; border-radius:4px;
+    font-size:1rem; width:100%;
+  }
+  button.primary:disabled {
+    background:#99bbff; cursor:not-allowed;
+  }
+  .error-msg {
+    color:#c00; font-weight:700; min-height:18px; margin-top:-10px; margin-bottom:10px; font-size:0.9rem;
+  }
+
+  /* Bottom Nav */
   #bottomNav {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: #222; color: white;
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 20px;
-    font-size: 1rem;
-    z-index: 999;
+    position:fixed; bottom:0; left:0; right:0;
+    background:#222; color:#eee; height:48px;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:0 15px; font-size:1rem; z-index:1500;
+    user-select:none;
   }
   #bottomNav .nav-left, #bottomNav .nav-right {
-    display: flex; align-items: center; gap: 10px;
+    display:flex; align-items:center; gap:10px;
   }
   #bottomNav button.nav-btn {
-    background: #444; color: white; border: none; border-radius: 4px;
-    padding: 8px 12px;
-    cursor: pointer;
+    background:#444; color:#eee; border:none; border-radius:4px;
+    padding:6px 12px; user-select:none; font-weight:700;
   }
+
+  /* Admin Dropdown */
   #adminDropdown {
-    position: relative;
+    position:relative;
   }
   #adminDropdownContent {
-    display: none;
-    position: absolute;
-    bottom: 40px; right: 0;
-    background: white;
-    color: black;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    min-width: 150px;
-    z-index: 1001;
+    display:none;
+    position:absolute; bottom:50px; right:0;
+    background:#fff; color:#222;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    border-radius:6px; min-width:160px;
+    user-select:auto;
+    z-index:2001;
   }
   #adminDropdownContent button {
-    width: 100%; padding: 10px; border: none; background: none;
-    text-align: left; cursor: pointer;
+    background:none; border:none; width:100%; padding:10px 16px;
+    text-align:left; cursor:pointer; font-weight:600; color:#222;
   }
   #adminDropdownContent button:hover {
-    background: #eee;
+    background:#eee;
+  }
+
+  /* Store Editor Modal */
+  #storeEditorModal {
+    position:fixed; top:2.5%; left:2.5%; width:95vw; height:95vh;
+    background:#fff; border-radius:10px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.25);
+    display:none; flex-direction:column;
+    z-index:2005;
+    user-select:auto;
+  }
+
+  /* Editor Header */
+  #editorHeader {
+    height:48px; background:#0069ff; color:#fff;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 20px; font-weight:700; font-size:1.2rem;
+    border-top-left-radius:10px; border-top-right-radius:10px;
+  }
+  #editorHeader button {
+    background:#0046bb; border:none; color:#fff; padding:6px 12px; border-radius:4px;
+  }
+  #editorHeader button:hover {
+    background:#003a99;
+  }
+
+  /* Editor Body */
+  #editorBody {
+    flex:1; display:flex; overflow:hidden;
+  }
+
+  /* Toolbar */
+  #editorToolbar {
+    width:220px; background:#f0f0f0; border-right:1px solid #ccc;
+    padding:12px;
+    box-sizing:border-box;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  #editorToolbar button {
+    background:#007bff; border:none; color:#fff; padding:8px 10px;
+    border-radius:5px; font-weight:700; font-size:0.9rem;
+    user-select:none;
+  }
+  #editorToolbar button:active {
+    background:#0056b3;
+  }
+
+  /* Canvas Area */
+  #editorCanvasWrapper {
+    flex:1; position:relative; background:#fff; overflow:auto;
+    border-left:1px solid #ccc;
+    padding:12px;
+  }
+  #editorCanvas {
+    position:relative; width:100%; min-height:100%;
+    background:#fff;
+    border:2px dashed #bbb;
+    border-radius:6px;
+    user-select:none;
+  }
+
+  /* Editable Elements */
+  .editor-element {
+    position:absolute;
+    border:2px solid transparent;
+    border-radius:4px;
+    padding:4px;
+    cursor:move;
+    user-select:none;
+    background:rgba(255,255,255,0.95);
+    box-sizing:border-box;
+  }
+  .editor-element.selected {
+    border-color:#0069ff;
+    background:rgba(0,105,255,0.15);
+  }
+  .editor-element img {
+    max-width: 100%; max-height: 100%;
+    display: block;
+    user-select:none;
+  }
+
+  /* Properties Panel */
+  #propertiesPanel {
+    width:300px; background:#fafafa; border-left:1px solid #ccc;
+    padding:12px; box-sizing:border-box;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  #propertiesPanel h3 {
+    margin:0 0 10px 0; font-weight:700; font-size:1.1rem;
+  }
+  #propertiesPanel label {
+    font-weight:600; font-size:0.9rem;
+  }
+  #propertiesPanel input[type=text], #propertiesPanel input[type=number], #propertiesPanel textarea {
+    width:100%; padding:6px 8px; font-size:1rem;
+    border-radius:4px; border:1px solid #ccc;
+    box-sizing:border-box;
+  }
+  #propertiesPanel textarea {
+    resize: vertical;
+    min-height:60px;
+  }
+  #propertiesPanel button.delete-btn {
+    margin-top: 10px;
+    background:#c00; color:#fff; border:none; border-radius:4px;
+    padding:8px; font-weight:700; cursor:pointer;
+  }
+  #propertiesPanel button.delete-btn:hover {
+    background:#900;
+  }
+
+  /* Scrollbars for canvas */
+  #editorCanvasWrapper::-webkit-scrollbar {
+    width:8px; height:8px;
+  }
+  #editorCanvasWrapper::-webkit-scrollbar-thumb {
+    background:#aaa; border-radius:4px;
   }
 </style>
 </head>
 <body>
 
 <!-- Admin Popup -->
-<div id="adminPopup">
+<div id="adminPopup" role="dialog" aria-modal="true" aria-labelledby="adminPopupTitle">
   <div id="adminPopupContent">
-    <h1>Pop-Up Shop</h1>
-    <div class="section" id="loginSection">
+    <h1 id="adminPopupTitle">Pop-Up Shop</h1>
+
+    <section class="section" id="loginSection" aria-label="Existing Store Login">
       <label for="adminPinInput">Enter Admin PIN:</label>
-      <input type="password" id="adminPinInput" placeholder="Admin PIN" />
-      <button id="verifyPinBtn">Verify</button>
-      <div id="loginErrorMsg" style="color:red;"></div>
-    </div>
+      <input type="password" id="adminPinInput" aria-describedby="loginErrorMsg" placeholder="Admin PIN" />
+      <button id="verifyPinBtn" class="primary">Verify</button>
+      <div id="loginErrorMsg" class="error-msg" role="alert"></div>
+    </section>
+
     <hr />
-    <div class="section" id="createSection">
+
+    <section class="section" id="createSection" aria-label="Create New Store">
       <label for="newStoreTitleInput">New Store Title:</label>
-      <input type="text" id="newStoreTitleInput" placeholder="Store Title" />
+      <input type="text" id="newStoreTitleInput" aria-describedby="createErrorMsg" placeholder="Store Title" />
       <label for="newAdminPinInput">New Admin PIN:</label>
       <input type="password" id="newAdminPinInput" placeholder="Create PIN" />
-      <button id="createStoreBtn">Create Store</button>
-      <div id="createErrorMsg" style="color:red;"></div>
-    </div>
+      <button id="createStoreBtn" class="primary">Create Store</button>
+      <div id="createErrorMsg" class="error-msg" role="alert"></div>
+    </section>
   </div>
 </div>
 
-<!-- Store Editor Placeholder -->
-<div id="storeEditor">
-  <h2>Store Editor</h2>
-  <p>Welcome, <span id="storeTitleDisplay"></span>!</p>
-  <button id="viewStoreBtn">View Live Store</button>
-  <button id="logoutBtn">Logout</button>
-  <!-- Admin editor UI will be developed here -->
+<!-- Store Editor Modal -->
+<div id="storeEditorModal" aria-label="Store Editor" role="dialog" aria-modal="true">
+  <header id="editorHeader">
+    <div id="storeEditorTitle">Store Editor</div>
+    <div>
+      <button id="saveStoreBtn" title="Save Store">Save</button>
+      <button id="exportStoreBtn" title="Export Store HTML">Export HTML</button>
+      <button id="closeEditorBtn" title="Close Editor">Close</button>
+    </div>
+  </header>
+  <main id="editorBody">
+    <!-- Toolbar: Add Elements -->
+    <nav id="editorToolbar" aria-label="Add Elements">
+      <button id="addTextBtn">Add Text</button>
+      <button id="addImageBtn">Add Image</button>
+      <button id="addCategoryBtn">Add Product Category</button>
+      <button id="addProductBtn">Add Product</button>
+      <button id="addNavButtonBtn">Add Nav Button</button>
+      <button id="themeSettingsBtn">Theme Settings</button>
+    </nav>
+
+    <!-- Canvas Area -->
+    <section id="editorCanvasWrapper" tabindex="0" aria-label="Page Layout Editor">
+      <div id="editorCanvas"></div>
+    </section>
+
+    <!-- Properties Panel -->
+    <aside id="propertiesPanel" aria-label="Element Properties">
+      <h3>Properties</h3>
+      <div id="propertiesContent">Select an element to edit properties.</div>
+    </aside>
+  </main>
 </div>
 
 <!-- Bottom Navigation -->
-<div id="bottomNav">
-  <div class="nav-left">
-    <button class="nav-btn" id="homeBtn">Home</button>
-    <!-- Extra nav buttons added dynamically here -->
+<nav id="bottomNav" aria-label="Main Navigation">
+  <div class="nav-left" role="menubar" aria-label="Primary Navigation">
+    <button class="nav-btn" id="homeBtn" role="menuitem" tabindex="0">Home</button>
   </div>
-  <div class="nav-right" id="adminDropdown">
-    <button class="nav-btn" id="adminDropdownBtn">Admin ▼</button>
-    <div id="adminDropdownContent">
-      <button id="openAdminEditorBtn">Open Admin Editor</button>
+  <div class="nav-right" id="adminDropdown" role="menu" aria-haspopup="true" aria-label="Admin Menu">
+    <button class="nav-btn" id="adminDropdownBtn" aria-expanded="false" aria-controls="adminDropdownContent" role="menuitem">Admin ▼</button>
+    <div id="adminDropdownContent" role="menu" aria-hidden="true">
+      <button id="openAdminEditorBtn" role="menuitem">Open Admin Editor</button>
+      <button id="logoutBtn" role="menuitem">Logout</button>
     </div>
   </div>
-</div>
+</nav>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -140,7 +287,7 @@
     collection, query, where, getDocs
   } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-  // Firebase configuration from you
+  // Firebase config (your project)
   const firebaseConfig = {
     apiKey: "AIzaSyAoWuLi-47H_0hvGzhqCx7lhQUpVwMvjVw",
     authDomain: "popupshop-59cfa.firebaseapp.com",
@@ -151,34 +298,48 @@
     measurementId: "G-SK505GZFCK",
   };
 
+  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // Elements
-  const adminPopup = document.getElementById("adminPopup");
-  const adminPinInput = document.getElementById("adminPinInput");
-  const verifyPinBtn = document.getElementById("verifyPinBtn");
-  const loginErrorMsg = document.getElementById("loginErrorMsg");
+  // DOM Elements
+  const adminPopup = document.getElementById('adminPopup');
+  const adminPinInput = document.getElementById('adminPinInput');
+  const verifyPinBtn = document.getElementById('verifyPinBtn');
+  const loginErrorMsg = document.getElementById('loginErrorMsg');
 
-  const newStoreTitleInput = document.getElementById("newStoreTitleInput");
-  const newAdminPinInput = document.getElementById("newAdminPinInput");
-  const createStoreBtn = document.getElementById("createStoreBtn");
-  const createErrorMsg = document.getElementById("createErrorMsg");
+  const newStoreTitleInput = document.getElementById('newStoreTitleInput');
+  const newAdminPinInput = document.getElementById('newAdminPinInput');
+  const createStoreBtn = document.getElementById('createStoreBtn');
+  const createErrorMsg = document.getElementById('createErrorMsg');
 
-  const storeEditor = document.getElementById("storeEditor");
-  const storeTitleDisplay = document.getElementById("storeTitleDisplay");
-  const viewStoreBtn = document.getElementById("viewStoreBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
+  const storeEditorModal = document.getElementById('storeEditorModal');
+  const editorCanvas = document.getElementById('editorCanvas');
+  const propertiesPanel = document.getElementById('propertiesContent');
+  const storeEditorTitle = document.getElementById('storeEditorTitle');
+  const saveStoreBtn = document.getElementById('saveStoreBtn');
+  const exportStoreBtn = document.getElementById('exportStoreBtn');
+  const closeEditorBtn = document.getElementById('closeEditorBtn');
 
-  const bottomNav = document.getElementById("bottomNav");
-  const navLeft = bottomNav.querySelector(".nav-left");
-  const adminDropdownBtn = document.getElementById("adminDropdownBtn");
-  const adminDropdownContent = document.getElementById("adminDropdownContent");
-  const openAdminEditorBtn = document.getElementById("openAdminEditorBtn");
-  const homeBtn = document.getElementById("homeBtn");
+  const editorToolbar = document.getElementById('editorToolbar');
+  const addTextBtn = document.getElementById('addTextBtn');
+  const addImageBtn = document.getElementById('addImageBtn');
+  const addCategoryBtn = document.getElementById('addCategoryBtn');
+  const addProductBtn = document.getElementById('addProductBtn');
+  const addNavButtonBtn = document.getElementById('addNavButtonBtn');
+  const themeSettingsBtn = document.getElementById('themeSettingsBtn');
+
+  const bottomNav = document.getElementById('bottomNav');
+  const navLeft = bottomNav.querySelector('.nav-left');
+  const adminDropdownBtn = document.getElementById('adminDropdownBtn');
+  const adminDropdownContent = document.getElementById('adminDropdownContent');
+  const openAdminEditorBtn = document.getElementById('openAdminEditorBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const homeBtn = document.getElementById('homeBtn');
 
   // State
-  let currentStore = null; // { id, title, pin, layout, navButtons }
+  let currentStore = null; // { id, title, pin, layout, navButtons, theme }
+  let selectedElementId = null;
   let adminDropdownOpen = false;
 
   // LocalStorage helpers
@@ -186,77 +347,82 @@
     return `popupshop_store_${storeId}`;
   }
 
-  // Toggle admin dropdown
-  adminDropdownBtn.addEventListener("click", () => {
+  // Show admin dropdown menu
+  adminDropdownBtn.addEventListener('click', () => {
     adminDropdownOpen = !adminDropdownOpen;
-    adminDropdownContent.style.display = adminDropdownOpen ? "block" : "none";
+    adminDropdownContent.style.display = adminDropdownOpen ? 'block' : 'none';
+    adminDropdownBtn.setAttribute('aria-expanded', adminDropdownOpen.toString());
   });
 
-  window.addEventListener("click", (e) => {
+  // Close dropdown when clicking outside
+  window.addEventListener('click', (e) => {
     if (!adminDropdownBtn.contains(e.target) && !adminDropdownContent.contains(e.target)) {
       adminDropdownOpen = false;
-      adminDropdownContent.style.display = "none";
+      adminDropdownContent.style.display = 'none';
+      adminDropdownBtn.setAttribute('aria-expanded', 'false');
     }
   });
 
-  // Firestore: load store by PIN
+  // Firestore: Load store by PIN
   async function loadStoreByPin(pin) {
     try {
-      console.log("Looking up store with PIN:", pin);
-      const storesCol = collection(db, "stores");
-      const q = query(storesCol, where("pin", "==", pin));
+      const storesCol = collection(db, 'stores');
+      const q = query(storesCol, where('pin', '==', pin));
       const querySnapshot = await getDocs(q);
-      if (querySnapshot.empty) {
-        console.log("No store found for PIN:", pin);
-        return null;
-      }
+      if (querySnapshot.empty) return null;
       const docSnap = querySnapshot.docs[0];
-      console.log("Store found:", docSnap.id, docSnap.data());
       return { id: docSnap.id, ...docSnap.data() };
     } catch (e) {
-      console.error("Error loading store by PIN:", e);
+      console.error('Firestore error loading by PIN:', e);
       return null;
     }
   }
 
-  // Firestore: create new store
+  // Firestore: Create new store
   async function createNewStore(title, pin) {
     if (!title || !pin) return null;
-    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const randomStr = Math.random().toString(36).slice(2, 7);
     const storeId = `${slug}-${randomStr}`;
-
     const newStore = {
       title,
       pin,
-      layout: [],
-      navButtons: [],
+      layout: [],    // Elements on page
+      navButtons: [], // Extra nav buttons beyond Home/Admin
+      theme: {
+        backgroundColor: '#ffffff',
+        backgroundImage: '',
+        navBarColor: '#222222',
+        navBarTextColor: '#eeeeee',
+        fontColor: '#222222',
+      },
       createdAt: new Date().toISOString(),
     };
-
     try {
-      await setDoc(doc(db, "stores", storeId), newStore);
-      console.log("Created new store:", storeId);
+      await setDoc(doc(db, 'stores', storeId), newStore);
       return { id: storeId, ...newStore };
     } catch (e) {
-      console.error("Failed to create store:", e);
+      console.error('Failed to create store:', e);
       return null;
     }
   }
 
-  // Save store to Firestore and fallback localStorage
+  // Save store data to Firestore with localStorage fallback
   async function saveStore(store) {
     try {
-      await setDoc(doc(db, "stores", store.id), store);
+      await setDoc(doc(db, 'stores', store.id), store);
       localStorage.removeItem(localStorageKey(store.id));
+      alert('Store saved successfully!');
       return true;
     } catch (e) {
-      console.warn("Firestore save failed, saving to localStorage:", e);
+      console.warn('Firestore save failed, saving to localStorage:', e);
       try {
         localStorage.setItem(localStorageKey(store.id), JSON.stringify(store));
+        alert('Saved locally due to network issue.');
         return true;
       } catch (err) {
-        console.error("localStorage save failed:", err);
+        console.error('LocalStorage save failed:', err);
+        alert('Failed to save store data.');
         return false;
       }
     }
@@ -265,88 +431,550 @@
   // Load store from Firestore or localStorage fallback
   async function loadStore(storeId) {
     try {
-      const docSnap = await getDoc(doc(db, "stores", storeId));
+      const docSnap = await getDoc(doc(db, 'stores', storeId));
       if (docSnap.exists()) return docSnap.data();
-      // fallback:
       const lsData = localStorage.getItem(localStorageKey(storeId));
       if (lsData) return JSON.parse(lsData);
       return null;
     } catch (e) {
-      console.warn("Firestore load failed, trying localStorage:", e);
+      console.warn('Firestore load failed, trying localStorage:', e);
       const lsData = localStorage.getItem(localStorageKey(storeId));
       if (lsData) return JSON.parse(lsData);
       return null;
     }
   }
 
-  // Render extra nav buttons
+  // Render bottom nav buttons (fixed Home + Admin, plus extras)
   function renderNavButtons() {
-    // Remove all extra buttons
-    [...navLeft.querySelectorAll(".nav-btn.custom")].forEach(btn => btn.remove());
+    // Clear all extra nav buttons except Home
+    [...navLeft.querySelectorAll('.nav-btn.custom')].forEach(btn => btn.remove());
     if (!currentStore || !currentStore.navButtons) return;
     currentStore.navButtons.forEach(btnData => {
-      const btn = document.createElement("button");
+      const btn = document.createElement('button');
       btn.textContent = btnData.label;
-      btn.classList.add("nav-btn", "custom");
-      btn.addEventListener("click", () => {
-        window.location.href = btnData.link || "#";
+      btn.classList.add('nav-btn', 'custom');
+      btn.addEventListener('click', () => {
+        if (btnData.link) window.location.href = btnData.link;
       });
       navLeft.appendChild(btn);
     });
   }
 
-  // Show store editor
+  // Open store editor modal and populate UI
   function openStoreEditor(store) {
     currentStore = store;
-    adminPopup.style.display = "none";
-    storeEditor.style.display = "block";
-    storeTitleDisplay.textContent = store.title || "(No Title)";
+    storeEditorTitle.textContent = `Store Editor: ${store.title || '(No Title)'}`;
+    adminPopup.style.display = 'none';
+    storeEditorModal.style.display = 'flex';
+    selectedElementId = null;
+    editorCanvas.innerHTML = '';
     renderNavButtons();
+    renderElements();
   }
 
-  // Button events
-  verifyPinBtn.addEventListener("click", async () => {
-    loginErrorMsg.textContent = "";
+  // Render all elements onto editorCanvas
+  function renderElements() {
+    editorCanvas.innerHTML = '';
+    if (!currentStore || !Array.isArray(currentStore.layout)) return;
+    currentStore.layout.forEach(el => {
+      const elDiv = document.createElement('div');
+      elDiv.classList.add('editor-element');
+      elDiv.setAttribute('data-id', el.id);
+      elDiv.style.left = el.position?.x + 'px' || '10px';
+      elDiv.style.top = el.position?.y + 'px' || '10px';
+      elDiv.style.width = el.size?.width + 'px' || '150px';
+      elDiv.style.height = el.size?.height + 'px' || 'auto';
+
+      // Render content based on type
+      switch(el.type) {
+        case 'text':
+          elDiv.textContent = el.content || 'Text';
+          elDiv.style.color = el.color || '#222';
+          elDiv.style.fontSize = (el.fontSize || 16) + 'px';
+          elDiv.style.fontWeight = el.bold ? 'bold' : 'normal';
+          elDiv.style.fontStyle = el.italic ? 'italic' : 'normal';
+          elDiv.style.textDecoration = el.underline ? 'underline' : 'none';
+          break;
+        case 'image':
+          if (el.src) {
+            const img = document.createElement('img');
+            img.src = el.src;
+            img.alt = el.alt || '';
+            img.style.width = '100%';
+            img.style.height = '100%';
+            elDiv.appendChild(img);
+          } else {
+            elDiv.textContent = 'Image';
+          }
+          break;
+        case 'category':
+          elDiv.textContent = `Category: ${el.title || '(No title)'}`;
+          elDiv.style.fontWeight = '700';
+          elDiv.style.fontSize = '16px';
+          break;
+        case 'product':
+          elDiv.textContent = `Product: ${el.title || '(No title)'}`;
+          elDiv.style.fontSize = '14px';
+          break;
+        case 'navButton':
+          elDiv.textContent = `Nav Btn: ${el.label || '(No label)'}`;
+          elDiv.style.backgroundColor = '#007bff';
+          elDiv.style.color = '#fff';
+          elDiv.style.textAlign = 'center';
+          elDiv.style.padding = '4px';
+          elDiv.style.borderRadius = '4px';
+          break;
+        default:
+          elDiv.textContent = 'Unknown Element';
+      }
+
+      // Add selection & drag handlers
+      elDiv.addEventListener('mousedown', e => selectElement(el.id, e));
+      elDiv.addEventListener('touchstart', e => selectElement(el.id, e));
+
+      editorCanvas.appendChild(elDiv);
+    });
+  }
+
+  // Generate unique ID for elements
+  function generateId() {
+    return 'el-' + Math.random().toString(36).slice(2, 10);
+  }
+
+  // Select element by id
+  function selectElement(id, e) {
+    e.stopPropagation();
+    if (selectedElementId === id) return;
+    selectedElementId = id;
+    updateSelectedElementUI();
+  }
+
+  // Clear selection if clicking outside
+  editorCanvas.addEventListener('mousedown', () => {
+    selectedElementId = null;
+    updateSelectedElementUI();
+  });
+  editorCanvas.addEventListener('touchstart', () => {
+    selectedElementId = null;
+    updateSelectedElementUI();
+  });
+
+  // Update properties panel and element highlight
+  function updateSelectedElementUI() {
+    [...editorCanvas.children].forEach(div => {
+      if (div.getAttribute('data-id') === selectedElementId) {
+        div.classList.add('selected');
+      } else {
+        div.classList.remove('selected');
+      }
+    });
+
+    if (!selectedElementId) {
+      propertiesPanel.innerHTML = 'Select an element to edit properties.';
+      return;
+    }
+
+    const el = currentStore.layout.find(e => e.id === selectedElementId);
+    if (!el) {
+      propertiesPanel.innerHTML = 'Selected element not found.';
+      return;
+    }
+
+    // Build properties UI based on type
+    propertiesPanel.innerHTML = '';
+    const title = document.createElement('h4');
+    title.textContent = `Edit ${el.type.charAt(0).toUpperCase() + el.type.slice(1)}`;
+    propertiesPanel.appendChild(title);
+
+    // Common inputs for position and size
+    // Position X
+    const posXLabel = document.createElement('label');
+    posXLabel.textContent = 'Position X (px):';
+    const posXInput = document.createElement('input');
+    posXInput.type = 'number';
+    posXInput.value = el.position?.x || 0;
+    posXInput.addEventListener('input', () => {
+      el.position = el.position || {};
+      el.position.x = parseInt(posXInput.value) || 0;
+      renderElements();
+    });
+    propertiesPanel.appendChild(posXLabel);
+    propertiesPanel.appendChild(posXInput);
+
+    // Position Y
+    const posYLabel = document.createElement('label');
+    posYLabel.textContent = 'Position Y (px):';
+    const posYInput = document.createElement('input');
+    posYInput.type = 'number';
+    posYInput.value = el.position?.y || 0;
+    posYInput.addEventListener('input', () => {
+      el.position = el.position || {};
+      el.position.y = parseInt(posYInput.value) || 0;
+      renderElements();
+    });
+    propertiesPanel.appendChild(posYLabel);
+    propertiesPanel.appendChild(posYInput);
+
+    // Width
+    const widthLabel = document.createElement('label');
+    widthLabel.textContent = 'Width (px):';
+    const widthInput = document.createElement('input');
+    widthInput.type = 'number';
+    widthInput.value = el.size?.width || 150;
+    widthInput.addEventListener('input', () => {
+      el.size = el.size || {};
+      el.size.width = parseInt(widthInput.value) || 150;
+      renderElements();
+    });
+    propertiesPanel.appendChild(widthLabel);
+    propertiesPanel.appendChild(widthInput);
+
+    // Height
+    const heightLabel = document.createElement('label');
+    heightLabel.textContent = 'Height (px):';
+    const heightInput = document.createElement('input');
+    heightInput.type = 'number';
+    heightInput.value = el.size?.height || 100;
+    heightInput.addEventListener('input', () => {
+      el.size = el.size || {};
+      el.size.height = parseInt(heightInput.value) || 100;
+      renderElements();
+    });
+    propertiesPanel.appendChild(heightLabel);
+    propertiesPanel.appendChild(heightInput);
+
+    // Type-specific properties
+    if (el.type === 'text') {
+      // Content
+      const contentLabel = document.createElement('label');
+      contentLabel.textContent = 'Text Content:';
+      const contentInput = document.createElement('textarea');
+      contentInput.value = el.content || '';
+      contentInput.addEventListener('input', () => {
+        el.content = contentInput.value;
+        renderElements();
+      });
+      propertiesPanel.appendChild(contentLabel);
+      propertiesPanel.appendChild(contentInput);
+
+      // Font Size
+      const fontSizeLabel = document.createElement('label');
+      fontSizeLabel.textContent = 'Font Size (px):';
+      const fontSizeInput = document.createElement('input');
+      fontSizeInput.type = 'number';
+      fontSizeInput.value = el.fontSize || 16;
+      fontSizeInput.addEventListener('input', () => {
+        el.fontSize = parseInt(fontSizeInput.value) || 16;
+        renderElements();
+      });
+      propertiesPanel.appendChild(fontSizeLabel);
+      propertiesPanel.appendChild(fontSizeInput);
+
+      // Color
+      const colorLabel = document.createElement('label');
+      colorLabel.textContent = 'Font Color:';
+      const colorInput = document.createElement('input');
+      colorInput.type = 'color';
+      colorInput.value = el.color || '#222222';
+      colorInput.addEventListener('input', () => {
+        el.color = colorInput.value;
+        renderElements();
+      });
+      propertiesPanel.appendChild(colorLabel);
+      propertiesPanel.appendChild(colorInput);
+
+      // Bold
+      const boldLabel = document.createElement('label');
+      boldLabel.textContent = 'Bold:';
+      const boldCheckbox = document.createElement('input');
+      boldCheckbox.type = 'checkbox';
+      boldCheckbox.checked = el.bold || false;
+      boldCheckbox.addEventListener('change', () => {
+        el.bold = boldCheckbox.checked;
+        renderElements();
+      });
+      propertiesPanel.appendChild(boldLabel);
+      propertiesPanel.appendChild(boldCheckbox);
+
+      // Italic
+      const italicLabel = document.createElement('label');
+      italicLabel.textContent = 'Italic:';
+      const italicCheckbox = document.createElement('input');
+      italicCheckbox.type = 'checkbox';
+      italicCheckbox.checked = el.italic || false;
+      italicCheckbox.addEventListener('change', () => {
+        el.italic = italicCheckbox.checked;
+        renderElements();
+      });
+      propertiesPanel.appendChild(italicLabel);
+      propertiesPanel.appendChild(italicCheckbox);
+
+      // Underline
+      const underlineLabel = document.createElement('label');
+      underlineLabel.textContent = 'Underline:';
+      const underlineCheckbox = document.createElement('input');
+      underlineCheckbox.type = 'checkbox';
+      underlineCheckbox.checked = el.underline || false;
+      underlineCheckbox.addEventListener('change', () => {
+        el.underline = underlineCheckbox.checked;
+        renderElements();
+      });
+      propertiesPanel.appendChild(underlineLabel);
+      propertiesPanel.appendChild(underlineCheckbox);
+    }
+    else if (el.type === 'image') {
+      // Image URL
+      const srcLabel = document.createElement('label');
+      srcLabel.textContent = 'Image URL:';
+      const srcInput = document.createElement('input');
+      srcInput.type = 'text';
+      srcInput.value = el.src || '';
+      srcInput.addEventListener('input', () => {
+        el.src = srcInput.value;
+        renderElements();
+      });
+      propertiesPanel.appendChild(srcLabel);
+      propertiesPanel.appendChild(srcInput);
+
+      // Alt Text
+      const altLabel = document.createElement('label');
+      altLabel.textContent = 'Alt Text:';
+      const altInput = document.createElement('input');
+      altInput.type = 'text';
+      altInput.value = el.alt || '';
+      altInput.addEventListener('input', () => {
+        el.alt = altInput.value;
+      });
+      propertiesPanel.appendChild(altLabel);
+      propertiesPanel.appendChild(altInput);
+    }
+    else if (el.type === 'navButton') {
+      // Label
+      const labelLabel = document.createElement('label');
+      labelLabel.textContent = 'Button Label:';
+      const labelInput = document.createElement('input');
+      labelInput.type = 'text';
+      labelInput.value = el.label || '';
+      labelInput.addEventListener('input', () => {
+        el.label = labelInput.value;
+        renderElements();
+      });
+      propertiesPanel.appendChild(labelLabel);
+      propertiesPanel.appendChild(labelInput);
+
+      // Link URL
+      const linkLabel = document.createElement('label');
+      linkLabel.textContent = 'Link URL:';
+      const linkInput = document.createElement('input');
+      linkInput.type = 'text';
+      linkInput.value = el.link || '';
+      linkInput.addEventListener('input', () => {
+        el.link = linkInput.value;
+      });
+      propertiesPanel.appendChild(linkLabel);
+      propertiesPanel.appendChild(linkInput);
+    }
+    else if (el.type === 'category' || el.type === 'product') {
+      // Title
+      const titleLabel = document.createElement('label');
+      titleLabel.textContent = 'Title:';
+      const titleInput = document.createElement('input');
+      titleInput.type = 'text';
+      titleInput.value = el.title || '';
+      titleInput.addEventListener('input', () => {
+        el.title = titleInput.value;
+        renderElements();
+      });
+      propertiesPanel.appendChild(titleLabel);
+      propertiesPanel.appendChild(titleInput);
+
+      // Description (only for product)
+      if (el.type === 'product') {
+        const descLabel = document.createElement('label');
+        descLabel.textContent = 'Description:';
+        const descInput = document.createElement('textarea');
+        descInput.value = el.description || '';
+        descInput.addEventListener('input', () => {
+          el.description = descInput.value;
+        });
+        propertiesPanel.appendChild(descLabel);
+        propertiesPanel.appendChild(descInput);
+
+        // Price
+        const priceLabel = document.createElement('label');
+        priceLabel.textContent = 'Price ($):';
+        const priceInput = document.createElement('input');
+        priceInput.type = 'number';
+        priceInput.min = '0';
+        priceInput.step = '0.01';
+        priceInput.value = el.price || 0;
+        priceInput.addEventListener('input', () => {
+          el.price = parseFloat(priceInput.value) || 0;
+        });
+        propertiesPanel.appendChild(priceLabel);
+        propertiesPanel.appendChild(priceInput);
+      }
+    }
+
+    // Delete button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.classList.add('delete-btn');
+    deleteBtn.textContent = 'Delete Element';
+    deleteBtn.addEventListener('click', () => {
+      currentStore.layout = currentStore.layout.filter(e => e.id !== el.id);
+      selectedElementId = null;
+      renderElements();
+      updateSelectedElementUI();
+    });
+    propertiesPanel.appendChild(deleteBtn);
+  }
+
+  // Add new element helpers
+  function addElement(type) {
+    if (!currentStore) return;
+    const newEl = {
+      id: generateId(),
+      type,
+      position: { x: 10, y: 10 },
+      size: { width: 150, height: 100 },
+    };
+    switch(type) {
+      case 'text':
+        newEl.content = 'New Text';
+        newEl.color = '#222222';
+        newEl.fontSize = 16;
+        break;
+      case 'image':
+        newEl.src = '';
+        newEl.alt = '';
+        break;
+      case 'category':
+        newEl.title = 'New Category';
+        break;
+      case 'product':
+        newEl.title = 'New Product';
+        newEl.description = '';
+        newEl.price = 0;
+        break;
+      case 'navButton':
+        newEl.label = 'New Nav';
+        newEl.link = '#';
+        break;
+    }
+    currentStore.layout.push(newEl);
+    renderElements();
+    selectedElementId = newEl.id;
+    updateSelectedElementUI();
+  }
+
+  addTextBtn.addEventListener('click', () => addElement('text'));
+  addImageBtn.addEventListener('click', () => addElement('image'));
+  addCategoryBtn.addEventListener('click', () => addElement('category'));
+  addProductBtn.addEventListener('click', () => addElement('product'));
+  addNavButtonBtn.addEventListener('click', () => addElement('navButton'));
+
+  // Save store button
+  saveStoreBtn.addEventListener('click', async () => {
+    if (!currentStore) return alert('No store loaded');
+    await saveStore(currentStore);
+  });
+
+  // Export store HTML (placeholder alert for now)
+  exportStoreBtn.addEventListener('click', () => {
+    alert('Export functionality coming soon.');
+  });
+
+  // Close editor modal returns to login
+  closeEditorBtn.addEventListener('click', () => {
+    if (confirm('Close editor and return to login? Unsaved changes will be lost.')) {
+      currentStore = null;
+      selectedElementId = null;
+      storeEditorModal.style.display = 'none';
+      adminPopup.style.display = 'flex';
+      adminPinInput.value = '';
+      loginErrorMsg.textContent = '';
+      newStoreTitleInput.value = '';
+      newAdminPinInput.value = '';
+      createErrorMsg.textContent = '';
+      editorCanvas.innerHTML = '';
+      propertiesPanel.innerHTML = 'Select an element to edit properties.';
+    }
+  });
+
+  // Verify PIN login
+  verifyPinBtn.addEventListener('click', async () => {
+    loginErrorMsg.textContent = '';
     const pin = adminPinInput.value.trim();
     if (!pin) {
-      loginErrorMsg.textContent = "Please enter a PIN.";
+      loginErrorMsg.textContent = 'Please enter a PIN.';
       return;
     }
     const store = await loadStoreByPin(pin);
     if (!store) {
-      loginErrorMsg.textContent = "Invalid PIN or store not found.";
+      loginErrorMsg.textContent = 'Invalid PIN or store not found.';
       return;
     }
     openStoreEditor(store);
   });
 
-  createStoreBtn.addEventListener("click", async () => {
-    createErrorMsg.textContent = "";
+  // Create new store
+  createStoreBtn.addEventListener('click', async () => {
+    createErrorMsg.textContent = '';
     const title = newStoreTitleInput.value.trim();
     const pin = newAdminPinInput.value.trim();
     if (!title || !pin) {
-      createErrorMsg.textContent = "Please enter both store title and PIN.";
+      createErrorMsg.textContent = 'Please enter both store title and PIN.';
       return;
     }
     const newStore = await createNewStore(title, pin);
     if (!newStore) {
-      createErrorMsg.textContent = "Failed to create store. Check console.";
+      createErrorMsg.textContent = 'Failed to create store. Check console.';
       return;
     }
     openStoreEditor(newStore);
   });
 
-  viewStoreBtn.addEventListener("click", () => {
-    alert("Live store preview is coming soon!");
+  // Logout button in admin dropdown
+  logoutBtn.addEventListener('click', () => {
+    if(confirm('Logout and return to login screen? Unsaved changes will be lost.')) {
+      currentStore = null;
+      selectedElementId = null;
+      storeEditorModal.style.display = 'none';
+      adminPopup.style.display = 'flex';
+      adminPinInput.value = '';
+      loginErrorMsg.textContent = '';
+      newStoreTitleInput.value = '';
+      newAdminPinInput.value = '';
+      createErrorMsg.textContent = '';
+      editorCanvas.innerHTML = '';
+      propertiesPanel.innerHTML = 'Select an element to edit properties.';
+    }
   });
 
-  logoutBtn.addEventListener("click", () => {
-    location.reload();
+  // Open Admin Editor button in dropdown
+  openAdminEditorBtn.addEventListener('click', () => {
+    if(currentStore) {
+      storeEditorModal.style.display = 'flex';
+      adminDropdownContent.style.display = 'none';
+      adminDropdownBtn.setAttribute('aria-expanded', 'false');
+    }
   });
 
-  openAdminEditorBtn.addEventListener("click", () => {
-    alert("Admin editor modal coming soon!");
+  // Unique ID generator
+  function generateId() {
+    return 'el-' + Math.random().toString(36).slice(2, 10);
+  }
+
+  // Initial display is admin popup on load
+  adminPopup.style.display = 'flex';
+
+  // Home button click just reloads page for now
+  homeBtn.addEventListener('click', () => {
+    alert('Home button clicked - implement navigation here.');
   });
+
+  // Prevent text selection and drag issues inside canvas for better drag-and-drop support (to be added)
 </script>
+
 </body>
 </html>
