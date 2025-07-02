@@ -3,276 +3,295 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pop-Up Shop - Store Builder</title>
+<title>Pop-Up Shop - Full Store Builder</title>
 <style>
-  /* Reset and base */
-  body,html {
-    margin:0; padding:0; height:100%; font-family: Arial,sans-serif; background:#fafafa;
-    user-select:none;
+  /* General reset and base styles */
+  body, html {
+    margin: 0; padding: 0; height: 100%; font-family: Arial, sans-serif;
+    background: #f8f8f8; overflow-x: hidden;
   }
   button {
-    cursor:pointer;
-  }
-  /* Admin Popup */
-  #adminPopup {
-    position:fixed; top:0; left:0; width:100vw; height:100vh;
-    background:rgba(0,0,0,0.8);
-    display:flex; justify-content:center; align-items:center;
-    z-index:2000;
-  }
-  #adminPopupContent {
-    background:#fff; border-radius:8px; width:420px; max-width:95vw; padding:20px;
-    box-sizing:border-box;
-    user-select:auto;
-  }
-  #adminPopupContent h1 {
-    margin:0 0 20px 0; text-align:center; font-weight:700;
-  }
-  .section {
-    margin-bottom:20px;
-  }
-  label {
-    font-weight:700; display:block; margin-bottom:5px;
-  }
-  input[type=text], input[type=password] {
-    width:100%; padding:8px; margin-bottom:12px; box-sizing:border-box;
-    font-size:1rem; border-radius:4px; border:1px solid #ccc;
-  }
-  button.primary {
-    background:#0069ff; border:none; color:#fff; font-weight:700; padding:10px 15px; border-radius:4px;
-    font-size:1rem; width:100%;
-  }
-  button.primary:disabled {
-    background:#99bbff; cursor:not-allowed;
-  }
-  .error-msg {
-    color:#c00; font-weight:700; min-height:18px; margin-top:-10px; margin-bottom:10px; font-size:0.9rem;
+    cursor: pointer;
   }
 
-  /* Bottom Nav */
+  /* Admin Popup */
+  #adminPopup {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.75);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 10000;
+  }
+  #adminPopupContent {
+    background: white; border-radius: 8px;
+    padding: 24px;
+    width: 400px;
+    box-sizing: border-box;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  #adminPopupContent h1 {
+    margin-top: 0; margin-bottom: 20px; text-align: center;
+  }
+  label {
+    display: block; font-weight: bold; margin: 12px 0 6px;
+  }
+  input[type="text"], input[type="password"] {
+    width: 100%; padding: 10px; box-sizing: border-box; font-size: 1rem;
+    border-radius: 5px; border: 1px solid #ccc;
+  }
+  button.primary {
+    background-color: #007bff; color: white; border: none;
+    width: 100%; padding: 12px; font-weight: bold; font-size: 1rem;
+    margin-top: 15px; border-radius: 5px;
+  }
+  button.primary:disabled {
+    background-color: #aac8ff; cursor: not-allowed;
+  }
+  .errorMsg {
+    color: red; min-height: 18px; margin-top: 6px; font-weight: 600;
+    font-size: 0.9rem; text-align: center;
+  }
+
+  /* Bottom Navigation */
   #bottomNav {
-    position:fixed; bottom:0; left:0; right:0;
-    background:#222; color:#eee; height:48px;
-    display:flex; justify-content:space-between; align-items:center;
-    padding:0 15px; font-size:1rem; z-index:1500;
-    user-select:none;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 50px; background-color: #222;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 20px; color: #eee; font-weight: bold; font-size: 1rem;
+    z-index: 9000;
   }
   #bottomNav .nav-left, #bottomNav .nav-right {
-    display:flex; align-items:center; gap:10px;
+    display: flex; gap: 15px;
   }
   #bottomNav button.nav-btn {
-    background:#444; color:#eee; border:none; border-radius:4px;
-    padding:6px 12px; user-select:none; font-weight:700;
+    background: #444; border: none; color: white;
+    border-radius: 5px; padding: 8px 15px;
+    user-select: none;
   }
 
   /* Admin Dropdown */
   #adminDropdown {
-    position:relative;
+    position: relative;
   }
   #adminDropdownContent {
-    display:none;
-    position:absolute; bottom:50px; right:0;
-    background:#fff; color:#222;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-    border-radius:6px; min-width:160px;
-    user-select:auto;
-    z-index:2001;
+    display: none;
+    position: absolute; bottom: 55px; right: 0;
+    background: white; color: #222;
+    border-radius: 6px; box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+    min-width: 180px;
+    user-select: auto;
+    z-index: 10001;
   }
   #adminDropdownContent button {
-    background:none; border:none; width:100%; padding:10px 16px;
-    text-align:left; cursor:pointer; font-weight:600; color:#222;
+    width: 100%; padding: 10px 15px; background: none; border: none;
+    text-align: left; font-weight: 600; cursor: pointer;
   }
   #adminDropdownContent button:hover {
-    background:#eee;
+    background-color: #f0f0f0;
   }
 
   /* Store Editor Modal */
   #storeEditorModal {
-    position:fixed; top:2.5%; left:2.5%; width:95vw; height:95vh;
-    background:#fff; border-radius:10px;
-    box-shadow:0 4px 20px rgba(0,0,0,0.25);
-    display:none; flex-direction:column;
-    z-index:2005;
-    user-select:auto;
+    position: fixed; top: 2.5%; left: 2.5%; width: 95vw; height: 95vh;
+    background: white; border-radius: 10px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+    display: none; flex-direction: column;
+    z-index: 10002;
+    user-select: auto;
   }
 
   /* Editor Header */
   #editorHeader {
-    height:48px; background:#0069ff; color:#fff;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:0 20px; font-weight:700; font-size:1.2rem;
-    border-top-left-radius:10px; border-top-right-radius:10px;
+    height: 50px; background-color: #007bff; color: white;
+    border-top-left-radius: 10px; border-top-right-radius: 10px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; font-weight: 700; font-size: 1.2rem;
   }
   #editorHeader button {
-    background:#0046bb; border:none; color:#fff; padding:6px 12px; border-radius:4px;
+    background: #0056b3; border: none; color: white;
+    padding: 8px 15px; border-radius: 5px; cursor: pointer;
   }
   #editorHeader button:hover {
-    background:#003a99;
+    background: #003d80;
   }
 
   /* Editor Body */
   #editorBody {
-    flex:1; display:flex; overflow:hidden;
+    display: flex; flex: 1; overflow: hidden;
   }
 
   /* Toolbar */
   #editorToolbar {
-    width:220px; background:#f0f0f0; border-right:1px solid #ccc;
-    padding:12px;
-    box-sizing:border-box;
-    display:flex; flex-direction:column; gap:12px;
+    width: 220px; background-color: #f9f9f9; border-right: 1px solid #ccc;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex; flex-direction: column; gap: 12px;
   }
   #editorToolbar button {
-    background:#007bff; border:none; color:#fff; padding:8px 10px;
-    border-radius:5px; font-weight:700; font-size:0.9rem;
-    user-select:none;
+    background-color: #007bff; color: white; border: none;
+    border-radius: 5px; padding: 12px; font-weight: 700;
+    user-select: none;
   }
-  #editorToolbar button:active {
-    background:#0056b3;
+  #editorToolbar button:hover {
+    background-color: #0056b3;
   }
 
-  /* Canvas Area */
+  /* Canvas Wrapper */
   #editorCanvasWrapper {
-    flex:1; position:relative; background:#fff; overflow:auto;
-    border-left:1px solid #ccc;
-    padding:12px;
-  }
-  #editorCanvas {
-    position:relative; width:100%; min-height:100%;
-    background:#fff;
-    border:2px dashed #bbb;
-    border-radius:6px;
-    user-select:none;
+    flex: 1; position: relative; background-color: #fff;
+    border-left: 1px solid #ccc; overflow: auto;
+    padding: 15px;
+    box-sizing: border-box;
   }
 
-  /* Editable Elements */
+  /* Canvas area */
+  #editorCanvas {
+    position: relative; width: 100%; min-height: 100%;
+    border: 2px dashed #bbb;
+    border-radius: 8px;
+    background-color: var(--background-color, #fff);
+    color: var(--font-color, #222);
+    font-family: Arial, sans-serif;
+  }
+
+  /* Editor Elements */
   .editor-element {
-    position:absolute;
-    border:2px solid transparent;
-    border-radius:4px;
-    padding:4px;
-    cursor:move;
-    user-select:none;
-    background:rgba(255,255,255,0.95);
-    box-sizing:border-box;
+    position: absolute;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    padding: 6px;
+    background: rgba(255,255,255,0.9);
+    box-sizing: border-box;
+    user-select: none;
+    cursor: move;
+    overflow: hidden;
   }
   .editor-element.selected {
-    border-color:#0069ff;
-    background:rgba(0,105,255,0.15);
+    border-color: #007bff;
+    background: rgba(0,123,255,0.1);
   }
   .editor-element img {
-    max-width: 100%; max-height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     display: block;
-    user-select:none;
+    pointer-events: none;
   }
 
   /* Properties Panel */
   #propertiesPanel {
-    width:300px; background:#fafafa; border-left:1px solid #ccc;
-    padding:12px; box-sizing:border-box;
-    display:flex; flex-direction:column; gap:10px;
+    width: 300px; background-color: #f9f9f9; border-left: 1px solid #ccc;
+    padding: 20px; box-sizing: border-box;
+    overflow-y: auto;
   }
   #propertiesPanel h3 {
-    margin:0 0 10px 0; font-weight:700; font-size:1.1rem;
+    margin-top: 0; margin-bottom: 15px;
+    font-weight: 700; font-size: 1.2rem;
   }
   #propertiesPanel label {
-    font-weight:600; font-size:0.9rem;
+    font-weight: 600;
+    display: block;
+    margin: 10px 0 5px;
   }
-  #propertiesPanel input[type=text], #propertiesPanel input[type=number], #propertiesPanel textarea {
-    width:100%; padding:6px 8px; font-size:1rem;
-    border-radius:4px; border:1px solid #ccc;
-    box-sizing:border-box;
+  #propertiesPanel input[type=text], #propertiesPanel input[type=number], #propertiesPanel textarea, #propertiesPanel input[type=color] {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
   }
   #propertiesPanel textarea {
     resize: vertical;
-    min-height:60px;
+    min-height: 80px;
   }
   #propertiesPanel button.delete-btn {
-    margin-top: 10px;
-    background:#c00; color:#fff; border:none; border-radius:4px;
-    padding:8px; font-weight:700; cursor:pointer;
+    margin-top: 15px;
+    width: 100%;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-weight: 700;
+    border-radius: 5px;
+    cursor: pointer;
   }
   #propertiesPanel button.delete-btn:hover {
-    background:#900;
+    background-color: #b02a37;
   }
 
-  /* Scrollbars for canvas */
-  #editorCanvasWrapper::-webkit-scrollbar {
-    width:8px; height:8px;
+  /* Scrollbar for properties panel */
+  #propertiesPanel::-webkit-scrollbar {
+    width: 8px;
   }
-  #editorCanvasWrapper::-webkit-scrollbar-thumb {
-    background:#aaa; border-radius:4px;
+  #propertiesPanel::-webkit-scrollbar-thumb {
+    background: #bbb;
+    border-radius: 4px;
   }
 </style>
 </head>
 <body>
 
-<!-- Admin Popup -->
-<div id="adminPopup" role="dialog" aria-modal="true" aria-labelledby="adminPopupTitle">
+<!-- Admin Login/Create Popup -->
+<div id="adminPopup" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
   <div id="adminPopupContent">
-    <h1 id="adminPopupTitle">Pop-Up Shop</h1>
+    <h1 id="popupTitle">Pop-Up Shop</h1>
 
-    <section class="section" id="loginSection" aria-label="Existing Store Login">
-      <label for="adminPinInput">Enter Admin PIN:</label>
-      <input type="password" id="adminPinInput" aria-describedby="loginErrorMsg" placeholder="Admin PIN" />
-      <button id="verifyPinBtn" class="primary">Verify</button>
-      <div id="loginErrorMsg" class="error-msg" role="alert"></div>
+    <section aria-label="Admin Login Section">
+      <label for="loginPin">Admin PIN</label>
+      <input type="password" id="loginPin" placeholder="Enter your admin PIN" autocomplete="off" />
+      <button id="loginBtn" class="primary">Login</button>
+      <div id="loginError" class="errorMsg" role="alert"></div>
     </section>
 
     <hr />
 
-    <section class="section" id="createSection" aria-label="Create New Store">
-      <label for="newStoreTitleInput">New Store Title:</label>
-      <input type="text" id="newStoreTitleInput" aria-describedby="createErrorMsg" placeholder="Store Title" />
-      <label for="newAdminPinInput">New Admin PIN:</label>
-      <input type="password" id="newAdminPinInput" placeholder="Create PIN" />
-      <button id="createStoreBtn" class="primary">Create Store</button>
-      <div id="createErrorMsg" class="error-msg" role="alert"></div>
+    <section aria-label="Create New Store Section">
+      <label for="createTitle">New Store Title</label>
+      <input type="text" id="createTitle" placeholder="Enter store title" autocomplete="off" />
+      <label for="createPin">Create Admin PIN</label>
+      <input type="password" id="createPin" placeholder="Create a PIN" autocomplete="off" />
+      <button id="createBtn" class="primary">Create New Store</button>
+      <div id="createError" class="errorMsg" role="alert"></div>
     </section>
   </div>
 </div>
 
 <!-- Store Editor Modal -->
-<div id="storeEditorModal" aria-label="Store Editor" role="dialog" aria-modal="true">
+<div id="storeEditorModal" role="dialog" aria-modal="true" aria-labelledby="editorTitle">
   <header id="editorHeader">
-    <div id="storeEditorTitle">Store Editor</div>
+    <h2 id="editorTitle" style="margin: 0;"></h2>
     <div>
       <button id="saveStoreBtn" title="Save Store">Save</button>
+      <button id="viewStoreBtn" title="View Live Store">View Store</button>
       <button id="exportStoreBtn" title="Export Store HTML">Export HTML</button>
       <button id="closeEditorBtn" title="Close Editor">Close</button>
     </div>
   </header>
   <main id="editorBody">
-    <!-- Toolbar: Add Elements -->
-    <nav id="editorToolbar" aria-label="Add Elements">
-      <button id="addTextBtn">Add Text</button>
-      <button id="addImageBtn">Add Image</button>
-      <button id="addCategoryBtn">Add Product Category</button>
-      <button id="addProductBtn">Add Product</button>
-      <button id="addNavButtonBtn">Add Nav Button</button>
-      <button id="themeSettingsBtn">Theme Settings</button>
+    <nav id="editorToolbar" aria-label="Add Elements Toolbar">
+      <button id="addTextBtn" title="Add Text">Add Text</button>
+      <button id="addImageBtn" title="Add Image">Add Image</button>
+      <button id="addCategoryBtn" title="Add Product Category">Add Category</button>
+      <button id="addProductBtn" title="Add Product">Add Product</button>
+      <button id="addNavButtonBtn" title="Add Nav Button">Add Nav Button</button>
+      <button id="themeSettingsBtn" title="Theme Settings">Theme</button>
     </nav>
-
-    <!-- Canvas Area -->
     <section id="editorCanvasWrapper" tabindex="0" aria-label="Page Layout Editor">
       <div id="editorCanvas"></div>
     </section>
-
-    <!-- Properties Panel -->
-    <aside id="propertiesPanel" aria-label="Element Properties">
+    <aside id="propertiesPanel" aria-label="Element Properties Panel">
       <h3>Properties</h3>
-      <div id="propertiesContent">Select an element to edit properties.</div>
+      <div id="propertiesContent">Select an element to edit its properties.</div>
     </aside>
   </main>
 </div>
 
-<!-- Bottom Navigation -->
+<!-- Bottom Navigation Bar -->
 <nav id="bottomNav" aria-label="Main Navigation">
   <div class="nav-left" role="menubar" aria-label="Primary Navigation">
-    <button class="nav-btn" id="homeBtn" role="menuitem" tabindex="0">Home</button>
+    <button id="homeBtn" class="nav-btn" role="menuitem">Home</button>
   </div>
   <div class="nav-right" id="adminDropdown" role="menu" aria-haspopup="true" aria-label="Admin Menu">
-    <button class="nav-btn" id="adminDropdownBtn" aria-expanded="false" aria-controls="adminDropdownContent" role="menuitem">Admin ▼</button>
+    <button id="adminDropdownBtn" class="nav-btn" aria-expanded="false" aria-controls="adminDropdownContent" role="menuitem">Admin ▼</button>
     <div id="adminDropdownContent" role="menu" aria-hidden="true">
       <button id="openAdminEditorBtn" role="menuitem">Open Admin Editor</button>
       <button id="logoutBtn" role="menuitem">Logout</button>
@@ -283,11 +302,10 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import {
-    getFirestore, doc, getDoc, setDoc,
-    collection, query, where, getDocs
+    getFirestore, collection, query, where, getDocs, doc, setDoc, getDoc
   } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-  // Firebase config (your project)
+  // Firebase config (your project config here)
   const firebaseConfig = {
     apiKey: "AIzaSyAoWuLi-47H_0hvGzhqCx7lhQUpVwMvjVw",
     authDomain: "popupshop-59cfa.firebaseapp.com",
@@ -304,20 +322,22 @@
 
   // DOM Elements
   const adminPopup = document.getElementById('adminPopup');
-  const adminPinInput = document.getElementById('adminPinInput');
-  const verifyPinBtn = document.getElementById('verifyPinBtn');
-  const loginErrorMsg = document.getElementById('loginErrorMsg');
+  const loginPinInput = document.getElementById('loginPin');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginError = document.getElementById('loginError');
 
-  const newStoreTitleInput = document.getElementById('newStoreTitleInput');
-  const newAdminPinInput = document.getElementById('newAdminPinInput');
-  const createStoreBtn = document.getElementById('createStoreBtn');
-  const createErrorMsg = document.getElementById('createErrorMsg');
+  const createTitleInput = document.getElementById('createTitle');
+  const createPinInput = document.getElementById('createPin');
+  const createBtn = document.getElementById('createBtn');
+  const createError = document.getElementById('createError');
 
   const storeEditorModal = document.getElementById('storeEditorModal');
   const editorCanvas = document.getElementById('editorCanvas');
   const propertiesPanel = document.getElementById('propertiesContent');
-  const storeEditorTitle = document.getElementById('storeEditorTitle');
+  const editorTitle = document.getElementById('editorTitle');
+
   const saveStoreBtn = document.getElementById('saveStoreBtn');
+  const viewStoreBtn = document.getElementById('viewStoreBtn');
   const exportStoreBtn = document.getElementById('exportStoreBtn');
   const closeEditorBtn = document.getElementById('closeEditorBtn');
 
@@ -342,19 +362,19 @@
   let selectedElementId = null;
   let adminDropdownOpen = false;
 
-  // LocalStorage helpers
+  // Helpers
+
   function localStorageKey(storeId) {
     return `popupshop_store_${storeId}`;
   }
 
-  // Show admin dropdown menu
+  // Show/hide admin dropdown menu
   adminDropdownBtn.addEventListener('click', () => {
     adminDropdownOpen = !adminDropdownOpen;
     adminDropdownContent.style.display = adminDropdownOpen ? 'block' : 'none';
     adminDropdownBtn.setAttribute('aria-expanded', adminDropdownOpen.toString());
   });
 
-  // Close dropdown when clicking outside
   window.addEventListener('click', (e) => {
     if (!adminDropdownBtn.contains(e.target) && !adminDropdownContent.contains(e.target)) {
       adminDropdownOpen = false;
@@ -363,7 +383,7 @@
     }
   });
 
-  // Firestore: Load store by PIN
+  // Load store by PIN
   async function loadStoreByPin(pin) {
     try {
       const storesCol = collection(db, 'stores');
@@ -373,22 +393,22 @@
       const docSnap = querySnapshot.docs[0];
       return { id: docSnap.id, ...docSnap.data() };
     } catch (e) {
-      console.error('Firestore error loading by PIN:', e);
+      console.error('Firestore load error:', e);
       return null;
     }
   }
 
-  // Firestore: Create new store
+  // Create new store
   async function createNewStore(title, pin) {
     if (!title || !pin) return null;
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const randomStr = Math.random().toString(36).slice(2, 7);
-    const storeId = `${slug}-${randomStr}`;
+    const rand = Math.random().toString(36).slice(2, 7);
+    const storeId = `${slug}-${rand}`;
     const newStore = {
       title,
       pin,
-      layout: [],    // Elements on page
-      navButtons: [], // Extra nav buttons beyond Home/Admin
+      layout: [],
+      navButtons: [],
       theme: {
         backgroundColor: '#ffffff',
         backgroundImage: '',
@@ -402,27 +422,27 @@
       await setDoc(doc(db, 'stores', storeId), newStore);
       return { id: storeId, ...newStore };
     } catch (e) {
-      console.error('Failed to create store:', e);
+      console.error('Firestore create error:', e);
       return null;
     }
   }
 
-  // Save store data to Firestore with localStorage fallback
+  // Save store with fallback localStorage
   async function saveStore(store) {
     try {
       await setDoc(doc(db, 'stores', store.id), store);
       localStorage.removeItem(localStorageKey(store.id));
-      alert('Store saved successfully!');
+      alert('Store saved successfully.');
       return true;
     } catch (e) {
-      console.warn('Firestore save failed, saving to localStorage:', e);
+      console.warn('Firestore save failed, trying localStorage:', e);
       try {
         localStorage.setItem(localStorageKey(store.id), JSON.stringify(store));
         alert('Saved locally due to network issue.');
         return true;
       } catch (err) {
         console.error('LocalStorage save failed:', err);
-        alert('Failed to save store data.');
+        alert('Failed to save store.');
         return false;
       }
     }
@@ -444,9 +464,9 @@
     }
   }
 
-  // Render bottom nav buttons (fixed Home + Admin, plus extras)
+  // Render nav buttons in fixed bottom nav (keep Home and Admin fixed)
   function renderNavButtons() {
-    // Clear all extra nav buttons except Home
+    // Remove custom nav buttons first
     [...navLeft.querySelectorAll('.nav-btn.custom')].forEach(btn => btn.remove());
     if (!currentStore || !currentStore.navButtons) return;
     currentStore.navButtons.forEach(btnData => {
@@ -454,54 +474,42 @@
       btn.textContent = btnData.label;
       btn.classList.add('nav-btn', 'custom');
       btn.addEventListener('click', () => {
-        if (btnData.link) window.location.href = btnData.link;
+        if (btnData.link) window.open(btnData.link, '_blank');
       });
       navLeft.appendChild(btn);
     });
   }
 
-  // Open store editor modal and populate UI
-  function openStoreEditor(store) {
-    currentStore = store;
-    storeEditorTitle.textContent = `Store Editor: ${store.title || '(No Title)'}`;
-    adminPopup.style.display = 'none';
-    storeEditorModal.style.display = 'flex';
-    selectedElementId = null;
-    editorCanvas.innerHTML = '';
-    renderNavButtons();
-    renderElements();
-  }
-
-  // Render all elements onto editorCanvas
+  // Render elements on canvas
   function renderElements() {
     editorCanvas.innerHTML = '';
-    if (!currentStore || !Array.isArray(currentStore.layout)) return;
+    if (!currentStore?.layout) return;
     currentStore.layout.forEach(el => {
       const elDiv = document.createElement('div');
       elDiv.classList.add('editor-element');
-      elDiv.setAttribute('data-id', el.id);
-      elDiv.style.left = el.position?.x + 'px' || '10px';
-      elDiv.style.top = el.position?.y + 'px' || '10px';
-      elDiv.style.width = el.size?.width + 'px' || '150px';
-      elDiv.style.height = el.size?.height + 'px' || 'auto';
+      if (el.id === selectedElementId) elDiv.classList.add('selected');
+      elDiv.dataset.id = el.id;
+      elDiv.style.left = (el.position?.x ?? 10) + 'px';
+      elDiv.style.top = (el.position?.y ?? 10) + 'px';
+      elDiv.style.width = (el.size?.width ?? 150) + 'px';
+      elDiv.style.height = (el.size?.height ?? 100) + 'px';
+      elDiv.style.color = currentStore.theme.fontColor || '#222';
 
-      // Render content based on type
-      switch(el.type) {
+      // Render content by type
+      switch (el.type) {
         case 'text':
           elDiv.textContent = el.content || 'Text';
-          elDiv.style.color = el.color || '#222';
           elDiv.style.fontSize = (el.fontSize || 16) + 'px';
           elDiv.style.fontWeight = el.bold ? 'bold' : 'normal';
           elDiv.style.fontStyle = el.italic ? 'italic' : 'normal';
           elDiv.style.textDecoration = el.underline ? 'underline' : 'none';
+          elDiv.style.color = el.color || currentStore.theme.fontColor || '#222';
           break;
         case 'image':
           if (el.src) {
             const img = document.createElement('img');
             img.src = el.src;
             img.alt = el.alt || '';
-            img.style.width = '100%';
-            img.style.height = '100%';
             elDiv.appendChild(img);
           } else {
             elDiv.textContent = 'Image';
@@ -528,9 +536,10 @@
           elDiv.textContent = 'Unknown Element';
       }
 
-      // Add selection & drag handlers
-      elDiv.addEventListener('mousedown', e => selectElement(el.id, e));
-      elDiv.addEventListener('touchstart', e => selectElement(el.id, e));
+      elDiv.addEventListener('mousedown', e => {
+        e.stopPropagation();
+        selectElement(el.id);
+      });
 
       editorCanvas.appendChild(elDiv);
     });
@@ -541,125 +550,112 @@
     return 'el-' + Math.random().toString(36).slice(2, 10);
   }
 
-  // Select element by id
-  function selectElement(id, e) {
-    e.stopPropagation();
-    if (selectedElementId === id) return;
+  // Select element
+  function selectElement(id) {
     selectedElementId = id;
-    updateSelectedElementUI();
+    renderElements();
+    updatePropertiesPanel();
   }
 
-  // Clear selection if clicking outside
-  editorCanvas.addEventListener('mousedown', () => {
+  // Clear selection
+  function clearSelection() {
     selectedElementId = null;
-    updateSelectedElementUI();
-  });
-  editorCanvas.addEventListener('touchstart', () => {
-    selectedElementId = null;
-    updateSelectedElementUI();
-  });
+    renderElements();
+    updatePropertiesPanel();
+  }
 
-  // Update properties panel and element highlight
-  function updateSelectedElementUI() {
-    [...editorCanvas.children].forEach(div => {
-      if (div.getAttribute('data-id') === selectedElementId) {
-        div.classList.add('selected');
-      } else {
-        div.classList.remove('selected');
-      }
-    });
-
+  // Update properties panel based on selected element
+  function updatePropertiesPanel() {
+    const panel = propertiesPanel;
+    panel.innerHTML = '';
     if (!selectedElementId) {
-      propertiesPanel.innerHTML = 'Select an element to edit properties.';
+      panel.textContent = 'Select an element to edit its properties.';
       return;
     }
-
     const el = currentStore.layout.find(e => e.id === selectedElementId);
     if (!el) {
-      propertiesPanel.innerHTML = 'Selected element not found.';
+      panel.textContent = 'Selected element not found.';
       return;
     }
 
-    // Build properties UI based on type
-    propertiesPanel.innerHTML = '';
-    const title = document.createElement('h4');
+    // Title
+    const title = document.createElement('h3');
     title.textContent = `Edit ${el.type.charAt(0).toUpperCase() + el.type.slice(1)}`;
-    propertiesPanel.appendChild(title);
+    panel.appendChild(title);
 
-    // Common inputs for position and size
     // Position X
     const posXLabel = document.createElement('label');
-    posXLabel.textContent = 'Position X (px):';
+    posXLabel.textContent = 'Position X (px)';
     const posXInput = document.createElement('input');
     posXInput.type = 'number';
-    posXInput.value = el.position?.x || 0;
+    posXInput.value = el.position?.x ?? 10;
     posXInput.addEventListener('input', () => {
       el.position = el.position || {};
       el.position.x = parseInt(posXInput.value) || 0;
       renderElements();
     });
-    propertiesPanel.appendChild(posXLabel);
-    propertiesPanel.appendChild(posXInput);
+    panel.appendChild(posXLabel);
+    panel.appendChild(posXInput);
 
     // Position Y
     const posYLabel = document.createElement('label');
-    posYLabel.textContent = 'Position Y (px):';
+    posYLabel.textContent = 'Position Y (px)';
     const posYInput = document.createElement('input');
     posYInput.type = 'number';
-    posYInput.value = el.position?.y || 0;
+    posYInput.value = el.position?.y ?? 10;
     posYInput.addEventListener('input', () => {
       el.position = el.position || {};
       el.position.y = parseInt(posYInput.value) || 0;
       renderElements();
     });
-    propertiesPanel.appendChild(posYLabel);
-    propertiesPanel.appendChild(posYInput);
+    panel.appendChild(posYLabel);
+    panel.appendChild(posYInput);
 
     // Width
     const widthLabel = document.createElement('label');
-    widthLabel.textContent = 'Width (px):';
+    widthLabel.textContent = 'Width (px)';
     const widthInput = document.createElement('input');
     widthInput.type = 'number';
-    widthInput.value = el.size?.width || 150;
+    widthInput.value = el.size?.width ?? 150;
     widthInput.addEventListener('input', () => {
       el.size = el.size || {};
       el.size.width = parseInt(widthInput.value) || 150;
       renderElements();
     });
-    propertiesPanel.appendChild(widthLabel);
-    propertiesPanel.appendChild(widthInput);
+    panel.appendChild(widthLabel);
+    panel.appendChild(widthInput);
 
     // Height
     const heightLabel = document.createElement('label');
-    heightLabel.textContent = 'Height (px):';
+    heightLabel.textContent = 'Height (px)';
     const heightInput = document.createElement('input');
     heightInput.type = 'number';
-    heightInput.value = el.size?.height || 100;
+    heightInput.value = el.size?.height ?? 100;
     heightInput.addEventListener('input', () => {
       el.size = el.size || {};
       el.size.height = parseInt(heightInput.value) || 100;
       renderElements();
     });
-    propertiesPanel.appendChild(heightLabel);
-    propertiesPanel.appendChild(heightInput);
+    panel.appendChild(heightLabel);
+    panel.appendChild(heightInput);
 
     // Type-specific properties
     if (el.type === 'text') {
-      // Content
+      // Content textarea
       const contentLabel = document.createElement('label');
-      contentLabel.textContent = 'Text Content:';
+      contentLabel.textContent = 'Text Content';
       const contentInput = document.createElement('textarea');
       contentInput.value = el.content || '';
       contentInput.addEventListener('input', () => {
         el.content = contentInput.value;
         renderElements();
       });
-      propertiesPanel.appendChild(contentLabel);
-      propertiesPanel.appendChild(contentInput);
+      panel.appendChild(contentLabel);
+      panel.appendChild(contentInput);
 
-      // Font Size
+      // Font size
       const fontSizeLabel = document.createElement('label');
-      fontSizeLabel.textContent = 'Font Size (px):';
+      fontSizeLabel.textContent = 'Font Size (px)';
       const fontSizeInput = document.createElement('input');
       fontSizeInput.type = 'number';
       fontSizeInput.value = el.fontSize || 16;
@@ -667,12 +663,12 @@
         el.fontSize = parseInt(fontSizeInput.value) || 16;
         renderElements();
       });
-      propertiesPanel.appendChild(fontSizeLabel);
-      propertiesPanel.appendChild(fontSizeInput);
+      panel.appendChild(fontSizeLabel);
+      panel.appendChild(fontSizeInput);
 
       // Color
       const colorLabel = document.createElement('label');
-      colorLabel.textContent = 'Font Color:';
+      colorLabel.textContent = 'Font Color';
       const colorInput = document.createElement('input');
       colorInput.type = 'color';
       colorInput.value = el.color || '#222222';
@@ -680,12 +676,12 @@
         el.color = colorInput.value;
         renderElements();
       });
-      propertiesPanel.appendChild(colorLabel);
-      propertiesPanel.appendChild(colorInput);
+      panel.appendChild(colorLabel);
+      panel.appendChild(colorInput);
 
       // Bold
       const boldLabel = document.createElement('label');
-      boldLabel.textContent = 'Bold:';
+      boldLabel.textContent = 'Bold';
       const boldCheckbox = document.createElement('input');
       boldCheckbox.type = 'checkbox';
       boldCheckbox.checked = el.bold || false;
@@ -693,12 +689,12 @@
         el.bold = boldCheckbox.checked;
         renderElements();
       });
-      propertiesPanel.appendChild(boldLabel);
-      propertiesPanel.appendChild(boldCheckbox);
+      panel.appendChild(boldLabel);
+      panel.appendChild(boldCheckbox);
 
       // Italic
       const italicLabel = document.createElement('label');
-      italicLabel.textContent = 'Italic:';
+      italicLabel.textContent = 'Italic';
       const italicCheckbox = document.createElement('input');
       italicCheckbox.type = 'checkbox';
       italicCheckbox.checked = el.italic || false;
@@ -706,12 +702,12 @@
         el.italic = italicCheckbox.checked;
         renderElements();
       });
-      propertiesPanel.appendChild(italicLabel);
-      propertiesPanel.appendChild(italicCheckbox);
+      panel.appendChild(italicLabel);
+      panel.appendChild(italicCheckbox);
 
       // Underline
       const underlineLabel = document.createElement('label');
-      underlineLabel.textContent = 'Underline:';
+      underlineLabel.textContent = 'Underline';
       const underlineCheckbox = document.createElement('input');
       underlineCheckbox.type = 'checkbox';
       underlineCheckbox.checked = el.underline || false;
@@ -719,13 +715,12 @@
         el.underline = underlineCheckbox.checked;
         renderElements();
       });
-      propertiesPanel.appendChild(underlineLabel);
-      propertiesPanel.appendChild(underlineCheckbox);
-    }
-    else if (el.type === 'image') {
+      panel.appendChild(underlineLabel);
+      panel.appendChild(underlineCheckbox);
+    } else if (el.type === 'image') {
       // Image URL
       const srcLabel = document.createElement('label');
-      srcLabel.textContent = 'Image URL:';
+      srcLabel.textContent = 'Image URL';
       const srcInput = document.createElement('input');
       srcInput.type = 'text';
       srcInput.value = el.src || '';
@@ -733,25 +728,24 @@
         el.src = srcInput.value;
         renderElements();
       });
-      propertiesPanel.appendChild(srcLabel);
-      propertiesPanel.appendChild(srcInput);
+      panel.appendChild(srcLabel);
+      panel.appendChild(srcInput);
 
       // Alt Text
       const altLabel = document.createElement('label');
-      altLabel.textContent = 'Alt Text:';
+      altLabel.textContent = 'Alt Text';
       const altInput = document.createElement('input');
       altInput.type = 'text';
       altInput.value = el.alt || '';
       altInput.addEventListener('input', () => {
         el.alt = altInput.value;
       });
-      propertiesPanel.appendChild(altLabel);
-      propertiesPanel.appendChild(altInput);
-    }
-    else if (el.type === 'navButton') {
+      panel.appendChild(altLabel);
+      panel.appendChild(altInput);
+    } else if (el.type === 'navButton') {
       // Label
       const labelLabel = document.createElement('label');
-      labelLabel.textContent = 'Button Label:';
+      labelLabel.textContent = 'Button Label';
       const labelInput = document.createElement('input');
       labelInput.type = 'text';
       labelInput.value = el.label || '';
@@ -759,25 +753,24 @@
         el.label = labelInput.value;
         renderElements();
       });
-      propertiesPanel.appendChild(labelLabel);
-      propertiesPanel.appendChild(labelInput);
+      panel.appendChild(labelLabel);
+      panel.appendChild(labelInput);
 
-      // Link URL
+      // Link
       const linkLabel = document.createElement('label');
-      linkLabel.textContent = 'Link URL:';
+      linkLabel.textContent = 'Link URL';
       const linkInput = document.createElement('input');
       linkInput.type = 'text';
       linkInput.value = el.link || '';
       linkInput.addEventListener('input', () => {
         el.link = linkInput.value;
       });
-      propertiesPanel.appendChild(linkLabel);
-      propertiesPanel.appendChild(linkInput);
-    }
-    else if (el.type === 'category' || el.type === 'product') {
+      panel.appendChild(linkLabel);
+      panel.appendChild(linkInput);
+    } else if (el.type === 'category' || el.type === 'product') {
       // Title
       const titleLabel = document.createElement('label');
-      titleLabel.textContent = 'Title:';
+      titleLabel.textContent = 'Title';
       const titleInput = document.createElement('input');
       titleInput.type = 'text';
       titleInput.value = el.title || '';
@@ -785,62 +778,62 @@
         el.title = titleInput.value;
         renderElements();
       });
-      propertiesPanel.appendChild(titleLabel);
-      propertiesPanel.appendChild(titleInput);
+      panel.appendChild(titleLabel);
+      panel.appendChild(titleInput);
 
-      // Description (only for product)
       if (el.type === 'product') {
+        // Description
         const descLabel = document.createElement('label');
-        descLabel.textContent = 'Description:';
+        descLabel.textContent = 'Description';
         const descInput = document.createElement('textarea');
         descInput.value = el.description || '';
         descInput.addEventListener('input', () => {
           el.description = descInput.value;
         });
-        propertiesPanel.appendChild(descLabel);
-        propertiesPanel.appendChild(descInput);
+        panel.appendChild(descLabel);
+        panel.appendChild(descInput);
 
         // Price
         const priceLabel = document.createElement('label');
-        priceLabel.textContent = 'Price ($):';
+        priceLabel.textContent = 'Price ($)';
         const priceInput = document.createElement('input');
         priceInput.type = 'number';
-        priceInput.min = '0';
-        priceInput.step = '0.01';
+        priceInput.min = 0;
+        priceInput.step = 0.01;
         priceInput.value = el.price || 0;
         priceInput.addEventListener('input', () => {
           el.price = parseFloat(priceInput.value) || 0;
         });
-        propertiesPanel.appendChild(priceLabel);
-        propertiesPanel.appendChild(priceInput);
+        panel.appendChild(priceLabel);
+        panel.appendChild(priceInput);
       }
     }
 
     // Delete button
-    const deleteBtn = document.createElement('button');
-    deleteBtn.classList.add('delete-btn');
-    deleteBtn.textContent = 'Delete Element';
-    deleteBtn.addEventListener('click', () => {
+    const delBtn = document.createElement('button');
+    delBtn.className = 'delete-btn';
+    delBtn.textContent = 'Delete Element';
+    delBtn.addEventListener('click', () => {
       currentStore.layout = currentStore.layout.filter(e => e.id !== el.id);
       selectedElementId = null;
       renderElements();
-      updateSelectedElementUI();
+      updatePropertiesPanel();
     });
-    propertiesPanel.appendChild(deleteBtn);
+    panel.appendChild(delBtn);
   }
 
-  // Add new element helpers
+  // Add element function
   function addElement(type) {
     if (!currentStore) return;
     const newEl = {
       id: generateId(),
       type,
-      position: { x: 10, y: 10 },
-      size: { width: 150, height: 100 },
+      position: { x: 20, y: 20 },
+      size: { width: 150, height: 100 }
     };
-    switch(type) {
+    switch (type) {
       case 'text':
-        newEl.content = 'New Text';
+        newEl.content = 'New text';
         newEl.color = '#222222';
         newEl.fontSize = 16;
         break;
@@ -857,14 +850,13 @@
         newEl.price = 0;
         break;
       case 'navButton':
-        newEl.label = 'New Nav';
+        newEl.label = 'New Nav Button';
         newEl.link = '#';
         break;
     }
     currentStore.layout.push(newEl);
     renderElements();
-    selectedElementId = newEl.id;
-    updateSelectedElementUI();
+    selectElement(newEl.id);
   }
 
   addTextBtn.addEventListener('click', () => addElement('text'));
@@ -879,101 +871,401 @@
     await saveStore(currentStore);
   });
 
-  // Export store HTML (placeholder alert for now)
-  exportStoreBtn.addEventListener('click', () => {
-    alert('Export functionality coming soon.');
+  // View live store button - renders store without admin UI
+  viewStoreBtn.addEventListener('click', () => {
+    if (!currentStore) return alert('No store loaded');
+    const liveWindow = window.open('', '_blank');
+    liveWindow.document.write(generateLiveStoreHTML(currentStore));
+    liveWindow.document.close();
   });
 
-  // Close editor modal returns to login
+  // Export HTML button - triggers download of store page HTML
+  exportStoreBtn.addEventListener('click', () => {
+    if (!currentStore) return alert('No store loaded');
+    const htmlContent = generateLiveStoreHTML(currentStore);
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    const safeTitle = (currentStore.title || 'popupshop').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    a.download = `${safeTitle}.html`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  // Close editor modal
   closeEditorBtn.addEventListener('click', () => {
     if (confirm('Close editor and return to login? Unsaved changes will be lost.')) {
       currentStore = null;
       selectedElementId = null;
       storeEditorModal.style.display = 'none';
       adminPopup.style.display = 'flex';
-      adminPinInput.value = '';
-      loginErrorMsg.textContent = '';
-      newStoreTitleInput.value = '';
-      newAdminPinInput.value = '';
-      createErrorMsg.textContent = '';
-      editorCanvas.innerHTML = '';
-      propertiesPanel.innerHTML = 'Select an element to edit properties.';
+      resetLoginCreateFields();
     }
   });
 
-  // Verify PIN login
-  verifyPinBtn.addEventListener('click', async () => {
-    loginErrorMsg.textContent = '';
-    const pin = adminPinInput.value.trim();
+  // Reset login/create fields
+  function resetLoginCreateFields() {
+    loginPinInput.value = '';
+    createTitleInput.value = '';
+    createPinInput.value = '';
+    loginError.textContent = '';
+    createError.textContent = '';
+  }
+
+  // Admin login button
+  loginBtn.addEventListener('click', async () => {
+    loginError.textContent = '';
+    const pin = loginPinInput.value.trim();
     if (!pin) {
-      loginErrorMsg.textContent = 'Please enter a PIN.';
+      loginError.textContent = 'Please enter a PIN.';
       return;
     }
+    loginBtn.disabled = true;
     const store = await loadStoreByPin(pin);
+    loginBtn.disabled = false;
     if (!store) {
-      loginErrorMsg.textContent = 'Invalid PIN or store not found.';
+      loginError.textContent = 'Invalid PIN or store not found.';
       return;
     }
     openStoreEditor(store);
   });
 
-  // Create new store
-  createStoreBtn.addEventListener('click', async () => {
-    createErrorMsg.textContent = '';
-    const title = newStoreTitleInput.value.trim();
-    const pin = newAdminPinInput.value.trim();
+  // Create new store button
+  createBtn.addEventListener('click', async () => {
+    createError.textContent = '';
+    const title = createTitleInput.value.trim();
+    const pin = createPinInput.value.trim();
     if (!title || !pin) {
-      createErrorMsg.textContent = 'Please enter both store title and PIN.';
+      createError.textContent = 'Please enter both store title and PIN.';
       return;
     }
+    createBtn.disabled = true;
     const newStore = await createNewStore(title, pin);
+    createBtn.disabled = false;
     if (!newStore) {
-      createErrorMsg.textContent = 'Failed to create store. Check console.';
+      createError.textContent = 'Failed to create store. Try again.';
       return;
     }
     openStoreEditor(newStore);
   });
 
-  // Logout button in admin dropdown
+  // Logout button
   logoutBtn.addEventListener('click', () => {
-    if(confirm('Logout and return to login screen? Unsaved changes will be lost.')) {
+    if (confirm('Logout and return to login? Unsaved changes will be lost.')) {
       currentStore = null;
       selectedElementId = null;
       storeEditorModal.style.display = 'none';
       adminPopup.style.display = 'flex';
-      adminPinInput.value = '';
-      loginErrorMsg.textContent = '';
-      newStoreTitleInput.value = '';
-      newAdminPinInput.value = '';
-      createErrorMsg.textContent = '';
+      resetLoginCreateFields();
       editorCanvas.innerHTML = '';
-      propertiesPanel.innerHTML = 'Select an element to edit properties.';
+      propertiesPanel.textContent = 'Select an element to edit its properties.';
+      navLeft.querySelectorAll('.nav-btn.custom').forEach(btn => btn.remove());
     }
   });
 
-  // Open Admin Editor button in dropdown
+  // Open editor button in admin dropdown
   openAdminEditorBtn.addEventListener('click', () => {
-    if(currentStore) {
+    if (currentStore) {
       storeEditorModal.style.display = 'flex';
       adminDropdownContent.style.display = 'none';
       adminDropdownBtn.setAttribute('aria-expanded', 'false');
     }
   });
 
-  // Unique ID generator
+  // Home button click (placeholder)
+  homeBtn.addEventListener('click', () => {
+    alert('Home button clicked!');
+  });
+
+  // Generate live store HTML from store data
+  function generateLiveStoreHTML(store) {
+    const bgImage = store.theme.backgroundImage ? `url('${store.theme.backgroundImage}')` : 'none';
+    const bgColor = store.theme.backgroundColor || '#fff';
+    const navBarColor = store.theme.navBarColor || '#222';
+    const navBarTextColor = store.theme.navBarTextColor || '#eee';
+    const fontColor = store.theme.fontColor || '#222';
+
+    // Compose elements HTML
+    let elementsHTML = '';
+    (store.layout || []).forEach(el => {
+      const style = `
+        position: absolute;
+        left: ${el.position?.x || 10}px;
+        top: ${el.position?.y || 10}px;
+        width: ${el.size?.width || 150}px;
+        height: ${el.size?.height || 100}px;
+        color: ${fontColor};
+        overflow: hidden;
+        ${el.type === 'text' ? `
+          font-size: ${el.fontSize || 16}px;
+          font-weight: ${el.bold ? 'bold' : 'normal'};
+          font-style: ${el.italic ? 'italic' : 'normal'};
+          text-decoration: ${el.underline ? 'underline' : 'none'};
+          color: ${el.color || fontColor};
+          background: transparent;
+          padding: 4px;
+          box-sizing: border-box;
+        ` : ''}
+        ${el.type === 'navButton' ? 'background-color: #007bff; color: white; text-align: center; border-radius: 4px; padding: 4px;' : ''}
+      `;
+
+      let content = '';
+      switch (el.type) {
+        case 'text':
+          content = el.content || '';
+          break;
+        case 'image':
+          content = el.src ? `<img src="${el.src}" alt="${el.alt || ''}" style="max-width:100%; max-height:100%;">` : 'Image';
+          break;
+        case 'category':
+          content = `<strong>Category: </strong>${el.title || '(No title)'}`;
+          break;
+        case 'product':
+          content = `<strong>Product: </strong>${el.title || '(No title)'}<br>${el.description || ''}<br><em>Price: $${el.price?.toFixed(2) || '0.00'}</em>`;
+          break;
+        case 'navButton':
+          content = el.label || 'Nav Button';
+          break;
+        default:
+          content = 'Unknown Element';
+      }
+
+      if(el.type === 'navButton' && el.link) {
+        content = `<a href="${el.link}" target="_blank" style="color:inherit; text-decoration:none;">${content}</a>`;
+      }
+
+      elementsHTML += `<div style="${style}">${content}</div>`;
+    });
+
+    // Compose nav buttons HTML (fixed home + admin nav not included)
+    let navButtonsHTML = '';
+    (store.navButtons || []).forEach(btn => {
+      navButtonsHTML += `
+        <button onclick="window.open('${btn.link || '#'}','_blank')" style="
+          background:#444; border:none; color:#eee; margin-left:8px;
+          padding: 6px 14px; border-radius: 5px; cursor:pointer;
+        ">${btn.label}</button>
+      `;
+    });
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>${store.title || 'Pop-Up Shop'}</title>
+  <style>
+    body, html {
+      margin: 0; padding: 0; height: 100%;
+      background-color: ${bgColor};
+      background-image: ${bgImage};
+      background-size: cover;
+      color: ${fontColor};
+      font-family: Arial, sans-serif;
+      position: relative;
+      overflow-x: hidden;
+    }
+    #pageContent {
+      position: relative;
+      min-height: 100vh;
+      padding-bottom: 60px; /* space for nav */
+    }
+    #fixedNav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 50px;
+      background-color: ${navBarColor};
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 0 15px;
+      box-sizing: border-box;
+      color: ${navBarTextColor};
+      font-weight: bold;
+    }
+    #fixedNav button {
+      background: #444; border: none; color: ${navBarTextColor};
+      border-radius: 5px; padding: 8px 15px;
+      margin-right: 12px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 1rem;
+    }
+    #fixedNav button:hover {
+      background: #666;
+    }
+    #contentArea {
+      position: relative;
+      padding: 15px;
+      min-height: calc(100vh - 50px);
+    }
+    #elementsContainer {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    #elementsContainer > div {
+      position: absolute;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="pageContent">
+    <div id="contentArea">
+      <div id="elementsContainer">
+        ${elementsHTML}
+      </div>
+    </div>
+    <nav id="fixedNav" role="navigation" aria-label="Main navigation">
+      <button onclick="alert('Home clicked!')">Home</button>
+      ${navButtonsHTML}
+      <button onclick="alert('Admin menu - not implemented')">Admin ▼</button>
+    </nav>
+  </div>
+</body>
+</html>`;
+  }
+
+  // Open store editor modal
+  function openStoreEditor(store) {
+    currentStore = store;
+    selectedElementId = null;
+    adminPopup.style.display = 'none';
+    storeEditorModal.style.display = 'flex';
+    editorTitle.textContent = store.title || 'Store Editor';
+    renderElements();
+    renderNavButtons();
+    updatePropertiesPanel();
+  }
+
+  // Generate unique ID for elements
   function generateId() {
     return 'el-' + Math.random().toString(36).slice(2, 10);
   }
 
-  // Initial display is admin popup on load
-  adminPopup.style.display = 'flex';
-
-  // Home button click just reloads page for now
-  homeBtn.addEventListener('click', () => {
-    alert('Home button clicked - implement navigation here.');
+  // Clear selection when clicking outside elements
+  editorCanvas.addEventListener('mousedown', () => {
+    clearSelection();
   });
 
-  // Prevent text selection and drag issues inside canvas for better drag-and-drop support (to be added)
+  // Basic drag functionality
+  let dragElement = null;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+
+  editorCanvas.addEventListener('mousedown', e => {
+    const target = e.target.closest('.editor-element');
+    if (!target) return;
+    e.preventDefault();
+    dragElement = currentStore.layout.find(el => el.id === target.dataset.id);
+    if (!dragElement) return;
+    selectElement(dragElement.id);
+    const rect = target.getBoundingClientRect();
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+
+    function onMouseMove(e) {
+      if (!dragElement) return;
+      const canvasRect = editorCanvas.getBoundingClientRect();
+      let newX = e.clientX - canvasRect.left - dragOffsetX;
+      let newY = e.clientY - canvasRect.top - dragOffsetY;
+      newX = Math.max(0, newX);
+      newY = Math.max(0, newY);
+      dragElement.position.x = newX;
+      dragElement.position.y = newY;
+      renderElements();
+      updatePropertiesPanel();
+    }
+
+    function onMouseUp() {
+      dragElement = null;
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    }
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  });
+
+  // Touch events for drag (basic)
+  editorCanvas.addEventListener('touchstart', e => {
+    const target = e.target.closest('.editor-element');
+    if (!target) return;
+    e.preventDefault();
+    dragElement = currentStore.layout.find(el => el.id === target.dataset.id);
+    if (!dragElement) return;
+    selectElement(dragElement.id);
+    const rect = target.getBoundingClientRect();
+    const touch = e.touches[0];
+    dragOffsetX = touch.clientX - rect.left;
+    dragOffsetY = touch.clientY - rect.top;
+
+    function onTouchMove(e) {
+      if (!dragElement) return;
+      const canvasRect = editorCanvas.getBoundingClientRect();
+      const touchMove = e.touches[0];
+      let newX = touchMove.clientX - canvasRect.left - dragOffsetX;
+      let newY = touchMove.clientY - canvasRect.top - dragOffsetY;
+      newX = Math.max(0, newX);
+      newY = Math.max(0, newY);
+      dragElement.position.x = newX;
+      dragElement.position.y = newY;
+      renderElements();
+      updatePropertiesPanel();
+    }
+
+    function onTouchEnd() {
+      dragElement = null;
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('touchcancel', onTouchEnd);
+    }
+
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd);
+    window.addEventListener('touchcancel', onTouchEnd);
+  });
+
+  // Theme settings modal (simple prompt for background color and nav bar color)
+  themeSettingsBtn.addEventListener('click', () => {
+    if (!currentStore) return alert('No store loaded');
+    const bgColor = prompt('Set page background color (hex or CSS color):', currentStore.theme.backgroundColor || '#ffffff');
+    if (bgColor !== null) currentStore.theme.backgroundColor = bgColor.trim() || '#ffffff';
+    const bgImage = prompt('Set background image URL (leave blank for none):', currentStore.theme.backgroundImage || '');
+    if (bgImage !== null) currentStore.theme.backgroundImage = bgImage.trim();
+    const navColor = prompt('Set nav bar background color:', currentStore.theme.navBarColor || '#222222');
+    if (navColor !== null) currentStore.theme.navBarColor = navColor.trim() || '#222222';
+    const navTextColor = prompt('Set nav bar text color:', currentStore.theme.navBarTextColor || '#eeeeee');
+    if (navTextColor !== null) currentStore.theme.navBarTextColor = navTextColor.trim() || '#eeeeee';
+    const fontColor = prompt('Set page font color:', currentStore.theme.fontColor || '#222222');
+    if (fontColor !== null) currentStore.theme.fontColor = fontColor.trim() || '#222222';
+
+    applyTheme();
+  });
+
+  // Apply theme colors to editor canvas and bottom nav
+  function applyTheme() {
+    if (!currentStore) return;
+    const bgColor = currentStore.theme.backgroundColor || '#fff';
+    const bgImage = currentStore.theme.backgroundImage ? `url('${currentStore.theme.backgroundImage}')` : 'none';
+    const fontColor = currentStore.theme.fontColor || '#222';
+    editorCanvas.style.setProperty('--background-color', bgColor);
+    editorCanvas.style.backgroundImage = bgImage;
+    editorCanvas.style.color = fontColor;
+
+    bottomNav.style.backgroundColor = currentStore.theme.navBarColor || '#222';
+    bottomNav.style.color = currentStore.theme.navBarTextColor || '#eee';
+
+    // Update nav buttons text color
+    [...navLeft.querySelectorAll('button')].forEach(btn => {
+      btn.style.color = currentStore.theme.navBarTextColor || '#eee';
+    });
+  }
+
+  // Initialize page with popup visible
+  adminPopup.style.display = 'flex';
+
 </script>
 
 </body>
