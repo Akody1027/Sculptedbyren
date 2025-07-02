@@ -116,7 +116,7 @@
   <p>Welcome, <span id="storeTitleDisplay"></span>!</p>
   <button id="viewStoreBtn">View Live Store</button>
   <button id="logoutBtn">Logout</button>
-  <!-- Admin editor UI will go here in later steps -->
+  <!-- Admin editor UI will be developed here -->
 </div>
 
 <!-- Bottom Navigation -->
@@ -134,12 +134,13 @@
 </div>
 
 <script type="module">
-  // Firebase imports and initialization
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import {
     getFirestore, doc, getDoc, setDoc,
+    collection, query, where, getDocs
   } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
+  // Firebase configuration from you
   const firebaseConfig = {
     apiKey: "AIzaSyAoWuLi-47H_0hvGzhqCx7lhQUpVwMvjVw",
     authDomain: "popupshop-59cfa.firebaseapp.com",
@@ -153,7 +154,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // DOM Elements
+  // Elements
   const adminPopup = document.getElementById("adminPopup");
   const adminPinInput = document.getElementById("adminPinInput");
   const verifyPinBtn = document.getElementById("verifyPinBtn");
@@ -177,21 +178,20 @@
   const homeBtn = document.getElementById("homeBtn");
 
   // State
-  let currentStore = null; // object {id, title, pin, layout, navButtons}
+  let currentStore = null; // { id, title, pin, layout, navButtons }
   let adminDropdownOpen = false;
 
-  // LocalStorage keys helpers
+  // LocalStorage helpers
   function localStorageKey(storeId) {
     return `popupshop_store_${storeId}`;
   }
 
-  // Toggle admin dropdown menu
+  // Toggle admin dropdown
   adminDropdownBtn.addEventListener("click", () => {
     adminDropdownOpen = !adminDropdownOpen;
     adminDropdownContent.style.display = adminDropdownOpen ? "block" : "none";
   });
 
-  // Click outside admin dropdown closes it
   window.addEventListener("click", (e) => {
     if (!adminDropdownBtn.contains(e.target) && !adminDropdownContent.contains(e.target)) {
       adminDropdownOpen = false;
@@ -199,53 +199,64 @@
     }
   });
 
-  // Firestore helper: load store by PIN
-  async function loadStoreByPin(pin) {
-    // Search stores collection for matching PIN (simple approach)
-    // In a real app, consider indexing PIN or using admin ID login
-    try {
-      const storesRef = db.collection ? db.collection("stores") : null;
-      // Firestore modular SDK doesn't have 'collection' on db directly, we need to import collection()
-      // So let's import collection and query here:
-    } catch (e) {
-      console.error("Firestore error loading by PIN:", e);
-      return null;
-    }
-    // Because Firestore SDK v9 uses modular imports, let's adjust:
-
-    // Firestore modular approach
-  }
-
-  // Due to complexity, let's write the Firestore PIN lookup properly:
-  import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
+  // Firestore: load store by PIN
   async function loadStoreByPin(pin) {
     try {
+      console.log("Looking up store with PIN:", pin);
       const storesCol = collection(db, "stores");
       const q = query(storesCol, where("pin", "==", pin));
       const querySnapshot = await getDocs(q);
-      if (querySnapshot.empty) return null;
+      if (querySnapshot.empty) {
+        console.log("No store found for PIN:", pin);
+        return null;
+      }
       const docSnap = querySnapshot.docs[0];
+      console.log("Store found:", docSnap.id, docSnap.data());
       return { id: docSnap.id, ...docSnap.data() };
     } catch (e) {
-      console.error("Firestore error loading by PIN:", e);
+      console.error("Error loading store by PIN:", e);
       return null;
     }
   }
 
-  // Save store to Firestore and localStorage fallback
+  // Firestore: create new store
+  async function createNewStore(title, pin) {
+    if (!title || !pin) return null;
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const randomStr = Math.random().toString(36).slice(2, 7);
+    const storeId = `${slug}-${randomStr}`;
+
+    const newStore = {
+      title,
+      pin,
+      layout: [],
+      navButtons: [],
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      await setDoc(doc(db, "stores", storeId), newStore);
+      console.log("Created new store:", storeId);
+      return { id: storeId, ...newStore };
+    } catch (e) {
+      console.error("Failed to create store:", e);
+      return null;
+    }
+  }
+
+  // Save store to Firestore and fallback localStorage
   async function saveStore(store) {
     try {
       await setDoc(doc(db, "stores", store.id), store);
-      localStorage.removeItem(localStorageKey(store.id)); // clear fallback on success
+      localStorage.removeItem(localStorageKey(store.id));
       return true;
     } catch (e) {
-      console.warn("Firestore save failed, using localStorage fallback:", e);
+      console.warn("Firestore save failed, saving to localStorage:", e);
       try {
         localStorage.setItem(localStorageKey(store.id), JSON.stringify(store));
         return true;
       } catch (err) {
-        console.error("localStorage save also failed:", err);
+        console.error("localStorage save failed:", err);
         return false;
       }
     }
@@ -255,53 +266,25 @@
   async function loadStore(storeId) {
     try {
       const docSnap = await getDoc(doc(db, "stores", storeId));
-      if (docSnap.exists()) {
-        return docSnap.data();
-      } else {
-        // Try localStorage fallback
-        const localData = localStorage.getItem(localStorageKey(storeId));
-        if (localData) return JSON.parse(localData);
-        return null;
-      }
+      if (docSnap.exists()) return docSnap.data();
+      // fallback:
+      const lsData = localStorage.getItem(localStorageKey(storeId));
+      if (lsData) return JSON.parse(lsData);
+      return null;
     } catch (e) {
-      console.warn("Firestore load failed, trying localStorage fallback:", e);
-      const localData = localStorage.getItem(localStorageKey(storeId));
-      if (localData) return JSON.parse(localData);
+      console.warn("Firestore load failed, trying localStorage:", e);
+      const lsData = localStorage.getItem(localStorageKey(storeId));
+      if (lsData) return JSON.parse(lsData);
       return null;
     }
   }
 
-  // Create new store in Firestore with default layout/navButtons
-  async function createNewStore(title, pin) {
-    // Generate store ID from title slug + random string
-    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-    const randomStr = Math.random().toString(36).substring(2, 7);
-    const storeId = `${slug}-${randomStr}`;
-
-    const newStore = {
-      title,
-      pin,
-      layout: [], // empty layout for now
-      navButtons: [], // no extra nav buttons initially
-      createdAt: new Date().toISOString(),
-    };
-
-    try {
-      await setDoc(doc(db, "stores", storeId), newStore);
-      return { id: storeId, ...newStore };
-    } catch (e) {
-      console.error("Error creating store:", e);
-      return null;
-    }
-  }
-
-  // Render bottom nav buttons from store.navButtons
+  // Render extra nav buttons
   function renderNavButtons() {
-    // Remove all extra buttons except Home and Admin dropdown
-    [...navLeft.querySelectorAll(".nav-btn.custom")].forEach((btn) => btn.remove());
-
+    // Remove all extra buttons
+    [...navLeft.querySelectorAll(".nav-btn.custom")].forEach(btn => btn.remove());
     if (!currentStore || !currentStore.navButtons) return;
-    currentStore.navButtons.forEach((btnData) => {
+    currentStore.navButtons.forEach(btnData => {
       const btn = document.createElement("button");
       btn.textContent = btnData.label;
       btn.classList.add("nav-btn", "custom");
@@ -312,7 +295,7 @@
     });
   }
 
-  // Show store editor UI
+  // Show store editor
   function openStoreEditor(store) {
     currentStore = store;
     adminPopup.style.display = "none";
@@ -321,25 +304,10 @@
     renderNavButtons();
   }
 
-  // View live store page (placeholder: reload page for now)
-  viewStoreBtn.addEventListener("click", () => {
-    alert("Live store preview is not implemented yet.");
-  });
-
-  // Logout: reload page to show admin popup again
-  logoutBtn.addEventListener("click", () => {
-    location.reload();
-  });
-
-  // Admin dropdown open editor button
-  openAdminEditorBtn.addEventListener("click", () => {
-    alert("Admin editor modal coming soon!");
-  });
-
-  // Handle Verify PIN
+  // Button events
   verifyPinBtn.addEventListener("click", async () => {
-    const pin = adminPinInput.value.trim();
     loginErrorMsg.textContent = "";
+    const pin = adminPinInput.value.trim();
     if (!pin) {
       loginErrorMsg.textContent = "Please enter a PIN.";
       return;
@@ -352,30 +320,33 @@
     openStoreEditor(store);
   });
 
-  // Handle Create Store
   createStoreBtn.addEventListener("click", async () => {
+    createErrorMsg.textContent = "";
     const title = newStoreTitleInput.value.trim();
     const pin = newAdminPinInput.value.trim();
-    createErrorMsg.textContent = "";
     if (!title || !pin) {
       createErrorMsg.textContent = "Please enter both store title and PIN.";
       return;
     }
     const newStore = await createNewStore(title, pin);
     if (!newStore) {
-      createErrorMsg.textContent = "Failed to create store. Try again.";
+      createErrorMsg.textContent = "Failed to create store. Check console.";
       return;
     }
     openStoreEditor(newStore);
   });
 
-  // Hide admin popup and show store editor if user already logged in (optional)
-  // Here we can add logic to check session/localStorage for existing store session
+  viewStoreBtn.addEventListener("click", () => {
+    alert("Live store preview is coming soon!");
+  });
 
-  // Initial setup
-  // For demo purposes, admin popup shows on every load
+  logoutBtn.addEventListener("click", () => {
+    location.reload();
+  });
 
+  openAdminEditorBtn.addEventListener("click", () => {
+    alert("Admin editor modal coming soon!");
+  });
 </script>
-
 </body>
 </html>
