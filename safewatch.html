@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Safe Viewer</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h2>Safe Viewer (Ad-blocked)</h2>
+  <iframe
+    src="https://example.com"
+    sandbox="allow-same-origin allow-forms"
+  ></iframe>
+</body>
+</html>
