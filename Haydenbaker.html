@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hayden Baker Memorial</title>
+    <style>
+        /* General Body Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: white; /* white background for overall page */
+            color: #333;
+        }
+
+        /* Full-size fixed background image */
+        .background-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('haydenbaker.png'); /* REPLACE with the actual path to Hayden's image */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1; /* Ensures it stays behind other content */
+        }
+
+        /* Main content container */
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: rgba(255, 255, 255, 0.85); /* Slightly transparent white background for the content */
+            padding: 30px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            position: relative; /* Needed for z-index to work against fixed background */
+            z-index: 1;
+        }
+
+        /* Section Styling */
+        section {
+            padding: 40px 0;
+            border-bottom: 1px solid #eee; /* Light separator between sections */
+        }
+
+        section:last-child {
+            border-bottom: none;
+        }
+
+        h1, h2, h3 {
+            color: #555; /* Neutral heading color */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        /* Call to Action Buttons */
+        .cta-buttons {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: #007bff; /* Primary button color - adjust as needed */
+            color: white;
+            padding: 12px 25px;
+            margin: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: #0056b3; /* Darker shade on hover */
+        }
+
+        /* Image Gallery Section (Mural) */
+        .gallery-viewport {
+            border: 1px solid #ddd;
+            min-height: 300px;
+            background-color: #fdfdfd; /* Very light background for the gallery */
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow-y: auto; /* Adds scroll if many images */
+            max-height: 600px; /* Max height before scrolling */
+        }
+
+        .image-upload-area {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+
+        .image-upload-area label {
+            display: block;
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        .image-mural {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsive grid for images */
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .image-mural img {
+            width: 100%;
+            height: 150px; /* Fixed height for mural images */
+            object-fit: cover; /* Ensures images cover the area without distortion */
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .image-mural img:hover {
+            transform: scale(1.03); /* Slight zoom on hover */
+        }
+
+        /* Stories and Messages Section */
+        .messages-container {
+            border: 1px solid #ddd;
+            min-height: 250px;
+            background-color: #fdfdfd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        .message-entry {
+            background-color: #fff;
+            border: 1px solid #eee;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .message-entry strong {
+            color: #444;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .message-form {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+
+        .message-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .message-form input[type="text"],
+        .message-form textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        .message-form textarea {
+            resize: vertical; /* Allow vertical resizing */
+            min-height: 100px;
+        }
+
+        .message-form button {
+            background-color: #28a745; /* Green submit button */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .message-form button:hover {
+            background-color: #218838;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #777;
+            font-size: 0.9em;
+            margin-top: 40px;
+            background-color: rgba(255, 255, 255, 0.7); /* Slightly transparent footer */
+            border-top: 1px solid #eee;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            .image-mural {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- This div will hold Hayden's full-size background image -->
+    <div class="background-image"></div>
+
+    <!-- Main content container with transparency -->
+    <div class="container">
+
+        <!-- Header Section -->
+        <section id="hero">
+            <h1>In Loving Memory of Hayden Baker</h1>
+            <p>Welcome to the memorial page dedicated to the life and legacy of Hayden Baker. Here, we share memories, stories, and provide a space for friends and family to connect and contribute in Hayden's honor.</p>
+            <div class="cta-buttons">
+                <!-- Example Call to Action Button 1 -->
+                <a href="#donation-info" class="cta-button">Support the Foundation</a>
+                <!-- Example Call to Action Button 2 -->
+                <a href="#share-memories" class="cta-button">Share a Memory</a>
+            </div>
+        </section>
+
+        <!-- About Hayden Section -->
+        <section id="about-hayden">
+            <h2>About Hayden</h2>
+            <p>Hayden was a vibrant soul, known for their kindness, infectious laugh, and unwavering spirit. They touched countless lives with their generosity and left an indelible mark on everyone they met. Hayden had a passion for [mention Hayden's hobbies/interests, e.g., music, helping others, nature, learning]. We remember them for [mention key qualities, e.g., their courage, creativity, empathy].</p>
+            <p>Born on [Date of Birth] and passed away on [Date of Passing], Hayden's time with us was a gift. This foundation aims to continue Hayden's legacy by [explain foundation's mission, e.g., funding research in X, supporting Y community initiatives, promoting Z cause].</p>
+            <!-- Add more paragraphs with details about Hayden's life, achievements, etc. -->
+        </section>
+
+        <!-- Image Mural Section -->
+        <section id="image-mural">
+            <h2>Hayden's Photo Mural</h2>
+            <p>A place for friends and family to share cherished photos of Hayden. Upload your favorite moments to contribute to this living mosaic of memories.</p>
+
+            <!-- Image Upload Area -->
+            <div class="image-upload-area">
+                <label for="imageUpload">Upload your photo of Hayden:</label>
+                <input type="file" id="imageUpload" accept="image/*">
+                <button type="button" id="uploadImageButton">Add Photo to Mural</button>
+                <p style="font-size: 0.8em; color: #888;">(Note: Upload functionality requires backend integration like Firebase Storage.)</p>
+            </div>
+
+            <!-- Viewport for displaying images -->
+            <div class="gallery-viewport">
+                <div class="image-mural" id="haydenImageMural">
+                    <!-- Images will be dynamically loaded here from Firebase -->
+                    <!-- Example placeholder images: -->
+                    <img src="placeholder-image1.jpg" alt="Hayden Memory 1"> <!-- REPLACE with actual images -->
+                    <img src="placeholder-image2.jpg" alt="Hayden Memory 2">
+                    <img src="placeholder-image3.jpg" alt="Hayden Memory 3">
+                    <img src="placeholder-image4.jpg" alt="Hayden Memory 4">
+                    <img src="placeholder-image5.jpg" alt="Hayden Memory 5">
+                    <!-- More images can be added here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Stories and Messages Section -->
+        <section id="share-memories">
+            <h2>Share Your Stories and Messages</h2>
+            <p>Please share your favorite memories, stories, or messages for Hayden and their family. Your words mean a lot.</p>
+
+            <!-- Form to add a new message -->
+            <div class="message-form">
+                <form id="addMessageForm">
+                    <label for="messageName">Your Name:</label>
+                    <input type="text" id="messageName" required placeholder="e.g., A Close Friend">
+
+                    <label for="messageText">Your Story/Message:</label>
+                    <textarea id="messageText" required placeholder="Share a cherished memory or a heartfelt message..."></textarea>
+
+                    <button type="submit">Post Message</button>
+                    <p style="font-size: 0.8em; color: #888; margin-top: 10px;">(Note: This form requires backend integration with Firebase to save and display messages.)</p>
+                </form>
+            </div>
+
+            <!-- Viewport for displaying messages -->
+            <div class="messages-container" id="haydenMessages">
+                <!-- Messages will be dynamically loaded here from Firebase -->
+                <!-- Example placeholder messages: -->
+                <div class="message-entry">
+                    <strong>John Doe:</strong>
+                    <p>I'll always remember Hayden's incredible kindness and how they always knew how to make everyone laugh. A truly special person.</p>
+                </div>
+                <div class="message-entry">
+                    <strong>Jane Smith:</strong>
+                    <p>Hayden had such a passion for [mention hobby]. I'll never forget our conversations about it. They inspired me greatly.</p>
+                </div>
+                <!-- More messages can be added here -->
+            </div>
+        </section>
+
+        <!-- Foundation/Donation Information Section -->
+        <section id="donation-info">
+            <h2>Support the Hayden Baker Foundation</h2>
+            <p>The Hayden Baker Foundation is dedicated to [reiterate foundation's mission and purpose]. Your generous support helps us continue Hayden's legacy and make a positive impact.</p>
+            <p>Every contribution, no matter the size, helps us achieve our goals. Thank you for your kindness and support.</p>
+            <div class="cta-buttons">
+                <a href="[LINK TO DONATION PAGE/PLATFORM]" class="cta-button">Make a Donation</a>
+                <a href="[LINK TO FOUNDATION'S 'ABOUT US' PAGE]" class="cta-button">Learn More About Our Work</a>
+            </div>
+            <!-- Add more details about how donations are used, impact stories, etc. -->
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2023 Hayden Baker Memorial Foundation. All Rights Reserved.</p>
+        <p>Contact: <a href="mailto:info@haydenbakerfoundation.org" style="color: #007bff; text-decoration: none;">info@haydenbakerfoundation.org</a></p>
+    </footer>
+
+    <script>
+        // JavaScript for basic client-side interactions
+        // Note: Full functionality (image uploads, message saving/loading) will require Firebase or another backend.
+
+        // Placeholder for Firebase integration:
+        // You would initialize Firebase here and add functions to interact with Firestore/Storage.
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Image Upload Logic (Client-side only for now) ---
+            const imageUploadInput = document.getElementById('imageUpload');
+            const uploadImageButton = document.getElementById('uploadImageButton');
+            const haydenImageMural = document.getElementById('haydenImageMural');
+
+            uploadImageButton.addEventListener('click', () => {
+                if (imageUploadInput.files.length > 0) {
+                    const file = imageUploadInput.files[0];
+                    const reader = new FileReader();
+
+                    reader.onload = (e) => {
+                        const newImage = document.createElement('img');
+                        newImage.src = e.target.result;
+                        newImage.alt = "Hayden Memory";
+                        haydenImageMural.appendChild(newImage);
+                        // In a real application, you would upload this file to Firebase Storage here.
+                        alert('Image added to display. (To save permanently, integrate with Firebase Storage)');
+                    };
+                    reader.readAsDataURL(file);
+                    imageUploadInput.value = ''; // Clear the input
+                } else {
+                    alert('Please select an image to upload.');
+                }
+            });
+
+            // --- Message Form Logic (Client-side only for now) ---
+            const addMessageForm = document.getElementById('addMessageForm');
+            const messageNameInput = document.getElementById('messageName');
+            const messageTextInput = document.getElementById('messageText');
+            const haydenMessagesContainer = document.getElementById('haydenMessages');
+
+            addMessageForm.addEventListener('submit', (e) => {
+                e.preventDefault(); // Prevent default form submission
+
+                const name = messageNameInput.value.trim();
+                const message = messageTextInput.value.trim();
+
+                if (name && message) {
+                    const newMessageEntry = document.createElement('div');
+                    newMessageEntry.classList.add('message-entry');
+                    newMessageEntry.innerHTML = `<strong>${name}:</strong><p>${message}</p>`;
+                    haydenMessagesContainer.prepend(newMessageEntry); // Add new message to the top
+
+                    // In a real application, you would save this message to Firebase Firestore here.
+                    alert('Message posted! (To save permanently, integrate with Firebase Firestore.)');
+
+                    // Clear the form
+                    messageNameInput.value = '';
+                    messageTextInput.value = '';
+                } else {
+                    alert('Please enter your name and a message.');
+                }
+            });
+
+            // Example of how you might load data from Firebase (conceptual)
+            function loadImagesFromFirebase() {
+                // This is where your Firebase Storage logic would go to fetch image URLs
+                // and append them to haydenImageMural
+                console.log("Loading images from Firebase (placeholder)...");
+            }
+
+            function loadMessagesFromFirebase() {
+                // This is where your Firebase Firestore logic would go to fetch messages
+                // and append them to haydenMessagesContainer
+                console.log("Loading messages from Firebase (placeholder)...");
+            }
+
+            // Call these functions when the page loads if you have Firebase integrated
+            // loadImagesFromFirebase();
+            // loadMessagesFromFirebase();
+        });
+    </script>
+</body>
+</html>
