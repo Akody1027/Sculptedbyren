@@ -158,9 +158,9 @@
         }
 
         .message-form {
-            margin-top: 20px;
+            margin-top: 0px;
             padding: 15px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid ;
             border-radius: 5px;
             background-color: #fafafa;
         }
@@ -290,20 +290,7 @@
             <h2>Share Your Stories and Messages</h2>
             <p>Please share your favorite memories, stories, or messages for Hayden and their family. Your words mean a lot.</p>
 
-            <!-- Form to add a new message -->
-            <div class="message-form">
-                <form id="addMessageForm">
-                    <label for="messageName">Your Name:</label>
-                    <input type="text" id="messageName" required placeholder="e.g., A Close Friend">
-
-                    <label for="messageText">Your Story/Message:</label>
-                    <textarea id="messageText" required placeholder="Share a cherished memory or a heartfelt message..."></textarea>
-
-                    <button type="submit">Post Message</button>
-                    <p style="font-size: 0.8em; color: #888; margin-top: 10px;">(Note: This form requires backend integration with Firebase to save and display messages.)</p>
-                </form>
-            </div>
-
+            
             <!-- Viewport for displaying messages -->
             <div class="messages-container" id="haydenMessages">
                 <!-- Messages will be dynamically loaded here from Firebase -->
@@ -318,6 +305,21 @@
                 </div>
                 <!-- More messages can be added here -->
             </div>
+
+            <!-- Form to add a new message -->
+            <div class="message-form">
+                <form id="addMessageForm">
+                    <label for="messageName">Your Name:</label>
+                    <input type="text" id="messageName" required placeholder="e.g., A Close Friend">
+
+                    <label for="messageText">Your Story/Message:</label>
+                    <textarea id="messageText" required placeholder="Share a cherished memory or a heartfelt message..."></textarea>
+
+                    <button type="submit">Post Message</button>
+                    <p style="font-size: 0.8em; color: #888; margin-top: 10px;">(Note: This form requires backend integration with Firebase to save and display messages.)</p>
+                </form>
+            </div>
+
         </section>
 
         <!-- Foundation/Donation Information Section -->
@@ -423,5 +425,6 @@
 </body>
 
 </html>
+
 
 
