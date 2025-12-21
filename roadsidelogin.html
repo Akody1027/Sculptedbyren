@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roadside Hero - Login</title>
+    <!-- Google Fonts for a modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5; /* Light grey background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .login-container {
+            background-color:  #f0f2f5;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+
+        .logo {
+            margin-bottom: 25px;
+        }
+
+        .logo img {
+            width: 80px; /* Adjust logo size */
+            height: auto;
+        }
+
+        .logo h1 {
+            font-size: 1.8em;
+            color: #2c3e50; /* Darker blue for text */
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .input-group input[type="text"],
+        .input-group input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box; /* Ensures padding doesn't expand the input width */
+        }
+
+        .input-group input[type="text"]:focus,
+        .input-group input[type="password"]:focus {
+            border-color: #007bff; /* Highlight on focus */
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+
+        .forgot-password a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-login {
+            background-color: #ff8c00; /* Orange color for login button */
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-login:hover {
+            background-color: #e67e00; /* Darker orange on hover */
+        }
+
+        .or-divider {
+            margin: 25px 0;
+            position: relative;
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .or-divider::before,
+        .or-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background-color: #eee;
+        }
+
+        .or-divider::before {
+            left: 0;
+        }
+
+        .or-divider::after {
+            right: 0;
+        }
+
+        .biometric-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .biometric-icon {
+            background-color: #f0f2f5;
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            color: #555;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .biometric-icon:hover {
+            background-color: #e0e2e5;
+            border-color: #bbb;
+        }
+
+        .biometric-icon i {
+            pointer-events: none; /* Prevent icon from interfering with click on parent div */
+        }
+
+        .signup-link {
+            font-size: 0.95em;
+            color: #555;
+        }
+
+        .signup-link a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <!-- Replace with your actual logo image -->
+            <img src="https://via.placeholder.com/80/2c3e50/ffffff?text=RH" alt="Roadside Hero Logo">
+            <h1>Roadside Hero</h1>
+        </div>
+        <h2>Welcome Back</h2>
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="username">Username or Email</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username or email" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <div class="forgot-password">
+                <a href="#">Forgot Password?</a>
+            </div>
+            <button type="submit" class="btn-login">Log In</button>
+        </form>
+
+        <div class="or-divider">OR</div>
+
+        <div class="biometric-options">
+            <div class="biometric-icon" id="faceIdOption" title="Login with Face ID">
+                <i class="fas fa-face-id"></i>
+            </div>
+            <div class="biometric-icon" id="fingerprintOption" title="Login with Fingerprint">
+                <i class="fas fa-fingerprint"></i>
+            </div>
+        </div>
+
+        <div class="signup-link">
+            Don't have an account? <a href="#">Sign Up</a>
+        </div>
+    </div>
+
+    <script>
+        // Basic JavaScript for handling form submission (will be replaced by Firebase logic)
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            console.log('Login attempt with:', { username, password });
+
+            // --- Here you would integrate Firebase authentication ---
+            // Example: firebase.auth().signInWithEmailAndPassword(username, password)
+            // .then((userCredential) => {
+            //     // Signed in
+            //     const user = userCredential.user;
+            //     console.log('Successfully logged in!', user);
+            //     // Redirect to dashboard
+            // })
+            // .catch((error) => {
+            //     const errorCode = error.code;
+            //     const errorMessage = error.message;
+            //     console.error('Login failed:', errorCode, errorMessage);
+            //     alert('Login failed: ' + errorMessage);
+            // });
+            // --- End Firebase integration placeholder ---
+
+            alert('Login button clicked! (Firebase integration goes here)');
+        });
+
+        // Placeholder for biometric login (will require native app integration or specific web APIs)
+        document.getElementById('faceIdOption').addEventListener('click', function() {
+            alert('Face ID login initiated! (Requires device-specific implementation)');
+            // For a real app, this would trigger native biometric prompt
+        });
+
+        document.getElementById('fingerprintOption').addEventListener('click', function() {
+            alert('Fingerprint login initiated! (Requires device-specific implementation)');
+            // For a real app, this would trigger native biometric prompt
+        });
+
+        // Note: The `fa-face-id` icon is a placeholder as Font Awesome does not have a specific 'Face ID' icon.
+        // You might use `fa-face-mesh` or a custom SVG for a more precise representation if desired.
+        // For actual biometric scanning on web, you'd look into WebAuthn API, which is complex and requires HTTPS.
+        // For mobile apps, this would be handled by native SDKs (e.g., LocalAuthentication on iOS, BiometricPrompt on Android).
+    </script>
+</body>
+</html>
