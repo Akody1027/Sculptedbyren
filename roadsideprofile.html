@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roadside Hero - Profile</title>
+    <!-- Google Fonts for a modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-zN5x0+uW9JpB8c1aKqWfQn5wPzY9hX+0n2Qj+A8l4r0w0H0i0J0p0T0Z0w0C0A0=" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5; /* Light grey background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for scrolling content */
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            overflow: hidden; /* Prevent body scroll if app-screen fills viewport */
+        }
+
+        /* --- App Screen / Viewport Shell Styling --- */
+        .app-screen {
+            background-color: #fff;
+            width: 100%;
+            max-width: 400px; /* Typical phone width */
+            height: 100vh; /* Full viewport height for a mobile app feel */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent content from spilling */
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            position: relative; /* For absolutely positioned elements like bottom nav */
+        }
+
+        /* --- Header --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background-color: #fff;
+            z-index: 1000;
+        }
+
+        .header .back-btn {
+            font-size: 1.5em;
+            color: #555;
+            text-decoration: none;
+            visibility: hidden; /* Hidden for a primary profile landing page */
+        }
+
+        .header .app-title {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.1em;
+            color: #2c3e50;
+            flex-grow: 1; /* Center the title */
+            justify-content: center;
+        }
+
+        .header .app-title img {
+            height: 28px; /* Adjust logo size */
+            margin-right: 8px;
+        }
+
+        .header .menu-icon {
+            font-size: 1.5em;
+            color: #555;
+            visibility: visible; /* Show menu icon on profile page */
+        }
+
+        /* --- Main Content Area for the Profile screen --- */
+        .screen-content {
+            flex-grow: 1; /* Allows content to take available space */
+            padding: 15px;
+            overflow-y: auto; /* Enable scrolling for content if it overflows */
+            -webkit-overflow-scrolling: touch; /* Smoother scrolling on iOS */
+            display: block; /* This screen is active by default */
+        }
+
+        /* --- Profile Screen Specific Styling --- */
+        .profile-landing-screen {
+            text-align: center;
+            padding-bottom: 80px; /* Space for bottom nav */
+        }
+
+        .profile-header-landing {
+            background-color: #007bff; /* Blue header background */
+            color: white;
+            padding: 30px 15px 20px;
+            margin: -15px -15px 25px -15px; /* Extend to edges of content area from shell padding */
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+
+        .profile-pic-landing {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid white;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+
+        .profile-header-landing h1 {
+            font-size: 1.8em;
+            margin: 10px 0 5px;
+            color: white; /* Override general h1 color */
+        }
+
+        .profile-header-landing p {
+            font-size: 0.95em;
+            margin: 0;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .profile-section {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .profile-section h3 {
+            font-size: 1.1em;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f9f9f9;
+        }
+
+        .info-item:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .info-item span {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .info-item strong {
+            color: #333;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .edit-btn {
+            background-color: #f0f2f5;
+            color: #007bff;
+            border: 1px solid #007bff;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 15px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .edit-btn:hover {
+            background-color: #e6f7ff;
+            color: #0056b3;
+        }
+
+        .logout-btn {
+            background-color: #dc3545; /* Red for logout */
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            width: 100%;
+            max-width: 250px;
+            margin-top: 30px;
+            margin-bottom: 20px; /* Adjust for more space before bottom nav */
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* --- Bottom Navigation --- */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+            padding: 10px 0;
+            position: sticky; /* Make it stick to the bottom of its parent */
+            bottom: 0;
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 1000;
+            margin-top: auto; /* Push to bottom if content is short */
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #888;
+            font-size: 0.8em;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: #007bff; /* Active item color */
+        }
+
+        .nav-item i {
+            font-size: 1.4em;
+            margin-bottom: 3px;
+        }
+
+        .nav-item:hover {
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-screen">
+        <!-- Header -->
+        <div class="header" id="appHeader">
+            <a href="#" class="back-btn" id="backButton"><i class="fas fa-chevron-left"></i></a>
+            <div class="app-title" id="appTitle">
+                <img src="https://via.placeholder.com/30/2c3e50/ffffff?text=RH" alt="Logo">
+                Roadside Hero
+            </div>
+            <a href="#" class="menu-icon" id="menuButton"><i class="fas fa-ellipsis-v"></i></a>
+        </div>
+
+        <!-- Profile Screen Content -->
+        <div class="screen-content profile-landing-screen active" id="profileScreen">
+            <div class="profile-header-landing">
+                <img src="https://via.placeholder.com/100/CCCCCC/FFFFFF?text=JD" alt="Profile Picture" class="profile-pic-landing">
+                <h1>Welcome, John Doe!</h1>
+                <p>Manage your account and vehicle details.</p>
+            </div>
+
+            <div class="profile-section">
+                <h3>Vehicle Information</h3>
+                <div class="info-item">
+                    <span>Make & Model:</span>
+                    <strong>Toyota Camry (2018)</strong>
+                </div>
+                <div class="info-item">
+                    <span>License Plate:</span>
+                    <strong>ABC-123</strong>
+                </div>
+                <div class="info-item">
+                    <span>VIN:</span>
+                    <strong>1HGXXXXXXXGXXXXXX</strong>
+                </div>
+                <button class="edit-btn">Edit Vehicle Info</button>
+            </div>
+
+            <div class="profile-section">
+                <h3>Contact Information</h3>
+                <div class="info-item">
+                    <span>Phone:</span>
+                    <strong>(555) 987-6543</strong>
+                </div>
+                <div class="info-item">
+                    <span>Address:</span>
+                    <strong>123 Main St, Anytown, USA</strong>
+                </div>
+                <button class="edit-btn">Edit Contact Info</button>
+            </div>
+
+            <div class="profile-section">
+                <h3>Payment Methods</h3>
+                <div class="info-item">
+                    <span>Primary:</span>
+                    <strong>Visa **** 1234</strong>
+                </div>
+                <button class="edit-btn">Manage Payment</button>
+            </div>
+
+            <button class="logout-btn">Log Out</button>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav" id="appNav">
+            <a href="#" class="nav-item" data-screen="dashboardScreen">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item active" data-screen="profileScreen">
+                <i class="fas fa-user-circle"></i>
+                <span>Profile</span>
+            </a>
+            <a href="#" class="nav-item" data-screen="settingsScreen">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Event listeners for profile-specific buttons
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                alert('Edit functionality triggered for: ' + this.closest('.profile-section').querySelector('h3').textContent);
+                // In a real app, this would navigate to an edit form or open a modal
+            });
+        });
+
+        document.querySelector('.logout-btn').addEventListener('click', function() {
+            alert('Logging out... (Firebase signOut would go here)');
+            // In a real app, this would redirect to the login page (e.g., window.location.href = 'login.html';)
+        });
+
+        // Placeholder for bottom navigation clicks
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Navigate to ' + this.dataset.screen + ' (In a full app, this would load a new screen)');
+
+                // For this standalone page, we'll just update the active state
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        document.getElementById('backButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Back button clicked! (This standalone page has nowhere to go back to)');
+        });
+
+        document.getElementById('menuButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Menu button clicked! (Implement a side menu or options popover here)');
+        });
+
+        // Initialize header title for the standalone profile page
+        document.addEventListener('DOMContentLoaded', () => {
+             const appTitle = document.getElementById('appTitle');
+             // Ensure the title is set correctly when the page loads
+             appTitle.innerHTML = '<img src="https://via.placeholder.com/30/2c3e50/ffffff?text=RH" alt="Logo">Roadside Hero';
+        });
+    </script>
+</body>
+</html>

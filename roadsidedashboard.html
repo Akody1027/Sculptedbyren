@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roadside Hero - Dashboard</title>
+    <!-- Google Fonts for a modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-zN5x0+uW9JpB8c1aKqWfQn5wPzY9hX+0n2Qj+A8l4r0w0H0i0J0p0T0Z0w0C0A0=" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5; /* Light grey background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for scrolling content */
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            overflow: hidden; /* Prevent body scroll if app-screen fills viewport */
+        }
+
+        /* --- App Screen / Viewport Shell Styling --- */
+        .app-screen {
+            background-color: #fff;
+            width: 100%;
+            max-width: 400px; /* Typical phone width */
+            height: 100vh; /* Full viewport height for a mobile app feel */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent content from spilling */
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            position: relative; /* For absolutely positioned elements like bottom nav */
+        }
+
+        /* --- Header --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background-color: #fff;
+            z-index: 1000;
+        }
+
+        .header .back-btn {
+            font-size: 1.5em;
+            color: #555;
+            text-decoration: none;
+            visibility: visible; /* Back button visible as per image */
+        }
+
+        .header .app-title {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.1em;
+            color: #2c3e50;
+            flex-grow: 1; /* Pushes to left when back button is present */
+            justify-content: flex-start; /* Aligns title to left */
+            margin-left: 15px; /* Spacing from back button */
+        }
+
+        .header .app-title img {
+            height: 28px; /* Adjust logo size */
+            margin-right: 8px;
+        }
+
+        .header .menu-icon {
+            font-size: 1.5em;
+            color: #555;
+            visibility: visible; /* Menu icon visible as per image */
+        }
+
+        /* --- Main Content Area for the Dashboard screen --- */
+        .screen-content {
+            flex-grow: 1; /* Allows content to take available space */
+            padding: 15px;
+            overflow-y: auto; /* Enable scrolling for content if it overflows */
+            -webkit-overflow-scrolling: touch; /* Smoother scrolling on iOS */
+            display: block; /* This screen is active by default */
+        }
+
+        h1 {
+            font-size: 1.6em;
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        /* --- Location Card --- */
+        .location-card {
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .location-card i {
+            color: #007bff;
+            font-size: 1.2em;
+        }
+
+        .location-card p {
+            margin: 0;
+            font-size: 0.95em;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        .location-card strong {
+            display: block;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        /* --- Map Placeholder --- */
+        .map-placeholder {
+            width: 100%;
+            height: 180px; /* Fixed height for the map area */
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+            font-size: 0.9em;
+            overflow: hidden;
+            /* Added background image for map effect (as seen in the image) */
+            background-image: url('https://via.placeholder.com/400x180/e0e0e0/888888?text=Map+Goes+Here'); /* Placeholder map image */
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* --- Service Buttons Grid --- */
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Two columns */
+            gap: 15px; /* Space between buttons */
+            margin-bottom: 30px;
+        }
+
+        .service-button {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #333;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .service-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .service-button i {
+            font-size: 2.5em;
+            color: #007bff; /* Primary blue for icons */
+            margin-bottom: 10px;
+        }
+
+        .service-button span {
+            font-weight: 500;
+            font-size: 1.05em;
+            text-align: center;
+        }
+
+        /* --- Emergency Contacts --- */
+        .emergency-contacts {
+            margin-bottom: 20px;
+        }
+
+        .emergency-contacts h3 {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .contact-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .contact-item:last-child {
+            border-bottom: none;
+        }
+
+        .contact-item .details {
+            display: flex;
+            align-items: center;
+        }
+
+        .contact-item .details i {
+            color: #ff8c00; /* Orange for star icon */
+            margin-right: 8px;
+        }
+
+        .contact-item .details span {
+            font-size: 1em;
+            color: #555;
+        }
+
+        .contact-item .call-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .contact-item .call-btn.emergency {
+            background-color: #dc3545; /* Red for emergency */
+        }
+
+        .contact-item .call-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* --- Bottom Navigation --- */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+            padding: 10px 0;
+            position: sticky; /* Make it stick to the bottom of its parent */
+            bottom: 0;
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 1000;
+            margin-top: auto; /* Push to bottom if content is short */
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #888;
+            font-size: 0.8em;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: #007bff; /* Active item color */
+        }
+
+        .nav-item i {
+            font-size: 1.4em;
+            margin-bottom: 3px;
+        }
+
+        .nav-item:hover {
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-screen">
+        <!-- Header -->
+        <div class="header" id="appHeader">
+            <a href="#" class="back-btn" id="backButton"><i class="fas fa-chevron-left"></i></a>
+            <div class="app-title" id="appTitle">
+                <img src="https://via.placeholder.com/30/2c3e50/ffffff?text=RH" alt="Logo">
+                Roadside Hero
+            </div>
+            <a href="#" class="menu-icon" id="menuButton"><i class="fas fa-ellipsis-v"></i></a>
+        </div>
+
+        <!-- Dashboard Screen Content (Main content for this standalone file) -->
+        <div class="screen-content active" id="dashboardScreen">
+            <h1>Dashboard</h1>
+
+            <div class="location-card">
+                <i class="fas fa-map-marker-alt"></i>
+                <p><strong>Current Location:</strong><br>123 Highway 40, Near Oakwood Pass</p>
+            </div>
+
+            <div class="map-placeholder">
+                <!-- A real interactive map (e.g., Google Maps) would replace this div -->
+            </div>
+
+            <div class="service-grid">
+                <a href="#" class="service-button" data-service="flatTire">
+                    <i class="fas fa-tire"></i>
+                    <span>Flat Tire</span>
+                </a>
+                <a href="#" class="service-button" data-service="outOfFuel">
+                    <i class="fas fa-gas-pump"></i>
+                    <span>Out of Fuel</span>
+                </a>
+                <a href="#" class="service-button" data-service="batteryBoost">
+                    <i class="fas fa-car-battery"></i>
+                    <span>Battery Boost</span>
+                </a>
+                <a href="#" class="service-button" data-service="towing">
+                    <i class="fas fa-truck-pickup"></i>
+                    <span>Towing</span>
+                </a>
+            </div>
+
+            <div class="emergency-contacts">
+                <h3>Emergency Contacts</h3>
+                <div class="contact-item">
+                    <div class="details">
+                        <span>Call Emergency Services</span>
+                    </div>
+                    <button class="call-btn emergency" onclick="callNumber('911')">CALL</button>
+                </div>
+                <div class="contact-item">
+                    <div class="details">
+                        <i class="fas fa-star"></i>
+                        <span>Preferred Towing: Speedy Towing</span>
+                    </div>
+                    <button class="call-btn" onclick="callNumber('(555) 123-4567')">CALL</button>
+                </div>
+                <div class="contact-item">
+                    <div class="details">
+                        <span>Dad: (555) 123-5678</span>
+                    </div>
+                    <button class="call-btn" onclick="callNumber('(555) 123-5678')">CALL</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav" id="appNav">
+            <a href="#" class="nav-item active" data-screen="dashboardScreen">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-screen="profileScreen">
+                <i class="fas fa-user-circle"></i>
+                <span>Profile</span>
+            </a>
+            <a href="#" class="nav-item" data-screen="settingsScreen">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Event listeners for service buttons
+        document.querySelectorAll('.service-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert(this.dataset.service + ' service requested!');
+                // In a real app, this would navigate to a service request detail page
+            });
+        });
+
+        // Function to simulate calling a number
+        function callNumber(number) {
+            alert('Calling: ' + number + ' (In a real app, this would initiate a phone call)');
+            // For a mobile web app, you'd use window.location.href = 'tel:' + number;
+        }
+
+        // Placeholder for bottom navigation clicks
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Navigate to ' + this.dataset.screen + ' (In a full app, this would load a new screen)');
+
+                // For this standalone page, we'll just update the active state
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        document.getElementById('backButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Back button clicked! (Implement navigation history here)');
+        });
+
+        document.getElementById('menuButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Menu button clicked! (Implement a side menu or options popover here)');
+        });
+
+        // Initialize header title for the standalone dashboard page
+        document.addEventListener('DOMContentLoaded', () => {
+             const appTitle = document.getElementById('appTitle');
+             // Ensure the title is set correctly when the page loads
+             appTitle.innerHTML = '<img src="https://via.placeholder.com/30/2c3e50/ffffff?text=RH" alt="Logo">Roadside Hero';
+        });
+    </script>
+</body>
+</html>
