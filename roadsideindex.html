@@ -2,64 +2,82 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Roadside Assistance</title>
+<title>Roadside Hero</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Google Maps -->
+<!-- Google Maps - Note: Replace with your own key if this one expires -->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB5GbyoapPOyLYJLNo9y85cyorIczEI-WU"></script>
 
 <style>
 :root {
-  --bg: #f7f8fa;
+  --bg: #f8fafc;
   --card: #ffffff;
-  --text: #1f2933;
-  --muted: #6b7280;
-  --accent: #334155;
-  --danger: #dc2626;
+  --text: #0f172a;
+  --muted: #64748b;
+  --accent: #2563eb;
+  --danger: #ef4444;
+  --success: #22c55e;
 }
 
 * { box-sizing: border-box; }
 
-body { margin:0; background: var(--bg); font-family: system-ui, -apple-system, BlinkMacSystemFont; color: var(--text); }
-#map { height:65vh; width:100%; position:relative; z-index:1; }
+body { margin:0; background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--text); overflow: hidden; }
+#map { height: 100vh; width:100%; position:absolute; top:0; z-index:1; }
 
 /* Dropdown Panel */
 #panel {
-  position: absolute; /* float above map */
-  bottom: 64px;       /* above footer */
-  left: 0;
-  right: 0;
+  position: fixed;
+  bottom: 80px;
+  left: 10px;
+  right: 10px;
   background: white;
-  border-top-left-radius:20px;
-  border-top-right-radius:20px;
-  box-shadow:0 -10px 30px rgba(0,0,0,0.08);
-  z-index: 10;       /* above map */
-  pointer-events: auto;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-#panelHeader { padding:14px 18px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
-#panelHeader h3 { margin:0; font-size:15px; }
-#panelContent { max-height:0; overflow:hidden; transition:max-height 0.25s ease; padding:0 16px; }
-#panelContent.open { max-height:260px; padding-bottom:12px; }
+#panelHeader { padding:16px 20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select: none; }
+#panelHeader h3 { margin:0; font-size:16px; font-weight: 700; }
+#panelContent { max-height:0; overflow-y:auto; transition: max-height 0.3s ease; padding: 0 16px; }
+#panelContent.open { max-height: 40vh; padding-bottom: 16px; }
 
-.card { background: var(--card); border-radius:16px; padding:14px; margin-bottom:12px; box-shadow:0 8px 20px rgba(0,0,0,0.05); }
+.card { background: #f1f5f9; border-radius:12px; padding:14px; margin-bottom:12px; border: 1px solid #e2e8f0; }
 .card h4 { margin:0 0 4px; font-size:15px; }
-.meta { font-size:12px; color: var(--muted); }
-.badge { display:inline-block; background:#eef2f7; padding:4px 8px; border-radius:999px; font-size:11px; margin:6px 0; }
+.meta { font-size:12px; color: var(--muted); margin-bottom: 8px; }
+.badge { display:inline-block; background:var(--accent); color: white; padding:2px 8px; border-radius:12px; font-size:11px; font-weight: 600; margin-right: 5px; }
 
-button { border:none; padding:10px 14px; border-radius:12px; background:var(--accent); color:white; font-size:14px; cursor:pointer; }
-button:active { transform:scale(0.97); }
+/* Buttons */
+.btn-respond { width: 100%; border:none; padding:8px; border-radius:8px; background:var(--text); color:white; font-size:13px; font-weight:600; cursor:pointer; margin-top: 8px; }
 
-/* Footer */
-#footer { position:fixed; bottom:0; width:100%; height:64px; display:flex; justify-content:center; align-items:center; box-shadow:0 -10px 30px rgba(0,0,0,0.08); z-index:20; background:white; }
-#sosBtn { background:var(--danger); padding:14px 36px; border-radius:999px; font-weight:600; }
+#footer { position:fixed; bottom:0; width:100%; height:80px; display:flex; justify-content:center; align-items:center; z-index:20; background: transparent; pointer-events: none;}
+#sosBtn { 
+    pointer-events: auto;
+    background:var(--danger); 
+    color: white; 
+    border: none;
+    padding:16px 40px; 
+    border-radius:999px; 
+    font-weight:700; 
+    font-size: 16px;
+    box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.4);
+    cursor: pointer;
+}
 
 /* Modal */
-#modal { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:none; justify-content:center; align-items:center; z-index:50; }
-#modalContent { background:white; width:90%; max-width:420px; border-radius:20px; padding:20px; }
-input, textarea { width:100%; padding:10px; border-radius:12px; border:1px solid #e5e7eb; margin-bottom:10px; font-size:14px; }
-.tip-options button { background:#e5e7eb; color:var(--text); margin-right:6px; }
-.tip-options button.active { background:var(--accent); color:white; }
+#modal { position:fixed; inset:0; background:rgba(15, 23, 42, 0.7); display:none; justify-content:center; align-items:flex-end; z-index:100; padding-bottom: 20px; }
+#modalContent { background:white; width:95%; max-width:450px; border-radius:24px; padding:24px; animation: slideUp 0.3s ease-out; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:12px; font-size:14px; outline: none; }
+input:focus { border-color: var(--accent); }
+.tip-options { display: flex; gap: 8px; margin-bottom: 12px; }
+.tip-options button { flex: 1; border: 1px solid #e2e8f0; background: white; padding: 8px; border-radius: 8px; cursor: pointer; }
+.tip-options button.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+.submit-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
+.cancel-link { display: block; text-align: center; margin-top: 15px; color: var(--muted); font-size: 13px; text-decoration: none; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -68,8 +86,8 @@ input, textarea { width:100%; padding:10px; border-radius:12px; border:1px solid
 
 <div id="panel">
   <div id="panelHeader" onclick="togglePanel()">
-    <h3>Active Requests</h3>
-    <span id="chevron">▴</span>
+    <h3>Active Requests Near You</h3>
+    <span id="chevron">▲</span>
   </div>
   <div id="panelContent">
     <div id="requests"></div>
@@ -77,31 +95,36 @@ input, textarea { width:100%; padding:10px; border-radius:12px; border:1px solid
 </div>
 
 <div id="footer">
-  <button id="sosBtn" onclick="openSOS()">Request Assistance</button>
+  <button id="sosBtn" onclick="openSOS()">GET HELP NOW</button>
 </div>
 
+<!-- Request Modal -->
 <div id="modal">
   <div id="modalContent">
-    <h3>Request Assistance</h3>
-    <p class="meta">Location shared securely</p>
-    <input id="name" placeholder="Your name">
-    <textarea id="issue" placeholder="Briefly describe the issue"></textarea>
+    <h2 style="margin-top:0">Need Assistance?</h2>
+    <p class="meta">Help is just a click away. Helpers will see your location.</p>
+    
+    <input id="name" placeholder="Your Name">
+    <textarea id="issue" placeholder="What's the problem? (e.g. Flat tire, Jumpstart)" rows="3"></textarea>
+    
+    <p class="meta" style="margin-bottom:8px">Incentive Tip (Paid to helper)</p>
     <div class="tip-options">
-      <p class="meta">Optional tip for helper</p>
       <button onclick="selectTip(5, this)">$5</button>
       <button onclick="selectTip(10, this)">$10</button>
       <button onclick="selectTip(20, this)">$20</button>
     </div>
-    <input id="customTip" placeholder="Custom tip amount ($)">
-    <button onclick="submitSOS()">Submit Request</button>
+    <input id="customTip" type="number" placeholder="Other amount ($)">
+    
+    <button class="submit-btn" onclick="submitSOS()">Post Request</button>
+    <span class="cancel-link" onclick="closeSOS()">Cancel</span>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
-// Firebase config
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyBgXWZkH0WMjhGmOfxjqbIDoJHlyA1pc-o",
   authDomain: "roadsidehero-104ea.firebaseapp.com",
@@ -119,82 +142,136 @@ let map, userLocation;
 let sosCache = {}, sosMarkers = {};
 let selectedTip = 0;
 
-function initMap() {
-  navigator.geolocation.getCurrentPosition(pos => {
-    userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    map = new google.maps.Map(document.getElementById("map"), { center: userLocation, zoom:13, styles:[{featureType:"poi",stylers:[{visibility:"off"}]}]});
-    new google.maps.Marker({ position: userLocation, map, icon:"https://maps.google.com/mapfiles/ms/icons/blue-dot.png" });
+// Expose functions to the window so HTML onclick works
+window.togglePanel = function() {
+  const content = document.getElementById("panelContent");
+  const chevron = document.getElementById("chevron");
+  content.classList.toggle("open");
+  chevron.textContent = content.classList.contains("open") ? "▼" : "▲";
+};
 
-    onValue(ref(database, "sosRequests"), snap => {
-      sosCache = {};
-      snap.forEach(c => sosCache[c.key] = c.val());
-      renderSOS();
-    });
+window.openSOS = function() { document.getElementById("modal").style.display = "flex"; };
+window.closeSOS = function() { document.getElementById("modal").style.display = "none"; };
 
-    map.addListener("idle", renderSOS);
+window.selectTip = function(amount, el) {
+  selectedTip = amount;
+  document.querySelectorAll(".tip-options button").forEach(b => b.classList.remove("active"));
+  el.classList.add("active");
+};
+
+window.submitSOS = function() {
+  const name = document.getElementById("name").value.trim();
+  const issue = document.getElementById("issue").value.trim();
+  const customTip = parseFloat(document.getElementById("customTip").value);
+  
+  if(!name || !issue) { alert("Please enter your name and issue"); return; }
+  if(!userLocation) { alert("Detecting location... please try again in a second."); return; }
+
+  const newRequestRef = push(ref(database, "sosRequests"));
+  set(newRequestRef, {
+    userName: name,
+    issue,
+    lat: userLocation.lat,
+    lng: userLocation.lng,
+    tip: customTip || selectedTip || 0,
+    status: "open",
+    timestamp: Date.now()
   });
+
+  window.closeSOS();
+  // Clear inputs
+  document.getElementById("name").value = "";
+  document.getElementById("issue").value = "";
+  document.getElementById("customTip").value = "";
+  selectedTip = 0;
+};
+
+// Initialize Map
+function initMap() {
+  const defaultLoc = { lat: 40.7128, lng: -74.0060 }; // NYC fallback
+  
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: defaultLoc,
+    zoom: 13,
+    disableDefaultUI: true,
+    styles: [{ featureType: "poi", stylers: [{ visibility: "off" }] }]
+  });
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      map.setCenter(userLocation);
+      new google.maps.Marker({
+        position: userLocation,
+        map,
+        icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+      });
+    });
+  }
+
+  // Sync with Firebase
+  onValue(ref(database, "sosRequests"), (snap) => {
+    sosCache = snap.val() || {};
+    renderSOS();
+  });
+
+  map.addListener("idle", renderSOS);
 }
 
 function renderSOS() {
   const container = document.getElementById("requests");
-  container.innerHTML = "";
   const bounds = map.getBounds();
-  let found = false;
+  if(!bounds) return;
+  
+  container.innerHTML = "";
+  let foundVisible = false;
 
+  // Remove markers that are no longer in DB or closed
   Object.keys(sosMarkers).forEach(id => {
-    if(!sosCache[id] || sosCache[id].status!=="open") { sosMarkers[id].setMap(null); delete sosMarkers[id]; }
-  });
-
-  Object.entries(sosCache).forEach(([id,d])=>{
-    if(d.status!=="open") return;
-    const pos = new google.maps.LatLng(d.lat,d.lng);
-    if(!sosMarkers[id]){
-      sosMarkers[id]=new google.maps.Marker({position:pos,map,icon:"https://maps.google.com/mapfiles/ms/icons/red-dot.png",title:d.issue});
+    if(!sosCache[id] || sosCache[id].status !== "open") {
+      sosMarkers[id].setMap(null);
+      delete sosMarkers[id];
     }
-    const visible = bounds.contains(pos);
-    sosMarkers[id].setVisible(visible);
-    if(!visible) return;
-
-    found = true;
-    container.innerHTML += `<div class="card"><h4>${d.userName}</h4><p>${d.issue}</p><span class="badge">Tip: $${d.tip||0}</span><button>Respond</button></div>`;
   });
 
-  if(!found) container.innerHTML=`<p class="meta">No assistance needed in this area</p>`;
-}
+  Object.entries(sosCache).forEach(([id, d]) => {
+    if(d.status !== "open") return;
 
-function togglePanel() {
-  const content=document.getElementById("panelContent");
-  const chevron=document.getElementById("chevron");
-  content.classList.toggle("open");
-  chevron.textContent = content.classList.contains("open")?"▾":"▴";
-}
+    const pos = { lat: d.lat, lng: d.lng };
+    
+    // Add marker if it doesn't exist
+    if(!sosMarkers[id]) {
+      sosMarkers[id] = new google.maps.Marker({
+        position: pos,
+        map,
+        icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+        animation: google.maps.Animation.DROP
+      });
+    }
 
-function openSOS(){ document.getElementById("modal").style.display="flex"; }
-function selectTip(amount,el){ selectedTip=amount; document.querySelectorAll(".tip-options button").forEach(b=>b.classList.remove("active")); el.classList.add("active"); }
-
-function submitSOS(){
-  const name=document.getElementById("name").value.trim();
-  const issue=document.getElementById("issue").value.trim();
-  const customTip=parseFloat(document.getElementById("customTip").value);
-  if(!name||!issue) return;
-
-  push(ref(database,"sosRequests"),{
-    userName:name,
-    issue,
-    lat:userLocation.lat,
-    lng:userLocation.lng,
-    tip:customTip||selectedTip||0,
-    status:"open",
-    timestamp:Date.now()
+    // Only show in the list if it's within the map view
+    if(bounds.contains(pos)) {
+      foundVisible = true;
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between">
+            <h4>${d.userName}</h4>
+            <span class="badge">$${d.tip} Tip</span>
+        </div>
+        <p style="margin:8px 0; font-size:14px;">${d.issue}</p>
+        <button class="btn-respond" onclick="alert('Contacting helper feature coming soon!')">I CAN HELP</button>
+      `;
+      container.appendChild(card);
+    }
   });
 
-  document.getElementById("modal").style.display="none";
-  document.getElementById("name").value="";
-  document.getElementById("issue").value="";
-  document.getElementById("customTip").value="";
-  selectedTip=0;
+  if(!foundVisible) {
+    container.innerHTML = `<p class="meta" style="text-align:center; padding:20px;">No active requests in this view.</p>`;
+  }
 }
 
+// Start
 initMap();
 </script>
 
