@@ -197,7 +197,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebas
 import { getDatabase, ref, push, onValue, set, get, update, remove, query, orderByChild, endAt } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB5GbyoapPOyLYJLNo9y85cyorIczEI-WU",
+  apiKey: "AIzaSyBgXWZkH0WMjhGmOfxjqbIDoJHlyA1pc-o",
   authDomain: "roadsidehero-104ea.firebaseapp.com",
   databaseURL: "https://roadsidehero-104ea-default-rtdb.firebaseio.com",
   projectId: "roadsidehero-104ea",
@@ -274,12 +274,18 @@ window.updateMapView = () => {
     else { const circle = new google.maps.Circle({ center: userLocation, radius: myRadius * 1609.34 }); map.fitBounds(circle.getBounds()); }
 };
 window.confirmHelp = (sosId) => {
-    update(ref(db, `sosRequests/${sosId}`), { status: 'accepted', helperId: myId });
+    update(ref(db, `sosRequests/${sosId}`), { status: 'accepted', helperId: myId, helperAcknowledged: false });
     window.closeModal('browseModal');
 };
+
+// FIXED: Now updates the database so the syncUI stops showing the alert
 window.acknowledgeCancel = () => {
-    document.getElementById('activeTask').style.display = 'none';
+    const myCanceledTaskEntry = Object.entries(sosCache).find(([id, r]) => r.helperId === myId && r.status === 'canceled');
+    if(myCanceledTaskEntry) {
+        update(ref(db, `sosRequests/${myCanceledTaskEntry[0]}`), { helperAcknowledged: true });
+    }
 };
+
 window.completeTask = async () => {
     const myActive = Object.entries(sosCache).find(([id, r]) => r.helperId === myId && r.status === 'accepted');
     if(!myActive) return;
@@ -341,30 +347,21 @@ function syncUI() {
         const dist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609).toFixed(1) : "?";
         const inRadius = (myRadius >= 999999 || dist <= myRadius);
 
-        // --- MAP MARKER LOGIC ---
-        // If request is open, in radius, and not mine -> Show Marker
         if(r.status === 'open' && r.ownerId !== myId && inRadius) {
             openCount++;
             list.innerHTML += `<div class="history-item"><b>${r.vehicle}: ${r.issue}</b><br>${dist} mi away<br><button class="submit-btn" style="margin-top:10px; padding:8px;" onclick="window.confirmHelp('${id}')">HELP THEM</button></div>`;
-            
-            // Create marker if it doesn't exist
             if(!markers[id] && map) {
-                markers[id] = new google.maps.Marker({
-                    position: {lat: r.lat, lng: r.lng},
-                    map: map,
-                    icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
-                    title: r.issue
-                });
+                markers[id] = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map: map, icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png", title: r.issue });
             }
         } else {
-            // Remove marker if it exists but no longer meets criteria
-            if(markers[id]) {
-                markers[id].setMap(null);
-                delete markers[id];
-            }
+            if(markers[id]) { markers[id].setMap(null); delete markers[id]; }
         }
         
-        if(r.helperId === myId && (r.status === 'accepted' || r.status === 'canceled')) myTask = r;
+        // Track task for Hero: Only show if accepted OR (canceled and not yet acknowledged)
+        if(r.helperId === myId && (r.status === 'accepted' || (r.status === 'canceled' && !r.helperAcknowledged))) {
+            myTask = r;
+        }
+
         if(r.ownerId === myId && (r.status === 'open' || r.status === 'accepted')) myActiveSOS = r;
 
         let statusColor = '#2563eb'; 
