@@ -2,121 +2,161 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Roadside Hero</title>
+<title>Roadside Hero - Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Google Maps - Note: Replace with your own key if this one expires -->
+<!-- Google Maps -->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB5GbyoapPOyLYJLNo9y85cyorIczEI-WU"></script>
 
 <style>
 :root {
-  --bg: #f8fafc;
-  --card: #ffffff;
-  --text: #0f172a;
-  --muted: #64748b;
-  --accent: #2563eb;
+  --bg: #f1f5f9;
+  --primary: #2563eb;
   --danger: #ef4444;
-  --success: #22c55e;
+  --text: #1e293b;
+  --white: #ffffff;
 }
 
-* { box-sizing: border-box; }
+body { margin:0; font-family: system-ui, -apple-system, sans-serif; background: var(--bg); overflow: hidden; }
+#map { height: 100vh; width: 100%; position: absolute; z-index: 1; }
 
-body { margin:0; background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--text); overflow: hidden; }
-#map { height: 100vh; width:100%; position:absolute; top:0; z-index:1; }
-
-/* Dropdown Panel */
-#panel {
+/* Fixed Footer Bar */
+#footer {
   position: fixed;
-  bottom: 80px;
-  left: 10px;
-  right: 10px;
+  bottom: 0;
+  width: 100%;
+  height: 75px;
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+/* Footer - Left side SOS Button */
+.footer-left { flex: 1; display: flex; justify-content: flex-start; }
+#sosBtn {
+  background: var(--danger);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+#sosBtn:active { transform: scale(0.95); }
+
+/* Footer - Right side Notifications */
+.footer-right { position: relative; display: flex; align-items: center; padding-right: 10px; }
+.notif-icon {
+  font-size: 28px;
+  cursor: pointer;
+  position: relative;
+  background: #f8fafc;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+}
+.badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: var(--danger);
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: none; /* hidden by default */
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+/* Notification Modal */
+#notifModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  z-index: 200;
+  justify-content: center;
+  align-items: flex-end;
+}
+#notifContent {
   background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  max-width: 500px;
+  border-radius: 24px 24px 0 0;
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
 }
-
-#panelHeader { padding:16px 20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select: none; }
-#panelHeader h3 { margin:0; font-size:16px; font-weight: 700; }
-#panelContent { max-height:0; overflow-y:auto; transition: max-height 0.3s ease; padding: 0 16px; }
-#panelContent.open { max-height: 40vh; padding-bottom: 16px; }
-
-.card { background: #f1f5f9; border-radius:12px; padding:14px; margin-bottom:12px; border: 1px solid #e2e8f0; }
-.card h4 { margin:0 0 4px; font-size:15px; }
-.meta { font-size:12px; color: var(--muted); margin-bottom: 8px; }
-.badge { display:inline-block; background:var(--accent); color: white; padding:2px 8px; border-radius:12px; font-size:11px; font-weight: 600; margin-right: 5px; }
-
-/* Buttons */
-.btn-respond { width: 100%; border:none; padding:8px; border-radius:8px; background:var(--text); color:white; font-size:13px; font-weight:600; cursor:pointer; margin-top: 8px; }
-
-#footer { position:fixed; bottom:0; width:100%; height:80px; display:flex; justify-content:center; align-items:center; z-index:20; background: transparent; pointer-events: none;}
-#sosBtn { 
-    pointer-events: auto;
-    background:var(--danger); 
-    color: white; 
-    border: none;
-    padding:16px 40px; 
-    border-radius:999px; 
-    font-weight:700; 
-    font-size: 16px;
-    box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.4);
-    cursor: pointer;
+.notif-item {
+  padding: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
 }
+.notif-item.new { background: #eff6ff; border-left: 4px solid var(--primary); }
 
-/* Modal */
-#modal { position:fixed; inset:0; background:rgba(15, 23, 42, 0.7); display:none; justify-content:center; align-items:flex-end; z-index:100; padding-bottom: 20px; }
-#modalContent { background:white; width:95%; max-width:450px; border-radius:24px; padding:24px; animation: slideUp 0.3s ease-out; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:12px; font-size:14px; outline: none; }
-input:focus { border-color: var(--accent); }
-.tip-options { display: flex; gap: 8px; margin-bottom: 12px; }
-.tip-options button { flex: 1; border: 1px solid #e2e8f0; background: white; padding: 8px; border-radius: 8px; cursor: pointer; }
-.tip-options button.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-.submit-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
-.cancel-link { display: block; text-align: center; margin-top: 15px; color: var(--muted); font-size: 13px; text-decoration: none; cursor: pointer; }
+/* Original Request Modal Styles */
+#requestModal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 200; align-items: center; justify-content: center; }
+.modal-box { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 20px; }
+input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+.submit-btn { width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; }
 </style>
 </head>
 <body>
 
 <div id="map"></div>
 
-<div id="panel">
-  <div id="panelHeader" onclick="togglePanel()">
-    <h3>Active Requests Near You</h3>
-    <span id="chevron">▲</span>
-  </div>
-  <div id="panelContent">
-    <div id="requests"></div>
-  </div>
-</div>
-
+<!-- FOOTER -->
 <div id="footer">
-  <button id="sosBtn" onclick="openSOS()">GET HELP NOW</button>
+  <div class="footer-left">
+    <button id="sosBtn" onclick="toggleModal('requestModal', true)">REQUEST SOS</button>
+  </div>
+  <div class="footer-right">
+    <div class="notif-icon" onclick="openNotifications()">
+      🔔
+      <span id="notifBadge" class="badge">0</span>
+    </div>
+  </div>
 </div>
 
-<!-- Request Modal -->
-<div id="modal">
-  <div id="modalContent">
-    <h2 style="margin-top:0">Need Assistance?</h2>
-    <p class="meta">Help is just a click away. Helpers will see your location.</p>
-    
-    <input id="name" placeholder="Your Name">
-    <textarea id="issue" placeholder="What's the problem? (e.g. Flat tire, Jumpstart)" rows="3"></textarea>
-    
-    <p class="meta" style="margin-bottom:8px">Incentive Tip (Paid to helper)</p>
-    <div class="tip-options">
-      <button onclick="selectTip(5, this)">$5</button>
-      <button onclick="selectTip(10, this)">$10</button>
-      <button onclick="selectTip(20, this)">$20</button>
+<!-- REQUEST MODAL -->
+<div id="requestModal" onclick="if(event.target==this) toggleModal('requestModal', false)">
+  <div class="modal-box">
+    <h3>New Assistance Request</h3>
+    <input id="userName" placeholder="Your Name">
+    <textarea id="userIssue" placeholder="Describe the problem..."></textarea>
+    <button class="submit-btn" onclick="submitRequest()">Post Request</button>
+  </div>
+</div>
+
+<!-- NOTIFICATION MODAL -->
+<div id="notifModal" onclick="if(event.target==this) toggleModal('notifModal', false)">
+  <div id="notifContent">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <h2 style="margin:0">Notifications</h2>
+        <button onclick="toggleModal('notifModal', false)" style="border:none; background:none; font-size:20px;">✕</button>
     </div>
-    <input id="customTip" type="number" placeholder="Other amount ($)">
-    
-    <button class="submit-btn" onclick="submitSOS()">Post Request</button>
-    <span class="cancel-link" onclick="closeSOS()">Cancel</span>
+    <div id="notifList">
+      <p style="color:#64748b; text-align:center;">No new notifications</p>
+    </div>
   </div>
 </div>
 
@@ -124,154 +164,95 @@ input:focus { border-color: var(--accent); }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyBgXWZkH0WMjhGmOfxjqbIDoJHlyA1pc-o",
   authDomain: "roadsidehero-104ea.firebaseapp.com",
   databaseURL: "https://roadsidehero-104ea-default-rtdb.firebaseio.com",
   projectId: "roadsidehero-104ea",
-  storageBucket: "roadsidehero-104ea.firebasestorage.app",
-  messagingSenderId: "1068443635940",
-  appId: "1:1068443635940:web:ae5e33d3fe0d78c415dcf1"
+  storageBucket: "roadsidehero-104ea.firebasestorage.app"
 };
 
 const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+const db = getDatabase(app);
 
-let map, userLocation;
-let sosCache = {}, sosMarkers = {};
-let selectedTip = 0;
+let userLocation = null;
+let lastKnownCount = 0;
 
-// Expose functions to the window so HTML onclick works
-window.togglePanel = function() {
-  const content = document.getElementById("panelContent");
-  const chevron = document.getElementById("chevron");
-  content.classList.toggle("open");
-  chevron.textContent = content.classList.contains("open") ? "▼" : "▲";
+// Global UI Toggles
+window.toggleModal = (id, show) => {
+    document.getElementById(id).style.display = show ? 'flex' : 'none';
 };
 
-window.openSOS = function() { document.getElementById("modal").style.display = "flex"; };
-window.closeSOS = function() { document.getElementById("modal").style.display = "none"; };
-
-window.selectTip = function(amount, el) {
-  selectedTip = amount;
-  document.querySelectorAll(".tip-options button").forEach(b => b.classList.remove("active"));
-  el.classList.add("active");
-};
-
-window.submitSOS = function() {
-  const name = document.getElementById("name").value.trim();
-  const issue = document.getElementById("issue").value.trim();
-  const customTip = parseFloat(document.getElementById("customTip").value);
-  
-  if(!name || !issue) { alert("Please enter your name and issue"); return; }
-  if(!userLocation) { alert("Detecting location... please try again in a second."); return; }
-
-  const newRequestRef = push(ref(database, "sosRequests"));
-  set(newRequestRef, {
-    userName: name,
-    issue,
-    lat: userLocation.lat,
-    lng: userLocation.lng,
-    tip: customTip || selectedTip || 0,
-    status: "open",
-    timestamp: Date.now()
-  });
-
-  window.closeSOS();
-  // Clear inputs
-  document.getElementById("name").value = "";
-  document.getElementById("issue").value = "";
-  document.getElementById("customTip").value = "";
-  selectedTip = 0;
-};
-
-// Initialize Map
+// Map Init
 function initMap() {
-  const defaultLoc = { lat: 40.7128, lng: -74.0060 }; // NYC fallback
-  
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: defaultLoc,
-    zoom: 13,
-    disableDefaultUI: true,
-    styles: [{ featureType: "poi", stylers: [{ visibility: "off" }] }]
-  });
-
-  if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(pos => {
-      userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      map.setCenter(userLocation);
-      new google.maps.Marker({
-        position: userLocation,
-        map,
-        icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-      });
+        userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const map = new google.maps.Map(document.getElementById("map"), {
+            center: userLocation, zoom: 14, disableDefaultUI: true
+        });
+        new google.maps.Marker({ position: userLocation, map, icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" });
     });
-  }
-
-  // Sync with Firebase
-  onValue(ref(database, "sosRequests"), (snap) => {
-    sosCache = snap.val() || {};
-    renderSOS();
-  });
-
-  map.addListener("idle", renderSOS);
 }
 
-function renderSOS() {
-  const container = document.getElementById("requests");
-  const bounds = map.getBounds();
-  if(!bounds) return;
-  
-  container.innerHTML = "";
-  let foundVisible = false;
+// Submit SOS
+window.submitRequest = () => {
+    const name = document.getElementById('userName').value;
+    const issue = document.getElementById('userIssue').value;
+    if(!name || !issue) return alert("Fill all fields");
 
-  // Remove markers that are no longer in DB or closed
-  Object.keys(sosMarkers).forEach(id => {
-    if(!sosCache[id] || sosCache[id].status !== "open") {
-      sosMarkers[id].setMap(null);
-      delete sosMarkers[id];
-    }
-  });
+    push(ref(db, 'sosRequests'), {
+        userName: name,
+        issue: issue,
+        lat: userLocation.lat,
+        lng: userLocation.lng,
+        status: 'open',
+        timestamp: Date.now()
+    });
+    toggleModal('requestModal', false);
+};
 
-  Object.entries(sosCache).forEach(([id, d]) => {
-    if(d.status !== "open") return;
-
-    const pos = { lat: d.lat, lng: d.lng };
+// REAL-TIME NOTIFICATION LISTENER
+onValue(ref(db, 'sosRequests'), (snapshot) => {
+    const data = snapshot.val();
+    const list = document.getElementById('notifList');
+    const badge = document.getElementById('notifBadge');
     
-    // Add marker if it doesn't exist
-    if(!sosMarkers[id]) {
-      sosMarkers[id] = new google.maps.Marker({
-        position: pos,
-        map,
-        icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
-        animation: google.maps.Animation.DROP
-      });
+    if (!data) return;
+
+    const items = Object.values(data).filter(item => item.status === 'open');
+    const count = items.length;
+
+    // Update Badge
+    if (count > 0) {
+        badge.innerText = count;
+        badge.style.display = 'flex';
+        // Simple "pop" animation logic
+        if(count > lastKnownCount) {
+            badge.style.transform = "scale(1.4)";
+            setTimeout(() => badge.style.transform = "scale(1)", 200);
+        }
+    } else {
+        badge.style.display = 'none';
     }
 
-    // Only show in the list if it's within the map view
-    if(bounds.contains(pos)) {
-      foundVisible = true;
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <div style="display:flex; justify-content:space-between">
-            <h4>${d.userName}</h4>
-            <span class="badge">$${d.tip} Tip</span>
-        </div>
-        <p style="margin:8px 0; font-size:14px;">${d.issue}</p>
-        <button class="btn-respond" onclick="alert('Contacting helper feature coming soon!')">I CAN HELP</button>
-      `;
-      container.appendChild(card);
-    }
-  });
+    // Build Notification List
+    list.innerHTML = "";
+    items.sort((a,b) => b.timestamp - a.timestamp).forEach(item => {
+        const div = document.createElement('div');
+        div.className = "notif-item new";
+        div.innerHTML = `<strong>New Request: ${item.userName}</strong><br>${item.issue}`;
+        list.appendChild(div);
+    });
 
-  if(!foundVisible) {
-    container.innerHTML = `<p class="meta" style="text-align:center; padding:20px;">No active requests in this view.</p>`;
-  }
-}
+    lastKnownCount = count;
+});
 
-// Start
+window.openNotifications = () => {
+    toggleModal('notifModal', true);
+    // Optional: Clear badge when clicked
+    // document.getElementById('notifBadge').style.display = 'none';
+};
+
 initMap();
 </script>
 
