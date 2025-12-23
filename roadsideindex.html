@@ -278,11 +278,7 @@ window.confirmHelp = (sosId) => {
     window.closeModal('browseModal');
 };
 window.acknowledgeCancel = () => {
-    const myCanceledTask = Object.entries(sosCache).find(([id, r]) => r.helperId === myId && r.status === 'canceled');
-    if(myCanceledTask) {
-        // Just hide the card from current session view
-        document.getElementById('activeTask').style.display = 'none';
-    }
+    document.getElementById('activeTask').style.display = 'none';
 };
 window.completeTask = async () => {
     const myActive = Object.entries(sosCache).find(([id, r]) => r.helperId === myId && r.status === 'accepted');
@@ -306,12 +302,12 @@ window.submitSOS = () => {
     window.switchView('seekerUI');
 };
 window.submitCancellation = (reason) => {
-    const myReqId = Object.keys(sosCache).find(k => sosCache[k].ownerId === myId && sosCache[k].status !== 'completed' && sosCache[k].status !== 'canceled');
+    const myReqId = Object.keys(sosCache).find(k => sosCache[k].ownerId === myId && (sosCache[k].status === 'open' || sosCache[k].status === 'accepted'));
     if(myReqId) {
         update(ref(db, `sosRequests/${myReqId}`), { status: 'canceled', cancelReason: reason });
     }
     window.closeModal('cancelConfirmModal');
-    location.reload();
+    location.reload(); // Returns to landing page because status is now terminal
 };
 window.confirmArrival = () => window.completeTask();
 
@@ -339,7 +335,7 @@ function syncUI() {
     const history = document.getElementById('notifHistory');
     const badge = document.getElementById('notifBadge');
     list.innerHTML = ""; history.innerHTML = "";
-    let openCount = 0; let myTask = null; let mySOS = null;
+    let openCount = 0; let myTask = null; let myActiveSOS = null;
 
     Object.entries(sosCache).forEach(([id, r]) => {
         const dist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609).toFixed(1) : "?";
@@ -353,8 +349,10 @@ function syncUI() {
         // Track the current specific assignment for this Hero (Accepted OR Canceled)
         if(r.helperId === myId && (r.status === 'accepted' || r.status === 'canceled')) myTask = r;
         
-        // Track own request for Seeker
-        if(r.ownerId === myId && r.status !== 'completed') mySOS = r;
+        // --- KEY FIX HERE ---
+        // Only trigger Seeker Dashboard if status is strictly Open or Accepted.
+        // Terminal statuses (Completed/Canceled) do not force the UI.
+        if(r.ownerId === myId && (r.status === 'open' || r.status === 'accepted')) myActiveSOS = r;
 
         // Notification History Logic
         let statusColor = '#2563eb'; // blue
@@ -381,19 +379,20 @@ function syncUI() {
         }
     } else { taskCard.style.display = "none"; }
 
-    // Update Seeker UI
-    if(mySOS) {
+    // Update Seeker UI (Only if myActiveSOS exists)
+    if(myActiveSOS) {
         window.switchView('seekerUI');
-        if(mySOS.status === 'accepted') {
+        if(myActiveSOS.status === 'accepted') {
             document.getElementById('searchingState').style.display = 'none';
             document.getElementById('matchedState').style.display = 'block';
-            const hero = profilesCache[mySOS.helperId] || {};
+            const hero = profilesCache[myActiveSOS.helperId] || {};
             document.getElementById('matchName').innerText = hero.name || "A Hero";
             document.getElementById('matchPic').src = hero.pic || "https://via.placeholder.com/85";
-            const hDist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(mySOS.lat, mySOS.lng)) / 1609).toFixed(1) : "?";
+            const hDist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(myActiveSOS.lat, myActiveSOS.lng)) / 1609).toFixed(1) : "?";
             document.getElementById('matchDist').innerText = hDist + " miles away";
         }
     }
+
     document.getElementById('openCount').innerText = openCount;
     badge.innerText = openCount; badge.style.display = openCount > 0 ? "flex" : "none";
 }
