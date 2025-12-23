@@ -1,226 +1,258 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>SOS Roadside Help</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<title>Roadside Assistance</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-  <!-- Google Maps -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_KEY"></script>
+<!-- Google Maps -->
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_KEY"></script>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont;
-      background: #f5f5f5;
-    }
+<style>
+:root {
+  --bg: #f7f8fa;
+  --card: #ffffff;
+  --text: #1f2933;
+  --muted: #6b7280;
+  --accent: #334155;
+  --danger: #dc2626;
+}
 
-    #map {
-      height: 65vh;
-      width: 100%;
-    }
+* { box-sizing: border-box; }
 
-    #panel {
-      height: 25vh;
-      background: white;
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-      padding: 15px;
-      overflow-y: auto;
-    }
+body {
+  margin: 0;
+  background: var(--bg);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  color: var(--text);
+}
 
-    .request {
-      border-bottom: 1px solid #eee;
-      padding: 10px 0;
-    }
+#map { height: 65vh; }
 
-    button {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 10px 14px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
+#panel {
+  height: 25vh;
+  padding: 16px;
+  overflow-y: auto;
+}
 
-    /* 🔴 SOS Footer */
-    #footer {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      height: 60px;
-      background: #111;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
 
-    #sosBtn {
-      background: #e63946;
-      font-size: 16px;
-      font-weight: bold;
-      padding: 12px 30px;
-      border-radius: 30px;
-    }
+.card h4 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
 
-    /* Modal */
-    #modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      display: none;
-      justify-content: center;
-      align-items: center;
-    }
+.meta {
+  font-size: 12px;
+  color: var(--muted);
+}
 
-    #modalContent {
-      background: white;
-      width: 90%;
-      max-width: 400px;
-      padding: 20px;
-      border-radius: 15px;
-    }
+.badge {
+  display: inline-block;
+  background: #eef2f7;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  margin-top: 6px;
+}
 
-    input, textarea {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-    }
-  </style>
+button {
+  border: none;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: white;
+  font-size: 14px;
+}
+
+button:active { transform: scale(0.97); }
+
+#footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 64px;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.08);
+}
+
+#sosBtn {
+  background: var(--danger);
+  padding: 14px 36px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+#modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+#modalContent {
+  background: white;
+  width: 90%;
+  max-width: 420px;
+  border-radius: 20px;
+  padding: 20px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 10px;
+}
+
+.tip-options button {
+  background: #e5e7eb;
+  color: var(--text);
+  margin-right: 6px;
+}
+
+.tip-options button.active {
+  background: var(--accent);
+  color: white;
+}
+</style>
 </head>
+
 <body>
 
 <div id="map"></div>
 
 <div id="panel">
-  <h3>Nearby SOS Requests</h3>
   <div id="requests"></div>
 </div>
 
-<!-- 🔴 Footer SOS Button -->
 <div id="footer">
-  <button id="sosBtn" onclick="openSOS()">SEND SOS</button>
+  <button id="sosBtn" onclick="openSOS()">Request Assistance</button>
 </div>
 
-<!-- Modal -->
 <div id="modal">
   <div id="modalContent">
-    <h3>Send SOS</h3>
-    <input id="name" placeholder="Your name">
-    <textarea id="issue" rows="3" placeholder="Describe your issue"></textarea>
-    <button onclick="submitSOS()">Submit</button>
+    <h3>Request Assistance</h3>
+    <p class="meta">Location shared securely</p>
+
+    <input id="name" placeholder="Your name" />
+
+    <textarea id="issue" placeholder="Briefly describe the issue"></textarea>
+
+    <div class="tip-options">
+      <p class="meta">Optional tip for helper</p>
+      <button onclick="selectTip(5)">$5</button>
+      <button onclick="selectTip(10)">$10</button>
+      <button onclick="selectTip(20)">$20</button>
+    </div>
+
+    <input id="customTip" placeholder="Custom tip amount ($)" />
+
+    <button onclick="submitSOS()">Submit Request</button>
   </div>
 </div>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "YOUR_FIREBASE_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-    projectId: "YOUR_PROJECT",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "XXXX",
-    appId: "XXXX"
-  };
+const firebaseConfig = {
+  apiKey: "YOUR_FIREBASE_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+  projectId: "YOUR_PROJECT"
+};
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-  let map;
-  let markers = {};
-  let userLocation = null;
+let map, userLocation, selectedTip = 0;
 
-  function initMap() {
-    navigator.geolocation.getCurrentPosition(pos => {
-      userLocation = {
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude
-      };
+function initMap() {
+  navigator.geolocation.getCurrentPosition(pos => {
+    userLocation = {
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude
+    };
 
-      map = new google.maps.Map(document.getElementById("map"), {
-        center: userLocation,
-        zoom: 13
-      });
-
-      new google.maps.Marker({
-        position: userLocation,
-        map,
-        label: "You"
-      });
-
-      loadSOS();
-    });
-  }
-
-  function loadSOS() {
-    const container = document.getElementById("requests");
-
-    db.ref("sosRequests").on("value", snap => {
-      container.innerHTML = "";
-
-      snap.forEach(child => {
-        const data = child.val();
-        if (data.status !== "open") return;
-
-        if (!markers[child.key]) {
-          markers[child.key] = new google.maps.Marker({
-            position: { lat: data.lat, lng: data.lng },
-            map
-          });
-        }
-
-        const div = document.createElement("div");
-        div.className = "request";
-        div.innerHTML = `
-          <strong>${data.userName}</strong>
-          <p>${data.issue}</p>
-          <button onclick="acceptSOS('${child.key}')">Accept</button>
-        `;
-        container.appendChild(div);
-      });
-    });
-  }
-
-  function acceptSOS(id) {
-    db.ref("sosRequests/" + id).update({
-      status: "accepted",
-      acceptedBy: "MotorUser"
-    });
-  }
-
-  function openSOS() {
-    document.getElementById("modal").style.display = "flex";
-  }
-
-  function submitSOS() {
-    const name = document.getElementById("name").value.trim();
-    const issue = document.getElementById("issue").value.trim();
-
-    if (!name || !issue || !userLocation) return;
-
-    db.ref("sosRequests").push({
-      userName: name,
-      issue: issue,
-      lat: userLocation.lat,
-      lng: userLocation.lng,
-      status: "open",
-      timestamp: Date.now()
+    map = new google.maps.Map(document.getElementById("map"), {
+      center: userLocation,
+      zoom: 13,
+      styles: [{ featureType: "poi", stylers: [{ visibility: "off" }] }]
     });
 
-    document.getElementById("modal").style.display = "none";
-    document.getElementById("name").value = "";
-    document.getElementById("issue").value = "";
-  }
+    loadSOS();
+  });
+}
 
-  initMap();
+function loadSOS() {
+  const container = document.getElementById("requests");
+  db.ref("sosRequests").on("value", snap => {
+    container.innerHTML = "";
+    snap.forEach(child => {
+      const d = child.val();
+      if (d.status !== "open") return;
+
+      container.innerHTML += `
+        <div class="card">
+          <h4>${d.userName}</h4>
+          <p>${d.issue}</p>
+          <span class="badge">Tip: $${d.tip || 0}</span>
+          <button onclick="acceptSOS('${child.key}')">Respond</button>
+        </div>
+      `;
+    });
+  });
+}
+
+function openSOS() {
+  document.getElementById("modal").style.display = "flex";
+}
+
+function selectTip(amount) {
+  selectedTip = amount;
+  document.querySelectorAll(".tip-options button").forEach(b => b.classList.remove("active"));
+  event.target.classList.add("active");
+}
+
+function submitSOS() {
+  const name = nameInput = document.getElementById("name").value;
+  const issue = document.getElementById("issue").value;
+  const customTip = parseFloat(document.getElementById("customTip").value);
+
+  db.ref("sosRequests").push({
+    userName: name,
+    issue,
+    lat: userLocation.lat,
+    lng: userLocation.lng,
+    tip: customTip || selectedTip,
+    status: "open",
+    timestamp: Date.now()
+  });
+
+  document.getElementById("modal").style.display = "none";
+}
+
+function acceptSOS(id) {
+  db.ref("sosRequests/" + id).update({
+    status: "accepted"
+  });
+}
+
+initMap();
 </script>
 
 </body>
