@@ -11,158 +11,141 @@
 <style>
 :root {
   --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b;
-  --accent: #2563eb; --danger: #ef4444; --success: #22c55e;
+  --accent: #2563eb; --danger: #ef4444; --success: #22c55e; --warning: #f59e0b;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-body, html { 
-    margin: 0; padding: 0; width: 100%; height: 100%; 
-    font-family: -apple-system, system-ui, sans-serif;
-    color: var(--text); background: white; overflow: hidden;
-}
+body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, system-ui, sans-serif; color: var(--text); background: white; overflow: hidden; }
 
 /* --- VIEW MANAGER --- */
-.view { display: none; width: 100%; height: 100%; position: fixed; inset: 0; z-index: 10; background: white; }
+.view { display: none; width: 100%; height: 100%; position: fixed; inset: 0; z-index: 10; background: white; overflow-y: auto; }
 .view-active { display: flex; flex-direction: column; }
 
-/* --- LANDING PAGE --- */
+/* --- LANDING PAGE (100x100) --- */
 #landingPage { align-items: center; justify-content: center; padding: 30px; text-align: center; z-index: 100; }
 #landingPage img { width: 220px; margin-bottom: 10px; }
-#landingPage h2 { font-size: 18px; font-weight: 500; color: var(--muted); margin: 0 0 50px 0; }
-.mode-btn { 
-    width: 100%; max-width: 320px; padding: 20px; border-radius: 18px; 
-    font-size: 18px; font-weight: 700; border: none; cursor: pointer; margin-bottom: 16px;
-    transition: transform 0.2s ease;
-}
-.btn-req { background: var(--danger); color: white; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3); }
-.btn-hero { background: var(--text); color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+.mode-btn { width: 100%; max-width: 320px; padding: 20px; border-radius: 18px; font-size: 18px; font-weight: 700; border: none; cursor: pointer; margin-bottom: 16px; transition: 0.2s; }
+.btn-req { background: var(--danger); color: white; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2); }
+.btn-hero { background: var(--text); color: white; }
 
-/* --- SEEKER WAIT SCREEN --- */
-#seekerUI { background: var(--bg); padding: 40px 20px; align-items: center; justify-content: flex-start; text-align: center; overflow-y: auto; }
-.search-pulse {
-    width: 100px; height: 100px; background: var(--accent); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; font-size: 40px;
-    color: white; margin: 30px auto; position: relative; z-index: 2;
-}
-.search-pulse::after {
-    content: ''; position: absolute; inset: 0; border-radius: 50%;
-    background: var(--accent); opacity: 0.4; animation: pulse 2s infinite;
-}
+/* --- SEEKER DASHBOARD --- */
+#seekerUI { background: var(--bg); padding: 20px; align-items: center; }
+.status-card { background: white; width: 100%; max-width: 400px; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; margin-top: 20px; border: 1px solid #e2e8f0; }
+.search-pulse { width: 80px; height: 80px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; margin: 0 auto 20px; position: relative; }
+.search-pulse::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--accent); opacity: 0.4; animation: pulse 2s infinite; }
 @keyframes pulse { 0% { transform: scale(1); opacity: 0.4; } 100% { transform: scale(2); opacity: 0; } }
 
-/* --- HERO UI (MAP) --- */
-#heroUI { position: relative; background: #e5e7eb; }
+/* --- HERO UI --- */
+#heroUI { overflow: hidden; }
 #map { width: 100%; height: 100%; position: absolute; top:0; left:0; z-index: 1; }
+#heroPanel { position: fixed; bottom: 90px; left: 15px; right: 15px; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+.task-card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-left: 5px solid var(--accent); }
+.browse-btn { background: white; padding: 15px; border-radius: 20px; text-align: center; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.1); cursor: pointer; }
 
-#panel { position: fixed; bottom: 90px; left: 15px; right: 15px; background: white; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 100; overflow: hidden; transition: 0.3s; }
-#panelHeader { padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
-#panelContent { max-height: 0; overflow-y: auto; transition: 0.3s; padding: 0 16px; }
-#panelContent.open { max-height: 40vh; padding-bottom: 20px; }
+/* --- NOTIFICATIONS --- */
+.notif-item { padding: 15px; border-radius: 15px; background: #f8fafc; margin-bottom: 10px; border: 1px solid #e2e8f0; font-size: 14px; }
+.badge-status { font-size: 10px; padding: 3px 8px; border-radius: 5px; text-transform: uppercase; font-weight: 800; float: right; }
 
-.card { background: #f8fafc; border-radius: 16px; padding: 15px; margin-bottom: 12px; border: 1px solid #e2e8f0; text-align: left; }
-.btn-respond { width: 100%; border: none; padding: 12px; border-radius: 10px; background: var(--accent); color: white; font-weight: 700; cursor: pointer; margin-top: 10px; }
+/* --- FOOTER --- */
+.footer { position: fixed; bottom: 0; width: 100%; height: 80px; background: white; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; z-index: 200; border-top: 1px solid #f1f5f9; }
+.icon-btn { position: relative; cursor: pointer; width: 45px; height: 45px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+#notifBadge { position: absolute; top: -2px; right: -2px; background: var(--danger); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid white; }
 
-/* FOOTER */
-#heroFooter { position: fixed; bottom: 0; width: 100%; height: 80px; display: flex; justify-content: space-between; align-items: center; z-index: 100; background: white; padding: 0 25px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
-.icon-wrapper { position: relative; cursor: pointer; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border-radius: 50%; font-size: 20px; }
-#notifBadge { position: absolute; top: -2px; right: -2px; background: var(--danger); color: white; font-size: 10px; font-weight: bold; width: 20px; height: 20px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid white; }
-
-/* MODALS */
-.modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); display: none; justify-content: center; align-items: flex-end; z-index: 10000; }
-.modal-content { background: white; width: 100%; max-width: 500px; border-radius: 32px 32px 0 0; padding: 24px; max-height: 90vh; overflow-y: auto; }
-
-.vehicle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-.v-type { padding: 12px; border: 2px solid #f1f5f9; border-radius: 12px; text-align: center; cursor: pointer; font-weight: 600; }
-.v-type.active { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
-
-input, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 12px; font-size: 15px; }
-.submit-btn { width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; }
-.cancel-link { display: block; text-align: center; padding: 15px; color: var(--muted); cursor: pointer; }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
+.modal-content { background: white; width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; }
+.submit-btn { width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 15px; font-weight: 700; cursor: pointer; font-size: 16px; }
 </style>
 </head>
 <body>
 
-<!-- 1. LANDING PAGE -->
+<!-- 1. LANDING -->
 <div id="landingPage" class="view view-active">
-    <img src="Roadsidehero.png" alt="Roadside Hero Logo">
-    <h2>Reliable help when you need it most.</h2>
+    <img src="Roadsidehero.png" alt="Logo">
+    <h2 style="color: var(--muted); margin-bottom: 40px;">Emergency Roadside Assistance</h2>
     <button class="mode-btn btn-req" onclick="window.openModal('requestModal')">Request Help!</button>
-    <button class="mode-btn btn-hero" onclick="window.enterHeroMode()">I am looking to be a Hero</button>
+    <button class="mode-btn btn-hero" onclick="window.enterHeroMode()">I'm Looking to be a Hero</button>
 </div>
 
 <!-- 2. SEEKER DASHBOARD -->
 <div id="seekerUI" class="view">
-    <div style="width:100%; text-align:left;"><button onclick="location.reload()" style="border:none; background:none; font-weight:700; padding:10px;">✕ Cancel</button></div>
-    <div class="search-pulse">📡</div>
-    <h1 id="seekerStatusTitle">Finding a Hero...</h1>
-    <div id="helperCountBox" style="background:white; padding:20px; border-radius:20px; border:1px solid #eee;">
-        <span id="helperCounter">Checking for nearby heroes...</span>
+    <button onclick="window.cancelSOS()" style="align-self: flex-start; background: none; border: none; font-weight: 700; color: var(--danger);">✕ CANCEL REQUEST</button>
+    
+    <div id="searchingState" class="status-card">
+        <div class="search-pulse">📡</div>
+        <h3>Broadcasting SOS...</h3>
+        <p id="nearbyHelpers">Checking for heroes nearby...</p>
     </div>
-    <div id="assignedHeroBox" style="display:none; margin-top:30px; width:100%; background:white; padding:20px; border-radius:20px; border:2px solid var(--success); text-align:left;">
-        <div style="display:flex; align-items:center; gap:15px;">
-            <img id="assignedHeroPic" src="" style="width:60px; height:60px; border-radius:50%; object-fit:cover;">
+
+    <div id="matchedState" class="status-card" style="display:none; border-color: var(--success);">
+        <div style="background: var(--success); color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; font-size: 12px; font-weight: 700; margin-bottom: 15px;">HERO FOUND</div>
+        <div style="display: flex; align-items: center; gap: 15px; text-align: left;">
+            <img id="matchPic" src="" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; background: #eee;">
             <div>
-                <h4 id="assignedHeroName" style="margin:0;">Hero Name</h4>
-                <p style="margin:2px 0; color:var(--success); font-weight:700;">ON THE WAY</p>
+                <h3 id="matchName" style="margin:0;">Hero Name</h3>
+                <p id="matchDist" style="margin:5px 0; color: var(--accent); font-weight: 700;"></p>
             </div>
         </div>
+        <button class="submit-btn" style="background: var(--success); margin-top: 20px;" onclick="window.confirmArrival()">HELP HAS ARRIVED</button>
     </div>
 </div>
 
-<!-- 3. HERO UI (MAP & TOOLS) -->
+<!-- 3. HERO UI -->
 <div id="heroUI" class="view">
     <div id="map"></div>
+    
+    <div id="heroPanel">
+        <!-- Persistent Task Card -->
+        <div id="activeTask" class="task-card" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <b style="color: var(--accent);">CURRENT ASSIGNMENT</b>
+                <span style="font-size:12px; color: var(--muted);" id="taskDist">0.0 mi</span>
+            </div>
+            <p id="taskUser" style="margin: 10px 0; font-weight: 700;"></p>
+            <div style="display:flex; gap:10px;">
+                <a id="navBtn" href="" target="_blank" style="flex:1; background: var(--success); color:white; text-align:center; padding:12px; border-radius:10px; text-decoration:none; font-weight:700;">NAVIGATE</a>
+                <button onclick="window.completeTask()" style="flex:1; border:1px solid #ddd; border-radius:10px; font-weight:700;">COMPLETE</button>
+            </div>
+        </div>
 
-    <!-- Active Requests Slider -->
-    <div id="panel">
-      <div id="panelHeader" onclick="window.togglePanel()">
-        <h3 style="margin:0; font-size:16px;">Nearby Requests</h3>
-        <span id="chevron">▲</span>
-      </div>
-      <div id="panelContent"><div id="requests"></div></div>
+        <div class="browse-btn" onclick="window.openModal('browseModal')">
+            🔍 BROWSE NEARBY REQUESTS (<span id="openCount">0</span>)
+        </div>
     </div>
 
-    <!-- Hero Footer -->
-    <div id="heroFooter">
-      <button style="border:none; background:none; font-weight:800; color:var(--muted); font-size:14px;" onclick="location.reload()">🏠 HOME</button>
-      <div class="footer-icons" style="display:flex; gap:15px;">
-          <div class="icon-wrapper" onclick="window.openModal('notifModal')">🔔<span id="notifBadge">0</span></div>
-          <div class="icon-wrapper" onclick="window.openProfile()">👤</div>
-      </div>
+    <div class="footer">
+        <button onclick="location.reload()" style="border:none; background:none; font-weight:800; color: var(--muted);">🏠 HOME</button>
+        <div class="footer-icons" style="display:flex; gap:15px;">
+            <div class="icon-btn" onclick="window.openModal('notifModal')">🔔<span id="notifBadge">0</span></div>
+            <div class="icon-btn" onclick="window.openProfile()">👤</div>
+        </div>
     </div>
 </div>
 
 <!-- MODALS -->
 <div id="requestModal" class="modal">
-  <div class="modal-content">
-    <h3>Help Request Form</h3>
-    <div class="vehicle-grid">
-        <div class="v-type active" onclick="window.selectVehicle('Car', this)">🚗 Car</div>
-        <div class="v-type" onclick="window.selectVehicle('Truck', this)">🛻 Truck</div>
-        <div class="v-type" onclick="window.selectVehicle('RV', this)">🚐 RV</div>
-        <div class="v-type" onclick="window.selectVehicle('HeavyDuty', this)">🚛 Heavy</div>
-    </div>
-    <input id="reqName" placeholder="Your Name">
-    <textarea id="reqIssue" placeholder="What's the problem?" rows="2"></textarea>
-    <input id="reqTip" type="number" placeholder="Optional Tip ($)">
-    <button class="submit-btn" onclick="window.submitSOS()">Submit SOS</button>
-    <span class="cancel-link" onclick="window.closeModal('requestModal')">Cancel</span>
-  </div>
-</div>
-
-<div id="profileModal" class="modal">
     <div class="modal-content">
-        <h3>Hero Settings</h3>
-        <input id="profileName" placeholder="Hero Name">
-        <textarea id="profileBio" placeholder="Tools/Bio..." rows="2"></textarea>
-        <button class="submit-btn" onclick="window.saveProfile()">Save Settings</button>
-        <span class="cancel-link" onclick="window.closeModal('profileModal')">Close</span>
+        <h3>Request Assistance</h3>
+        <textarea id="reqIssue" placeholder="What's the problem?" rows="3"></textarea>
+        <input id="reqTip" type="number" placeholder="Optional Tip Amount ($)">
+        <button class="submit-btn" onclick="window.submitSOS()">SUBMIT SOS</button>
+        <p onclick="window.closeModal('requestModal')" class="cancel-link">Cancel</p>
     </div>
 </div>
 
-<div id="notifModal" class="modal" onclick="if(event.target==this) window.closeModal('notifModal')">
-    <div class="modal-content"><h3>History</h3><div id="notifList"></div></div>
+<div id="browseModal" class="modal">
+    <div class="modal-content">
+        <h3>Available Requests</h3>
+        <div id="browseList"></div>
+        <button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:15px;" onclick="window.closeModal('browseModal')">CLOSE</button>
+    </div>
+</div>
+
+<div id="notifModal" class="modal">
+    <div class="modal-content">
+        <h3>Notification History</h3>
+        <div id="notifHistory"></div>
+        <button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:15px;" onclick="window.closeModal('notifModal')">CLOSE</button>
+    </div>
 </div>
 
 <script type="module">
@@ -178,137 +161,177 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+const db = getDatabase(app);
 
 if(!localStorage.getItem('heroUserId')) localStorage.setItem('heroUserId', 'u_' + Math.random().toString(36).substr(2, 9));
 const myId = localStorage.getItem('heroUserId');
 
-let map, userLocation, selectedVehicle = "Car";
-let sosCache = {}, profilesCache = {}, sosMarkers = {};
+let map, userLocation, activeSosId = null;
+let sosCache = {}, profilesCache = {}, markers = {};
 
-// --- VIEW CONTROLLER ---
-window.switchView = (viewId) => {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('view-active'));
-    document.getElementById(viewId).classList.add('view-active');
-};
-
-window.enterHeroMode = () => {
-    window.switchView('heroUI');
-    // Important: Delay map init slightly to let the CSS display take effect
-    setTimeout(() => { if (!map) initMap(); }, 100);
-};
-
-// --- UI EXPORTS ---
+// --- GLOBAL UTILS ---
 window.openModal = (id) => document.getElementById(id).style.display = "flex";
 window.closeModal = (id) => document.getElementById(id).style.display = "none";
-window.togglePanel = () => {
-    const c = document.getElementById("panelContent");
-    c.classList.toggle("open");
-    document.getElementById("chevron").textContent = c.classList.contains("open") ? "▼" : "▲";
-};
-window.selectVehicle = (type, el) => {
-    selectedVehicle = type;
-    document.querySelectorAll(".v-type").forEach(b => b.classList.remove("active"));
-    el.classList.add("active");
+window.switchView = (id) => {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('view-active'));
+    document.getElementById(id).classList.add('view-active');
 };
 
-// --- LOGIC ---
-window.submitSOS = () => {
-  const name = document.getElementById("reqName").value.trim();
-  const issue = document.getElementById("reqIssue").value.trim();
-  if(!name || !issue || !userLocation) return alert("Please allow GPS and fill form");
-  
-  push(ref(database, "sosRequests"), {
-    userName: name, issue, vehicle: selectedVehicle,
-    lat: userLocation.lat, lng: userLocation.lng,
-    status: "open", timestamp: Date.now(), ownerId: myId
-  });
-  
-  window.closeModal("requestModal");
-  window.switchView('seekerUI');
+// --- HERO LOGIC ---
+window.enterHeroMode = () => {
+    window.switchView('heroUI');
+    setTimeout(() => { if(!map) initMap(); }, 200);
 };
 
-window.confirmHelp = (id) => {
-    update(ref(database, `sosRequests/${id}`), { status: "accepted", helperId: myId });
-    alert("Response sent! Navigating to user.");
-};
-
-function initMap() {
-    const mapEl = document.getElementById("map");
-    map = new google.maps.Map(mapEl, {
-        center: userLocation || { lat: 40.7, lng: -74 },
-        zoom: 14,
-        disableDefaultUI: true,
-        styles: [{ featureType: "poi", stylers: [{ visibility: "off" }] }]
+window.confirmHelp = (sosId) => {
+    update(ref(db, `sosRequests/${sosId}`), {
+        status: 'accepted',
+        helperId: myId
     });
+    window.closeModal('browseModal');
+};
 
-    if(userLocation) {
-        new google.maps.Marker({ position: userLocation, map, icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" });
-        map.setCenter(userLocation);
+window.completeTask = () => {
+    if(activeSosId) {
+        update(ref(db, `sosRequests/${activeSosId}`), { status: 'completed' });
+        activeSosId = null;
     }
+};
 
-    onValue(ref(database, "sosRequests"), (snap) => {
-        sosCache = snap.val() || {};
-        renderSOS();
-        updateSeekerUI();
+// --- SEEKER LOGIC ---
+window.submitSOS = () => {
+    const issue = document.getElementById('reqIssue').value;
+    if(!issue || !userLocation) return alert("Please allow GPS and describe issue.");
+    
+    const newSos = push(ref(db, "sosRequests"));
+    set(newSos, {
+        ownerId: myId,
+        userName: "Guest User",
+        issue: issue,
+        tip: document.getElementById('reqTip').value || 0,
+        lat: userLocation.lat,
+        lng: userLocation.lng,
+        status: 'open',
+        timestamp: Date.now()
     });
+    window.closeModal('requestModal');
+    window.switchView('seekerUI');
+};
 
-    onValue(ref(database, "profiles"), (snap) => {
-        profilesCache = snap.val() || {};
-        updateSeekerUI();
+window.cancelSOS = () => {
+    const myReqId = Object.keys(sosCache).find(k => sosCache[k].ownerId === myId && sosCache[k].status !== 'completed');
+    if(myReqId) remove(ref(db, `sosRequests/${myReqId}`));
+    location.reload();
+};
+
+window.confirmArrival = () => window.completeTask();
+
+// --- MAP & SYNC ---
+function initMap() {
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: userLocation || {lat: 40, lng: -74}, zoom: 14, disableDefaultUI: true
     });
 }
 
-function renderSOS() {
-    const container = document.getElementById("requests");
-    const badge = document.getElementById("notifBadge");
-    container.innerHTML = "";
-    let openCount = 0;
+onValue(ref(db, "sosRequests"), (snap) => {
+    sosCache = snap.val() || {};
+    syncUI();
+});
 
-    Object.entries(sosCache).forEach(([id, d]) => {
-        if(d.status !== "open") {
-            if(sosMarkers[id]) { sosMarkers[id].setMap(null); delete sosMarkers[id]; }
-            return;
+onValue(ref(db, "profiles"), (snap) => {
+    profilesCache = snap.val() || {};
+    syncUI();
+});
+
+function syncUI() {
+    const list = document.getElementById('browseList');
+    const history = document.getElementById('notifHistory');
+    const badge = document.getElementById('notifBadge');
+    
+    list.innerHTML = "";
+    history.innerHTML = "";
+    let openCount = 0;
+    let myActiveTask = null;
+    let myOwnRequest = null;
+
+    Object.entries(sosCache).forEach(([id, r]) => {
+        const dist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(
+            new google.maps.LatLng(userLocation.lat, userLocation.lng),
+            new google.maps.LatLng(r.lat, r.lng)
+        ) / 1609).toFixed(1) : "?";
+
+        // 1. Hero View: Browse Open Requests
+        if(r.status === 'open' && r.ownerId !== myId) {
+            openCount++;
+            list.innerHTML += `<div style="background:#f1f5f9; padding:15px; border-radius:12px; margin-bottom:10px;">
+                <b>${r.userName}</b> (${dist} mi away)<br>${r.issue}
+                <button class="submit-btn" style="margin-top:10px; padding:10px;" onclick="window.confirmHelp('${id}')">I CAN HELP</button>
+            </div>`;
         }
-        openCount++;
-        if(!sosMarkers[id] && map) {
-            sosMarkers[id] = new google.maps.Marker({ position: {lat: d.lat, lng: d.lng}, map, icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png" });
+
+        // 2. Hero View: Active Assignment Tracking
+        if(r.status === 'accepted' && r.helperId === myId) {
+            myActiveTask = r;
+            activeSosId = id;
         }
-        container.innerHTML += `<div class="card">
-            <b>${d.userName}</b> [${d.vehicle}]
-            <p style="font-size:13px; margin:5px 0;">${d.issue}</p>
-            <button class="btn-respond" onclick="window.confirmHelp('${id}')">I CAN HELP</button>
+
+        // 3. Seeker View: My own SOS
+        if(r.ownerId === myId && r.status !== 'completed') {
+            myOwnRequest = r;
+        }
+
+        // 4. Notification History
+        const statusClass = r.status === 'open' ? 'status-active' : 'status-completed';
+        history.innerHTML += `<div class="notif-item">
+            <span class="badge-status ${statusClass}" style="background:${r.status==='completed'?'#cbd5e1':'#2563eb'}; color:white;">${r.status}</span>
+            <b>${r.userName}</b><br><small>${r.issue}</small>
         </div>`;
     });
 
-    badge.innerText = openCount;
-    badge.style.display = openCount > 0 ? "flex" : "none";
-}
-
-function updateSeekerUI() {
-    const myReq = Object.values(sosCache).find(r => r.ownerId === myId && r.status !== 'completed');
-    if (!myReq) return;
-
-    // Helper count logic
-    let nearby = 0;
-    Object.values(profilesCache).forEach(p => {
-        if (p.lat && p.id !== myId) nearby++;
-    });
-    document.getElementById('helperCounter').innerHTML = `<b>${nearby}</b> Heroes active nearby.`;
-
-    if (myReq.status === 'accepted') {
-        const hero = profilesCache[myReq.helperId] || {};
-        document.getElementById('seekerStatusTitle').innerText = "Hero is Coming!";
-        document.getElementById('assignedHeroBox').style.display = 'block';
-        document.getElementById('assignedHeroName').innerText = hero.name || "A Hero";
-        document.getElementById('assignedHeroPic').src = hero.pic || "https://via.placeholder.com/60";
+    // Update Hero Assignment UI
+    const taskCard = document.getElementById('activeTask');
+    if(myActiveTask) {
+        taskCard.style.display = "block";
+        document.getElementById('taskUser').innerText = `Helping: ${myActiveTask.userName}`;
+        document.getElementById('navBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${myActiveTask.lat},${myActiveTask.lng}`;
+        document.getElementById('taskDist').innerText = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(
+            new google.maps.LatLng(userLocation.lat, userLocation.lng),
+            new google.maps.LatLng(myActiveTask.lat, myActiveTask.lng)
+        ) / 1609).toFixed(1) + " mi" : "";
+    } else {
+        taskCard.style.display = "none";
     }
+
+    // Update Seeker Dashboard UI
+    if(myOwnRequest) {
+        window.switchView('seekerUI');
+        if(myOwnRequest.status === 'accepted') {
+            document.getElementById('searchingState').style.display = 'none';
+            document.getElementById('matchedState').style.display = 'block';
+            const hero = profilesCache[myOwnRequest.helperId] || {};
+            document.getElementById('matchName').innerText = hero.name || "A Hero";
+            document.getElementById('matchPic').src = hero.pic || "https://via.placeholder.com/70";
+            
+            const hDist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(
+                new google.maps.LatLng(userLocation.lat, userLocation.lng),
+                new google.maps.LatLng(myOwnRequest.lat, myOwnRequest.lng)
+            ) / 1609).toFixed(1) : "?";
+            document.getElementById('matchDist').innerText = hDist + " miles away";
+        }
+    }
+
+    document.getElementById('openCount').innerText = openCount;
 }
 
-// Background GPS
+// GPS Tracking
 navigator.geolocation.watchPosition(p => {
     userLocation = { lat: p.coords.latitude, lng: p.coords.longitude };
-    update(ref(database, `profiles/${myId}`), { lat: p.coords.latitude, lng: p.coords.longitude, id: myId });
+    update(ref(db, `profiles/${myId}`), { 
+        lat: userLocation.lat, 
+        lng: userLocation.lng, 
+        id: myId,
+        name: "Anonymous Hero" 
+    });
 }, null, { enableHighAccuracy: true });
 
 </script>
