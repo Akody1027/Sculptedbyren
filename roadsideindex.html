@@ -5,10 +5,10 @@
 <title>Roadside Hero</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Google Maps with Geometry Library for Distance Calculation -->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB5GbyoapPOyLYJLNo9y85cyorIczEI-WU&libraries=geometry"></script>
 
 <style>
+/* ... (All your existing CSS remains exactly the same) ... */
 :root {
   --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b;
   --accent: #2563eb; --danger: #ef4444; --success: #22c55e;
@@ -17,7 +17,6 @@
 body { margin:0; background: var(--bg); font-family: -apple-system, sans-serif; color: var(--text); overflow: hidden; }
 #map { height: 100vh; width:100%; position:absolute; top:0; z-index:1; }
 
-/* Existing Panels & Cards */
 #panel { position: fixed; bottom: 85px; left: 10px; right: 10px; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 10; overflow: hidden; transition: all 0.3s; }
 #panelHeader { padding:16px 20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
 #panelContent { max-height:0; overflow-y:auto; transition: 0.3s; padding: 0 16px; }
@@ -25,21 +24,18 @@ body { margin:0; background: var(--bg); font-family: -apple-system, sans-serif; 
 .card { background: #f1f5f9; border-radius:12px; padding:14px; margin-bottom:12px; border: 1px solid #e2e8f0; }
 .btn-respond { width: 100%; border:none; padding:10px; border-radius:8px; background:var(--text); color:white; font-weight:600; cursor:pointer; margin-top:8px; }
 
-/* Footer */
 #footer { position:fixed; bottom:0; width:100%; height:75px; display:flex; justify-content: space-between; align-items:center; z-index:100; background: white; padding: 0 20px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
 #sosBtn { background:var(--danger); color: white; border: none; padding:12px 25px; border-radius:12px; font-weight:700; cursor: pointer; }
 .footer-icons { display: flex; gap: 12px; }
 .icon-wrapper { position: relative; cursor: pointer; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border-radius: 50%; }
 #notifBadge { position: absolute; top: -2px; right: -2px; background: var(--danger); color: white; font-size: 10px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid white; }
 
-/* Modals */
 .modal { position:fixed; inset:0; background:rgba(15, 23, 42, 0.7); display:none; justify-content:center; align-items:flex-end; z-index:200; }
 .modal-content { background:white; width:100%; max-width:500px; border-radius:24px 24px 0 0; padding:24px; max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-/* Profile & Response UI */
 .profile-pic-container { text-align: center; margin-bottom: 15px; }
-#profileDisplayPic, #heroArrivalPic { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #e2e8f0; border: 3px solid var(--accent); }
+#profileDisplayPic { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #e2e8f0; border: 3px solid var(--accent); }
 .eta-options { display: flex; gap: 8px; margin: 15px 0; }
 .eta-options button { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; background: white; cursor: pointer; }
 .eta-options button.active { background: var(--accent); color: white; }
@@ -53,7 +49,6 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
 
 <div id="map"></div>
 
-<!-- Requests Panel -->
 <div id="panel">
   <div id="panelHeader" onclick="togglePanel()">
     <h3>Active Requests Near You</h3>
@@ -64,7 +59,6 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
   </div>
 </div>
 
-<!-- Footer -->
 <div id="footer">
   <button id="sosBtn" onclick="openModal('modal')">GET HELP NOW</button>
   <div class="footer-icons">
@@ -78,7 +72,6 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
   </div>
 </div>
 
-<!-- REQUEST MODAL -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <h3>Post SOS Request</h3>
@@ -89,7 +82,6 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
   </div>
 </div>
 
-<!-- RESPONSE MODAL (The Helper's View) -->
 <div id="responseModal" class="modal">
   <div class="modal-content">
     <h3 id="respName">Helping User...</h3>
@@ -111,7 +103,6 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
   </div>
 </div>
 
-<!-- NOTIFICATION MODAL -->
 <div id="notifModal" class="modal" onclick="if(event.target==this) closeModal('notifModal')">
     <div class="modal-content">
         <h3>Activity</h3>
@@ -120,7 +111,6 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
     </div>
 </div>
 
-<!-- PROFILE MODAL -->
 <div id="profileModal" class="modal">
     <div class="modal-content">
         <div class="profile-pic-container">
@@ -138,7 +128,7 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, set, get, update } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, set, get, update, remove, query, orderByChild, endAt } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBgXWZkH0WMjhGmOfxjqbIDoJHlyA1pc-o",
@@ -154,10 +144,10 @@ const database = getDatabase(app);
 if(!localStorage.getItem('heroUserId')) localStorage.setItem('heroUserId', 'user_' + Math.random().toString(36).substr(2, 9));
 const myId = localStorage.getItem('heroUserId');
 
-let map, userLocation, selectedETA = 15, activeSOSId = null;
+let map, userLocation, selectedETA = 15;
 let sosCache = {}, sosMarkers = {};
 
-// UI Helpers
+// EXPOSE TO GLOBAL SCOPE
 window.openModal = (id) => document.getElementById(id).style.display = "flex";
 window.closeModal = (id) => document.getElementById(id).style.display = "none";
 window.togglePanel = () => {
@@ -166,22 +156,24 @@ window.togglePanel = () => {
     document.getElementById("chevron").textContent = content.classList.contains("open") ? "▼" : "▲";
 };
 
-// HELPER LOGIC: Opening the details of a request
+// FIX: Helper logic was not globally available
 window.openHelpDetails = (id) => {
-    activeSOSId = id;
     const data = sosCache[id];
+    if(!data) return;
+
     document.getElementById("respName").innerText = "Helping " + data.userName;
-    document.getElementById("respIssue").innerText = d.issue;
+    document.getElementById("respIssue").innerText = data.issue; // Fixed: was d.issue
     
-    // Distance Calc
-    const dist = google.maps.geometry.spherical.computeDistanceBetween(
-        new google.maps.LatLng(userLocation.lat, userLocation.lng),
-        new google.maps.LatLng(data.lat, data.lng)
-    );
-    document.getElementById("respDist").innerText = (dist / 1609.34).toFixed(1) + " miles away from you";
+    if(userLocation) {
+        const dist = google.maps.geometry.spherical.computeDistanceBetween(
+            new google.maps.LatLng(userLocation.lat, userLocation.lng),
+            new google.maps.LatLng(data.lat, data.lng)
+        );
+        document.getElementById("respDist").innerText = (dist / 1609.34).toFixed(1) + " miles away from you";
+    }
     
     document.getElementById("confirmHelpBtn").onclick = () => confirmHelp(id);
-    openModal("responseModal");
+    window.openModal("responseModal");
 };
 
 window.setETA = (mins, el) => {
@@ -190,11 +182,15 @@ window.setETA = (mins, el) => {
     el.classList.add("active");
 };
 
+// ADDED: Logic to mark SOS as complete (manually)
+window.completeSOS = (id) => {
+    remove(ref(database, `sosRequests/${id}`));
+};
+
 async function confirmHelp(requestId) {
     const profileSnap = await get(ref(database, `profiles/${myId}`));
     const profile = profileSnap.val() || { name: "A Hero", helpsCount: 0 };
 
-    // 1. Update the Request Status
     update(ref(database, `sosRequests/${requestId}`), {
         status: "accepted",
         helperId: myId,
@@ -203,16 +199,14 @@ async function confirmHelp(requestId) {
         eta: selectedETA
     });
 
-    // 2. Increment Helper's personal count
     update(ref(database, `profiles/${myId}`), {
         helpsCount: (profile.helpsCount || 0) + 1
     });
 
-    closeModal("responseModal");
-    alert("On my way! The user has been notified.");
+    window.closeModal("responseModal");
+    alert("Response sent! The user has been notified.");
 }
 
-// SEEKER LOGIC: Posting the SOS
 window.submitSOS = () => {
   const name = document.getElementById("name").value.trim();
   const issue = document.getElementById("issue").value.trim();
@@ -223,11 +217,27 @@ window.submitSOS = () => {
     userName: name, issue, lat: userLocation.lat, lng: userLocation.lng,
     status: "open", timestamp: Date.now(), ownerId: myId
   });
-  closeModal("modal");
+  window.closeModal("modal");
 };
 
-// MAP & DATA SYNC
+// AUTO-CLEANUP: Deletes anything older than 12 hours
+async function cleanupOldRequests() {
+    const twelveHoursAgo = Date.now() - (12 * 60 * 60 * 1000);
+    const oldQuery = query(ref(database, "sosRequests"), orderByChild("timestamp"), endAt(twelveHoursAgo));
+    const snapshot = await get(oldQuery);
+    if (snapshot.exists()) {
+        const updates = {};
+        snapshot.forEach((child) => {
+            updates[child.key] = null;
+        });
+        update(ref(database, "sosRequests"), updates);
+        console.log("Cleaned up expired SOS requests.");
+    }
+}
+
 function initMap() {
+  cleanupOldRequests(); // Run cleanup on startup
+
   map = new google.maps.Map(document.getElementById("map"), {
     center: { lat: 40.7128, lng: -74.0060 }, zoom: 13, disableDefaultUI: true
   });
@@ -251,9 +261,8 @@ function renderSOS() {
   container.innerHTML = "";
 
   Object.entries(sosCache).forEach(([id, d]) => {
-    // Hide markers that are already accepted
     if(d.status !== "open") {
-        if(sosMarkers[id]) sosMarkers[id].setMap(null);
+        if(sosMarkers[id]) { sosMarkers[id].setMap(null); delete sosMarkers[id]; }
         return;
     }
 
@@ -277,20 +286,17 @@ function updateNotifications() {
     let count = 0;
     let html = "";
 
-    Object.values(sosCache).forEach(r => {
-        // Notification for SEEKER (Someone accepted your SOS)
+    Object.entries(sosCache).forEach(([id, r]) => {
         if(r.ownerId === myId && r.status === "accepted") {
             count++;
-            html += `<div style="padding:15px; border-bottom:1px solid #eee; background:#f0fdf4;">
-                <b>Hero coming!</b><br>${r.helperName} is on the way. ETA: ${r.eta} mins.
+            html += `<div style="padding:15px; border-bottom:1px solid #eee; background:#f0fdf4; border-radius:10px; margin-bottom:5px;">
+                <b>Hero coming!</b><br>${r.helperName} is on the way (ETA: ${r.eta}m).
+                <button onclick="completeSOS('${id}')" style="display:block; margin-top:10px; padding:5px 10px; background:var(--success); color:white; border:none; border-radius:5px; cursor:pointer;">Complete & Remove</button>
             </div>`;
         }
-        // Notification for HELPER (New public SOS nearby)
         else if(r.status === "open" && r.ownerId !== myId) {
             count++;
-            html += `<div style="padding:10px; border-bottom:1px solid #eee;">
-                New request from ${r.userName}
-            </div>`;
+            html += `<div style="padding:10px; border-bottom:1px solid #eee;">New request from ${r.userName}</div>`;
         }
     });
 
@@ -299,9 +305,9 @@ function updateNotifications() {
     list.innerHTML = html || "No new activity";
 }
 
-// PROFILE LOGIC (Preserved from previous)
+// PROFILE LOGIC
 window.openProfile = async () => {
-    openModal("profileModal");
+    window.openModal("profileModal");
     const snap = await get(ref(database, `profiles/${myId}`));
     if(snap.exists()) {
         const d = snap.val();
@@ -318,7 +324,7 @@ window.saveProfile = () => {
         bio: document.getElementById("profileBio").value,
         pic: document.getElementById("profileDisplayPic").src
     });
-    closeModal("profileModal");
+    window.closeModal("profileModal");
 };
 
 window.previewFile = () => {
