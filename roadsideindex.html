@@ -93,7 +93,7 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
   </div>
 </div>
 
-<!-- Interaction Details Modal (New) -->
+<!-- Interaction Details Modal -->
 <div id="interactionModal" class="modal">
     <div class="modal-content">
         <h3>Hero Assistance Details</h3>
@@ -189,7 +189,6 @@ const myId = localStorage.getItem('heroUserId');
 let map, userLocation, watchId = null, selectedVehicle = "Car";
 let sosCache = {}, profilesCache = {}, sosMarkers = {}, helperMarkers = {};
 
-// --- GLOBAL UI ---
 window.openModal = (id) => document.getElementById(id).style.display = "flex";
 window.closeModal = (id) => document.getElementById(id).style.display = "none";
 window.togglePanel = () => {
@@ -204,13 +203,13 @@ window.selectVehicle = (type, el) => {
     el.classList.add("active");
 };
 
-// --- INTERACTION MODAL LOGIC ---
+// Interaction Logic
 window.openInteractionDetails = (sosId) => {
     const sos = sosCache[sosId];
     if(!sos) return;
     const hero = profilesCache[sos.helperId] || {};
 
-    const heroHtml = `
+    document.getElementById('interactionHeroDisplay').innerHTML = `
         <div class="hero-card">
             <img src="${hero.pic || 'https://via.placeholder.com/85'}" class="round-pic" style="width:60px; height:60px;">
             <div class="hero-info">
@@ -219,7 +218,7 @@ window.openInteractionDetails = (sosId) => {
             </div>
         </div>
     `;
-    const sosHtml = `
+    document.getElementById('interactionSOSDisplay').innerHTML = `
         <div class="card" style="background:#f1f5f9; border:none;">
             <p><b>Vehicle:</b> ${sos.vehicle || 'Car'}</p>
             <p><b>Issue:</b> ${sos.issue}</p>
@@ -227,15 +226,12 @@ window.openInteractionDetails = (sosId) => {
         </div>
     `;
 
-    document.getElementById('interactionHeroDisplay').innerHTML = heroHtml;
-    document.getElementById('interactionSOSDisplay').innerHTML = sosHtml;
     document.getElementById('interactionCompleteBtn').onclick = () => window.completeSOS(sosId);
-    
     window.closeModal('notifModal');
     window.openModal('interactionModal');
 };
 
-// --- PROFILE & PIC ---
+// Profile & GPS Tracking
 window.previewFile = () => {
     const reader = new FileReader();
     reader.onload = (e) => document.getElementById('profileDisplayPic').src = e.target.result;
@@ -276,7 +272,7 @@ window.saveOnlineStatus = () => {
     }
 };
 
-// --- SOS LOGIC ---
+// SOS Flow
 window.submitSOS = () => {
   const name = document.getElementById("name").value.trim();
   const issue = document.getElementById("issue").value.trim();
@@ -318,7 +314,6 @@ window.completeSOS = async (id) => {
     window.closeModal('interactionModal');
 };
 
-// --- MAP & CORE ---
 async function cleanupOldRequests() {
     const twelveHoursAgo = Date.now() - (12 * 60 * 60 * 1000);
     const q = query(ref(database, "sosRequests"), orderByChild("timestamp"), endAt(twelveHoursAgo));
@@ -336,7 +331,7 @@ function initMap() {
         userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         map.setCenter(userLocation);
         new google.maps.Marker({ position: userLocation, map, icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" });
-    });
+    }, () => alert("GPS Required"));
 
     onValue(ref(database, "sosRequests"), (snap) => {
         sosCache = snap.val() || {};
@@ -398,9 +393,10 @@ function updateNotifications() {
     Object.entries(sosCache).forEach(([id, r]) => {
         if(r.ownerId === myId && r.status === "accepted") {
             count++;
+            // FIXED: Notification action now only "SHOW DETAILS"
             html += `<div onclick="window.openInteractionDetails('${id}')" style="cursor:pointer; padding:15px; background:#f0fdf4; border-radius:10px; margin-bottom:10px; border:1px solid var(--success);">
-                <b>Hero is coming!</b><br>Click to view details and track location.
-                <button class="btn-respond" style="background:var(--success)" onclick="event.stopPropagation(); window.completeSOS('${id}')">MARK COMPLETED</button>
+                <b>A Hero is on the way!</b><br>Track their live location on the map.
+                <button class="btn-respond" style="background:var(--accent)" onclick="event.stopPropagation(); window.openInteractionDetails('${id}')">SHOW DETAILS</button>
             </div>`;
         }
     });
