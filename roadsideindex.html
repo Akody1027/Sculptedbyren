@@ -17,7 +17,7 @@
 body { margin:0; background: var(--bg); font-family: -apple-system, sans-serif; color: var(--text); overflow: hidden; }
 #map { height: 100vh; width:100%; position:absolute; top:0; z-index:1; }
 
-/* Dropdown Panel */
+/* Panels */
 #panel { position: fixed; bottom: 85px; left: 10px; right: 10px; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 10; overflow: hidden; transition: 0.3s; }
 #panelHeader { padding:16px 20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; background: white; border-bottom: 1px solid #f1f5f9; }
 #panelContent { max-height:0; overflow-y:auto; transition: 0.3s; padding: 0 16px; }
@@ -38,7 +38,15 @@ body { margin:0; background: var(--bg); font-family: -apple-system, sans-serif; 
 .modal-content { background:white; width:100%; max-width:500px; border-radius:24px 24px 0 0; padding:24px; max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-/* Toggle Switch */
+/* Vehicle Type Selector */
+.vehicle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+.v-type { padding: 10px; border: 1px solid #e2e8f0; border-radius: 10px; text-align: center; cursor: pointer; font-size: 13px; background: white; }
+.v-type.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* Profile UI */
+.profile-pic-container { text-align: center; margin-bottom: 15px; }
+#profileDisplayPic { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; background: #e2e8f0; border: 3px solid var(--accent); }
+
 .toggle-row { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
 .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
 .switch input { opacity: 0; width: 0; height: 0; }
@@ -57,7 +65,6 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
 
 <div id="map"></div>
 
-<!-- Dropdown Panel -->
 <div id="panel">
   <div id="panelHeader" onclick="window.togglePanel()">
     <h3>Active Requests</h3>
@@ -68,7 +75,6 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
   </div>
 </div>
 
-<!-- Footer -->
 <div id="footer">
   <button id="sosBtn" onclick="window.openModal('modal')">GET HELP NOW</button>
   <div class="footer-icons">
@@ -86,6 +92,13 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
 <div id="modal" class="modal">
   <div class="modal-content">
     <h3>Post SOS Request</h3>
+    <label style="font-size:12px; color:var(--muted)">Vehicle Type</label>
+    <div class="vehicle-grid">
+        <div class="v-type active" onclick="window.selectVehicle('Car', this)">🚗 Car</div>
+        <div class="v-type" onclick="window.selectVehicle('Truck', this)">🛻 Truck</div>
+        <div class="v-type" onclick="window.selectVehicle('RV', this)">🚐 RV</div>
+        <div class="v-type" onclick="window.selectVehicle('Commercial', this)">🚛 Heavy Duty</div>
+    </div>
     <input id="name" placeholder="Your Name">
     <textarea id="issue" placeholder="What's the problem?" rows="2"></textarea>
     <input id="tip" type="number" placeholder="Incentive Tip Amount ($)">
@@ -94,18 +107,17 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
   </div>
 </div>
 
-<!-- Details/Response Modal -->
+<!-- Details Modal -->
 <div id="responseModal" class="modal">
   <div class="modal-content">
     <h3 id="respName">SOS Details</h3>
+    <p id="respVehicle" style="font-weight:bold; margin:0 0 10px; color:var(--accent);"></p>
     <p id="respIssue" style="background:#f1f5f9; padding:15px; border-radius:12px;"></p>
     <p id="respTip" style="font-weight:bold; color:var(--success);"></p>
-    
     <div id="actionButtons">
         <button class="submit-btn" id="confirmHelpBtn">I'M ON MY WAY</button>
         <a id="navBtn" class="nav-btn" target="_blank" style="display:none;">NAVIGATE TO LOCATION</a>
     </div>
-    
     <span class="cancel-link" onclick="window.closeModal('responseModal')">Go Back</span>
   </div>
 </div>
@@ -113,7 +125,11 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
 <!-- Profile Modal -->
 <div id="profileModal" class="modal">
     <div class="modal-content">
-        <h3>My Profile</h3>
+        <div class="profile-pic-container">
+            <img id="profileDisplayPic" src="https://via.placeholder.com/85">
+            <input type="file" id="picInput" style="display:none" onchange="window.previewFile()">
+            <button onclick="document.getElementById('picInput').click()" style="display:block; margin:5px auto; border:none; background:none; color:var(--accent); font-weight:bold; cursor:pointer;">Update Photo</button>
+        </div>
         <div class="toggle-row">
             <span>Hero Mode (Online)</span>
             <label class="switch">
@@ -156,11 +172,10 @@ const database = getDatabase(app);
 if(!localStorage.getItem('heroUserId')) localStorage.setItem('heroUserId', 'u_' + Math.random().toString(36).substr(2, 9));
 const myId = localStorage.getItem('heroUserId');
 
-let map, userLocation, watchId = null;
-let sosCache = {}, profilesCache = {};
-let sosMarkers = {}, helperMarkers = {}, myHeroMarker = null;
+let map, userLocation, watchId = null, selectedVehicle = "Car";
+let sosCache = {}, profilesCache = {}, sosMarkers = {}, helperMarkers = {};
 
-// --- GLOBAL FUNCTIONS ---
+// --- GLOBAL UI ---
 window.openModal = (id) => document.getElementById(id).style.display = "flex";
 window.closeModal = (id) => document.getElementById(id).style.display = "none";
 window.togglePanel = () => {
@@ -169,48 +184,24 @@ window.togglePanel = () => {
     document.getElementById("chevron").textContent = c.classList.contains("open") ? "▼" : "▲";
 };
 
-window.openHelpDetails = (id) => {
-    const data = sosCache[id];
-    if(!data) return;
-    document.getElementById("respName").innerText = "Helping " + data.userName;
-    document.getElementById("respIssue").innerText = data.issue;
-    document.getElementById("respTip").innerText = data.tip ? `Reward Tip: $${data.tip}` : "No tip offered";
-    
-    const navBtn = document.getElementById("navBtn");
-    navBtn.style.display = "block";
-    navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${data.lat},${data.lng}`;
-    
-    document.getElementById("confirmHelpBtn").onclick = () => window.confirmHelp(id);
-    window.openModal("responseModal");
+window.selectVehicle = (type, el) => {
+    selectedVehicle = type;
+    document.querySelectorAll(".v-type").forEach(b => b.classList.remove("active"));
+    el.classList.add("active");
 };
 
-window.confirmHelp = async (requestId) => {
-    update(ref(database, `sosRequests/${requestId}`), { status: "accepted", helperId: myId });
-    window.closeModal("responseModal");
+// --- PROFILE & PIC ---
+window.previewFile = () => {
+    const reader = new FileReader();
+    reader.onload = (e) => document.getElementById('profileDisplayPic').src = e.target.result;
+    reader.readAsDataURL(document.getElementById('picInput').files[0]);
 };
-
-window.saveOnlineStatus = () => {
-    const isOnline = document.getElementById("onlineToggle").checked;
-    update(ref(database, `profiles/${myId}`), { isOnline });
-    startLocationTracking(isOnline);
-};
-
-function startLocationTracking(isOnline) {
-    if (watchId) navigator.geolocation.clearWatch(watchId);
-    if (isOnline) {
-        watchId = navigator.geolocation.watchPosition(pos => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            userLocation = { lat, lng };
-            update(ref(database, `profiles/${myId}`), { lat, lng });
-        }, err => console.error(err), { enableHighAccuracy: true });
-    }
-}
 
 window.saveProfile = () => {
     update(ref(database, `profiles/${myId}`), {
         name: document.getElementById("profileName").value,
-        bio: document.getElementById("profileBio").value
+        bio: document.getElementById("profileBio").value,
+        pic: document.getElementById("profileDisplayPic").src
     });
     window.closeModal("profileModal");
 };
@@ -224,19 +215,51 @@ window.openProfile = async () => {
         document.getElementById("profileBio").value = d.bio || "";
         document.getElementById("heroCountDisplay").innerText = d.helpsCount || 0;
         document.getElementById("onlineToggle").checked = d.isOnline || false;
+        if(d.pic) document.getElementById("profileDisplayPic").src = d.pic;
     }
 };
 
+window.saveOnlineStatus = () => {
+    const isOnline = document.getElementById("onlineToggle").checked;
+    update(ref(database, `profiles/${myId}`), { isOnline });
+    if (watchId) navigator.geolocation.clearWatch(watchId);
+    if (isOnline) {
+        watchId = navigator.geolocation.watchPosition(pos => {
+            const lat = pos.coords.latitude, lng = pos.coords.longitude;
+            update(ref(database, `profiles/${myId}`), { lat, lng });
+        }, null, { enableHighAccuracy: true });
+    }
+};
+
+// --- SOS LOGIC ---
 window.submitSOS = () => {
   const name = document.getElementById("name").value.trim();
   const issue = document.getElementById("issue").value.trim();
   const tip = document.getElementById("tip").value || 0;
   if(!name || !issue || !userLocation) return;
   push(ref(database, "sosRequests"), {
-    userName: name, issue, tip, lat: userLocation.lat, lng: userLocation.lng,
+    userName: name, issue, tip, vehicle: selectedVehicle,
+    lat: userLocation.lat, lng: userLocation.lng,
     status: "open", timestamp: Date.now(), ownerId: myId
   });
   window.closeModal("modal");
+};
+
+window.openHelpDetails = (id) => {
+    const data = sosCache[id];
+    document.getElementById("respName").innerText = "Helping " + data.userName;
+    document.getElementById("respVehicle").innerText = "Vehicle: " + (data.vehicle || "Car");
+    document.getElementById("respIssue").innerText = data.issue;
+    document.getElementById("respTip").innerText = data.tip > 0 ? `Tip: $${data.tip}` : "";
+    document.getElementById("navBtn").style.display = "block";
+    document.getElementById("navBtn").href = `https://www.google.com/maps/dir/?api=1&destination=${data.lat},${data.lng}`;
+    document.getElementById("confirmHelpBtn").onclick = () => window.confirmHelp(id);
+    window.openModal("responseModal");
+};
+
+window.confirmHelp = (id) => {
+    update(ref(database, `sosRequests/${id}`), { status: "accepted", helperId: myId });
+    window.closeModal("responseModal");
 };
 
 window.completeSOS = async (id) => {
@@ -249,25 +272,25 @@ window.completeSOS = async (id) => {
     remove(ref(database, `sosRequests/${id}`));
 };
 
-// --- CORE LOGIC ---
+// --- MAP & CORE ---
 async function cleanupOldRequests() {
     const twelveHoursAgo = Date.now() - (12 * 60 * 60 * 1000);
     const q = query(ref(database, "sosRequests"), orderByChild("timestamp"), endAt(twelveHoursAgo));
     const snap = await get(q);
-    if (snap.exists()) snap.forEach(child => remove(ref(database, `sosRequests/${child.key}`)));
+    if (snap.exists()) snap.forEach(c => remove(ref(database, `sosRequests/${c.key}`)));
 }
 
 function initMap() {
     cleanupOldRequests();
     map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 40.71, lng: -74 }, zoom: 14, disableDefaultUI: true
+        center: { lat: 40.7, lng: -74 }, zoom: 15, disableDefaultUI: true
     });
 
     navigator.geolocation.getCurrentPosition(pos => {
         userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         map.setCenter(userLocation);
         new google.maps.Marker({ position: userLocation, map, icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" });
-    });
+    }, () => alert("Please enable GPS for the map to focus on you."));
 
     onValue(ref(database, "sosRequests"), (snap) => {
         sosCache = snap.val() || {};
@@ -292,42 +315,32 @@ function renderSOS() {
         if(!sosMarkers[id]) sosMarkers[id] = new google.maps.Marker({ 
             position: {lat: d.lat, lng: d.lng}, map, icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png" 
         });
-        container.innerHTML += `
-            <div class="card">
-                <b>${d.userName}</b> ${d.tip > 0 ? `<span style="color:var(--success); float:right;">$${d.tip} Tip</span>` : ''}
-                <p style="font-size:14px; margin:5px 0;">${d.issue}</p>
-                <button class="btn-respond" onclick="window.openHelpDetails('${id}')">VIEW & HELP</button>
-            </div>`;
+        container.innerHTML += `<div class="card">
+            <b>${d.userName}</b> [${d.vehicle || 'Car'}]
+            <p style="font-size:14px; margin:5px 0;">${d.issue}</p>
+            <button class="btn-respond" onclick="window.openHelpDetails('${id}')">VIEW & HELP</button>
+        </div>`;
     });
 }
 
 function renderHelpers() {
-    // This function handles both general online heroes and your specific assigned hero
     Object.entries(profilesCache).forEach(([id, p]) => {
         if(id === myId) return;
+        let isMyHero = false;
+        Object.values(sosCache).forEach(req => { if(req.ownerId === myId && req.status==='accepted' && req.helperId===id) isMyHero = true; });
 
-        // 1. Check if this profile is the specific Hero coming to help current user
-        let isMyAssignedHero = false;
-        Object.values(sosCache).forEach(req => {
-            if (req.ownerId === myId && req.status === 'accepted' && req.helperId === id) isMyAssignedHero = true;
-        });
-
-        if(!p.isOnline && !isMyAssignedHero) {
+        if(!p.isOnline && !isMyHero) {
             if(helperMarkers[id]) { helperMarkers[id].setMap(null); delete helperMarkers[id]; }
             return;
         }
-
         const pos = {lat: p.lat, lng: p.lng};
         if(!helperMarkers[id]) {
             helperMarkers[id] = new google.maps.Marker({
-                position: pos, map,
-                icon: isMyAssignedHero ? "http://maps.google.com/mapfiles/kml/pal4/icon54.png" : "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
-                title: p.name || "Hero"
+                position: pos, map, icon: isMyHero ? "http://maps.google.com/mapfiles/kml/pal4/icon54.png" : "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
             });
         } else {
-            // Update location in real-time
             helperMarkers[id].setPosition(pos);
-            if (isMyAssignedHero) helperMarkers[id].setIcon("http://maps.google.com/mapfiles/kml/pal4/icon54.png");
+            if(isMyHero) helperMarkers[id].setIcon("http://maps.google.com/mapfiles/kml/pal4/icon54.png");
         }
     });
 }
@@ -340,7 +353,7 @@ function updateNotifications() {
         if(r.ownerId === myId && r.status === "accepted") {
             count++;
             html += `<div style="padding:15px; background:#f0fdf4; border-radius:10px; margin-bottom:10px; border:1px solid var(--success);">
-                <b>A Hero is on the way!</b><br>Track their live location on the map.
+                <b>Hero On The Way!</b><br>Track them live on the map.
                 <button class="btn-respond" style="background:var(--success)" onclick="window.completeSOS('${id}')">MARK COMPLETED</button>
             </div>`;
         }
