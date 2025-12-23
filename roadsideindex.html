@@ -5,10 +5,10 @@
 <title>Roadside Hero</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Google Maps with Geometry -->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB5GbyoapPOyLYJLNo9y85cyorIczEI-WU&libraries=geometry"></script>
 
 <style>
-/* ... (All your existing CSS remains exactly the same) ... */
 :root {
   --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b;
   --accent: #2563eb; --danger: #ef4444; --success: #22c55e;
@@ -17,41 +17,50 @@
 body { margin:0; background: var(--bg); font-family: -apple-system, sans-serif; color: var(--text); overflow: hidden; }
 #map { height: 100vh; width:100%; position:absolute; top:0; z-index:1; }
 
-#panel { position: fixed; bottom: 85px; left: 10px; right: 10px; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 10; overflow: hidden; transition: all 0.3s; }
-#panelHeader { padding:16px 20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
+/* Dropdown Panel */
+#panel { position: fixed; bottom: 85px; left: 10px; right: 10px; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 10; overflow: hidden; transition: 0.3s; }
+#panelHeader { padding:16px 20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; background: white; border-bottom: 1px solid #f1f5f9; }
 #panelContent { max-height:0; overflow-y:auto; transition: 0.3s; padding: 0 16px; }
 #panelContent.open { max-height: 40vh; padding-bottom: 16px; }
+
 .card { background: #f1f5f9; border-radius:12px; padding:14px; margin-bottom:12px; border: 1px solid #e2e8f0; }
 .btn-respond { width: 100%; border:none; padding:10px; border-radius:8px; background:var(--text); color:white; font-weight:600; cursor:pointer; margin-top:8px; }
 
+/* Footer */
 #footer { position:fixed; bottom:0; width:100%; height:75px; display:flex; justify-content: space-between; align-items:center; z-index:100; background: white; padding: 0 20px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
 #sosBtn { background:var(--danger); color: white; border: none; padding:12px 25px; border-radius:12px; font-weight:700; cursor: pointer; }
 .footer-icons { display: flex; gap: 12px; }
 .icon-wrapper { position: relative; cursor: pointer; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border-radius: 50%; }
 #notifBadge { position: absolute; top: -2px; right: -2px; background: var(--danger); color: white; font-size: 10px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid white; }
 
+/* Modals */
 .modal { position:fixed; inset:0; background:rgba(15, 23, 42, 0.7); display:none; justify-content:center; align-items:flex-end; z-index:200; }
 .modal-content { background:white; width:100%; max-width:500px; border-radius:24px 24px 0 0; padding:24px; max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-.profile-pic-container { text-align: center; margin-bottom: 15px; }
-#profileDisplayPic { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #e2e8f0; border: 3px solid var(--accent); }
-.eta-options { display: flex; gap: 8px; margin: 15px 0; }
-.eta-options button { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; background: white; cursor: pointer; }
-.eta-options button.active { background: var(--accent); color: white; }
+/* Profile & Toggle Switch */
+.toggle-row { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
+.switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--success); }
+input:checked + .slider:before { transform: translateX(24px); }
 
 input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:12px; }
-.submit-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
-.cancel-link { display: block; text-align: center; margin-top: 15px; color: var(--muted); cursor: pointer; }
+.submit-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 8px; }
+.nav-btn { width: 100%; padding: 14px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; text-decoration: none; display: block; text-align: center; margin-bottom: 8px;}
+.cancel-link { display: block; text-align: center; padding: 10px; color: var(--muted); cursor: pointer; font-size: 14px;}
 </style>
 </head>
 <body>
 
 <div id="map"></div>
 
+<!-- Dropdown Panel -->
 <div id="panel">
-  <div id="panelHeader" onclick="togglePanel()">
-    <h3>Active Requests Near You</h3>
+  <div id="panelHeader" onclick="window.togglePanel()">
+    <h3>Active Requests</h3>
     <span id="chevron">▲</span>
   </div>
   <div id="panelContent">
@@ -59,70 +68,73 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
   </div>
 </div>
 
+<!-- Footer -->
 <div id="footer">
-  <button id="sosBtn" onclick="openModal('modal')">GET HELP NOW</button>
+  <button id="sosBtn" onclick="window.openModal('modal')">GET HELP NOW</button>
   <div class="footer-icons">
-      <div class="icon-wrapper" onclick="openModal('notifModal')">
+      <div class="icon-wrapper" onclick="window.openModal('notifModal')">
           <span>🔔</span>
           <span id="notifBadge">0</span>
       </div>
-      <div class="icon-wrapper" onclick="openProfile()">
+      <div class="icon-wrapper" onclick="window.openProfile()">
           <span>👤</span>
       </div>
   </div>
 </div>
 
+<!-- Request SOS Modal -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <h3>Post SOS Request</h3>
     <input id="name" placeholder="Your Name">
     <textarea id="issue" placeholder="What's the problem?" rows="2"></textarea>
-    <button class="submit-btn" onclick="submitSOS()">Post Request</button>
-    <span class="cancel-link" onclick="closeModal('modal')">Cancel</span>
+    <button class="submit-btn" onclick="window.submitSOS()">Post Request</button>
+    <span class="cancel-link" onclick="window.closeModal('modal')">Cancel</span>
   </div>
 </div>
 
+<!-- Details/Response Modal -->
 <div id="responseModal" class="modal">
   <div class="modal-content">
-    <h3 id="respName">Helping User...</h3>
-    <div style="background:#f8fafc; padding:12px; border-radius:12px; margin-bottom:15px;">
-        <p id="respIssue" style="margin:0; font-size:14px;"></p>
-        <p id="respDist" style="margin:5px 0 0; font-weight:bold; color:var(--accent); font-size:12px;"></p>
+    <h3 id="respName">SOS Details</h3>
+    <p id="respIssue" style="background:#f1f5f9; padding:15px; border-radius:12px;"></p>
+    
+    <div id="actionButtons">
+        <button class="submit-btn" id="confirmHelpBtn">I CAN HELP (SEND ETA)</button>
+        <a id="navBtn" class="nav-btn" target="_blank" style="display:none;">NAVIGATE WITH GOOGLE MAPS</a>
     </div>
     
-    <label>Your ETA (Minutes)</label>
-    <div class="eta-options">
-        <button onclick="setETA(5, this)">5m</button>
-        <button onclick="setETA(15, this)">15m</button>
-        <button onclick="setETA(30, this)">30m</button>
-        <button onclick="setETA(60, this)">1h</button>
-    </div>
-    
-    <button class="submit-btn" id="confirmHelpBtn">CONFIRM & SEND ETA</button>
-    <span class="cancel-link" onclick="closeModal('responseModal')">Back</span>
+    <span class="cancel-link" onclick="window.closeModal('responseModal')">Go Back</span>
   </div>
 </div>
 
-<div id="notifModal" class="modal" onclick="if(event.target==this) closeModal('notifModal')">
+<!-- Profile Modal -->
+<div id="profileModal" class="modal">
     <div class="modal-content">
-        <h3>Activity</h3>
-        <div id="notifList"></div>
-        <button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:20px;" onclick="closeModal('notifModal')">Close</button>
+        <h3>My Profile</h3>
+        <div class="toggle-row">
+            <span>Online Status (Hero Mode)</span>
+            <label class="switch">
+                <input type="checkbox" id="onlineToggle" onchange="window.saveOnlineStatus()">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div style="text-align:center; margin-bottom:15px;">
+            Assists: <b id="heroCountDisplay">0</b>
+        </div>
+        <input id="profileName" placeholder="Display Name">
+        <textarea id="profileBio" placeholder="Bio..." rows="2"></textarea>
+        <button class="submit-btn" onclick="window.saveProfile()">Save Settings</button>
+        <span class="cancel-link" onclick="window.closeModal('profileModal')">Close</span>
     </div>
 </div>
 
-<div id="profileModal" class="modal">
+<!-- Notifications Modal -->
+<div id="notifModal" class="modal" onclick="if(event.target==this) window.closeModal('notifModal')">
     <div class="modal-content">
-        <div class="profile-pic-container">
-            <img id="profileDisplayPic" src="https://via.placeholder.com/80">
-            <input type="file" id="picInput" style="display:none" onchange="previewFile()">
-            <button onclick="document.getElementById('picInput').click()" style="display:block; margin:5px auto; border:none; background:none; color:var(--accent); cursor:pointer;">Change Photo</button>
-        </div>
-        <div class="hero-stat">Total Assists: <b id="heroCountDisplay">0</b></div>
-        <input id="profileName" placeholder="Hero Name">
-        <textarea id="profileBio" placeholder="Bio..."></textarea>
-        <button class="submit-btn" onclick="saveProfile()">Save Profile</button>
-        <span class="cancel-link" onclick="closeModal('profileModal')">Close</span>
+        <h3>Notifications</h3>
+        <div id="notifList"></div>
+        <button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:20px;" onclick="window.closeModal('notifModal')">Close</button>
     </div>
 </div>
 
@@ -141,171 +153,61 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-if(!localStorage.getItem('heroUserId')) localStorage.setItem('heroUserId', 'user_' + Math.random().toString(36).substr(2, 9));
+if(!localStorage.getItem('heroUserId')) localStorage.setItem('heroUserId', 'u_' + Math.random().toString(36).substr(2, 9));
 const myId = localStorage.getItem('heroUserId');
 
-let map, userLocation, selectedETA = 15;
-let sosCache = {}, sosMarkers = {};
+let map, userLocation;
+let sosCache = {}, profilesCache = {};
+let sosMarkers = {}, helperMarkers = {};
 
-// EXPOSE TO GLOBAL SCOPE
+// --- GLOBAL FUNCTIONS ---
 window.openModal = (id) => document.getElementById(id).style.display = "flex";
 window.closeModal = (id) => document.getElementById(id).style.display = "none";
 window.togglePanel = () => {
-    const content = document.getElementById("panelContent");
-    content.classList.toggle("open");
-    document.getElementById("chevron").textContent = content.classList.contains("open") ? "▼" : "▲";
+    const c = document.getElementById("panelContent");
+    c.classList.toggle("open");
+    document.getElementById("chevron").textContent = c.classList.contains("open") ? "▼" : "▲";
 };
 
-// FIX: Helper logic was not globally available
 window.openHelpDetails = (id) => {
     const data = sosCache[id];
     if(!data) return;
-
     document.getElementById("respName").innerText = "Helping " + data.userName;
-    document.getElementById("respIssue").innerText = data.issue; // Fixed: was d.issue
+    document.getElementById("respIssue").innerText = data.issue;
     
-    if(userLocation) {
-        const dist = google.maps.geometry.spherical.computeDistanceBetween(
-            new google.maps.LatLng(userLocation.lat, userLocation.lng),
-            new google.maps.LatLng(data.lat, data.lng)
-        );
-        document.getElementById("respDist").innerText = (dist / 1609.34).toFixed(1) + " miles away from you";
-    }
+    const navBtn = document.getElementById("navBtn");
+    navBtn.style.display = "block";
+    navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${data.lat},${data.lng}`;
     
-    document.getElementById("confirmHelpBtn").onclick = () => confirmHelp(id);
+    document.getElementById("confirmHelpBtn").onclick = () => window.confirmHelp(id);
     window.openModal("responseModal");
 };
 
-window.setETA = (mins, el) => {
-    selectedETA = mins;
-    document.querySelectorAll(".eta-options button").forEach(b => b.classList.remove("active"));
-    el.classList.add("active");
-};
-
-// ADDED: Logic to mark SOS as complete (manually)
-window.completeSOS = (id) => {
-    remove(ref(database, `sosRequests/${id}`));
-};
-
-async function confirmHelp(requestId) {
-    const profileSnap = await get(ref(database, `profiles/${myId}`));
-    const profile = profileSnap.val() || { name: "A Hero", helpsCount: 0 };
-
-    update(ref(database, `sosRequests/${requestId}`), {
-        status: "accepted",
-        helperId: myId,
-        helperName: profile.name,
-        helperPic: profile.pic || "",
-        eta: selectedETA
-    });
-
-    update(ref(database, `profiles/${myId}`), {
-        helpsCount: (profile.helpsCount || 0) + 1
-    });
-
+window.confirmHelp = async (requestId) => {
+    const snap = await get(ref(database, `profiles/${myId}`));
+    const profile = snap.val() || {helpsCount: 0};
+    update(ref(database, `sosRequests/${requestId}`), { status: "accepted", helperId: myId });
+    update(ref(database, `profiles/${myId}`), { helpsCount: (profile.helpsCount || 0) + 1 });
     window.closeModal("responseModal");
-    alert("Response sent! The user has been notified.");
-}
-
-window.submitSOS = () => {
-  const name = document.getElementById("name").value.trim();
-  const issue = document.getElementById("issue").value.trim();
-  if(!name || !issue || !userLocation) return;
-
-  const newRequestRef = push(ref(database, "sosRequests"));
-  set(newRequestRef, {
-    userName: name, issue, lat: userLocation.lat, lng: userLocation.lng,
-    status: "open", timestamp: Date.now(), ownerId: myId
-  });
-  window.closeModal("modal");
 };
 
-// AUTO-CLEANUP: Deletes anything older than 12 hours
-async function cleanupOldRequests() {
-    const twelveHoursAgo = Date.now() - (12 * 60 * 60 * 1000);
-    const oldQuery = query(ref(database, "sosRequests"), orderByChild("timestamp"), endAt(twelveHoursAgo));
-    const snapshot = await get(oldQuery);
-    if (snapshot.exists()) {
-        const updates = {};
-        snapshot.forEach((child) => {
-            updates[child.key] = null;
-        });
-        update(ref(database, "sosRequests"), updates);
-        console.log("Cleaned up expired SOS requests.");
-    }
-}
-
-function initMap() {
-  cleanupOldRequests(); // Run cleanup on startup
-
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: 40.7128, lng: -74.0060 }, zoom: 13, disableDefaultUI: true
-  });
-  
-  navigator.geolocation.getCurrentPosition(pos => {
-      userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      map.setCenter(userLocation);
-      new google.maps.Marker({ position: userLocation, map, icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" });
-  });
-
-  onValue(ref(database, "sosRequests"), (snap) => {
-    sosCache = snap.val() || {};
-    renderSOS();
-    updateNotifications();
-  });
-}
-
-function renderSOS() {
-  const container = document.getElementById("requests");
-  const bounds = map.getBounds();
-  container.innerHTML = "";
-
-  Object.entries(sosCache).forEach(([id, d]) => {
-    if(d.status !== "open") {
-        if(sosMarkers[id]) { sosMarkers[id].setMap(null); delete sosMarkers[id]; }
-        return;
-    }
-
-    const pos = { lat: d.lat, lng: d.lng };
-    if(!sosMarkers[id]) sosMarkers[id] = new google.maps.Marker({ position: pos, map, icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png" });
-    
-    if(bounds && bounds.contains(pos)) {
-      container.innerHTML += `
-        <div class="card">
-            <h4>${d.userName}</h4>
-            <p>${d.issue}</p>
-            <button class="btn-respond" onclick="openHelpDetails('${id}')">VIEW DETAILS & HELP</button>
-        </div>`;
-    }
-  });
-}
-
-function updateNotifications() {
-    const list = document.getElementById("notifList");
-    const badge = document.getElementById("notifBadge");
-    let count = 0;
-    let html = "";
-
-    Object.entries(sosCache).forEach(([id, r]) => {
-        if(r.ownerId === myId && r.status === "accepted") {
-            count++;
-            html += `<div style="padding:15px; border-bottom:1px solid #eee; background:#f0fdf4; border-radius:10px; margin-bottom:5px;">
-                <b>Hero coming!</b><br>${r.helperName} is on the way (ETA: ${r.eta}m).
-                <button onclick="completeSOS('${id}')" style="display:block; margin-top:10px; padding:5px 10px; background:var(--success); color:white; border:none; border-radius:5px; cursor:pointer;">Complete & Remove</button>
-            </div>`;
-        }
-        else if(r.status === "open" && r.ownerId !== myId) {
-            count++;
-            html += `<div style="padding:10px; border-bottom:1px solid #eee;">New request from ${r.userName}</div>`;
-        }
+window.saveOnlineStatus = () => {
+    const isOnline = document.getElementById("onlineToggle").checked;
+    update(ref(database, `profiles/${myId}`), { 
+        isOnline, 
+        lat: userLocation ? userLocation.lat : 0, 
+        lng: userLocation ? userLocation.lng : 0 
     });
+};
 
-    badge.innerText = count;
-    badge.style.display = count > 0 ? "flex" : "none";
-    list.innerHTML = html || "No new activity";
-}
+window.saveProfile = () => {
+    update(ref(database, `profiles/${myId}`), {
+        name: document.getElementById("profileName").value,
+        bio: document.getElementById("profileBio").value
+    });
+    window.closeModal("profileModal");
+};
 
-// PROFILE LOGIC
 window.openProfile = async () => {
     window.openModal("profileModal");
     const snap = await get(ref(database, `profiles/${myId}`));
@@ -314,24 +216,111 @@ window.openProfile = async () => {
         document.getElementById("profileName").value = d.name || "";
         document.getElementById("profileBio").value = d.bio || "";
         document.getElementById("heroCountDisplay").innerText = d.helpsCount || 0;
-        if(d.pic) document.getElementById("profileDisplayPic").src = d.pic;
+        document.getElementById("onlineToggle").checked = d.isOnline || false;
     }
 };
 
-window.saveProfile = () => {
-    update(ref(database, `profiles/${myId}`), {
-        name: document.getElementById("profileName").value,
-        bio: document.getElementById("profileBio").value,
-        pic: document.getElementById("profileDisplayPic").src
-    });
-    window.closeModal("profileModal");
+window.submitSOS = () => {
+  const name = document.getElementById("name").value.trim();
+  const issue = document.getElementById("issue").value.trim();
+  if(!name || !issue || !userLocation) return;
+  push(ref(database, "sosRequests"), {
+    userName: name, issue, lat: userLocation.lat, lng: userLocation.lng,
+    status: "open", timestamp: Date.now(), ownerId: myId
+  });
+  window.closeModal("modal");
 };
 
-window.previewFile = () => {
-    const reader = new FileReader();
-    reader.onload = (e) => document.getElementById('profileDisplayPic').src = e.target.result;
-    reader.readAsDataURL(document.getElementById('picInput').files[0]);
-};
+window.completeSOS = (id) => remove(ref(database, `sosRequests/${id}`));
+
+// --- CORE LOGIC ---
+async function cleanupOldRequests() {
+    const twelveHoursAgo = Date.now() - (12 * 60 * 60 * 1000);
+    const q = query(ref(database, "sosRequests"), orderByChild("timestamp"), endAt(twelveHoursAgo));
+    const snap = await get(q);
+    if (snap.exists()) snap.forEach(child => remove(ref(database, `sosRequests/${child.key}`)));
+}
+
+function initMap() {
+    cleanupOldRequests();
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 40.71, lng: -74 }, zoom: 13, disableDefaultUI: true
+    });
+
+    navigator.geolocation.getCurrentPosition(pos => {
+        userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        map.setCenter(userLocation);
+        new google.maps.Marker({ position: userLocation, map, icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" });
+    });
+
+    // Listen for SOS
+    onValue(ref(database, "sosRequests"), (snap) => {
+        sosCache = snap.val() || {};
+        renderSOS();
+        updateNotifications();
+    });
+
+    // Listen for Online Helpers
+    onValue(ref(database, "profiles"), (snap) => {
+        profilesCache = snap.val() || {};
+        renderHelpers();
+    });
+}
+
+function renderSOS() {
+    const container = document.getElementById("requests");
+    container.innerHTML = "";
+    Object.entries(sosCache).forEach(([id, d]) => {
+        if(d.status !== "open") {
+            if(sosMarkers[id]) { sosMarkers[id].setMap(null); delete sosMarkers[id]; }
+            return;
+        }
+        if(!sosMarkers[id]) sosMarkers[id] = new google.maps.Marker({ 
+            position: {lat: d.lat, lng: d.lng}, map, icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png" 
+        });
+        container.innerHTML += `
+            <div class="card">
+                <b>${d.userName}</b>
+                <p style="font-size:14px; margin:5px 0;">${d.issue}</p>
+                <button class="btn-respond" onclick="window.openHelpDetails('${id}')">VIEW & NAVIGATE</button>
+            </div>`;
+    });
+}
+
+function renderHelpers() {
+    Object.entries(profilesCache).forEach(([id, p]) => {
+        if(id === myId) return; // Hide self
+        if(!p.isOnline) {
+            if(helperMarkers[id]) { helperMarkers[id].setMap(null); delete helperMarkers[id]; }
+            return;
+        }
+        if(!helperMarkers[id]) {
+            helperMarkers[id] = new google.maps.Marker({
+                position: {lat: p.lat, lng: p.lng}, map,
+                icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+                title: p.name || "Hero"
+            });
+        }
+    });
+}
+
+function updateNotifications() {
+    const badge = document.getElementById("notifBadge");
+    const list = document.getElementById("notifList");
+    let count = 0; let html = "";
+    Object.entries(sosCache).forEach(([id, r]) => {
+        if(r.ownerId === myId && r.status === "accepted") {
+            count++;
+            html += `<div style="padding:15px; background:#f0fdf4; border-radius:10px; margin-bottom:10px;">
+                <b>Hero On The Way!</b><br>Someone has accepted your request.
+                <button class="btn-respond" style="background:var(--success)" onclick="window.completeSOS('${id}')">MARK COMPLETED</button>
+            </div>`;
+        }
+    });
+    badge.innerText = count;
+    badge.style.display = count > 0 ? "flex" : "none";
+    list.innerHTML = html || "<p style='color:gray;text-align:center;'>No activity</p>";
+}
 
 initMap();
 </script>
