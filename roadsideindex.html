@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Roadside Hero - Pro</title>
+<title>Roadside Hero</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- Google Maps -->
@@ -10,154 +10,174 @@
 
 <style>
 :root {
-  --bg: #f1f5f9;
-  --primary: #2563eb;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --accent: #2563eb;
   --danger: #ef4444;
-  --text: #1e293b;
-  --white: #ffffff;
+  --success: #22c55e;
 }
 
-body { margin:0; font-family: system-ui, -apple-system, sans-serif; background: var(--bg); overflow: hidden; }
-#map { height: 100vh; width: 100%; position: absolute; z-index: 1; }
+* { box-sizing: border-box; }
 
-/* Fixed Footer Bar */
-#footer {
+body { margin:0; background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--text); overflow: hidden; }
+#map { height: 100vh; width:100%; position:absolute; top:0; z-index:1; }
+
+/* Dropdown Panel - Kept Original */
+#panel {
   position: fixed;
-  bottom: 0;
-  width: 100%;
-  height: 75px;
-  background: var(--white);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-  z-index: 100;
-  box-sizing: border-box;
-}
-
-/* Footer - Left side SOS Button */
-.footer-left { flex: 1; display: flex; justify-content: flex-start; }
-#sosBtn {
-  background: var(--danger);
-  color: white;
-  border: none;
-  padding: 12px 28px;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 15px;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-#sosBtn:active { transform: scale(0.95); }
-
-/* Footer - Right side Notifications */
-.footer-right { position: relative; display: flex; align-items: center; padding-right: 10px; }
-.notif-icon {
-  font-size: 28px;
-  cursor: pointer;
-  position: relative;
-  background: #f8fafc;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: 1px solid #e2e8f0;
-}
-.badge {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  background: var(--danger);
-  color: white;
-  font-size: 10px;
-  font-weight: bold;
-  min-width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: none; /* hidden by default */
-  align-items: center;
-  justify-content: center;
-  border: 2px solid white;
-}
-
-/* Notification Modal */
-#notifModal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: none;
-  z-index: 200;
-  justify-content: center;
-  align-items: flex-end;
-}
-#notifContent {
+  bottom: 85px; /* Adjusted to sit above new footer */
+  left: 10px;
+  right: 10px;
   background: white;
-  width: 100%;
-  max-width: 500px;
-  border-radius: 24px 24px 0 0;
-  padding: 24px;
-  max-height: 70vh;
-  overflow-y: auto;
-  animation: slideUp 0.3s ease-out;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.notif-item {
-  padding: 12px;
-  border-bottom: 1px solid #f1f5f9;
-  font-size: 14px;
+
+#panelHeader { padding:16px 20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select: none; }
+#panelHeader h3 { margin:0; font-size:16px; font-weight: 700; }
+#panelContent { max-height:0; overflow-y:auto; transition: max-height 0.3s ease; padding: 0 16px; }
+#panelContent.open { max-height: 40vh; padding-bottom: 16px; }
+
+.card { background: #f1f5f9; border-radius:12px; padding:14px; margin-bottom:12px; border: 1px solid #e2e8f0; }
+.card h4 { margin:0 0 4px; font-size:15px; }
+.badge-tip { display:inline-block; background:var(--accent); color: white; padding:2px 8px; border-radius:12px; font-size:11px; font-weight: 600; margin-right: 5px; }
+.btn-respond { width: 100%; border:none; padding:8px; border-radius:8px; background:var(--text); color:white; font-size:13px; font-weight:600; cursor:pointer; margin-top: 8px; }
+
+/* NEW FIXED FOOTER BAR */
+#footer { 
+    position:fixed; 
+    bottom:0; 
+    width:100%; 
+    height:75px; 
+    display:flex; 
+    justify-content: space-between; 
+    align-items:center; 
+    z-index:100; 
+    background: white; 
+    padding: 0 20px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
 }
-.notif-item.new { background: #eff6ff; border-left: 4px solid var(--primary); }
+
+#sosBtn { 
+    background:var(--danger); 
+    color: white; 
+    border: none;
+    padding:12px 25px; 
+    border-radius:12px; 
+    font-weight:700; 
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* NOTIFICATION ICON & BADGE */
+.notif-wrapper {
+    position: relative;
+    cursor: pointer;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    border-radius: 50%;
+}
+.notif-bell { font-size: 22px; }
+#notifBadge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: var(--danger);
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: none; /* Hidden when 0 */
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+/* NOTIFICATION MODAL */
+#notifModal { position:fixed; inset:0; background:rgba(15, 23, 42, 0.7); display:none; justify-content:center; align-items:flex-end; z-index:200; }
+#notifContent { 
+    background:white; width:100%; max-width:500px; border-radius:24px 24px 0 0; 
+    padding:24px; max-height: 80vh; overflow-y: auto; animation: slideUp 0.3s ease-out; 
+}
+
+/* Original Request Modal */
+#modal { position:fixed; inset:0; background:rgba(15, 23, 42, 0.7); display:none; justify-content:center; align-items:flex-end; z-index:200; padding-bottom: 20px; }
+#modalContent { background:white; width:95%; max-width:450px; border-radius:24px; padding:24px; animation: slideUp 0.3s ease-out; }
 
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-/* Original Request Modal Styles */
-#requestModal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 200; align-items: center; justify-content: center; }
-.modal-box { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 20px; }
-input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-.submit-btn { width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; }
+input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:12px; font-size:14px; outline: none; }
+.tip-options { display: flex; gap: 8px; margin-bottom: 12px; }
+.tip-options button { flex: 1; border: 1px solid #e2e8f0; background: white; padding: 8px; border-radius: 8px; cursor: pointer; }
+.tip-options button.active { background: var(--accent); color: white; border-color: var(--accent); }
+.submit-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
+.cancel-link { display: block; text-align: center; margin-top: 15px; color: var(--muted); font-size: 13px; text-decoration: none; cursor: pointer; }
+
+.notif-item { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+.notif-item b { color: var(--accent); }
 </style>
 </head>
 <body>
 
 <div id="map"></div>
 
-<!-- FOOTER -->
+<!-- Active Requests Panel -->
+<div id="panel">
+  <div id="panelHeader" onclick="togglePanel()">
+    <h3>Active Requests Near You</h3>
+    <span id="chevron">▲</span>
+  </div>
+  <div id="panelContent">
+    <div id="requests"></div>
+  </div>
+</div>
+
+<!-- FIXED FOOTER -->
 <div id="footer">
-  <div class="footer-left">
-    <button id="sosBtn" onclick="toggleModal('requestModal', true)">REQUEST SOS</button>
-  </div>
-  <div class="footer-right">
-    <div class="notif-icon" onclick="openNotifications()">
-      🔔
-      <span id="notifBadge" class="badge">0</span>
-    </div>
+  <button id="sosBtn" onclick="openSOS()">GET HELP NOW</button>
+  <div class="notif-wrapper" onclick="openNotifs()">
+      <span class="notif-bell">🔔</span>
+      <span id="notifBadge">0</span>
   </div>
 </div>
 
-<!-- REQUEST MODAL -->
-<div id="requestModal" onclick="if(event.target==this) toggleModal('requestModal', false)">
-  <div class="modal-box">
-    <h3>New Assistance Request</h3>
-    <input id="userName" placeholder="Your Name">
-    <textarea id="userIssue" placeholder="Describe the problem..."></textarea>
-    <button class="submit-btn" onclick="submitRequest()">Post Request</button>
+<!-- Request Modal -->
+<div id="modal">
+  <div id="modalContent">
+    <h2 style="margin-top:0">Need Assistance?</h2>
+    <input id="name" placeholder="Your Name">
+    <textarea id="issue" placeholder="What's the problem?" rows="3"></textarea>
+    <div class="tip-options">
+      <button onclick="selectTip(5, this)">$5</button>
+      <button onclick="selectTip(10, this)">$10</button>
+      <button onclick="selectTip(20, this)">$20</button>
+    </div>
+    <input id="customTip" type="number" placeholder="Other amount ($)">
+    <button class="submit-btn" onclick="submitSOS()">Post Request</button>
+    <span class="cancel-link" onclick="closeSOS()">Cancel</span>
   </div>
 </div>
 
-<!-- NOTIFICATION MODAL -->
-<div id="notifModal" onclick="if(event.target==this) toggleModal('notifModal', false)">
-  <div id="notifContent">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <h2 style="margin:0">Notifications</h2>
-        <button onclick="toggleModal('notifModal', false)" style="border:none; background:none; font-size:20px;">✕</button>
+<!-- Notification Modal -->
+<div id="notifModal" onclick="if(event.target==this) closeNotifs()">
+    <div id="notifContent">
+        <h3 style="margin-top:0">Activity Notifications</h3>
+        <div id="notifList">
+            <p style="color:var(--muted); text-align:center;">No new notifications</p>
+        </div>
+        <button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:20px;" onclick="closeNotifs()">Close</button>
     </div>
-    <div id="notifList">
-      <p style="color:#64748b; text-align:center;">No new notifications</p>
-    </div>
-  </div>
 </div>
 
 <script type="module">
@@ -169,92 +189,122 @@ const firebaseConfig = {
   authDomain: "roadsidehero-104ea.firebaseapp.com",
   databaseURL: "https://roadsidehero-104ea-default-rtdb.firebaseio.com",
   projectId: "roadsidehero-104ea",
-  storageBucket: "roadsidehero-104ea.firebasestorage.app"
+  storageBucket: "roadsidehero-104ea.firebasestorage.app",
+  messagingSenderId: "1068443635940",
+  appId: "1:1068443635940:web:ae5e33d3fe0d78c415dcf1"
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const database = getDatabase(app);
 
-let userLocation = null;
-let lastKnownCount = 0;
+let map, userLocation;
+let sosCache = {}, sosMarkers = {};
+let selectedTip = 0;
 
-// Global UI Toggles
-window.toggleModal = (id, show) => {
-    document.getElementById(id).style.display = show ? 'flex' : 'none';
+// UI Functions
+window.togglePanel = () => {
+  const content = document.getElementById("panelContent");
+  const chevron = document.getElementById("chevron");
+  content.classList.toggle("open");
+  chevron.textContent = content.classList.contains("open") ? "▼" : "▲";
 };
 
-// Map Init
+window.openSOS = () => document.getElementById("modal").style.display = "flex";
+window.closeSOS = () => document.getElementById("modal").style.display = "none";
+window.openNotifs = () => document.getElementById("notifModal").style.display = "flex";
+window.closeNotifs = () => document.getElementById("notifModal").style.display = "none";
+
+window.selectTip = (amount, el) => {
+  selectedTip = amount;
+  document.querySelectorAll(".tip-options button").forEach(b => b.classList.remove("active"));
+  el.classList.add("active");
+};
+
+window.submitSOS = () => {
+  const name = document.getElementById("name").value.trim();
+  const issue = document.getElementById("issue").value.trim();
+  const customTip = parseFloat(document.getElementById("customTip").value);
+  if(!name || !issue || !userLocation) return;
+
+  push(ref(database, "sosRequests"), {
+    userName: name, issue, lat: userLocation.lat, lng: userLocation.lng,
+    tip: customTip || selectedTip || 0, status: "open", timestamp: Date.now()
+  });
+
+  window.closeSOS();
+  document.getElementById("name").value = ""; document.getElementById("issue").value = "";
+};
+
 function initMap() {
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: 40.7128, lng: -74.0060 }, zoom: 13, disableDefaultUI: true
+  });
+
+  if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(pos => {
-        userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        const map = new google.maps.Map(document.getElementById("map"), {
-            center: userLocation, zoom: 14, disableDefaultUI: true
-        });
-        new google.maps.Marker({ position: userLocation, map, icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" });
+      userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      map.setCenter(userLocation);
+      new google.maps.Marker({ position: userLocation, map, icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" });
     });
+  }
+
+  // Real-time listener for Requests AND Notifications
+  onValue(ref(database, "sosRequests"), (snap) => {
+    sosCache = snap.val() || {};
+    renderSOS();
+    updateNotifications();
+  });
+
+  map.addListener("idle", renderSOS);
 }
 
-// Submit SOS
-window.submitRequest = () => {
-    const name = document.getElementById('userName').value;
-    const issue = document.getElementById('userIssue').value;
-    if(!name || !issue) return alert("Fill all fields");
+function renderSOS() {
+  const container = document.getElementById("requests");
+  const bounds = map.getBounds();
+  if(!bounds) return;
+  container.innerHTML = "";
+  let found = false;
 
-    push(ref(db, 'sosRequests'), {
-        userName: name,
-        issue: issue,
-        lat: userLocation.lat,
-        lng: userLocation.lng,
-        status: 'open',
-        timestamp: Date.now()
-    });
-    toggleModal('requestModal', false);
-};
+  Object.entries(sosCache).forEach(([id, d]) => {
+    if(d.status !== "open") return;
+    const pos = { lat: d.lat, lng: d.lng };
+    if(!sosMarkers[id]) {
+      sosMarkers[id] = new google.maps.Marker({ position: pos, map, icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png" });
+    }
+    if(bounds.contains(pos)) {
+      found = true;
+      container.innerHTML += `<div class="card"><h4>${d.userName}</h4><span class="badge-tip">$${d.tip} Tip</span><p>${d.issue}</p><button class="btn-respond">I CAN HELP</button></div>`;
+    }
+  });
+}
 
-// REAL-TIME NOTIFICATION LISTENER
-onValue(ref(db, 'sosRequests'), (snapshot) => {
-    const data = snapshot.val();
-    const list = document.getElementById('notifList');
-    const badge = document.getElementById('notifBadge');
+// REAL-TIME NOTIFICATION LOGIC
+function updateNotifications() {
+    const badge = document.getElementById("notifBadge");
+    const list = document.getElementById("notifList");
+    const openRequests = Object.values(sosCache).filter(r => r.status === "open");
     
-    if (!data) return;
-
-    const items = Object.values(data).filter(item => item.status === 'open');
-    const count = items.length;
-
-    // Update Badge
-    if (count > 0) {
-        badge.innerText = count;
-        badge.style.display = 'flex';
-        // Simple "pop" animation logic
-        if(count > lastKnownCount) {
-            badge.style.transform = "scale(1.4)";
-            setTimeout(() => badge.style.transform = "scale(1)", 200);
-        }
+    // Update Badge Number
+    if(openRequests.length > 0) {
+        badge.innerText = openRequests.length;
+        badge.style.display = "flex";
     } else {
-        badge.style.display = 'none';
+        badge.style.display = "none";
     }
 
-    // Build Notification List
-    list.innerHTML = "";
-    items.sort((a,b) => b.timestamp - a.timestamp).forEach(item => {
-        const div = document.createElement('div');
-        div.className = "notif-item new";
-        div.innerHTML = `<strong>New Request: ${item.userName}</strong><br>${item.issue}`;
-        list.appendChild(div);
-    });
-
-    lastKnownCount = count;
-});
-
-window.openNotifications = () => {
-    toggleModal('notifModal', true);
-    // Optional: Clear badge when clicked
-    // document.getElementById('notifBadge').style.display = 'none';
-};
+    // Populate Notification Module
+    if(openRequests.length > 0) {
+        list.innerHTML = openRequests.map(r => `
+            <div class="notif-item">
+                <b>New Request:</b> ${r.userName} needs help with "${r.issue.substring(0,30)}..."
+            </div>
+        `).join('');
+    } else {
+        list.innerHTML = `<p style="color:var(--muted); text-align:center;">No new activity</p>`;
+    }
+}
 
 initMap();
 </script>
-
 </body>
 </html>
