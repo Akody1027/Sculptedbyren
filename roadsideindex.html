@@ -28,30 +28,36 @@ body { margin:0; background: var(--bg); font-family: -apple-system, sans-serif; 
 
 /* Footer */
 #footer { position:fixed; bottom:0; width:100%; height:75px; display:flex; justify-content: space-between; align-items:center; z-index:100; background: white; padding: 0 20px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
-#sosBtn { background:var(--danger); color: white; border: none; padding:12px 25px; border-radius:12px; font-weight:700; cursor: pointer; }
+#sosBtn { background:var(--danger); color: white; border: none; padding:12px 28px; border-radius:12px; font-weight:700; cursor: pointer; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
 .footer-icons { display: flex; gap: 12px; }
 .icon-wrapper { position: relative; cursor: pointer; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border-radius: 50%; }
-#notifBadge { position: absolute; top: -2px; right: -2px; background: var(--danger); color: white; font-size: 10px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid white; }
+
+/* Live Notification Badge with Animation */
+#notifBadge { 
+    position: absolute; top: -2px; right: -2px; background: var(--danger); color: white; 
+    font-size: 10px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; 
+    display: none; align-items: center; justify-content: center; border: 2px solid white; 
+}
+.pulse-anim { animation: pulse-red 0.5s ease-in-out; }
+@keyframes pulse-red { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
+
+/* Radius Selector UI */
+.radius-container { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 20px; }
+.radius-item { flex: 1 1 60px; position: relative; }
+.radius-item input { position: absolute; opacity: 0; cursor: pointer; }
+.radius-label { display: block; padding: 6px 2px; text-align: center; background: #f1f5f9; border-radius: 8px; font-size: 11px; cursor: pointer; }
+.radius-item input:checked + .radius-label { background: var(--accent); color: white; }
+
+.vehicle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+.v-type { padding: 10px; border: 1px solid #e2e8f0; border-radius: 10px; text-align: center; cursor: pointer; font-size: 13px; background: white; }
+.v-type.active { background: var(--accent); color: white; border-color: var(--accent); }
 
 /* Modals */
 .modal { position:fixed; inset:0; background:rgba(15, 23, 42, 0.7); display:none; justify-content:center; align-items:flex-end; z-index:200; }
 .modal-content { background:white; width:100%; max-width:500px; border-radius:24px 24px 0 0; padding:24px; max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-/* Profile/Radius Specifics */
-.radius-container { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 20px; }
-.radius-item { flex: 1 1 60px; position: relative; }
-.radius-item input { position: absolute; opacity: 0; cursor: pointer; }
-.radius-label { display: block; padding: 6px 2px; text-align: center; background: #f1f5f9; border-radius: 8px; font-size: 11px; cursor: pointer; border: 1px solid transparent; }
-.radius-item input:checked + .radius-label { background: var(--accent); color: white; border-color: var(--accent); }
-
-.vehicle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-.v-type { padding: 10px; border: 1px solid #e2e8f0; border-radius: 10px; text-align: center; cursor: pointer; font-size: 13px; background: white; }
-.v-type.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-.profile-pic-container { text-align: center; margin-bottom: 15px; }
 .round-pic { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; background: #e2e8f0; border: 3px solid var(--accent); }
-
 input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:12px; font-size: 14px; }
 .submit-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
 .cancel-link { display: block; text-align: center; padding: 10px; color: var(--muted); cursor: pointer; font-size: 14px;}
@@ -61,15 +67,12 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
 
 <div id="map"></div>
 
-<!-- Active Requests Panel -->
 <div id="panel">
   <div id="panelHeader" onclick="window.togglePanel()">
-    <h3>Active Requests</h3>
+    <h3>Active Requests Near You</h3>
     <span id="chevron">▲</span>
   </div>
-  <div id="panelContent">
-    <div id="requests"></div>
-  </div>
+  <div id="panelContent"><div id="requests"></div></div>
 </div>
 
 <div id="footer">
@@ -85,31 +88,10 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
   </div>
 </div>
 
-<!-- PROFILE MODAL -->
-<div id="profileModal" class="modal">
-    <div class="modal-content">
-        <h3>Hero Settings</h3>
-        <div class="profile-pic-container">
-            <img id="profileDisplayPic" class="round-pic" src="https://via.placeholder.com/85">
-            <input type="file" id="picInput" style="display:none" onchange="window.previewFile()">
-            <button onclick="document.getElementById('picInput').click()" style="display:block; margin:5px auto; border:none; background:none; color:var(--accent); font-weight:bold; cursor:pointer;">Update Photo</button>
-        </div>
-
-        <label style="font-size:12px; color:var(--muted)">Assistance Radius (Auto-Zooms Map)</label>
-        <div class="radius-container" id="radiusSelector"></div>
-
-        <input id="profileName" placeholder="Display Name">
-        <textarea id="profileBio" placeholder="Bio/Tools..." rows="2"></textarea>
-        <button class="submit-btn" onclick="window.saveProfile()">Save & Update Map</button>
-        <span class="cancel-link" onclick="window.closeModal('profileModal')">Close</span>
-    </div>
-</div>
-
-<!-- SOS MODAL -->
+<!-- Modals (Request, History, Profile, Interaction) -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <h3>Post SOS Request</h3>
-    <label style="font-size:12px; color:var(--muted)">Vehicle Type</label>
     <div class="vehicle-grid">
         <div class="v-type active" onclick="window.selectVehicle('Car', this)">🚗 Car</div>
         <div class="v-type" onclick="window.selectVehicle('Truck', this)">🛻 Truck</div>
@@ -117,29 +99,44 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
         <div class="v-type" onclick="window.selectVehicle('HeavyDuty', this)">🚛 Heavy Duty</div>
     </div>
     <input id="name" placeholder="Your Name">
-    <textarea id="issue" placeholder="What's the problem?" rows="2"></textarea>
-    <input id="tip" type="number" placeholder="Incentive Tip Amount ($)">
+    <textarea id="issue" placeholder="Describe the problem..." rows="2"></textarea>
+    <input id="tip" type="number" placeholder="Incentive Tip ($)">
     <button class="submit-btn" onclick="window.submitSOS()">Post Request</button>
     <span class="cancel-link" onclick="window.closeModal('modal')">Cancel</span>
   </div>
 </div>
 
-<!-- INTERACTION MODAL -->
+<div id="notifModal" class="modal" onclick="if(event.target==this) window.closeModal('notifModal')">
+    <div class="modal-content">
+        <h3>Live Notifications</h3>
+        <div id="notifList"></div>
+        <button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:20px;" onclick="window.closeModal('notifModal')">Close</button>
+    </div>
+</div>
+
+<div id="profileModal" class="modal">
+    <div class="modal-content">
+        <h3>Hero Profile</h3>
+        <div style="text-align:center;"><img id="profileDisplayPic" class="round-pic" src="https://via.placeholder.com/85"></div>
+        <button onclick="document.getElementById('picInput').click()" style="display:block; margin:5px auto; border:none; background:none; color:var(--accent); font-weight:bold; cursor:pointer;">Update Photo</button>
+        <input type="file" id="picInput" style="display:none" onchange="window.previewFile()">
+        
+        <label style="font-size:12px; color:var(--muted)">Service Travel Radius</label>
+        <div class="radius-container" id="radiusSelector"></div>
+        
+        <input id="profileName" placeholder="Display Name">
+        <textarea id="profileBio" placeholder="Bio/Tools..." rows="2"></textarea>
+        <button class="submit-btn" onclick="window.saveProfile()">Save Settings</button>
+        <span class="cancel-link" onclick="window.closeModal('profileModal')">Close</span>
+    </div>
+</div>
+
 <div id="interactionModal" class="modal">
     <div class="modal-content">
         <h3>Assistance Tracking</h3>
         <div id="interactionDisplay" style="background:#f1f5f9; padding:15px; border-radius:12px; margin-bottom:15px;"></div>
         <button class="submit-btn" style="background:var(--success);" id="interactionCompleteBtn">MARK SOS COMPLETED</button>
         <span class="cancel-link" onclick="window.closeModal('interactionModal')">Close</span>
-    </div>
-</div>
-
-<!-- NOTIFICATION MODAL -->
-<div id="notifModal" class="modal" onclick="if(event.target==this) window.closeModal('notifModal')">
-    <div class="modal-content">
-        <h3>History</h3>
-        <div id="notifList"></div>
-        <button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:20px;" onclick="window.closeModal('notifModal')">Close</button>
     </div>
 </div>
 
@@ -163,11 +160,11 @@ const myId = localStorage.getItem('heroUserId');
 
 let map, userLocation, watchId = null;
 let sosCache = {}, profilesCache = {}, sosMarkers = {}, helperMarkers = {};
-let myRadius = 50, selectedVehicle = "Car";
+let myRadius = 50, selectedVehicle = "Car", lastBadgeCount = 0;
 
 const radiusOptions = [5, 10, 15, 20, 30, 40, 50, 100, 150, 200, 300, 999999];
 
-// --- WINDOW SCOPED FUNCTIONS ---
+// --- WINDOW EXPORTS ---
 window.openModal = (id) => document.getElementById(id).style.display = "flex";
 window.closeModal = (id) => document.getElementById(id).style.display = "none";
 window.togglePanel = () => {
@@ -175,46 +172,22 @@ window.togglePanel = () => {
     c.classList.toggle("open");
     document.getElementById("chevron").textContent = c.classList.contains("open") ? "▼" : "▲";
 };
-
 window.selectVehicle = (type, el) => {
     selectedVehicle = type;
     document.querySelectorAll(".v-type").forEach(b => b.classList.remove("active"));
     el.classList.add("active");
 };
-
-window.setMyRadius = (val) => { 
-    myRadius = val; 
-    window.updateMapView();
-};
-
-window.updateMapView = () => {
-    if (!map || !userLocation) return;
-    if (myRadius >= 999999) {
-        map.setCenter({ lat: 39.8, lng: -98.5 });
-        map.setZoom(4);
-    } else {
-        const circle = new google.maps.Circle({ center: userLocation, radius: myRadius * 1609.34 });
-        map.fitBounds(circle.getBounds());
-    }
-};
-
+window.setMyRadius = (val) => { myRadius = val; window.updateMapView(); renderSOS(); updateNotifications(); };
 window.previewFile = () => {
     const reader = new FileReader();
     reader.onload = (e) => document.getElementById('profileDisplayPic').src = e.target.result;
     reader.readAsDataURL(document.getElementById('picInput').files[0]);
 };
-
 window.saveProfile = () => {
-    update(ref(database, `profiles/${myId}`), {
-        name: document.getElementById("profileName").value,
-        bio: document.getElementById("profileBio").value,
-        pic: document.getElementById("profileDisplayPic").src,
-        serviceRadius: myRadius
-    });
+    update(ref(database, `profiles/${myId}`), { name: document.getElementById("profileName").value, bio: document.getElementById("profileBio").value, pic: document.getElementById("profileDisplayPic").src, serviceRadius: myRadius });
     window.updateMapView();
     window.closeModal("profileModal");
 };
-
 window.openProfile = async () => {
     window.openModal("profileModal");
     const snap = await get(ref(database, `profiles/${myId}`));
@@ -223,11 +196,7 @@ window.openProfile = async () => {
         document.getElementById("profileName").value = d.name || "";
         document.getElementById("profileBio").value = d.bio || "";
         if(d.pic) document.getElementById("profileDisplayPic").src = d.pic;
-        if(d.serviceRadius) {
-            myRadius = d.serviceRadius;
-            const rInput = document.getElementById('r' + d.serviceRadius);
-            if(rInput) rInput.checked = true;
-        }
+        if(d.serviceRadius) { myRadius = d.serviceRadius; const rIn = document.getElementById('r' + d.serviceRadius); if(rIn) rIn.checked = true; }
     }
 };
 
@@ -236,18 +205,11 @@ window.submitSOS = () => {
   const issue = document.getElementById("issue").value.trim();
   const tip = document.getElementById("tip").value || 0;
   if(!name || !issue || !userLocation) return;
-  push(ref(database, "sosRequests"), {
-    userName: name, issue, tip, vehicle: selectedVehicle,
-    lat: userLocation.lat, lng: userLocation.lng,
-    status: "open", timestamp: Date.now(), ownerId: myId
-  });
+  push(ref(database, "sosRequests"), { userName: name, issue, tip, vehicle: selectedVehicle, lat: userLocation.lat, lng: userLocation.lng, status: "open", timestamp: Date.now(), ownerId: myId });
   window.closeModal("modal");
 };
 
-window.confirmHelp = (id) => {
-    update(ref(database, `sosRequests/${id}`), { status: "accepted", helperId: myId });
-};
-
+window.confirmHelp = (id) => { update(ref(database, `sosRequests/${id}`), { status: "accepted", helperId: myId }); };
 window.completeSOS = async (id) => {
     const r = sosCache[id];
     if (r && r.helperId) {
@@ -258,50 +220,40 @@ window.completeSOS = async (id) => {
     update(ref(database, `sosRequests/${id}`), { status: "completed", completedAt: Date.now() });
     window.closeModal('interactionModal');
 };
-
 window.openInteractionDetails = (id) => {
     const s = sosCache[id];
-    document.getElementById('interactionDisplay').innerHTML = `<b>Stranded:</b> ${s.userName}<br><b>Issue:</b> ${s.issue}<br><b>Tip:</b> $${s.tip || 0}`;
+    document.getElementById('interactionDisplay').innerHTML = `<b>Stranded:</b> ${s.userName}<br><b>Vehicle:</b> ${s.vehicle}<br><b>Issue:</b> ${s.issue}<br><b>Tip:</b> $${s.tip || 0}`;
     document.getElementById('interactionCompleteBtn').onclick = () => window.completeSOS(id);
     window.openModal('interactionModal');
 };
 
-// --- CORE LOGIC ---
-function setupRadiusUI() {
+// --- MAP LOGIC ---
+window.updateMapView = () => {
+    if (!map || !userLocation) return;
+    if (myRadius >= 999999) { map.setCenter({ lat: 39.8, lng: -98.5 }); map.setZoom(4); }
+    else { const circle = new google.maps.Circle({ center: userLocation, radius: myRadius * 1609.34 }); map.fitBounds(circle.getBounds()); }
+};
+
+function initMap() {
     const radBox = document.getElementById('radiusSelector');
     radiusOptions.forEach(val => {
-        const div = document.createElement('div');
-        div.className = 'radius-item';
+        const div = document.createElement('div'); div.className = 'radius-item';
         const label = val === 999999 ? 'Nation' : val + 'mi';
         div.innerHTML = `<input type="radio" name="rad" id="r${val}" value="${val}" ${val === 50 ? 'checked' : ''} onchange="window.setMyRadius(${val})">
                          <label class="radius-label" for="r${val}">${label}</label>`;
         radBox.appendChild(div);
     });
-}
 
-async function cleanupOldRequests() {
-    const twelveHoursAgo = Date.now() - (12 * 60 * 60 * 1000);
-    const q = query(ref(database, "sosRequests"), orderByChild("timestamp"), endAt(twelveHoursAgo));
-    const snap = await get(q);
-    if (snap.exists()) snap.forEach(c => remove(ref(database, `sosRequests/${c.key}`)));
-}
-
-function initMap() {
-    setupRadiusUI();
-    cleanupOldRequests();
-
-    map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 40.7, lng: -74 }, zoom: 12, disableDefaultUI: true
-    });
+    map = new google.maps.Map(document.getElementById("map"), { center: { lat: 40.7, lng: -74 }, zoom: 12, disableDefaultUI: true });
 
     navigator.geolocation.getCurrentPosition(pos => {
         userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         new google.maps.Marker({ position: userLocation, map, icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" });
         window.updateMapView();
-        
         watchId = navigator.geolocation.watchPosition(p => {
              userLocation = { lat: p.coords.latitude, lng: p.coords.longitude };
              update(ref(database, `profiles/${myId}`), { lat: p.coords.latitude, lng: p.coords.longitude });
+             renderSOS(); // Re-filter on move
         }, null, { enableHighAccuracy: true });
     });
 
@@ -322,15 +274,8 @@ function renderSOS() {
     container.innerHTML = "";
     Object.entries(sosCache).forEach(([id, d]) => {
         if(!userLocation) return;
-        const dist = google.maps.geometry.spherical.computeDistanceBetween(
-            new google.maps.LatLng(userLocation.lat, userLocation.lng),
-            new google.maps.LatLng(d.lat, d.lng)
-        ) / 1609.34;
-
-        if(d.status !== "open" || (myRadius < 999999 && dist > myRadius)) {
-            if(sosMarkers[id]) { sosMarkers[id].setMap(null); delete sosMarkers[id]; }
-            return;
-        }
+        const dist = google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(d.lat, d.lng)) / 1609.34;
+        if(d.status !== "open" || (myRadius < 999999 && dist > myRadius)) { if(sosMarkers[id]) { sosMarkers[id].setMap(null); delete sosMarkers[id]; } return; }
         if(!sosMarkers[id]) sosMarkers[id] = new google.maps.Marker({ position: {lat: d.lat, lng: d.lng}, map, icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png" });
         container.innerHTML += `<div class="card"><b>${d.userName}</b> (${dist.toFixed(1)} mi)<br><small>${d.vehicle} - ${d.issue}</small><button class="btn-respond" onclick="window.confirmHelp('${id}')">HELP</button></div>`;
     });
@@ -341,10 +286,7 @@ function renderHelpers() {
         if(id === myId) return;
         let isMyHero = false;
         Object.values(sosCache).forEach(req => { if(req.ownerId === myId && req.status==='accepted' && req.helperId===id) isMyHero = true; });
-        if(!isMyHero) {
-            if(helperMarkers[id]) { helperMarkers[id].setMap(null); delete helperMarkers[id]; }
-            return;
-        }
+        if(!isMyHero) { if(helperMarkers[id]) { helperMarkers[id].setMap(null); delete helperMarkers[id]; } return; }
         if(!helperMarkers[id]) helperMarkers[id] = new google.maps.Marker({ position: {lat: p.lat, lng: p.lng}, map, icon: "http://maps.google.com/mapfiles/kml/pal4/icon54.png" });
         else helperMarkers[id].setPosition({lat: p.lat, lng: p.lng});
     });
@@ -353,16 +295,35 @@ function renderHelpers() {
 function updateNotifications() {
     const badge = document.getElementById("notifBadge");
     const list = document.getElementById("notifList");
-    let activeCount = 0; let html = "";
+    let currentBadgeCount = 0; let html = "";
+
     Object.entries(sosCache).forEach(([id, r]) => {
+        if(!userLocation) return;
+        const dist = google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609.34;
+        const inRadius = (myRadius >= 999999 || dist <= myRadius);
+
+        // 1. Alert for Stranded User: Someone is coming
         if(r.ownerId === myId && r.status === "accepted") {
-            activeCount++;
-            html += `<div class="card" onclick="window.openInteractionDetails('${id}')"><b>Hero Coming!</b><br>Click for details.</div>`;
+            currentBadgeCount++;
+            html += `<div class="card" onclick="window.openInteractionDetails('${id}')" style="background:#f0fdf4; border:1px solid var(--success);"><b>Hero is coming!</b><br>Click for details.</div>`;
+        }
+        // 2. Alert for Helper: New request within my radius
+        else if(r.status === "open" && r.ownerId !== myId && inRadius) {
+            currentBadgeCount++;
+            html += `<div class="card" onclick="window.togglePanel(); window.closeModal('notifModal')" style="border-left:4px solid var(--danger);"><b>New Request Nearby!</b><br>${r.userName} needs help with ${r.vehicle}.</div>`;
         }
     });
-    badge.innerText = activeCount;
-    badge.style.display = activeCount > 0 ? "flex" : "none";
-    list.innerHTML = html || "<p style='color:gray;text-align:center;'>No activity</p>";
+
+    if (currentBadgeCount > lastBadgeCount) {
+        badge.classList.remove("pulse-anim");
+        void badge.offsetWidth; // trigger reflow
+        badge.classList.add("pulse-anim");
+    }
+
+    badge.innerText = currentBadgeCount;
+    badge.style.display = currentBadgeCount > 0 ? "flex" : "none";
+    list.innerHTML = html || "<p style='color:gray;text-align:center;'>No live activity in your area.</p>";
+    lastBadgeCount = currentBadgeCount;
 }
 
 initMap();
