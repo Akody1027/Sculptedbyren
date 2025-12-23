@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>Roadside Assistance</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -31,12 +31,42 @@ body {
   color: var(--text);
 }
 
-#map { height: 65vh; }
+#map {
+  height: 65vh;
+  width: 100%;
+}
 
+/* Dropdown Panel */
 #panel {
-  height: 25vh;
-  padding: 16px;
-  overflow-y: auto;
+  background: white;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.08);
+}
+
+#panelHeader {
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+#panelHeader h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+#panelContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+  padding: 0 16px;
+}
+
+#panelContent.open {
+  max-height: 260px;
+  padding-bottom: 12px;
 }
 
 .card {
@@ -63,7 +93,7 @@ body {
   padding: 4px 8px;
   border-radius: 999px;
   font-size: 11px;
-  margin-top: 6px;
+  margin: 6px 0;
 }
 
 button {
@@ -73,10 +103,14 @@ button {
   background: var(--accent);
   color: white;
   font-size: 14px;
+  cursor: pointer;
 }
 
-button:active { transform: scale(0.97); }
+button:active {
+  transform: scale(0.97);
+}
 
+/* Footer */
 #footer {
   position: fixed;
   bottom: 0;
@@ -96,13 +130,14 @@ button:active { transform: scale(0.97); }
   font-weight: 600;
 }
 
+/* Modal */
 #modal {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.45);
   display: none;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
 #modalContent {
@@ -119,6 +154,7 @@ input, textarea {
   border-radius: 12px;
   border: 1px solid #e5e7eb;
   margin-bottom: 10px;
+  font-size: 14px;
 }
 
 .tip-options button {
@@ -139,7 +175,13 @@ input, textarea {
 <div id="map"></div>
 
 <div id="panel">
-  <div id="requests"></div>
+  <div id="panelHeader" onclick="togglePanel()">
+    <h3>Active Requests</h3>
+    <span id="chevron">▴</span>
+  </div>
+  <div id="panelContent">
+    <div id="requests"></div>
+  </div>
 </div>
 
 <div id="footer">
@@ -151,19 +193,17 @@ input, textarea {
     <h3>Request Assistance</h3>
     <p class="meta">Location shared securely</p>
 
-    <input id="name" placeholder="Your name" />
-
+    <input id="name" placeholder="Your name">
     <textarea id="issue" placeholder="Briefly describe the issue"></textarea>
 
     <div class="tip-options">
       <p class="meta">Optional tip for helper</p>
-      <button onclick="selectTip(5)">$5</button>
-      <button onclick="selectTip(10)">$10</button>
-      <button onclick="selectTip(20)">$20</button>
+      <button onclick="selectTip(5, this)">$5</button>
+      <button onclick="selectTip(10, this)">$10</button>
+      <button onclick="selectTip(20, this)">$20</button>
     </div>
 
-    <input id="customTip" placeholder="Custom tip amount ($)" />
-
+    <input id="customTip" placeholder="Custom tip amount ($)">
     <button onclick="submitSOS()">Submit Request</button>
   </div>
 </div>
@@ -179,7 +219,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let map, userLocation, selectedTip = 0;
+let map, userLocation;
+let sosCache = {};
+let sosMarkers = {};
+let selectedTip = 0;
 
 function initMap() {
   navigator.geolocation.getCurrentPosition(pos => {
@@ -194,62 +237,107 @@ function initMap() {
       styles: [{ featureType: "poi", stylers: [{ visibility: "off" }] }]
     });
 
-    loadSOS();
+    new google.maps.Marker({
+      position: userLocation,
+      map,
+      icon: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+    });
+
+    db.ref("sosRequests").on("value", snap => {
+      sosCache = {};
+      snap.forEach(c => sosCache[c.key] = c.val());
+      renderSOS();
+    });
+
+    map.addListener("idle", renderSOS);
   });
 }
 
-function loadSOS() {
+function renderSOS() {
   const container = document.getElementById("requests");
-  db.ref("sosRequests").on("value", snap => {
-    container.innerHTML = "";
-    snap.forEach(child => {
-      const d = child.val();
-      if (d.status !== "open") return;
+  container.innerHTML = "";
+  const bounds = map.getBounds();
+  let found = false;
 
-      container.innerHTML += `
-        <div class="card">
-          <h4>${d.userName}</h4>
-          <p>${d.issue}</p>
-          <span class="badge">Tip: $${d.tip || 0}</span>
-          <button onclick="acceptSOS('${child.key}')">Respond</button>
-        </div>
-      `;
-    });
+  Object.keys(sosMarkers).forEach(id => {
+    if (!sosCache[id] || sosCache[id].status !== "open") {
+      sosMarkers[id].setMap(null);
+      delete sosMarkers[id];
+    }
   });
+
+  Object.entries(sosCache).forEach(([id, d]) => {
+    if (d.status !== "open") return;
+    const pos = new google.maps.LatLng(d.lat, d.lng);
+
+    if (!sosMarkers[id]) {
+      sosMarkers[id] = new google.maps.Marker({
+        position: pos,
+        map,
+        icon: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+        title: d.issue
+      });
+    }
+
+    const visible = bounds.contains(pos);
+    sosMarkers[id].setVisible(visible);
+    if (!visible) return;
+
+    found = true;
+    container.innerHTML += `
+      <div class="card">
+        <h4>${d.userName}</h4>
+        <p>${d.issue}</p>
+        <span class="badge">Tip: $${d.tip || 0}</span>
+        <button>Respond</button>
+      </div>
+    `;
+  });
+
+  if (!found) {
+    container.innerHTML = `<p class="meta">No assistance needed in this area</p>`;
+  }
+}
+
+function togglePanel() {
+  const content = document.getElementById("panelContent");
+  const chevron = document.getElementById("chevron");
+  content.classList.toggle("open");
+  chevron.textContent = content.classList.contains("open") ? "▾" : "▴";
 }
 
 function openSOS() {
   document.getElementById("modal").style.display = "flex";
 }
 
-function selectTip(amount) {
+function selectTip(amount, el) {
   selectedTip = amount;
   document.querySelectorAll(".tip-options button").forEach(b => b.classList.remove("active"));
-  event.target.classList.add("active");
+  el.classList.add("active");
 }
 
 function submitSOS() {
-  const name = nameInput = document.getElementById("name").value;
-  const issue = document.getElementById("issue").value;
+  const name = document.getElementById("name").value.trim();
+  const issue = document.getElementById("issue").value.trim();
   const customTip = parseFloat(document.getElementById("customTip").value);
+
+  if (!name || !issue) return;
 
   db.ref("sosRequests").push({
     userName: name,
     issue,
     lat: userLocation.lat,
     lng: userLocation.lng,
-    tip: customTip || selectedTip,
+    tip: customTip || selectedTip || 0,
     status: "open",
     timestamp: Date.now()
   });
 
   document.getElementById("modal").style.display = "none";
-}
-
-function acceptSOS(id) {
-  db.ref("sosRequests/" + id).update({
-    status: "accepted"
-  });
+  document.getElementById("name").value = "";
+  document.getElementById("issue").value = "";
+  document.getElementById("customTip").value = "";
+  selectedTip = 0;
 }
 
 initMap();
@@ -257,4 +345,3 @@ initMap();
 
 </body>
 </html>
-
