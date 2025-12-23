@@ -12,6 +12,7 @@
 :root {
   --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b;
   --accent: #2563eb; --danger: #ef4444; --success: #22c55e;
+  --inactive: #e2e8f0;
 }
 * { box-sizing: border-box; }
 body { margin:0; background: var(--bg); font-family: -apple-system, sans-serif; color: var(--text); overflow: hidden; }
@@ -38,6 +39,14 @@ body { margin:0; background: var(--bg); font-family: -apple-system, sans-serif; 
 .modal-content { background:white; width:100%; max-width:500px; border-radius:24px 24px 0 0; padding:24px; max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
+/* Notification Items */
+.notif-item { padding:15px; border-radius:12px; margin-bottom:10px; border:1px solid #e2e8f0; position: relative; }
+.notif-active { background: #f0fdf4; border-color: var(--success); }
+.notif-completed { background: #f8fafc; border-color: #e2e8f0; opacity: 0.8; }
+.status-pill { font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; float: right; }
+.status-active { background: var(--success); color: white; }
+.status-completed { background: var(--muted); color: white; }
+
 /* Vehicle Selection */
 .vehicle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
 .v-type { padding: 10px; border: 1px solid #e2e8f0; border-radius: 10px; text-align: center; cursor: pointer; font-size: 13px; background: white; }
@@ -47,18 +56,8 @@ body { margin:0; background: var(--bg); font-family: -apple-system, sans-serif; 
 .profile-pic-container { text-align: center; margin-bottom: 15px; }
 .round-pic { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; background: #e2e8f0; border: 3px solid var(--accent); }
 
-/* Interaction Details Styles */
 .hero-card { display: flex; align-items: center; gap: 15px; background: #f8fafc; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
 .hero-info h4 { margin: 0; font-size: 16px; }
-.hero-info p { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
-
-.toggle-row { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
-.switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-input:checked + .slider { background-color: var(--success); }
-input:checked + .slider:before { transform: translateX(24px); }
 
 input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:12px; font-size: 14px; }
 .submit-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 8px; }
@@ -99,7 +98,9 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
         <h3>Hero Assistance Details</h3>
         <div id="interactionHeroDisplay"></div>
         <div id="interactionSOSDisplay" style="margin-top:10px;"></div>
-        <button class="submit-btn" style="background:var(--success); margin-top:15px;" id="interactionCompleteBtn">MARK SOS COMPLETED</button>
+        <div id="interactionActions">
+            <button class="submit-btn" style="background:var(--success); margin-top:15px;" id="interactionCompleteBtn">MARK SOS COMPLETED</button>
+        </div>
         <span class="cancel-link" onclick="window.closeModal('interactionModal')">Close Details</span>
     </div>
 </div>
@@ -123,7 +124,7 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
   </div>
 </div>
 
-<!-- Helper Response Modal -->
+<!-- Response Modal -->
 <div id="responseModal" class="modal">
   <div class="modal-content">
     <h3 id="respName">SOS Details</h3>
@@ -144,13 +145,6 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
             <input type="file" id="picInput" style="display:none" onchange="window.previewFile()">
             <button onclick="document.getElementById('picInput').click()" style="display:block; margin:5px auto; border:none; background:none; color:var(--accent); font-weight:bold; cursor:pointer;">Update Photo</button>
         </div>
-        <div class="toggle-row">
-            <span>Hero Mode (Online)</span>
-            <label class="switch">
-                <input type="checkbox" id="onlineToggle" onchange="window.saveOnlineStatus()">
-                <span class="slider"></span>
-            </label>
-        </div>
         <div style="text-align:center; margin-bottom:15px;">Assists: <b id="heroCountDisplay">0</b></div>
         <input id="profileName" placeholder="Display Name">
         <textarea id="profileBio" placeholder="Bio/Tools..." rows="2"></textarea>
@@ -162,7 +156,7 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
 <!-- Notifications Modal -->
 <div id="notifModal" class="modal" onclick="if(event.target==this) window.closeModal('notifModal')">
     <div class="modal-content">
-        <h3>Notifications</h3>
+        <h3>Notification History</h3>
         <div id="notifList"></div>
         <button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:20px;" onclick="window.closeModal('notifModal')">Close</button>
     </div>
@@ -213,8 +207,8 @@ window.openInteractionDetails = (sosId) => {
         <div class="hero-card">
             <img src="${hero.pic || 'https://via.placeholder.com/85'}" class="round-pic" style="width:60px; height:60px;">
             <div class="hero-info">
-                <h4>${hero.name || 'Hero'} is on the way</h4>
-                <p>${hero.bio || 'Coming to help you now!'}</p>
+                <h4>${hero.name || 'Hero'} Assistance</h4>
+                <p>${sos.status === 'completed' ? 'This help request is completed.' : 'Hero is on the way!'}</p>
             </div>
         </div>
     `;
@@ -226,12 +220,15 @@ window.openInteractionDetails = (sosId) => {
         </div>
     `;
 
+    // Hide complete button if already completed
+    document.getElementById('interactionActions').style.display = sos.status === 'completed' ? 'none' : 'block';
     document.getElementById('interactionCompleteBtn').onclick = () => window.completeSOS(sosId);
+    
     window.closeModal('notifModal');
     window.openModal('interactionModal');
 };
 
-// Profile & GPS Tracking
+// Profile & GPS
 window.previewFile = () => {
     const reader = new FileReader();
     reader.onload = (e) => document.getElementById('profileDisplayPic').src = e.target.result;
@@ -255,20 +252,7 @@ window.openProfile = async () => {
         document.getElementById("profileName").value = d.name || "";
         document.getElementById("profileBio").value = d.bio || "";
         document.getElementById("heroCountDisplay").innerText = d.helpsCount || 0;
-        document.getElementById("onlineToggle").checked = d.isOnline || false;
         if(d.pic) document.getElementById("profileDisplayPic").src = d.pic;
-    }
-};
-
-window.saveOnlineStatus = () => {
-    const isOnline = document.getElementById("onlineToggle").checked;
-    update(ref(database, `profiles/${myId}`), { isOnline });
-    if (watchId) navigator.geolocation.clearWatch(watchId);
-    if (isOnline) {
-        watchId = navigator.geolocation.watchPosition(pos => {
-            const lat = pos.coords.latitude, lng = pos.coords.longitude;
-            update(ref(database, `profiles/${myId}`), { lat, lng });
-        }, null, { enableHighAccuracy: true });
     }
 };
 
@@ -310,7 +294,8 @@ window.completeSOS = async (id) => {
         const count = snap.exists() ? (snap.val().helpsCount || 0) : 0;
         update(ref(database, `profiles/${r.helperId}`), { helpsCount: count + 1 });
     }
-    remove(ref(database, `sosRequests/${id}`));
+    // Update status to completed instead of removing
+    update(ref(database, `sosRequests/${id}`), { status: "completed", completedAt: Date.now() });
     window.closeModal('interactionModal');
 };
 
@@ -318,6 +303,7 @@ async function cleanupOldRequests() {
     const twelveHoursAgo = Date.now() - (12 * 60 * 60 * 1000);
     const q = query(ref(database, "sosRequests"), orderByChild("timestamp"), endAt(twelveHoursAgo));
     const snap = await get(q);
+    // Cleanup old completed or open requests to save DB space, but keep them in session if needed
     if (snap.exists()) snap.forEach(c => remove(ref(database, `sosRequests/${c.key}`)));
 }
 
@@ -331,7 +317,11 @@ function initMap() {
         userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         map.setCenter(userLocation);
         new google.maps.Marker({ position: userLocation, map, icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" });
-    }, () => alert("GPS Required"));
+        // Start watching hero location for live updates
+        watchId = navigator.geolocation.watchPosition(p => {
+             update(ref(database, `profiles/${myId}`), { lat: p.coords.latitude, lng: p.coords.longitude });
+        }, null, { enableHighAccuracy: true });
+    });
 
     onValue(ref(database, "sosRequests"), (snap) => {
         sosCache = snap.val() || {};
@@ -349,6 +339,7 @@ function renderSOS() {
     const container = document.getElementById("requests");
     container.innerHTML = "";
     Object.entries(sosCache).forEach(([id, d]) => {
+        // Only show OPEN requests on the map/browse list
         if(d.status !== "open") {
             if(sosMarkers[id]) { sosMarkers[id].setMap(null); delete sosMarkers[id]; }
             return;
@@ -368,20 +359,23 @@ function renderHelpers() {
     Object.entries(profilesCache).forEach(([id, p]) => {
         if(id === myId) return;
         let isMyHero = false;
-        Object.values(sosCache).forEach(req => { if(req.ownerId === myId && req.status==='accepted' && req.helperId===id) isMyHero = true; });
+        Object.values(sosCache).forEach(req => { 
+            // Only track hero on map if status is specifically 'accepted'
+            if(req.ownerId === myId && req.status==='accepted' && req.helperId===id) isMyHero = true; 
+        });
 
-        if(!p.isOnline && !isMyHero) {
+        // If not your active hero, don't show on map
+        if(!isMyHero) {
             if(helperMarkers[id]) { helperMarkers[id].setMap(null); delete helperMarkers[id]; }
             return;
         }
         const pos = {lat: p.lat, lng: p.lng};
         if(!helperMarkers[id]) {
             helperMarkers[id] = new google.maps.Marker({
-                position: pos, map, icon: isMyHero ? "http://maps.google.com/mapfiles/kml/pal4/icon54.png" : "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+                position: pos, map, icon: "http://maps.google.com/mapfiles/kml/pal4/icon54.png"
             });
         } else {
             helperMarkers[id].setPosition(pos);
-            if(isMyHero) helperMarkers[id].setIcon("http://maps.google.com/mapfiles/kml/pal4/icon54.png");
         }
     });
 }
@@ -389,20 +383,36 @@ function renderHelpers() {
 function updateNotifications() {
     const badge = document.getElementById("notifBadge");
     const list = document.getElementById("notifList");
-    let count = 0; let html = "";
-    Object.entries(sosCache).forEach(([id, r]) => {
-        if(r.ownerId === myId && r.status === "accepted") {
-            count++;
-            // FIXED: Notification action now only "SHOW DETAILS"
-            html += `<div onclick="window.openInteractionDetails('${id}')" style="cursor:pointer; padding:15px; background:#f0fdf4; border-radius:10px; margin-bottom:10px; border:1px solid var(--success);">
-                <b>A Hero is on the way!</b><br>Track their live location on the map.
-                <button class="btn-respond" style="background:var(--accent)" onclick="event.stopPropagation(); window.openInteractionDetails('${id}')">SHOW DETAILS</button>
-            </div>`;
+    let activeCount = 0; let html = "";
+    
+    // Sort notifications: Accepted first, then Completed
+    const sortedEntries = Object.entries(sosCache).sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
+
+    sortedEntries.forEach(([id, r]) => {
+        if(r.ownerId === myId) {
+            if (r.status === "accepted") {
+                activeCount++;
+                html += `
+                <div class="notif-item notif-active" onclick="window.openInteractionDetails('${id}')">
+                    <span class="status-pill status-active">Active</span>
+                    <b>Hero is on the way!</b><br>
+                    <small>Assigned Hero: ${profilesCache[r.helperId]?.name || 'Hero'}</small>
+                    <button class="btn-respond" style="background:var(--accent)">SHOW DETAILS</button>
+                </div>`;
+            } else if (r.status === "completed") {
+                html += `
+                <div class="notif-item notif-completed" onclick="window.openInteractionDetails('${id}')">
+                    <span class="status-pill status-completed">Completed</span>
+                    <b>Assistance Finished</b><br>
+                    <small>Issue: ${r.issue.substring(0, 20)}...</small>
+                </div>`;
+            }
         }
     });
-    badge.innerText = count;
-    badge.style.display = count > 0 ? "flex" : "none";
-    list.innerHTML = html || "<p style='color:gray;text-align:center;'>No activity</p>";
+
+    badge.innerText = activeCount;
+    badge.style.display = activeCount > 0 ? "flex" : "none";
+    list.innerHTML = html || "<p style='color:gray;text-align:center;'>No past or active requests found.</p>";
 }
 
 initMap();
