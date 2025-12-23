@@ -38,7 +38,7 @@ body { margin:0; background: var(--bg); font-family: -apple-system, sans-serif; 
 .modal-content { background:white; width:100%; max-width:500px; border-radius:24px 24px 0 0; padding:24px; max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-/* Profile & Toggle Switch */
+/* Toggle Switch */
 .toggle-row { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
 .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
 .switch input { opacity: 0; width: 0; height: 0; }
@@ -47,7 +47,7 @@ body { margin:0; background: var(--bg); font-family: -apple-system, sans-serif; 
 input:checked + .slider { background-color: var(--success); }
 input:checked + .slider:before { transform: translateX(24px); }
 
-input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:12px; }
+input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:12px; font-size: 14px; }
 .submit-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 8px; }
 .nav-btn { width: 100%; padding: 14px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; text-decoration: none; display: block; text-align: center; margin-bottom: 8px;}
 .cancel-link { display: block; text-align: center; padding: 10px; color: var(--muted); cursor: pointer; font-size: 14px;}
@@ -88,6 +88,7 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
     <h3>Post SOS Request</h3>
     <input id="name" placeholder="Your Name">
     <textarea id="issue" placeholder="What's the problem?" rows="2"></textarea>
+    <input id="tip" type="number" placeholder="Incentive Tip Amount ($)">
     <button class="submit-btn" onclick="window.submitSOS()">Post Request</button>
     <span class="cancel-link" onclick="window.closeModal('modal')">Cancel</span>
   </div>
@@ -98,10 +99,11 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
   <div class="modal-content">
     <h3 id="respName">SOS Details</h3>
     <p id="respIssue" style="background:#f1f5f9; padding:15px; border-radius:12px;"></p>
+    <p id="respTip" style="font-weight:bold; color:var(--success);"></p>
     
     <div id="actionButtons">
-        <button class="submit-btn" id="confirmHelpBtn">I CAN HELP (SEND ETA)</button>
-        <a id="navBtn" class="nav-btn" target="_blank" style="display:none;">NAVIGATE WITH GOOGLE MAPS</a>
+        <button class="submit-btn" id="confirmHelpBtn">I'M ON MY WAY</button>
+        <a id="navBtn" class="nav-btn" target="_blank" style="display:none;">NAVIGATE TO LOCATION</a>
     </div>
     
     <span class="cancel-link" onclick="window.closeModal('responseModal')">Go Back</span>
@@ -113,17 +115,15 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
     <div class="modal-content">
         <h3>My Profile</h3>
         <div class="toggle-row">
-            <span>Online Status (Hero Mode)</span>
+            <span>Hero Mode (Online)</span>
             <label class="switch">
                 <input type="checkbox" id="onlineToggle" onchange="window.saveOnlineStatus()">
                 <span class="slider"></span>
             </label>
         </div>
-        <div style="text-align:center; margin-bottom:15px;">
-            Assists: <b id="heroCountDisplay">0</b>
-        </div>
+        <div style="text-align:center; margin-bottom:15px;">Assists: <b id="heroCountDisplay">0</b></div>
         <input id="profileName" placeholder="Display Name">
-        <textarea id="profileBio" placeholder="Bio..." rows="2"></textarea>
+        <textarea id="profileBio" placeholder="Bio/Tools..." rows="2"></textarea>
         <button class="submit-btn" onclick="window.saveProfile()">Save Settings</button>
         <span class="cancel-link" onclick="window.closeModal('profileModal')">Close</span>
     </div>
@@ -156,9 +156,9 @@ const database = getDatabase(app);
 if(!localStorage.getItem('heroUserId')) localStorage.setItem('heroUserId', 'u_' + Math.random().toString(36).substr(2, 9));
 const myId = localStorage.getItem('heroUserId');
 
-let map, userLocation;
+let map, userLocation, watchId = null;
 let sosCache = {}, profilesCache = {};
-let sosMarkers = {}, helperMarkers = {};
+let sosMarkers = {}, helperMarkers = {}, myHeroMarker = null;
 
 // --- GLOBAL FUNCTIONS ---
 window.openModal = (id) => document.getElementById(id).style.display = "flex";
@@ -174,6 +174,7 @@ window.openHelpDetails = (id) => {
     if(!data) return;
     document.getElementById("respName").innerText = "Helping " + data.userName;
     document.getElementById("respIssue").innerText = data.issue;
+    document.getElementById("respTip").innerText = data.tip ? `Reward Tip: $${data.tip}` : "No tip offered";
     
     const navBtn = document.getElementById("navBtn");
     navBtn.style.display = "block";
@@ -184,21 +185,27 @@ window.openHelpDetails = (id) => {
 };
 
 window.confirmHelp = async (requestId) => {
-    const snap = await get(ref(database, `profiles/${myId}`));
-    const profile = snap.val() || {helpsCount: 0};
     update(ref(database, `sosRequests/${requestId}`), { status: "accepted", helperId: myId });
-    update(ref(database, `profiles/${myId}`), { helpsCount: (profile.helpsCount || 0) + 1 });
     window.closeModal("responseModal");
 };
 
 window.saveOnlineStatus = () => {
     const isOnline = document.getElementById("onlineToggle").checked;
-    update(ref(database, `profiles/${myId}`), { 
-        isOnline, 
-        lat: userLocation ? userLocation.lat : 0, 
-        lng: userLocation ? userLocation.lng : 0 
-    });
+    update(ref(database, `profiles/${myId}`), { isOnline });
+    startLocationTracking(isOnline);
 };
+
+function startLocationTracking(isOnline) {
+    if (watchId) navigator.geolocation.clearWatch(watchId);
+    if (isOnline) {
+        watchId = navigator.geolocation.watchPosition(pos => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            userLocation = { lat, lng };
+            update(ref(database, `profiles/${myId}`), { lat, lng });
+        }, err => console.error(err), { enableHighAccuracy: true });
+    }
+}
 
 window.saveProfile = () => {
     update(ref(database, `profiles/${myId}`), {
@@ -223,15 +230,24 @@ window.openProfile = async () => {
 window.submitSOS = () => {
   const name = document.getElementById("name").value.trim();
   const issue = document.getElementById("issue").value.trim();
+  const tip = document.getElementById("tip").value || 0;
   if(!name || !issue || !userLocation) return;
   push(ref(database, "sosRequests"), {
-    userName: name, issue, lat: userLocation.lat, lng: userLocation.lng,
+    userName: name, issue, tip, lat: userLocation.lat, lng: userLocation.lng,
     status: "open", timestamp: Date.now(), ownerId: myId
   });
   window.closeModal("modal");
 };
 
-window.completeSOS = (id) => remove(ref(database, `sosRequests/${id}`));
+window.completeSOS = async (id) => {
+    const r = sosCache[id];
+    if (r && r.helperId) {
+        const snap = await get(ref(database, `profiles/${r.helperId}`));
+        const count = snap.exists() ? (snap.val().helpsCount || 0) : 0;
+        update(ref(database, `profiles/${r.helperId}`), { helpsCount: count + 1 });
+    }
+    remove(ref(database, `sosRequests/${id}`));
+};
 
 // --- CORE LOGIC ---
 async function cleanupOldRequests() {
@@ -244,7 +260,7 @@ async function cleanupOldRequests() {
 function initMap() {
     cleanupOldRequests();
     map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 40.71, lng: -74 }, zoom: 13, disableDefaultUI: true
+        center: { lat: 40.71, lng: -74 }, zoom: 14, disableDefaultUI: true
     });
 
     navigator.geolocation.getCurrentPosition(pos => {
@@ -253,14 +269,12 @@ function initMap() {
         new google.maps.Marker({ position: userLocation, map, icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" });
     });
 
-    // Listen for SOS
     onValue(ref(database, "sosRequests"), (snap) => {
         sosCache = snap.val() || {};
         renderSOS();
         updateNotifications();
     });
 
-    // Listen for Online Helpers
     onValue(ref(database, "profiles"), (snap) => {
         profilesCache = snap.val() || {};
         renderHelpers();
@@ -280,26 +294,40 @@ function renderSOS() {
         });
         container.innerHTML += `
             <div class="card">
-                <b>${d.userName}</b>
+                <b>${d.userName}</b> ${d.tip > 0 ? `<span style="color:var(--success); float:right;">$${d.tip} Tip</span>` : ''}
                 <p style="font-size:14px; margin:5px 0;">${d.issue}</p>
-                <button class="btn-respond" onclick="window.openHelpDetails('${id}')">VIEW & NAVIGATE</button>
+                <button class="btn-respond" onclick="window.openHelpDetails('${id}')">VIEW & HELP</button>
             </div>`;
     });
 }
 
 function renderHelpers() {
+    // This function handles both general online heroes and your specific assigned hero
     Object.entries(profilesCache).forEach(([id, p]) => {
-        if(id === myId) return; // Hide self
-        if(!p.isOnline) {
+        if(id === myId) return;
+
+        // 1. Check if this profile is the specific Hero coming to help current user
+        let isMyAssignedHero = false;
+        Object.values(sosCache).forEach(req => {
+            if (req.ownerId === myId && req.status === 'accepted' && req.helperId === id) isMyAssignedHero = true;
+        });
+
+        if(!p.isOnline && !isMyAssignedHero) {
             if(helperMarkers[id]) { helperMarkers[id].setMap(null); delete helperMarkers[id]; }
             return;
         }
+
+        const pos = {lat: p.lat, lng: p.lng};
         if(!helperMarkers[id]) {
             helperMarkers[id] = new google.maps.Marker({
-                position: {lat: p.lat, lng: p.lng}, map,
-                icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+                position: pos, map,
+                icon: isMyAssignedHero ? "http://maps.google.com/mapfiles/kml/pal4/icon54.png" : "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
                 title: p.name || "Hero"
             });
+        } else {
+            // Update location in real-time
+            helperMarkers[id].setPosition(pos);
+            if (isMyAssignedHero) helperMarkers[id].setIcon("http://maps.google.com/mapfiles/kml/pal4/icon54.png");
         }
     });
 }
@@ -311,8 +339,8 @@ function updateNotifications() {
     Object.entries(sosCache).forEach(([id, r]) => {
         if(r.ownerId === myId && r.status === "accepted") {
             count++;
-            html += `<div style="padding:15px; background:#f0fdf4; border-radius:10px; margin-bottom:10px;">
-                <b>Hero On The Way!</b><br>Someone has accepted your request.
+            html += `<div style="padding:15px; background:#f0fdf4; border-radius:10px; margin-bottom:10px; border:1px solid var(--success);">
+                <b>A Hero is on the way!</b><br>Track their live location on the map.
                 <button class="btn-respond" style="background:var(--success)" onclick="window.completeSOS('${id}')">MARK COMPLETED</button>
             </div>`;
         }
