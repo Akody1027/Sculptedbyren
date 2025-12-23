@@ -23,7 +23,7 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 
 /* --- LANDING PAGE --- */
 #landingPage { align-items: center; justify-content: center; padding: 30px; text-align: center; z-index: 100; }
-#landingPage img { width: 220px; margin-bottom: 10px; }
+#landingPage .logo { width: 220px; margin-bottom: 10px; }
 .mode-btn { width: 100%; max-width: 320px; padding: 20px; border-radius: 18px; font-size: 18px; font-weight: 700; border: none; cursor: pointer; margin-bottom: 16px; transition: 0.2s; }
 .btn-req { background: var(--danger); color: white; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2); }
 .btn-hero { background: var(--text); color: white; }
@@ -39,24 +39,32 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 #heroUI { overflow: hidden; }
 #map { width: 100%; height: 100%; position: absolute; top:0; left:0; z-index: 1; }
 #heroPanel { position: fixed; bottom: 90px; left: 15px; right: 15px; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
-.task-card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-left: 5px solid var(--accent); }
-.browse-btn { background: white; padding: 15px; border-radius: 20px; text-align: center; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.1); cursor: pointer; }
-
-/* --- RADIUS TOGGLES --- */
-.radius-container { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 20px; }
-.radius-item { flex: 1 1 60px; position: relative; }
-.radius-item input { position: absolute; opacity: 0; cursor: pointer; }
-.radius-label { display: block; padding: 6px 2px; text-align: center; background: #f1f5f9; border-radius: 8px; font-size: 11px; cursor: pointer; border: 1px solid transparent; }
-.radius-item input:checked + .radius-label { background: var(--accent); color: white; border-color: var(--accent); }
+.task-card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-left: 6px solid var(--accent); }
+.browse-btn { background: white; padding: 18px; border-radius: 20px; text-align: center; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.1); cursor: pointer; }
 
 /* --- MODALS --- */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
-.modal-content { background: white; width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease; }
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-content { background: white; width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; }
+
+/* Vehicle Toggle Grid */
+.vehicle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
+.v-type { padding: 12px; border: 2px solid #f1f5f9; border-radius: 12px; text-align: center; cursor: pointer; font-weight: 600; font-size: 14px; }
+.v-type.active { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
+
+/* Radius UI */
+.radius-container { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 20px; }
+.radius-item { flex: 1 1 60px; position: relative; }
+.radius-item input { position: absolute; opacity: 0; cursor: pointer; }
+.radius-label { display: block; padding: 8px 2px; text-align: center; background: #f1f5f9; border-radius: 8px; font-size: 11px; cursor: pointer; }
+.radius-item input:checked + .radius-label { background: var(--accent); color: white; }
 
 input, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 12px; font-size: 15px; background: #f8fafc; }
-.submit-btn { width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 15px; font-weight: 700; cursor: pointer; font-size: 16px; }
-.cancel-link { display: block; text-align: center; padding: 10px; color: var(--muted); cursor: pointer; font-size: 14px;}
+.submit-btn { width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 16px; }
+.cancel-link { display: block; text-align: center; padding: 15px; color: var(--muted); cursor: pointer; }
+
+/* HISTORY & NOTIFICATIONS */
+.history-item { padding: 15px; background: #f8fafc; border-radius: 15px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
+.status-pill { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; float: right; }
 
 /* FOOTER */
 .footer { position: fixed; bottom: 0; width: 100%; height: 80px; background: white; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; z-index: 200; border-top: 1px solid #f1f5f9; }
@@ -66,9 +74,9 @@ input, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px s
 </head>
 <body>
 
-<!-- 1. LANDING -->
+<!-- 1. LANDING PAGE -->
 <div id="landingPage" class="view view-active">
-    <img src="Roadsidehero.png" alt="Roadside Hero Logo">
+    <img src="Roadsidehero.png" class="logo" alt="Roadside Hero Logo">
     <h2 style="color: var(--muted); margin-bottom: 40px; font-weight: 500;">Help is just a click away.</h2>
     <button class="mode-btn btn-req" onclick="window.openModal('requestModal')">Request Help!</button>
     <button class="mode-btn btn-hero" onclick="window.enterHeroMode()">I'm Looking to be a Hero</button>
@@ -76,21 +84,22 @@ input, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px s
 
 <!-- 2. SEEKER DASHBOARD -->
 <div id="seekerUI" class="view">
-    <button onclick="window.cancelSOS()" style="align-self: flex-start; background: none; border: none; font-weight: 700; color: var(--danger); padding: 20px;">✕ CANCEL REQUEST</button>
+    <button onclick="window.cancelSOS()" style="align-self: flex-start; background: none; border: none; font-weight: 800; color: var(--danger); padding: 20px;">✕ CANCEL SOS</button>
     
     <div id="searchingState" class="status-card">
         <div class="search-pulse">📡</div>
-        <h3>Searching for Heroes...</h3>
+        <h3>Broadcasting Help Signal...</h3>
         <p id="nearbyHelpers">Notifying heroes in your area.</p>
     </div>
 
     <div id="matchedState" class="status-card" style="display:none; border-color: var(--success);">
-        <div style="background: var(--success); color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; font-size: 12px; font-weight: 700; margin-bottom: 15px;">HERO ASSIGNED</div>
+        <div style="background: var(--success); color: white; padding: 6px 16px; border-radius: 20px; display: inline-block; font-size: 12px; font-weight: 800; margin-bottom: 15px;">HERO CONNECTED</div>
         <div style="display: flex; align-items: center; gap: 15px; text-align: left;">
-            <img id="matchPic" src="" style="width: 75px; height: 75px; border-radius: 50%; object-fit: cover; background: #eee; border: 2px solid var(--success);">
+            <img id="matchPic" src="" style="width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 2px solid var(--success);">
             <div>
                 <h3 id="matchName" style="margin:0;">Hero Name</h3>
                 <p id="matchDist" style="margin:5px 0; color: var(--accent); font-weight: 700;"></p>
+                <p id="matchBio" style="font-size: 12px; color: var(--muted);"></p>
             </div>
         </div>
         <button class="submit-btn" style="background: var(--success); margin-top: 25px;" onclick="window.confirmArrival()">HELP HAS ARRIVED</button>
@@ -103,17 +112,17 @@ input, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px s
     <div id="heroPanel">
         <div id="activeTask" class="task-card" style="display:none;">
             <div style="display:flex; justify-content:space-between;">
-                <b style="color: var(--accent);">ACTIVE TASK</b>
-                <span id="taskDist" style="font-weight:bold;">0.0 mi</span>
+                <b style="color: var(--accent);">ONGOING ASSIGNMENT</b>
+                <span id="taskDist" style="font-weight:bold;">... mi</span>
             </div>
-            <p id="taskUser" style="margin:10px 0; font-weight:700;"></p>
-            <div style="display:flex; gap:8px;">
+            <p id="taskUser" style="margin:12px 0; font-weight:700; font-size:16px;"></p>
+            <div style="display:flex; gap:10px;">
                 <a id="navBtn" href="" target="_blank" style="flex:1; background:var(--success); color:white; text-align:center; padding:12px; border-radius:12px; text-decoration:none; font-weight:700;">NAVIGATE</a>
-                <button onclick="window.completeTask()" style="flex:1; border:1px solid #ddd; background:white; border-radius:12px; font-weight:700;">COMPLETE</button>
+                <button onclick="window.completeTask()" style="flex:1; border:1px solid #ddd; background:white; border-radius:12px; font-weight:700;">MARK FINISHED</button>
             </div>
         </div>
         <div class="browse-btn" onclick="window.openModal('browseModal')">
-            🔍 VIEW REQUESTS (<span id="openCount">0</span>)
+            🔍 BROWSE REQUESTS (<span id="openCount">0</span>)
         </div>
     </div>
     <div class="footer">
@@ -129,7 +138,19 @@ input, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px s
 <div id="requestModal" class="modal">
     <div class="modal-content">
         <h3>Request Assistance</h3>
-        <textarea id="reqIssue" placeholder="Briefly describe the problem..." rows="3"></textarea>
+        <label style="font-size:12px; font-weight:bold;">Vehicle Type</label>
+        <div class="vehicle-grid">
+            <div class="v-type active" onclick="window.selectVehicle('Car', this)">🚗 Car</div>
+            <div class="v-type" onclick="window.selectVehicle('Truck', this)">🛻 Truck</div>
+            <div class="v-type" onclick="window.selectVehicle('RV', this)">🚐 RV</div>
+            <div class="v-type" onclick="window.selectVehicle('HeavyDuty', this)">🚛 Heavy Duty</div>
+        </div>
+        
+        <img id="damagePreview" style="width:100%; height:120px; object-fit:cover; border-radius:15px; margin-bottom:15px; display:none;">
+        <input type="file" id="damageInput" accept="image/*" style="display:none" onchange="window.previewDamage(this)">
+        <button onclick="document.getElementById('damageInput').click()" style="width:100%; padding:12px; border-radius:12px; border:2px dashed #ddd; background:none; margin-bottom:15px; cursor:pointer; font-weight:bold; color:var(--muted);">📷 Add Damage Photo</button>
+
+        <textarea id="reqIssue" placeholder="What's the problem?" rows="2"></textarea>
         <input id="reqTip" type="number" placeholder="Optional Tip for Hero ($)">
         <button class="submit-btn" onclick="window.submitSOS()">SUBMIT SOS</button>
         <p onclick="window.closeModal('requestModal')" class="cancel-link">Cancel</p>
@@ -141,28 +162,25 @@ input, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px s
         <h3>Hero Profile & Radius</h3>
         <div style="text-align:center; margin-bottom:15px;">
             <img id="profileDisplayPic" src="https://via.placeholder.com/85" style="width:85px; height:85px; border-radius:50%; object-fit:cover; border:3px solid var(--accent);">
-            <input type="file" id="picInput" style="display:none" onchange="window.previewFile()">
-            <button onclick="document.getElementById('picInput').click()" style="display:block; margin:5px auto; border:none; background:none; color:var(--accent); font-weight:bold; cursor:pointer;">Update Photo</button>
+            <input type="file" id="picInput" style="display:none" onchange="window.previewProfilePic(this)">
+            <button onclick="document.getElementById('picInput').click()" style="display:block; margin:5px auto; border:none; background:none; color:var(--accent); font-weight:bold; cursor:pointer;">Change Photo</button>
         </div>
         <div style="text-align:center; margin-bottom:15px; font-size:14px;">Total Assists: <b id="heroCountDisplay">0</b></div>
-        
-        <input id="profileName" placeholder="Display Hero Name">
-        <textarea id="profileBio" placeholder="Bio / Equipment (e.g. Have jack, jumper cables)..." rows="2"></textarea>
-        
-        <label style="font-size:12px; color:var(--muted)">Service Travel Radius</label>
+        <input id="profileName" placeholder="Hero Name">
+        <textarea id="profileBio" placeholder="Bio / Tools Available..." rows="2"></textarea>
+        <label style="font-size:12px; font-weight:bold;">Service Travel Radius</label>
         <div class="radius-container" id="radiusSelector"></div>
-        
-        <button class="submit-btn" onclick="window.saveProfile()">Save Profile</button>
+        <button class="submit-btn" onclick="window.saveProfile()">Save Settings</button>
         <span class="cancel-link" onclick="window.closeModal('profileModal')">Close</span>
     </div>
 </div>
 
-<div id="browseModal" class="modal"><div class="modal-content"><h3>Nearby Requests</h3><div id="browseList"></div><button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:15px;" onclick="window.closeModal('browseModal')">CLOSE</button></div></div>
+<div id="browseModal" class="modal"><div class="modal-content"><h3>Requests in Radius</h3><div id="browseList"></div><button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:15px;" onclick="window.closeModal('browseModal')">CLOSE</button></div></div>
 <div id="notifModal" class="modal"><div class="modal-content"><h3>History</h3><div id="notifHistory"></div><button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:15px;" onclick="window.closeModal('notifModal')">CLOSE</button></div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, set, get, update, remove } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, set, get, update, remove, query, orderByChild, endAt } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBgXWZkH0WMjhGmOfxjqbIDoJHlyA1pc-o",
@@ -178,24 +196,41 @@ const db = getDatabase(app);
 if(!localStorage.getItem('heroUserId')) localStorage.setItem('heroUserId', 'u_' + Math.random().toString(36).substr(2, 9));
 const myId = localStorage.getItem('heroUserId');
 
-let map, userLocation, activeSosId = null, myRadius = 50;
+let map, userLocation, selectedVehicle = "Car", damageImgData = null, myRadius = 50;
+let sosCache = {}, profilesCache = {}, markers = {};
 const radiusOptions = [5, 10, 15, 20, 30, 40, 50, 100, 150, 200, 300, 999999];
 
-// --- WINDOW FUNCTIONS ---
+// --- WINDOW EXPORTS ---
 window.openModal = (id) => document.getElementById(id).style.display = "flex";
 window.closeModal = (id) => document.getElementById(id).style.display = "none";
 window.switchView = (id) => {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('view-active'));
     document.getElementById(id).classList.add('view-active');
 };
-
-// --- PROFILE LOGIC ---
-window.previewFile = () => {
-    const reader = new FileReader();
-    reader.onload = (e) => document.getElementById('profileDisplayPic').src = e.target.result;
-    reader.readAsDataURL(document.getElementById('picInput').files[0]);
+window.selectVehicle = (type, el) => {
+    selectedVehicle = type;
+    document.querySelectorAll(".v-type").forEach(b => b.classList.remove("active"));
+    el.classList.add("active");
 };
 
+// --- IMAGES ---
+window.previewDamage = (input) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        damageImgData = e.target.result;
+        document.getElementById('damagePreview').src = damageImgData;
+        document.getElementById('damagePreview').style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+};
+window.previewProfilePic = (input) => {
+    const reader = new FileReader();
+    reader.onload = (e) => document.getElementById('profileDisplayPic').src = e.target.result;
+    reader.readAsDataURL(input.files[0]);
+};
+
+// --- PROFILE ---
+window.setMyRadius = (val) => { myRadius = val; };
 window.saveProfile = () => {
     update(ref(db, `profiles/${myId}`), {
         name: document.getElementById("profileName").value,
@@ -206,7 +241,6 @@ window.saveProfile = () => {
     if(map && userLocation) window.updateMapView();
     window.closeModal("profileModal");
 };
-
 window.openProfile = async () => {
     window.openModal("profileModal");
     const snap = await get(ref(db, `profiles/${myId}`));
@@ -224,57 +258,53 @@ window.openProfile = async () => {
     }
 };
 
-window.setMyRadius = (val) => { myRadius = val; };
-
 // --- HERO LOGIC ---
 window.enterHeroMode = () => {
     window.switchView('heroUI');
     setTimeout(() => { if(!map) initMap(); }, 200);
 };
-
 window.updateMapView = () => {
     if (!map || !userLocation) return;
     if (myRadius >= 999999) { map.setCenter({ lat: 39.8, lng: -98.5 }); map.setZoom(4); }
     else { const circle = new google.maps.Circle({ center: userLocation, radius: myRadius * 1609.34 }); map.fitBounds(circle.getBounds()); }
 };
-
 window.confirmHelp = (sosId) => {
     update(ref(db, `sosRequests/${sosId}`), { status: 'accepted', helperId: myId });
     window.closeModal('browseModal');
 };
-
 window.completeTask = async () => {
-    if(!activeSosId) return;
+    const myActive = Object.entries(sosCache).find(([id, r]) => r.helperId === myId && r.status === 'accepted');
+    if(!myActive) return;
     const snap = await get(ref(db, `profiles/${myId}`));
     const count = snap.exists() ? (snap.val().helpsCount || 0) : 0;
     update(ref(db, `profiles/${myId}`), { helpsCount: count + 1 });
-    update(ref(db, `sosRequests/${activeSosId}`), { status: 'completed' });
-    activeSosId = null;
+    update(ref(db, `sosRequests/${myActive[0]}`), { status: 'completed' });
 };
 
 // --- SEEKER LOGIC ---
 window.submitSOS = () => {
     const issue = document.getElementById('reqIssue').value;
-    if(!issue || !userLocation) return alert("Describe your issue and allow GPS.");
+    if(!issue || !userLocation) return alert("Allow GPS and describe issue.");
     push(ref(db, "sosRequests"), {
-        ownerId: myId, userName: "Guest User", issue, tip: document.getElementById('reqTip').value || 0,
+        ownerId: myId, userName: "Stranded User", issue, tip: document.getElementById('reqTip').value || 0,
+        vehicle: selectedVehicle, damagePic: damageImgData,
         lat: userLocation.lat, lng: userLocation.lng, status: 'open', timestamp: Date.now()
     });
     window.closeModal('requestModal');
     window.switchView('seekerUI');
 };
-
 window.cancelSOS = () => {
     const myReqId = Object.keys(sosCache).find(k => sosCache[k].ownerId === myId && sosCache[k].status !== 'completed');
     if(myReqId) remove(ref(db, `sosRequests/${myReqId}`));
     location.reload();
 };
-
 window.confirmArrival = () => window.completeTask();
 
 // --- MAP & SYNC ---
 function initMap() {
-    map = new google.maps.Map(document.getElementById("map"), { center: userLocation || {lat: 40, lng: -74}, zoom: 14, disableDefaultUI: true });
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: userLocation || {lat: 40, lng: -74}, zoom: 14, disableDefaultUI: true
+    });
     if(userLocation) {
         new google.maps.Marker({ position: userLocation, map, icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" });
         window.updateMapView();
@@ -294,48 +324,53 @@ onValue(ref(db, "profiles"), (snap) => {
 function syncUI() {
     const list = document.getElementById('browseList');
     const history = document.getElementById('notifHistory');
+    const badge = document.getElementById('notifBadge');
     list.innerHTML = ""; history.innerHTML = "";
-    let openCount = 0; let myActiveTask = null; let myOwnRequest = null;
+    let openCount = 0; let myTask = null; let mySOS = null;
 
     Object.entries(sosCache).forEach(([id, r]) => {
         const dist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609).toFixed(1) : "?";
+        const inRadius = (myRadius >= 999999 || dist <= myRadius);
 
-        if(r.status === 'open' && r.ownerId !== myId) {
+        if(r.status === 'open' && r.ownerId !== myId && inRadius) {
             openCount++;
-            list.innerHTML += `<div style="background:#f1f5f9; padding:15px; border-radius:12px; margin-bottom:10px;">
-                <b>SOS: ${r.issue}</b><br>${dist} mi away<br><button class="submit-btn" style="margin-top:10px; padding:8px;" onclick="window.confirmHelp('${id}')">HELP THEM</button>
-            </div>`;
+            list.innerHTML += `<div class="history-item"><b>${r.vehicle}: ${r.issue}</b><br>${dist} mi away<br><button class="submit-btn" style="margin-top:10px; padding:8px;" onclick="window.confirmHelp('${id}')">HELP THEM</button></div>`;
         }
-        if(r.status === 'accepted' && r.helperId === myId) { myActiveTask = r; activeSosId = id; }
-        if(r.ownerId === myId && r.status !== 'completed') { myOwnRequest = r; }
+        if(r.status === 'accepted' && r.helperId === myId) myTask = r;
+        if(r.ownerId === myId && r.status !== 'completed') mySOS = r;
 
-        history.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee; font-size:12px;"><b>${r.status.toUpperCase()}</b>: ${r.issue}</div>`;
+        const p = r.status === 'open' ? 'status-active' : 'status-completed';
+        history.innerHTML += `<div class="history-item"><span class="status-pill" style="background:${r.status==='completed'?'#ddd':'#2563eb'}; color:white;">${r.status}</span><b>${r.userName}</b><br>${r.issue}</div>`;
     });
 
+    // Update Hero Task Card
     const taskCard = document.getElementById('activeTask');
-    if(myActiveTask) {
+    if(myTask) {
         taskCard.style.display = "block";
-        document.getElementById('taskUser').innerText = `Helping: ${myActiveTask.issue}`;
-        document.getElementById('navBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${myActiveTask.lat},${myActiveTask.lng}`;
-        document.getElementById('taskDist').innerText = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(myActiveTask.lat, myActiveTask.lng)) / 1609).toFixed(1) + " mi" : "";
+        document.getElementById('taskUser').innerText = `Helping with ${myTask.issue}`;
+        document.getElementById('navBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${myTask.lat},${myTask.lng}`;
+        document.getElementById('taskDist').innerText = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(myTask.lat, myTask.lng)) / 1609).toFixed(1) + " mi" : "";
     } else { taskCard.style.display = "none"; }
 
-    if(myOwnRequest) {
+    // Update Seeker UI
+    if(mySOS) {
         window.switchView('seekerUI');
-        if(myOwnRequest.status === 'accepted') {
+        if(mySOS.status === 'accepted') {
             document.getElementById('searchingState').style.display = 'none';
             document.getElementById('matchedState').style.display = 'block';
-            const hero = profilesCache[myOwnRequest.helperId] || {};
+            const hero = profilesCache[mySOS.helperId] || {};
             document.getElementById('matchName').innerText = hero.name || "A Hero";
-            document.getElementById('matchPic').src = hero.pic || "https://via.placeholder.com/75";
-            const hDist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(myOwnRequest.lat, myOwnRequest.lng)) / 1609).toFixed(1) : "?";
+            document.getElementById('matchPic').src = hero.pic || "https://via.placeholder.com/85";
+            document.getElementById('matchBio').innerText = hero.bio || "Tools on hand!";
+            const hDist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(mySOS.lat, mySOS.lng)) / 1609).toFixed(1) : "?";
             document.getElementById('matchDist').innerText = hDist + " miles away";
         }
     }
     document.getElementById('openCount').innerText = openCount;
+    badge.innerText = openCount; badge.style.display = openCount > 0 ? "flex" : "none";
 }
 
-// --- SETUP RADIUS UI ---
+// Build Radius UI
 const radBox = document.getElementById('radiusSelector');
 radiusOptions.forEach(val => {
     const div = document.createElement('div'); div.className = 'radius-item';
