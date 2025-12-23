@@ -24,10 +24,10 @@
 body { margin:0; background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--text); overflow: hidden; }
 #map { height: 100vh; width:100%; position:absolute; top:0; z-index:1; }
 
-/* Dropdown Panel - Kept Original */
+/* Dropdown Panel */
 #panel {
   position: fixed;
-  bottom: 85px; /* Adjusted to sit above new footer */
+  bottom: 85px; 
   left: 10px;
   right: 10px;
   background: white;
@@ -48,7 +48,7 @@ body { margin:0; background: var(--bg); font-family: -apple-system, BlinkMacSyst
 .badge-tip { display:inline-block; background:var(--accent); color: white; padding:2px 8px; border-radius:12px; font-size:11px; font-weight: 600; margin-right: 5px; }
 .btn-respond { width: 100%; border:none; padding:8px; border-radius:8px; background:var(--text); color:white; font-size:13px; font-weight:600; cursor:pointer; margin-top: 8px; }
 
-/* NEW FIXED FOOTER BAR */
+/* FOOTER BAR */
 #footer { 
     position:fixed; 
     bottom:0; 
@@ -74,8 +74,9 @@ body { margin:0; background: var(--bg); font-family: -apple-system, BlinkMacSyst
     cursor: pointer;
 }
 
-/* NOTIFICATION ICON & BADGE */
-.notif-wrapper {
+/* FOOTER ICONS */
+.footer-icons { display: flex; gap: 12px; }
+.icon-wrapper {
     position: relative;
     cursor: pointer;
     width: 45px;
@@ -86,7 +87,6 @@ body { margin:0; background: var(--bg); font-family: -apple-system, BlinkMacSyst
     background: #f1f5f9;
     border-radius: 50%;
 }
-.notif-bell { font-size: 22px; }
 #notifBadge {
     position: absolute;
     top: -2px;
@@ -98,41 +98,37 @@ body { margin:0; background: var(--bg); font-family: -apple-system, BlinkMacSyst
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    display: none; /* Hidden when 0 */
+    display: none;
     align-items: center;
     justify-content: center;
     border: 2px solid white;
 }
 
-/* NOTIFICATION MODAL */
-#notifModal { position:fixed; inset:0; background:rgba(15, 23, 42, 0.7); display:none; justify-content:center; align-items:flex-end; z-index:200; }
-#notifContent { 
+/* MODALS */
+#modal, #notifModal, #profileModal { position:fixed; inset:0; background:rgba(15, 23, 42, 0.7); display:none; justify-content:center; align-items:flex-end; z-index:200; }
+.modal-content { 
     background:white; width:100%; max-width:500px; border-radius:24px 24px 0 0; 
-    padding:24px; max-height: 80vh; overflow-y: auto; animation: slideUp 0.3s ease-out; 
+    padding:24px; max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s ease-out; 
 }
-
-/* Original Request Modal */
-#modal { position:fixed; inset:0; background:rgba(15, 23, 42, 0.7); display:none; justify-content:center; align-items:flex-end; z-index:200; padding-bottom: 20px; }
-#modalContent { background:white; width:95%; max-width:450px; border-radius:24px; padding:24px; animation: slideUp 0.3s ease-out; }
-
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
+/* Profile Specific UI */
+.profile-pic-container { text-align: center; margin-bottom: 15px; }
+#profileDisplayPic { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #e2e8f0; border: 3px solid var(--accent); }
+.hero-stat { background: #eff6ff; padding: 10px; border-radius: 12px; text-align: center; margin-top: 10px; border: 1px solid #dbeafe; }
+.hero-stat b { font-size: 18px; color: var(--accent); }
+
 input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:12px; font-size:14px; outline: none; }
-.tip-options { display: flex; gap: 8px; margin-bottom: 12px; }
-.tip-options button { flex: 1; border: 1px solid #e2e8f0; background: white; padding: 8px; border-radius: 8px; cursor: pointer; }
-.tip-options button.active { background: var(--accent); color: white; border-color: var(--accent); }
 .submit-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
 .cancel-link { display: block; text-align: center; margin-top: 15px; color: var(--muted); font-size: 13px; text-decoration: none; cursor: pointer; }
 
 .notif-item { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-.notif-item b { color: var(--accent); }
 </style>
 </head>
 <body>
 
 <div id="map"></div>
 
-<!-- Active Requests Panel -->
 <div id="panel">
   <div id="panelHeader" onclick="togglePanel()">
     <h3>Active Requests Near You</h3>
@@ -143,27 +139,25 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
   </div>
 </div>
 
-<!-- FIXED FOOTER -->
 <div id="footer">
   <button id="sosBtn" onclick="openSOS()">GET HELP NOW</button>
-  <div class="notif-wrapper" onclick="openNotifs()">
-      <span class="notif-bell">🔔</span>
-      <span id="notifBadge">0</span>
+  <div class="footer-icons">
+      <div class="icon-wrapper" onclick="openNotifs()">
+          <span>🔔</span>
+          <span id="notifBadge">0</span>
+      </div>
+      <div class="icon-wrapper" onclick="openProfile()">
+          <span>👤</span>
+      </div>
   </div>
 </div>
 
 <!-- Request Modal -->
 <div id="modal">
-  <div id="modalContent">
+  <div class="modal-content" style="max-width: 450px; border-radius: 24px; margin-bottom: 20px; align-self: center;">
     <h2 style="margin-top:0">Need Assistance?</h2>
     <input id="name" placeholder="Your Name">
     <textarea id="issue" placeholder="What's the problem?" rows="3"></textarea>
-    <div class="tip-options">
-      <button onclick="selectTip(5, this)">$5</button>
-      <button onclick="selectTip(10, this)">$10</button>
-      <button onclick="selectTip(20, this)">$20</button>
-    </div>
-    <input id="customTip" type="number" placeholder="Other amount ($)">
     <button class="submit-btn" onclick="submitSOS()">Post Request</button>
     <span class="cancel-link" onclick="closeSOS()">Cancel</span>
   </div>
@@ -171,37 +165,61 @@ input, textarea { width:100%; padding:12px; border-radius:12px; border:1px solid
 
 <!-- Notification Modal -->
 <div id="notifModal" onclick="if(event.target==this) closeNotifs()">
-    <div id="notifContent">
+    <div class="modal-content">
         <h3 style="margin-top:0">Activity Notifications</h3>
-        <div id="notifList">
-            <p style="color:var(--muted); text-align:center;">No new notifications</p>
-        </div>
+        <div id="notifList"></div>
         <button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:20px;" onclick="closeNotifs()">Close</button>
+    </div>
+</div>
+
+<!-- Profile Modal -->
+<div id="profileModal" onclick="if(event.target==this) closeProfile()">
+    <div class="modal-content">
+        <h3 style="margin-top:0">Personal Profile</h3>
+        <div class="profile-pic-container">
+            <img id="profileDisplayPic" src="https://via.placeholder.com/80" alt="Profile">
+            <br>
+            <input type="file" id="picInput" accept="image/*" style="display:none" onchange="previewFile()">
+            <button onclick="document.getElementById('picInput').click()" style="background:none; border:none; color:var(--accent); font-size:12px; cursor:pointer;">Change Photo</button>
+        </div>
+        
+        <div class="hero-stat">
+            Total Hero Assists: <b id="heroCountDisplay">0</b>
+        </div>
+        
+        <label style="font-size:12px; color:var(--muted)">Display Name</label>
+        <input id="profileName" placeholder="Hero Name">
+        
+        <label style="font-size:12px; color:var(--muted)">Bio / Helper Description</label>
+        <textarea id="profileBio" placeholder="Tell others what tools you carry or how you can help..." rows="3"></textarea>
+        
+        <button class="submit-btn" onclick="saveProfile()">Save Profile</button>
+        <span class="cancel-link" onclick="closeProfile()">Close</span>
     </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, set, get } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBgXWZkH0WMjhGmOfxjqbIDoJHlyA1pc-o",
   authDomain: "roadsidehero-104ea.firebaseapp.com",
   databaseURL: "https://roadsidehero-104ea-default-rtdb.firebaseio.com",
   projectId: "roadsidehero-104ea",
-  storageBucket: "roadsidehero-104ea.firebasestorage.app",
-  messagingSenderId: "1068443635940",
-  appId: "1:1068443635940:web:ae5e33d3fe0d78c415dcf1"
+  storageBucket: "roadsidehero-104ea.firebasestorage.app"
 };
 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
+// Simple Local User ID to track your own data
+if(!localStorage.getItem('heroUserId')) localStorage.setItem('heroUserId', 'user_' + Math.random().toString(36).substr(2, 9));
+const myId = localStorage.getItem('heroUserId');
+
 let map, userLocation;
 let sosCache = {}, sosMarkers = {};
-let selectedTip = 0;
 
-// UI Functions
 window.togglePanel = () => {
   const content = document.getElementById("panelContent");
   const chevron = document.getElementById("chevron");
@@ -213,33 +231,70 @@ window.openSOS = () => document.getElementById("modal").style.display = "flex";
 window.closeSOS = () => document.getElementById("modal").style.display = "none";
 window.openNotifs = () => document.getElementById("notifModal").style.display = "flex";
 window.closeNotifs = () => document.getElementById("notifModal").style.display = "none";
+window.openProfile = () => {
+    document.getElementById("profileModal").style.display = "flex";
+    loadProfileData();
+};
+window.closeProfile = () => document.getElementById("profileModal").style.display = "none";
 
-window.selectTip = (amount, el) => {
-  selectedTip = amount;
-  document.querySelectorAll(".tip-options button").forEach(b => b.classList.remove("active"));
-  el.classList.add("active");
+// Image Preview logic
+window.previewFile = () => {
+    const file = document.getElementById('picInput').files[0];
+    const reader = new FileReader();
+    reader.onloadend = () => { document.getElementById('profileDisplayPic').src = reader.result; }
+    if (file) reader.readAsDataURL(file);
+};
+
+// Profile CRUD
+async function loadProfileData() {
+    const snap = await get(ref(database, `profiles/${myId}`));
+    if(snap.exists()){
+        const d = snap.val();
+        document.getElementById("profileName").value = d.name || "";
+        document.getElementById("profileBio").value = d.bio || "";
+        document.getElementById("heroCountDisplay").innerText = d.helpsCount || 0;
+        if(d.pic) document.getElementById("profileDisplayPic").src = d.pic;
+    }
+}
+
+window.saveProfile = () => {
+    set(ref(database, `profiles/${myId}`), {
+        name: document.getElementById("profileName").value,
+        bio: document.getElementById("profileBio").value,
+        pic: document.getElementById("profileDisplayPic").src,
+        helpsCount: parseInt(document.getElementById("heroCountDisplay").innerText) || 0
+    });
+    alert("Profile Updated!");
+    closeProfile();
+};
+
+// Track Help Actions
+window.handleHelpAction = async (requestId) => {
+    const snap = await get(ref(database, `profiles/${myId}`));
+    let currentCount = 0;
+    if(snap.exists()) currentCount = snap.val().helpsCount || 0;
+    
+    // Increment helpsCount in DB
+    set(ref(database, `profiles/${myId}/helpsCount`), currentCount + 1);
+    alert("Response sent! Your help count has increased.");
 };
 
 window.submitSOS = () => {
   const name = document.getElementById("name").value.trim();
   const issue = document.getElementById("issue").value.trim();
-  const customTip = parseFloat(document.getElementById("customTip").value);
   if(!name || !issue || !userLocation) return;
 
   push(ref(database, "sosRequests"), {
     userName: name, issue, lat: userLocation.lat, lng: userLocation.lng,
-    tip: customTip || selectedTip || 0, status: "open", timestamp: Date.now()
+    status: "open", timestamp: Date.now()
   });
-
   window.closeSOS();
-  document.getElementById("name").value = ""; document.getElementById("issue").value = "";
 };
 
 function initMap() {
   map = new google.maps.Map(document.getElementById("map"), {
     center: { lat: 40.7128, lng: -74.0060 }, zoom: 13, disableDefaultUI: true
   });
-
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(pos => {
       userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -247,14 +302,11 @@ function initMap() {
       new google.maps.Marker({ position: userLocation, map, icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" });
     });
   }
-
-  // Real-time listener for Requests AND Notifications
   onValue(ref(database, "sosRequests"), (snap) => {
     sosCache = snap.val() || {};
     renderSOS();
     updateNotifications();
   });
-
   map.addListener("idle", renderSOS);
 }
 
@@ -263,45 +315,30 @@ function renderSOS() {
   const bounds = map.getBounds();
   if(!bounds) return;
   container.innerHTML = "";
-  let found = false;
-
   Object.entries(sosCache).forEach(([id, d]) => {
     if(d.status !== "open") return;
     const pos = { lat: d.lat, lng: d.lng };
-    if(!sosMarkers[id]) {
-      sosMarkers[id] = new google.maps.Marker({ position: pos, map, icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png" });
-    }
+    if(!sosMarkers[id]) sosMarkers[id] = new google.maps.Marker({ position: pos, map, icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png" });
     if(bounds.contains(pos)) {
-      found = true;
-      container.innerHTML += `<div class="card"><h4>${d.userName}</h4><span class="badge-tip">$${d.tip} Tip</span><p>${d.issue}</p><button class="btn-respond">I CAN HELP</button></div>`;
+      const card = document.createElement('div');
+      card.className = "card";
+      card.innerHTML = `<h4>${d.userName}</h4><p>${d.issue}</p>`;
+      const btn = document.createElement('button');
+      btn.className = "btn-respond";
+      btn.innerText = "I CAN HELP";
+      btn.onclick = () => handleHelpAction(id);
+      card.appendChild(btn);
+      container.appendChild(card);
     }
   });
 }
 
-// REAL-TIME NOTIFICATION LOGIC
 function updateNotifications() {
     const badge = document.getElementById("notifBadge");
-    const list = document.getElementById("notifList");
     const openRequests = Object.values(sosCache).filter(r => r.status === "open");
-    
-    // Update Badge Number
-    if(openRequests.length > 0) {
-        badge.innerText = openRequests.length;
-        badge.style.display = "flex";
-    } else {
-        badge.style.display = "none";
-    }
-
-    // Populate Notification Module
-    if(openRequests.length > 0) {
-        list.innerHTML = openRequests.map(r => `
-            <div class="notif-item">
-                <b>New Request:</b> ${r.userName} needs help with "${r.issue.substring(0,30)}..."
-            </div>
-        `).join('');
-    } else {
-        list.innerHTML = `<p style="color:var(--muted); text-align:center;">No new activity</p>`;
-    }
+    badge.innerText = openRequests.length;
+    badge.style.display = openRequests.length > 0 ? "flex" : "none";
+    document.getElementById("notifList").innerHTML = openRequests.map(r => `<div class="notif-item"><b>New Request:</b> ${r.userName}</div>`).join('') || "No new activity";
 }
 
 initMap();
