@@ -135,7 +135,7 @@ input, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px s
     <div class="footer">
 
         <div class="footer-icons" style="display:flex; gap:15px;">
-            <div class="icon-btn" onclick="window.openModal('notifModal')" img src="notificationicon.png"><span id="notifBadge">0</span></div>
+            <img src="notificationicon.png" class="icon-btn" onclick="window.openModal('notifModal')" ><span id="notifBadge">0</span></img>
             <button onclick="location.reload()" style="border:none; background:none; font-weight:800; color: var(--muted);">🏠 HOME</button>
             <div class="icon-btn" onclick="window.openProfile()">👤</div>
         </div>
@@ -424,6 +424,7 @@ navigator.geolocation.watchPosition(p => {
 </script>
 </body>
 </html>
+
 
 
 
