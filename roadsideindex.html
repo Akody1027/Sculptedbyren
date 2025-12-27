@@ -61,8 +61,11 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 
 /* --- UI COMPONENTS --- */
 .vehicle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 15px 0; }
-.v-type { padding: 15px; border: 2px solid #f1f5f9; border-radius: 16px; text-align: center; cursor: pointer; font-weight: 700; }
+.v-type { padding: 15px; border: 2px solid #f1f5f9; border-radius: 16px; text-align: center; cursor: pointer; font-weight: 700; transition: 0.2s; }
 .v-type.active { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
+.tip-btn { border: 2px solid #f1f5f9; border-radius: 12px; padding: 12px; flex: 1; text-align: center; cursor: pointer; font-weight: 800; background: white; }
+.tip-btn.active { border-color: var(--success); background: #f0fdf4; color: var(--success); }
+
 input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 12px; font-size: 15px; background: #f8fafc; }
 .submit-btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 16px; font-weight: 700; cursor: pointer; font-size: 16px; }
 .cancel-link { display: block; text-align: center; padding: 15px; color: var(--muted); cursor: pointer; font-weight: 600; }
@@ -120,7 +123,8 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
                     <b id="taskStatusLabel" style="color: var(--accent);">ONGOING JOB</b>
                     <button onclick="window.openChat()" style="background:var(--accent); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:bold;">CHAT</button>
                 </div>
-                <p id="taskUser" style="margin:15px 0; font-weight:700; font-size:16px;"></p>
+                <p id="taskUser" style="margin:10px 0; font-weight:700; font-size:16px;"></p>
+                <p id="taskTipLabel" style="margin: 0 0 10px 0; font-weight: 800; color: var(--success); font-size: 14px;"></p>
                 <div style="display:flex; gap:10px;">
                     <a id="navBtn" href="" target="_blank" style="flex:1; background:var(--success); color:white; text-align:center; padding:15px; border-radius:14px; text-decoration:none; font-weight:700;">NAVIGATE</a>
                     <button id="arrivedBtn" onclick="window.markArrived()" style="flex:1; background:var(--warning); color:white; border:none; border-radius:14px; font-weight:700;">I'M HERE</button>
@@ -152,6 +156,7 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
         <h3 id="detVehicle">Vehicle Request</h3>
         <img id="detImg" style="width:100%; height:200px; object-fit:cover; border-radius:20px; margin-bottom:15px; display:none;">
         <p id="detIssue" style="font-weight:bold; margin-bottom:5px;"></p>
+        <p id="detTip" style="color:var(--success); font-weight: 900; font-size: 18px; margin: 10px 0;"></p>
         <p id="detDist" style="color:var(--accent); font-size:14px; margin-bottom:20px; font-weight:600;"></p>
         
         <label style="font-size:11px; font-weight:bold; color:var(--muted);">ETA TO ARRIVAL</label>
@@ -192,6 +197,16 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
             <div class="v-type" onclick="window.selectVehicle('RV', this)">🚐 RV</div>
             <div class="v-type" onclick="window.selectVehicle('HeavyDuty', this)">🚛 Heavy Duty</div>
         </div>
+        
+        <!-- NEW TIP SECTION -->
+        <label style="font-size:11px; font-weight:bold; color:var(--muted); margin-bottom:8px; display:block;">TIP NOT REQUIRED, BUT APPRECIATED!</label>
+        <div style="display:flex; gap:10px; margin-bottom:12px;">
+            <div class="tip-btn" onclick="window.setTip(5, this)">$5</div>
+            <div class="tip-btn" onclick="window.setTip(10, this)">$10</div>
+            <div class="tip-btn" onclick="window.setTip(20, this)">$20</div>
+        </div>
+        <input type="number" id="customTip" placeholder="Other Tip Amount ($)" style="margin-bottom:15px;">
+
         <img id="damagePreview" style="width:100%; height:150px; object-fit:cover; border-radius:20px; margin-bottom:15px; display:none;">
         <input type="file" id="damageInput" accept="image/*" style="display:none" onchange="window.handleImageUpload(this, 'damage')">
         <button onclick="document.getElementById('damageInput').click()" style="width:100%; padding:15px; border-radius:16px; border:2px dashed #cbd5e1; background:none; margin-bottom:15px; cursor:pointer; font-weight:bold; color:var(--muted);">📷 Add Damage Photo</button>
@@ -269,12 +284,17 @@ window.onload = () => {
                         icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: "#2563eb", fillOpacity: 1, strokeColor: "white", strokeWeight: 2 }
                     });
                 } else { heroMarker.setPosition(userLocation); }
-                // Use setCenter instead of panTo for instant snapping
                 if (isFirstLoad && document.getElementById('heroUI').classList.contains('view-active')) { map.setCenter(userLocation); }
             }
             syncUI();
         }, (err) => console.error(err), { enableHighAccuracy: true });
     }
+};
+
+window.setTip = (amt, el) => {
+    document.querySelectorAll('.tip-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('customTip').value = amt;
 };
 
 window.updateRadius = (val) => {
@@ -367,6 +387,7 @@ window.viewRequest = (id) => {
     if(!r) return;
     document.getElementById('detVehicle').innerText = r.vehicle + " Request";
     document.getElementById('detIssue').innerText = r.issue;
+    document.getElementById('detTip').innerText = (r.tip && r.tip > 0) ? "💰 Offering $" + r.tip + " Tip" : "";
     const dist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609).toFixed(1) : "?";
     document.getElementById('detDist').innerText = "📍 " + dist + " miles from you";
     const img = document.getElementById('detImg');
@@ -396,10 +417,11 @@ window.acknowledgeCancel = () => {
 
 window.submitSOS = () => {
     const issue = document.getElementById('reqIssue').value;
+    const tip = document.getElementById('customTip').value || 0;
     if(!issue || !userLocation) return alert("Please describe the issue.");
     push(ref(db, "sosRequests"), {
         ownerId: myId, userName: "Driver", issue, vehicle: selectedVehicle, damagePic: damageImgData,
-        lat: userLocation.lat, lng: userLocation.lng, status: 'open', timestamp: Date.now()
+        tip: tip, lat: userLocation.lat, lng: userLocation.lng, status: 'open', timestamp: Date.now()
     });
     window.closeModal('requestModal');
     window.switchView('seekerUI');
@@ -462,6 +484,7 @@ function syncUI() {
             document.getElementById('taskCanceledView').style.display = 'none';
             document.getElementById('taskStatusLabel').innerText = currentTask.status.toUpperCase() + " JOB";
             document.getElementById('taskUser').innerText = `Issue: ${currentTask.issue}`;
+            document.getElementById('taskTipLabel').innerText = (currentTask.tip && currentTask.tip > 0) ? "💰 Tip: $" + currentTask.tip : "";
             document.getElementById('navBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${currentTask.lat},${currentTask.lng}`;
             document.getElementById('arrivedBtn').style.display = currentTask.status === 'accepted' ? 'block' : 'none';
             document.getElementById('completeBtn').style.display = currentTask.status === 'arrived' ? 'block' : 'none';
