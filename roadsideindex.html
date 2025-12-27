@@ -15,19 +15,18 @@
   --shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; transition: all 0.2s ease; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, system-ui, sans-serif; color: var(--text); background: white; overflow: hidden; }
 
 /* --- VIEW MANAGER --- */
 .view { display: none; width: 100vw; height: 100vh; position: fixed; inset: 0; z-index: 10; background: white; overflow-y: auto; }
-.view-active { display: flex; flex-direction: column; animation: fadeIn 0.4s ease; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.view-active { display: flex; flex-direction: column; }
 
 /* --- LANDING PAGE --- */
 #landingPage { align-items: center; justify-content: center; padding: 30px; text-align: center; z-index: 100; background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%); }
 #landingPage img { width: 240px; margin-bottom: 10px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1)); }
 .mode-btn { width: 100%; max-width: 320px; padding: 20px; border-radius: 18px; font-size: 18px; font-weight: 700; border: none; cursor: pointer; margin-bottom: 16px; box-shadow: var(--shadow); }
-.mode-btn:active { transform: scale(0.96); }
+.mode-btn:active { transform: scale(0.98); }
 .btn-req { background: var(--danger); color: white; }
 .btn-hero { background: var(--text); color: white; }
 
@@ -50,7 +49,7 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
 .modal-content { 
     background: white; width: 100%; max-width: 500px; border-radius: 32px 32px 0 0; padding: 30px; max-height: 95vh; overflow-y: auto; 
-    transform: translateY(100%); animation: slideUp 0.4s forwards cubic-bezier(0, 0, 0.2, 1);
+    transform: translateY(100%); animation: slideUp 0.3s forwards cubic-bezier(0, 0, 0.2, 1);
 }
 @keyframes slideUp { to { transform: translateY(0); } }
 
@@ -63,10 +62,9 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 /* --- UI COMPONENTS --- */
 .vehicle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 15px 0; }
 .v-type { padding: 15px; border: 2px solid #f1f5f9; border-radius: 16px; text-align: center; cursor: pointer; font-weight: 700; }
-.v-type.active { border-color: var(--accent); background: #eff6ff; color: var(--accent); transform: scale(1.02); }
-input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 12px; font-size: 15px; background: #f8fafc; font-family: inherit; }
-.submit-btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 16px; font-weight: 700; cursor: pointer; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); }
-.submit-btn:hover { opacity: 0.9; }
+.v-type.active { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
+input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 12px; font-size: 15px; background: #f8fafc; }
+.submit-btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 16px; font-weight: 700; cursor: pointer; font-size: 16px; }
 .cancel-link { display: block; text-align: center; padding: 15px; color: var(--muted); cursor: pointer; font-weight: 600; }
 
 /* FOOTER */
@@ -75,7 +73,7 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 .icon-btn { cursor: pointer; width: 32px; height: 32px; filter: brightness(0) invert(1); }
 #notifBadge { position: absolute; top: -5px; right: -5px; background: white; color: var(--danger); font-size: 10px; width: 20px; height: 20px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 900; }
 
-.center-btn { position: absolute; top: 20px; right: 20px; background: white; border: none; padding: 12px; border-radius: 12px; box-shadow: var(--shadow); cursor: pointer; z-index: 5; font-weight: 800; font-size: 11px; letter-spacing: 0.5px; }
+.center-btn { position: absolute; top: 20px; right: 20px; background: white; border: none; padding: 12px; border-radius: 12px; box-shadow: var(--shadow); cursor: pointer; z-index: 5; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -90,24 +88,24 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 
 <!-- 2. SEEKER DASHBOARD -->
 <div id="seekerUI" class="view">
-    <button onclick="window.openModal('cancelConfirmModal')" style="align-self: flex-start; background: none; border: none; font-weight: 800; color: var(--danger); padding: 20px; font-size: 14px;">✕ CANCEL REQUEST</button>
+    <button onclick="window.openModal('cancelConfirmModal')" style="align-self: flex-start; background: none; border: none; font-weight: 800; color: var(--danger); padding: 20px;">✕ CANCEL SOS</button>
     <div id="searchingState" class="status-card">
         <div class="search-pulse">📡</div>
-        <h3 style="margin-bottom:8px;">Broadcasting SOS...</h3>
-        <p style="color:var(--muted); margin:0;">Finding Heroes within reach.</p>
+        <h3>Broadcasting SOS...</h3>
+        <p>Finding Heroes nearby...</p>
     </div>
     <div id="matchedState" class="status-card" style="display:none; border-color: var(--success);">
         <div id="seekerStatusPill" style="background: var(--success); color: white; padding: 6px 16px; border-radius: 20px; display: inline-block; font-size: 12px; font-weight: 800; margin-bottom: 15px;">HERO CONNECTED</div>
         <div style="display: flex; align-items: center; gap: 15px; text-align: left;">
             <img id="matchPic" src="" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #f1f5f9;">
             <div style="flex:1">
-                <h3 id="matchName" style="margin:0; font-size: 18px;">Hero Name</h3>
+                <h3 id="matchName" style="margin:0;">Hero Name</h3>
                 <p id="matchETA" style="margin:4px 0; color: var(--success); font-weight: 800; font-size: 14px;">Arriving in ...</p>
             </div>
-            <button onclick="window.openChat()" style="background:var(--accent); color:white; border:none; padding:12px 18px; border-radius:14px; font-weight:bold; font-size:13px;">CHAT</button>
+            <button onclick="window.openChat()" style="background:var(--accent); color:white; border:none; padding:12px; border-radius:14px; font-weight:bold;">CHAT</button>
         </div>
         <div id="seekerMap"></div>
-        <p style="font-size:11px; color:var(--muted); font-weight: 600;">LIVE HERO TRACKING ACTIVE</p>
+        <p style="font-size:11px; color:var(--muted)">LIVE HERO TRACKING ENABLED</p>
     </div>
 </div>
 
@@ -119,10 +117,10 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
         <div id="activeTask" class="task-card" style="display:none;">
             <div id="taskNormalView">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <b id="taskStatusLabel" style="color: var(--accent); font-size: 12px; letter-spacing: 1px;">ONGOING JOB</b>
-                    <button onclick="window.openChat()" style="background:var(--accent); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:bold; font-size: 13px;">CHAT</button>
+                    <b id="taskStatusLabel" style="color: var(--accent);">ONGOING JOB</b>
+                    <button onclick="window.openChat()" style="background:var(--accent); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:bold;">CHAT</button>
                 </div>
-                <p id="taskUser" style="margin:15px 0; font-weight:700; font-size:16px; color: var(--text);"></p>
+                <p id="taskUser" style="margin:15px 0; font-weight:700; font-size:16px;"></p>
                 <div style="display:flex; gap:10px;">
                     <a id="navBtn" href="" target="_blank" style="flex:1; background:var(--success); color:white; text-align:center; padding:15px; border-radius:14px; text-decoration:none; font-weight:700;">NAVIGATE</a>
                     <button id="arrivedBtn" onclick="window.markArrived()" style="flex:1; background:var(--warning); color:white; border:none; border-radius:14px; font-weight:700;">I'M HERE</button>
@@ -151,20 +149,20 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 <!-- DETAILS MODAL -->
 <div id="detailsModal" class="modal">
     <div class="modal-content">
-        <h3 id="detVehicle" style="margin-top:0;">Vehicle Request</h3>
+        <h3 id="detVehicle">Vehicle Request</h3>
         <img id="detImg" style="width:100%; height:200px; object-fit:cover; border-radius:20px; margin-bottom:15px; display:none;">
-        <p id="detIssue" style="font-weight:bold; font-size:17px; margin-bottom:5px;"></p>
-        <p id="detDist" style="color:var(--accent); font-size:14px; margin-bottom:20px; font-weight: 600;"></p>
+        <p id="detIssue" style="font-weight:bold; margin-bottom:5px;"></p>
+        <p id="detDist" style="color:var(--accent); font-size:14px; margin-bottom:20px; font-weight:600;"></p>
         
-        <label style="font-size:11px; font-weight:bold; color:var(--muted); letter-spacing: 0.5px;">ESTIMATED ARRIVAL TIME</label>
-        <select id="detETA" style="margin-top:8px;">
+        <label style="font-size:11px; font-weight:bold; color:var(--muted);">ETA TO ARRIVAL</label>
+        <select id="detETA">
             <option value="5-10 mins">5-10 mins</option>
             <option value="15-20 mins">15-20 mins</option>
             <option value="30-45 mins">30-45 mins</option>
             <option value="1 hour+">1 hour+</option>
         </select>
         
-        <button id="detAcceptBtn" class="submit-btn">ACCEPT & DRIVE</button>
+        <button id="detAcceptBtn" class="submit-btn">ACCEPT & HELP</button>
         <span class="cancel-link" onclick="window.closeModal('detailsModal')">Go Back</span>
     </div>
 </div>
@@ -172,12 +170,12 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 <!-- CHAT MODAL -->
 <div id="chatModal" class="modal">
     <div class="modal-content" style="height:85vh">
-        <h3 id="chatTitle" style="margin-top:0;">Messages</h3>
+        <h3 id="chatTitle">Messages</h3>
         <div id="chatBox"></div>
         <div style="display:flex; gap:10px;">
-            <button onclick="document.getElementById('chatImgInput').click()" style="padding:15px; background:#f1f5f9; border:none; border-radius:15px; font-size:20px;">📷</button>
+            <button onclick="document.getElementById('chatImgInput').click()" style="padding:15px; background:#f1f5f9; border:none; border-radius:15px;">📷</button>
             <input type="file" id="chatImgInput" accept="image/*" style="display:none" onchange="window.sendChatImg(this)">
-            <input id="chatInput" placeholder="Write a message..." style="margin:0;">
+            <input id="chatInput" placeholder="Type message..." style="margin:0;">
             <button onclick="window.sendTextMsg()" style="background:var(--accent); color:white; border:none; padding:0 20px; border-radius:15px; font-weight:bold;">SEND</button>
         </div>
         <span class="cancel-link" onclick="window.closeModal('chatModal')">Close</span>
@@ -187,7 +185,7 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 <!-- REQUEST SOS MODAL -->
 <div id="requestModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0;">How can we help?</h3>
+        <h3>Request Help</h3>
         <div class="vehicle-grid">
             <div class="v-type active" onclick="window.selectVehicle('Car', this)">🚗 Car</div>
             <div class="v-type" onclick="window.selectVehicle('Truck', this)">🛻 Truck</div>
@@ -196,39 +194,39 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
         </div>
         <img id="damagePreview" style="width:100%; height:150px; object-fit:cover; border-radius:20px; margin-bottom:15px; display:none;">
         <input type="file" id="damageInput" accept="image/*" style="display:none" onchange="window.handleImageUpload(this, 'damage')">
-        <button onclick="document.getElementById('damageInput').click()" style="width:100%; padding:15px; border-radius:16px; border:2px dashed #cbd5e1; background:none; margin-bottom:15px; cursor:pointer; font-weight:bold; color:var(--muted);">📷 Take a photo of the issue</button>
-        <textarea id="reqIssue" placeholder="Describe the problem (e.g. Flat tire, out of gas...)" rows="3"></textarea>
-        <button class="submit-btn" onclick="window.submitSOS()" style="background: var(--danger);">SEND SOS NOW</button>
-        <p onclick="window.closeModal('requestModal')" class="cancel-link">Nevermind</p>
+        <button onclick="document.getElementById('damageInput').click()" style="width:100%; padding:15px; border-radius:16px; border:2px dashed #cbd5e1; background:none; margin-bottom:15px; cursor:pointer; font-weight:bold; color:var(--muted);">📷 Add Damage Photo</button>
+        <textarea id="reqIssue" placeholder="What's the problem?" rows="2"></textarea>
+        <button class="submit-btn" onclick="window.submitSOS()">SUBMIT SOS</button>
+        <p onclick="window.closeModal('requestModal')" class="cancel-link">Cancel</p>
     </div>
 </div>
 
 <div id="cancelConfirmModal" class="modal">
-    <div class="modal-content" style="padding-bottom: 40px;"><h3>Cancel your SOS?</h3><p style="color:var(--muted); margin-bottom:20px;">Please tell us why:</p><button class="submit-btn" style="background:var(--success); margin-bottom:10px;" onclick="window.submitCancellation('Issue Resolved')">Issue Resolved</button><button class="submit-btn" style="background:var(--accent); margin-bottom:10px;" onclick="window.submitCancellation('Found Other Helper')">Found Other Helper</button><button class="submit-btn" style="background:var(--muted); margin-bottom:10px;" onclick="window.submitCancellation('Changed Mind')">Don't Need Help</button><span class="cancel-link" onclick="window.closeModal('cancelConfirmModal')">Keep Request Active</span></div>
+    <div class="modal-content"><h3>Cancel SOS?</h3><button class="submit-btn" style="background:var(--success); margin-bottom:10px;" onclick="window.submitCancellation('Issue Resolved')">Issue Resolved</button><button class="submit-btn" style="background:var(--accent); margin-bottom:10px;" onclick="window.submitCancellation('Found Other Helper')">Found Other Helper</button><button class="submit-btn" style="background:var(--muted); margin-bottom:10px;" onclick="window.submitCancellation('Changed Mind')">Don't Need Help</button><span class="cancel-link" onclick="window.closeModal('cancelConfirmModal')">Keep Request</span></div>
 </div>
 
 <div id="profileModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0;">Hero Settings</h3>
+        <h3>Hero Profile</h3>
         <div style="text-align:center; margin-bottom:20px;">
-            <img id="profileDisplayPic" src="https://via.placeholder.com/100" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:4px solid #eff6ff; box-shadow: var(--shadow);">
+            <img id="profileDisplayPic" src="https://via.placeholder.com/100" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:4px solid #eff6ff;">
             <input type="file" id="picInput" style="display:none" onchange="window.handleImageUpload(this, 'profile')">
-            <button onclick="document.getElementById('picInput').click()" style="display:block; margin:8px auto; border:none; background:none; color:var(--accent); font-weight:bold; cursor:pointer; font-size:14px;">Change Photo</button>
+            <button onclick="document.getElementById('picInput').click()" style="display:block; margin:8px auto; border:none; background:none; color:var(--accent); font-weight:bold; cursor:pointer;">Update Photo</button>
         </div>
-        <input id="profileName" placeholder="Your Hero Name">
-        <textarea id="profileBio" placeholder="Bio / Specialized tools you carry..." rows="2"></textarea>
+        <input id="profileName" placeholder="Hero Name">
+        <textarea id="profileBio" placeholder="Bio / Tools Available..." rows="2"></textarea>
         
-        <div style="background: #f8fafc; padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
-            <label style="font-size:11px; font-weight:900; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Service Radius: <span id="radiusVal" style="color:var(--accent); font-size:14px;">25</span> miles</label>
+        <div style="background: #f8fafc; padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <label style="font-size:11px; font-weight:900; color:var(--muted);">SERVICE RADIUS: <span id="radiusVal" style="color:var(--accent);">25</span> miles</label>
             <input type="range" id="profileRadius" min="5" max="100" step="5" value="25" style="margin: 15px 0 0 0;" oninput="window.updateRadius(this.value)">
         </div>
 
-        <button class="submit-btn" onclick="window.saveProfile()">Save Changes</button>
+        <button class="submit-btn" onclick="window.saveProfile()">Save Settings</button>
         <span class="cancel-link" onclick="window.closeModal('profileModal')">Close</span>
     </div>
 </div>
 
-<div id="notifModal" class="modal"><div class="modal-content"><h3>Activity History</h3><div id="notifHistory" style="max-height: 400px; overflow-y:auto;"></div><button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:20px;" onclick="window.closeModal('notifModal')">CLOSE</button></div></div>
+<div id="notifModal" class="modal"><div class="modal-content"><h3>Activity History</h3><div id="notifHistory"></div><button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:20px;" onclick="window.closeModal('notifModal')">CLOSE</button></div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -271,6 +269,7 @@ window.onload = () => {
                         icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: "#2563eb", fillOpacity: 1, strokeColor: "white", strokeWeight: 2 }
                     });
                 } else { heroMarker.setPosition(userLocation); }
+                // Use setCenter instead of panTo for instant snapping
                 if (isFirstLoad && document.getElementById('heroUI').classList.contains('view-active')) { map.setCenter(userLocation); }
             }
             syncUI();
@@ -278,14 +277,13 @@ window.onload = () => {
     }
 };
 
-// FIX: Instant Radius Adjustment
 window.updateRadius = (val) => {
     myRadius = parseInt(val);
     document.getElementById('radiusVal').innerText = val;
-    syncUI(); // Trigger immediate map marker refresh
+    syncUI();
 };
 
-window.centerOnMe = () => { if (map && userLocation) map.panTo(userLocation); };
+window.centerOnMe = () => { if (map && userLocation) map.setCenter(userLocation); };
 window.openModal = (id) => document.getElementById(id).style.display = "flex";
 window.closeModal = (id) => document.getElementById(id).style.display = "none";
 window.switchView = (id) => {
