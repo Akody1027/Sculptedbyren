@@ -28,26 +28,10 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 .btn-req { background: var(--danger); color: white; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2); }
 .btn-hero { background: var(--text); color: white; }
 
-/* --- HERO COLLAPSIBLE DRAWER --- */
-#heroDrawer {
-    position: fixed; left: -310px; top: 10%; width: 310px; height: 75%;
-    background: white; z-index: 500; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 5px 0 25px rgba(0,0,0,0.15); border-radius: 0 24px 24px 0;
-    display: flex; flex-direction: column; padding: 20px; overflow: hidden;
-}
-#heroDrawer.open { left: 0; }
-#drawerToggle {
-    position: absolute; right: -55px; top: 20px; width: 55px; height: 55px;
-    background: var(--danger); border-radius: 0 15px 15px 0;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; box-shadow: 5px 0 10px rgba(0,0,0,0.1); font-size: 24px; transition: 0.3s;
-}
-#drawerToggle.active-job { background: var(--success) !important; box-shadow: 0 0 15px var(--success); }
-
 /* --- SEEKER DASHBOARD --- */
 #seekerUI { background: var(--bg); padding: 20px; align-items: center; }
 .status-card { background: white; width: 100%; max-width: 450px; padding: 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; margin-top: 10px; border: 1px solid #e2e8f0; }
-#seekerMap { width: 100%; height: 200px; border-radius: 15px; margin: 15px 0; background: #eee; border: 1px solid #ddd; }
+#seekerMap { width: 100%; height: 200px; border-radius: 15px; margin: 15px 0; background: #eee; }
 
 .search-pulse { width: 80px; height: 80px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; margin: 0 auto 20px; position: relative; }
 .search-pulse::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--accent); opacity: 0.4; animation: pulse 2s infinite; }
@@ -56,13 +40,16 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 /* --- HERO UI --- */
 #heroUI { overflow: hidden; }
 #map { width: 100%; height: 100%; position: absolute; top:0; left:0; z-index: 1; }
+#heroPanel { width:100%; position: fixed; bottom: 80px;  z-index: 100; display: flex; flex-direction: column; padding: 0 15px; pointer-events: none; }
+#heroPanel > * { pointer-events: auto; }
+.task-card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-left: 6px solid var(--accent); margin-bottom: 10px; }
 
 /* --- MODALS --- */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
 .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; padding: 25px; max-height: 95vh; overflow-y: auto; }
 
 /* --- CHAT --- */
-#chatBox { height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 10px; background: #f1f5f9; border-radius: 12px; margin-bottom: 10px; }
+#chatBox { height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 10px; background: #f1f5f9; border-radius: 12px; margin-bottom: 10px; }
 .msg { padding: 10px 14px; border-radius: 15px; max-width: 80%; font-size: 14px; word-wrap: break-word; }
 .msg-me { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 2px; }
 .msg-them { align-self: flex-start; background: #e2e8f0; color: var(--text); border-bottom-left-radius: 2px; }
@@ -121,17 +108,8 @@ input, textarea, select { width: 100%; padding: 14px; border-radius: 12px; borde
 <!-- 3. HERO UI -->
 <div id="heroUI" class="view">
     <div id="map"></div>
-
-    <!-- COLLAPSIBLE HERO DRAWER -->
-    <div id="heroDrawer">
-        <div id="drawerToggle" onclick="document.getElementById('heroDrawer').classList.toggle('open')">🛠️</div>
-        <h3 style="margin-top:0;">Hero Console</h3>
-        
-        <div id="noJobMsg">
-            <p style="color:var(--muted); text-align:center; padding:40px 10px;">No current assignment. Tap a red pin on the map to offer help.</p>
-        </div>
-
-        <div id="activeTask" style="display:none;">
+    <div id="heroPanel">
+        <div id="activeTask" class="task-card" style="display:none;">
             <div id="taskNormalView">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <b style="color: var(--accent);">ONGOING JOB</b>
@@ -150,7 +128,6 @@ input, textarea, select { width: 100%; padding: 14px; border-radius: 12px; borde
             </div>
         </div>
     </div>
-
     <div class="footer">
         <div class="footer-icons">
             <div style="position:relative">
@@ -163,7 +140,7 @@ input, textarea, select { width: 100%; padding: 14px; border-radius: 12px; borde
     </div>
 </div>
 
-<!-- REQUEST DETAILS MODAL -->
+<!-- REQUEST DETAILS MODAL (Pop up when icon is clicked) -->
 <div id="detailsModal" class="modal">
     <div class="modal-content">
         <h3 id="detVehicle">Vehicle Request</h3>
@@ -187,7 +164,7 @@ input, textarea, select { width: 100%; padding: 14px; border-radius: 12px; borde
 <!-- CHAT MODAL -->
 <div id="chatModal" class="modal">
     <div class="modal-content" style="height:80vh">
-        <h3 id="chatTitle">Live Support</h3>
+        <h3 id="chatTitle">Message Center</h3>
         <div id="chatBox"></div>
         <div style="display:flex; gap:10px;">
             <button onclick="document.getElementById('chatImgInput').click()" style="padding:10px; background:#e2e8f0; border:none; border-radius:10px;">📷</button>
@@ -195,7 +172,7 @@ input, textarea, select { width: 100%; padding: 14px; border-radius: 12px; borde
             <input id="chatInput" placeholder="Type message..." style="margin:0;">
             <button onclick="window.sendTextMsg()" style="background:var(--accent); color:white; border:none; padding:0 20px; border-radius:10px; font-weight:bold;">SEND</button>
         </div>
-        <span class="cancel-link" onclick="window.closeModal('chatModal')">Close</span>
+        <span class="cancel-link" onclick="window.closeModal('chatModal')">Close Chat</span>
     </div>
 </div>
 
@@ -209,19 +186,28 @@ input, textarea, select { width: 100%; padding: 14px; border-radius: 12px; borde
             <div class="v-type" onclick="window.selectVehicle('RV', this)">🚐 RV</div>
             <div class="v-type" onclick="window.selectVehicle('HeavyDuty', this)">🚛 Heavy Duty</div>
         </div>
+        <img id="damagePreview" style="width:100%; height:120px; object-fit:cover; border-radius:15px; margin-bottom:15px; display:none;">
+        <input type="file" id="damageInput" accept="image/*" style="display:none" onchange="window.previewDamage(this)">
+        <button onclick="document.getElementById('damageInput').click()" style="width:100%; padding:12px; border-radius:12px; border:2px dashed #ddd; background:none; margin-bottom:15px; cursor:pointer; font-weight:bold; color:var(--muted);">📷 Add Damage Photo</button>
         <textarea id="reqIssue" placeholder="What's the problem?" rows="2"></textarea>
         <button class="submit-btn" onclick="window.submitSOS()">SUBMIT SOS</button>
         <p onclick="window.closeModal('requestModal')" class="cancel-link">Cancel</p>
     </div>
 </div>
 
-<div id="cancelConfirmModal" class="modal"><div class="modal-content"><h3>Cancel SOS?</h3><button class="submit-btn" style="background:var(--danger); margin-bottom:10px;" onclick="window.submitCancellation('Fixed')">I fixed it myself</button><span class="cancel-link" onclick="window.closeModal('cancelConfirmModal')">Don't Cancel</span></div></div>
-<div id="profileModal" class="modal"><div class="modal-content"><h3>Profile</h3><input id="profileName" placeholder="Name"><button class="submit-btn" onclick="window.saveProfile()">Save</button><span class="cancel-link" onclick="window.closeModal('profileModal')">Close</span></div></div>
-<div id="notifModal" class="modal"><div class="modal-content"><h3>History</h3><div id="notifHistory"></div><button class="submit-btn" onclick="window.closeModal('notifModal')">CLOSE</button></div></div>
+<div id="cancelConfirmModal" class="modal">
+    <div class="modal-content"><h3>Cancel SOS?</h3><button class="submit-btn" style="background:var(--success); margin-bottom:10px;" onclick="window.submitCancellation('Issue Resolved')">Issue Resolved</button><button class="submit-btn" style="background:var(--accent); margin-bottom:10px;" onclick="window.submitCancellation('Found Other Helper')">Found Other Helper</button><button class="submit-btn" style="background:var(--muted); margin-bottom:10px;" onclick="window.submitCancellation('Changed Mind')">Don't Need Help Now</button><span class="cancel-link" onclick="window.closeModal('cancelConfirmModal')">Keep Request</span></div>
+</div>
+
+<div id="profileModal" class="modal">
+    <div class="modal-content"><h3>Hero Profile</h3><div style="text-align:center; margin-bottom:15px;"><img id="profileDisplayPic" src="https://via.placeholder.com/85" style="width:85px; height:85px; border-radius:50%; object-fit:cover; border:3px solid var(--accent);"><input type="file" id="picInput" style="display:none" onchange="window.previewProfilePic(this)"><button onclick="document.getElementById('picInput').click()" style="display:block; margin:5px auto; border:none; background:none; color:var(--accent); font-weight:bold; cursor:pointer;">Update Photo</button></div><input id="profileName" placeholder="Hero Name"><textarea id="profileBio" placeholder="Bio / Tools Available..." rows="2"></textarea><button class="submit-btn" onclick="window.saveProfile()">Save Settings</button><span class="cancel-link" onclick="window.closeModal('profileModal')">Close</span></div>
+</div>
+
+<div id="notifModal" class="modal"><div class="modal-content"><h3>Activity History</h3><div id="notifHistory"></div><button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:15px;" onclick="window.closeModal('notifModal')">CLOSE</button></div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, set, get, update, runTransaction } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, set, get, update, remove } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBgXWZkH0WMjhGmOfxjqbIDoJHlyA1pc-o",
@@ -234,11 +220,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const myId = localStorage.getItem('heroUserId') || 'u_' + Math.random().toString(36).substr(2, 9);
-localStorage.setItem('heroUserId', myId);
+if(!localStorage.getItem('heroUserId')) localStorage.setItem('heroUserId', 'u_' + Math.random().toString(36).substr(2, 9));
+const myId = localStorage.getItem('heroUserId');
 
-let map, seekerMiniMap, userLocation, damageImgData = null;
-let sosCache = {}, profilesCache = {}, markers = {}, seekerMarkers = {};
+let map, seekerMiniMap, userLocation, selectedVehicle = "Car", damageImgData = null;
+let sosCache = {}, profilesCache = {}, markers = {}, seekerHeroMarker, seekerUserMarker;
 
 const alertIcon = {
     path: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z",
@@ -247,9 +233,9 @@ const alertIcon = {
 
 window.onload = () => {
     if (navigator.geolocation) navigator.geolocation.getCurrentPosition(() => {}, () => alert("Enable GPS."));
+    if ("Notification" in window && Notification.permission !== "granted") Notification.requestPermission();
 };
 
-// --- CORE UTILS ---
 window.openModal = (id) => document.getElementById(id).style.display = "flex";
 window.closeModal = (id) => document.getElementById(id).style.display = "none";
 window.switchView = (id) => {
@@ -257,6 +243,7 @@ window.switchView = (id) => {
     document.getElementById(id).classList.add('view-active');
 };
 window.selectVehicle = (type, el) => {
+    selectedVehicle = type;
     document.querySelectorAll(".v-type").forEach(b => b.classList.remove("active"));
     el.classList.add("active");
 };
@@ -268,62 +255,63 @@ window.viewRequest = (id) => {
     document.getElementById('detVehicle').innerText = r.vehicle + " Request";
     document.getElementById('detIssue').innerText = r.issue;
     const dist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609).toFixed(1) : "?";
-    document.getElementById('detDist').innerText = dist + " miles away";
+    document.getElementById('detDist').innerText = dist + " miles away from you";
+    
+    const img = document.getElementById('detImg');
+    if(r.damagePic) { img.src = r.damagePic; img.style.display = "block"; } 
+    else { img.style.display = "none"; }
+    
     document.getElementById('detAcceptBtn').onclick = () => window.confirmHelp(id);
     window.openModal('detailsModal');
 };
 
-// --- CHAT ---
+// --- CHAT LOGIC ---
 let activeChatId = null;
 window.openChat = () => {
-    const active = Object.entries(sosCache).find(([id, r]) => (r.ownerId === myId || r.helperId === myId) && r.status === 'accepted');
-    if(!active) return;
-    activeChatId = active[0];
+    const activeReq = Object.entries(sosCache).find(([id, r]) => (r.ownerId === myId || r.helperId === myId) && r.status === 'accepted');
+    if(!activeReq) return;
+    activeChatId = activeReq[0];
     window.openModal('chatModal');
     onValue(ref(db, `chats/${activeChatId}`), (snap) => {
         const box = document.getElementById('chatBox'); box.innerHTML = "";
-        Object.values(snap.val() || {}).forEach(m => {
+        const data = snap.val() || {};
+        Object.values(data).forEach(m => {
             const side = m.sender === myId ? 'msg-me' : 'msg-them';
-            let html = m.text ? `<div>${m.text}</div>` : "";
-            if(m.img) html += `<img src="${m.img}" style="width:100%; border-radius:10px;">`;
-            box.innerHTML += `<div class="msg ${side}">${html}</div>`;
+            let content = m.text ? `<div>${m.text}</div>` : "";
+            if(m.img) content += `<img src="${m.img}">`;
+            box.innerHTML += `<div class="msg ${side}">${content}</div>`;
         });
         box.scrollTop = box.scrollHeight;
     });
 };
+
 window.sendTextMsg = () => {
-    const i = document.getElementById('chatInput');
-    if(i.value && activeChatId) {
-        push(ref(db, `chats/${activeChatId}`), { sender: myId, text: i.value, time: Date.now() });
-        i.value = "";
-    }
+    const input = document.getElementById('chatInput');
+    if(!input.value.trim() || !activeChatId) return;
+    push(ref(db, `chats/${activeChatId}`), { sender: myId, text: input.value, timestamp: Date.now() });
+    input.value = "";
 };
 
-// --- HERO LOGIC (SAFETY CHECK) ---
+window.sendChatImg = (input) => {
+    const file = input.files[0];
+    if(!file || !activeChatId) return;
+    const reader = new FileReader();
+    reader.onload = (e) => push(ref(db, `chats/${activeChatId}`), { sender: myId, img: e.target.result, timestamp: Date.now() });
+    reader.readAsDataURL(file);
+};
+
+// --- HERO LOGIC ---
 window.enterHeroMode = () => { window.switchView('heroUI'); setTimeout(() => { if(!map) initMap(); }, 200); };
 
-window.confirmHelp = async (sosId) => {
+window.confirmHelp = (sosId) => {
     const eta = document.getElementById('detETA').value;
-    const sosRef = ref(db, `sosRequests/${sosId}`);
+    update(ref(db, `sosRequests/${sosId}`), { status: 'accepted', helperId: myId, helperAcknowledged: false, eta: eta });
+    window.closeModal('detailsModal');
+};
 
-    // SAFETY CHECK: Transactional update
-    const result = await runTransaction(sosRef, (currentData) => {
-        if (currentData === null) return currentData;
-        if (currentData.status !== 'open') return; // ABORT: Someone already took it
-        currentData.status = 'accepted';
-        currentData.helperId = myId;
-        currentData.eta = eta;
-        currentData.helperAcknowledged = false;
-        return currentData;
-    });
-
-    if (result.committed) {
-        window.closeModal('detailsModal');
-        document.getElementById('heroDrawer').classList.add('open');
-    } else {
-        alert("Sorry! Another Hero just accepted this request.");
-        window.closeModal('detailsModal');
-    }
+window.acknowledgeCancel = () => {
+    const canceledTask = Object.entries(sosCache).find(([id, r]) => r.helperId === myId && r.status === 'canceled');
+    if(canceledTask) update(ref(db, `sosRequests/${canceledTask[0]}`), { helperAcknowledged: true });
 };
 
 window.completeTask = () => {
@@ -331,40 +319,35 @@ window.completeTask = () => {
     if(active) update(ref(db, `sosRequests/${active[0]}`), { status: 'completed' });
 };
 
-window.acknowledgeCancel = () => {
-    const canceled = Object.entries(sosCache).find(([id, r]) => r.helperId === myId && r.status === 'canceled');
-    if(canceled) update(ref(db, `sosRequests/${canceled[0]}`), { helperAcknowledged: true });
-};
-
 // --- SEEKER LOGIC ---
 window.submitSOS = () => {
     const issue = document.getElementById('reqIssue').value;
     if(!issue || !userLocation) return alert("Describe issue and allow GPS.");
     push(ref(db, "sosRequests"), {
-        ownerId: myId, userName: "User", issue, status: 'open', vehicle: 'Car',
-        lat: userLocation.lat, lng: userLocation.lng, timestamp: Date.now()
+        ownerId: myId, userName: "User", issue, vehicle: selectedVehicle, damagePic: damageImgData,
+        lat: userLocation.lat, lng: userLocation.lng, status: 'open', timestamp: Date.now()
     });
     window.closeModal('requestModal');
     window.switchView('seekerUI');
 };
+
 window.submitCancellation = (reason) => {
-    const myReq = Object.keys(sosCache).find(k => sosCache[k].ownerId === myId && (sosCache[k].status === 'open' || sosCache[k].status === 'accepted'));
-    if(myReq) update(ref(db, `sosRequests/${myReq}`), { status: 'canceled', cancelReason: reason });
-    location.reload();
+    const myReqId = Object.keys(sosCache).find(k => sosCache[k].ownerId === myId && (sosCache[k].status === 'open' || sosCache[k].status === 'accepted'));
+    if(myReqId) update(ref(db, `sosRequests/${myReqId}`), { status: 'canceled', cancelReason: reason });
+    location.reload(); 
 };
 
-// --- SYNC ENGINE ---
+// --- SYNC ---
 function initMap() {
     map = new google.maps.Map(document.getElementById("map"), { 
-        center: userLocation || {lat: 39.8, lng: -98.5}, zoom: 14, disableDefaultUI: true,
+        center: userLocation || {lat: 40, lng: -74}, zoom: 14, disableDefaultUI: true,
         styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }]
     });
 }
 
 function syncUI() {
-    let openCount = 0; let activeJob = null; let mySOS = null;
     const history = document.getElementById('notifHistory'); history.innerHTML = "";
-    const drawerToggle = document.getElementById('drawerToggle');
+    let openCount = 0; let currentTask = null; let myActiveSOS = null;
 
     Object.entries(sosCache).forEach(([id, r]) => {
         const isMyJob = (r.helperId === myId && r.status === 'accepted');
@@ -375,69 +358,67 @@ function syncUI() {
                 marker.addListener('click', () => window.viewRequest(id));
                 markers[id] = marker;
             }
-        } else if(markers[id]) { markers[id].setMap(null); delete markers[id]; }
+        } else {
+            if(markers[id]) { markers[id].setMap(null); delete markers[id]; }
+        }
+        
+        if(r.helperId === myId && (r.status === 'accepted' || (r.status === 'canceled' && !r.helperAcknowledged))) currentTask = r;
+        if(r.ownerId === myId && (r.status === 'open' || r.status === 'accepted')) myActiveSOS = r;
 
-        if(r.helperId === myId && (r.status === 'accepted' || (r.status === 'canceled' && !r.helperAcknowledged))) activeJob = r;
-        if(r.ownerId === myId && (r.status === 'open' || r.status === 'accepted')) mySOS = r;
-
-        history.innerHTML += `<div class="history-item"><b>${r.issue}</b> [${r.status}]</div>`;
+        let statusColor = r.status === 'completed' ? '#22c55e' : (r.status === 'canceled' ? '#ef4444' : '#2563eb');
+        history.innerHTML += `<div class="history-item"><span class="status-pill" style="background:${statusColor};">${r.status}</span><b>${r.vehicle}</b><br>${r.issue}</div>`;
     });
 
-    // Hero Drawer Update
-    if(activeJob) {
-        drawerToggle.classList.add('active-job');
-        document.getElementById('noJobMsg').style.display = 'none';
-        document.getElementById('activeTask').style.display = 'block';
-        if(activeJob.status === 'canceled') {
+    const taskCard = document.getElementById('activeTask');
+    if(currentTask) {
+        taskCard.style.display = "block";
+        if(currentTask.status === 'canceled') {
             document.getElementById('taskNormalView').style.display = 'none';
             document.getElementById('taskCanceledView').style.display = 'block';
-            document.getElementById('cancelReasonDisplay').innerText = activeJob.cancelReason || "Not provided";
+            document.getElementById('cancelReasonDisplay').innerText = `Reason: ${currentTask.cancelReason || 'None'}`;
         } else {
             document.getElementById('taskNormalView').style.display = 'block';
             document.getElementById('taskCanceledView').style.display = 'none';
-            document.getElementById('taskUser').innerText = activeJob.issue;
-            document.getElementById('navBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${activeJob.lat},${activeJob.lng}`;
+            document.getElementById('taskUser').innerText = `Current Job: ${currentTask.issue}`;
+            document.getElementById('navBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${currentTask.lat},${currentTask.lng}`;
         }
-    } else {
-        drawerToggle.classList.remove('active-job');
-        document.getElementById('noJobMsg').style.display = 'block';
-        document.getElementById('activeTask').style.display = 'none';
-    }
+    } else { taskCard.style.display = "none"; }
 
-    // Seeker Map Update
-    if(mySOS && mySOS.status === 'accepted') {
+    if(myActiveSOS) {
         window.switchView('seekerUI');
-        document.getElementById('searchingState').style.display = 'none';
-        document.getElementById('matchedState').style.display = 'block';
-        const hero = profilesCache[mySOS.helperId] || {};
-        document.getElementById('matchName').innerText = hero.name || "Hero";
-        document.getElementById('matchETA').innerText = `ETA: ${mySOS.eta}`;
-        updateSeekerTracking(mySOS, hero);
+        if(myActiveSOS.status === 'accepted') {
+            document.getElementById('searchingState').style.display = 'none';
+            document.getElementById('matchedState').style.display = 'block';
+            const hero = profilesCache[myActiveSOS.helperId] || {};
+            document.getElementById('matchName').innerText = hero.name || "Roadside Hero";
+            document.getElementById('matchPic').src = hero.pic || "https://via.placeholder.com/65";
+            document.getElementById('matchETA').innerText = `Arriving in ${myActiveSOS.eta || '...'}`;
+            updateSeekerMiniMap(myActiveSOS, hero);
+        }
     }
+    const badge = document.getElementById('notifBadge');
+    badge.innerText = openCount; badge.style.display = openCount > 0 ? "flex" : "none";
 }
 
-function updateSeekerTracking(sos, hero) {
-    if(!seekerMiniMap) seekerMiniMap = new google.maps.Map(document.getElementById('seekerMap'), { zoom: 14, disableDefaultUI: true });
-    
-    if(!seekerMarkers.user) seekerMarkers.user = new google.maps.Marker({ map: seekerMiniMap, icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' });
-    if(!seekerMarkers.hero) seekerMarkers.hero = new google.maps.Marker({ map: seekerMiniMap, icon: 'http://maps.google.com/mapfiles/ms/icons/truck.png' });
-
+function updateSeekerMiniMap(sos, hero) {
+    if(!seekerMiniMap) {
+        seekerMiniMap = new google.maps.Map(document.getElementById('seekerMap'), { zoom: 14, disableDefaultUI: true });
+        seekerUserMarker = new google.maps.Marker({ map: seekerMiniMap, icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' });
+        seekerHeroMarker = new google.maps.Marker({ map: seekerMiniMap, icon: 'http://maps.google.com/mapfiles/ms/icons/truck.png' });
+    }
     const userPos = {lat: sos.lat, lng: sos.lng};
-    seekerMarkers.user.setPosition(userPos);
-
+    seekerUserMarker.setPosition(userPos);
     if(hero.lat) {
         const heroPos = {lat: hero.lat, lng: hero.lng};
-        seekerMarkers.hero.setPosition(heroPos);
+        seekerHeroMarker.setPosition(heroPos);
         const bounds = new google.maps.LatLngBounds();
         bounds.extend(userPos); bounds.extend(heroPos);
         seekerMiniMap.fitBounds(bounds);
-    } else {
-        seekerMiniMap.setCenter(userPos);
-    }
+    } else { seekerMiniMap.setCenter(userPos); }
 }
 
-onValue(ref(db, "sosRequests"), (s) => { sosCache = s.val() || {}; syncUI(); });
-onValue(ref(db, "profiles"), (s) => { profilesCache = s.val() || {}; syncUI(); });
+onValue(ref(db, "sosRequests"), (snap) => { sosCache = snap.val() || {}; syncUI(); });
+onValue(ref(db, "profiles"), (snap) => { profilesCache = snap.val() || {}; syncUI(); });
 
 navigator.geolocation.watchPosition(p => {
     userLocation = { lat: p.coords.latitude, lng: p.coords.longitude };
@@ -445,14 +426,21 @@ navigator.geolocation.watchPosition(p => {
 }, null, { enableHighAccuracy: true });
 
 window.saveProfile = () => {
-    update(ref(db, `profiles/${myId}`), { name: document.getElementById('profileName').value });
-    window.closeModal('profileModal');
+    update(ref(db, `profiles/${myId}`), { name: document.getElementById("profileName").value, bio: document.getElementById("profileBio").value, pic: document.getElementById("profileDisplayPic").src });
+    window.closeModal("profileModal");
 };
 window.openProfile = async () => {
-    window.openModal('profileModal');
+    window.openModal("profileModal");
     const snap = await get(ref(db, `profiles/${myId}`));
-    if(snap.exists()) document.getElementById('profileName').value = snap.val().name || "";
+    if(snap.exists()) {
+        const d = snap.val();
+        document.getElementById("profileName").value = d.name || "";
+        document.getElementById("profileBio").value = d.bio || "";
+        if(d.pic) document.getElementById("profileDisplayPic").src = d.pic;
+    }
 };
+window.previewDamage = (i) => { const r = new FileReader(); r.onload=(e)=>{damageImgData=e.target.result; document.getElementById('damagePreview').src=e.target.result; document.getElementById('damagePreview').style.display='block';}; r.readAsDataURL(i.files[0]); };
+window.previewProfilePic = (i) => { const r = new FileReader(); r.onload=(e)=>document.getElementById('profileDisplayPic').src=e.target.result; r.readAsDataURL(i.files[0]); };
 
 </script>
 </body>
