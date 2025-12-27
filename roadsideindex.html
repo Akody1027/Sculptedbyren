@@ -41,9 +41,25 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 
 /* --- HERO UI --- */
 #map { width: 100%; height: 100%; position: absolute; top:0; left:0; z-index: 1; }
-#heroPanel { width:100%; position: fixed; bottom: 85px; z-index: 100; display: flex; flex-direction: column; padding: 0 15px; pointer-events: none; }
+
+/* Status Indicator (Side Button) */
+#statusIndicator {
+    position: fixed; left: 15px; bottom: 150px; z-index: 150;
+    width: 55px; height: 55px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 900; font-size: 28px; cursor: pointer;
+    box-shadow: var(--shadow); border: 3px solid white; transition: 0.3s;
+}
+
+#heroPanel { width:100%; max-width: 400px; position: fixed; bottom: 85px; left: 0; z-index: 100; display: flex; flex-direction: column; padding: 0 15px; pointer-events: none; }
 #heroPanel > * { pointer-events: auto; }
-.task-card { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 20px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border-left: 6px solid var(--accent); }
+
+.task-card { 
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 20px; border-radius: 24px; 
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border-left: 6px solid var(--accent);
+    display: none; transform: translateX(-110%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.task-card.expanded { display: block; transform: translateX(0); }
 
 /* --- MODALS --- */
 .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
@@ -61,7 +77,7 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 
 /* --- UI COMPONENTS --- */
 .vehicle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 15px 0; }
-.v-type { padding: 15px; border: 2px solid #f1f5f9; border-radius: 16px; text-align: center; cursor: pointer; font-weight: 700; transition: 0.2s; }
+.v-type { padding: 15px; border: 2px solid #f1f5f9; border-radius: 16px; text-align: center; cursor: pointer; font-weight: 700; }
 .v-type.active { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
 .tip-btn { border: 2px solid #f1f5f9; border-radius: 12px; padding: 12px; flex: 1; text-align: center; cursor: pointer; font-weight: 800; background: white; }
 .tip-btn.active { border-color: var(--success); background: #f0fdf4; color: var(--success); }
@@ -115,26 +131,30 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 <!-- 3. HERO UI -->
 <div id="heroUI" class="view">
     <button class="center-btn" onclick="window.centerOnMe()">📍 RE-CENTER</button>
+    
+    <!-- Status Icon -->
+    <div id="statusIndicator" style="background: #94a3b8;" onclick="window.toggleTaskCard()">!</div>
+
     <div id="map"></div>
     <div id="heroPanel">
-        <div id="activeTask" class="task-card" style="display:none;">
+        <div id="activeTask" class="task-card">
             <div id="taskNormalView">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <b id="taskStatusLabel" style="color: var(--accent);">ONGOING JOB</b>
-                    <button onclick="window.openChat()" style="background:var(--accent); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:bold;">CHAT</button>
+                    <button onclick="window.openChat()" style="background:var(--accent); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:bold; font-size:12px;">CHAT</button>
                 </div>
-                <p id="taskUser" style="margin:10px 0; font-weight:700; font-size:16px;"></p>
+                <p id="taskUser" style="margin:10px 0; font-weight:700; font-size:15px;"></p>
                 <p id="taskTipLabel" style="margin: 0 0 10px 0; font-weight: 800; color: var(--success); font-size: 14px;"></p>
-                <div style="display:flex; gap:10px;">
-                    <a id="navBtn" href="" target="_blank" style="flex:1; background:var(--success); color:white; text-align:center; padding:15px; border-radius:14px; text-decoration:none; font-weight:700;">NAVIGATE</a>
-                    <button id="arrivedBtn" onclick="window.markArrived()" style="flex:1; background:var(--warning); color:white; border:none; border-radius:14px; font-weight:700;">I'M HERE</button>
-                    <button id="completeBtn" onclick="window.completeTask()" style="flex:1; border:1px solid #ddd; background:white; border-radius:14px; font-weight:700; display:none;">FINISHED</button>
+                <div style="display:flex; gap:8px;">
+                    <a id="navBtn" href="" target="_blank" style="flex:1; background:var(--success); color:white; text-align:center; padding:12px; border-radius:12px; text-decoration:none; font-weight:700; font-size:13px;">MAPS</a>
+                    <button id="arrivedBtn" onclick="window.markArrived()" style="flex:1; background:var(--warning); color:white; border:none; border-radius:12px; font-weight:700; font-size:13px;">HERE</button>
+                    <button id="completeBtn" onclick="window.completeTask()" style="flex:1; border:1px solid #ddd; background:white; border-radius:12px; font-weight:700; font-size:13px; display:none;">DONE</button>
                 </div>
             </div>
             <div id="taskCanceledView" style="display:none; text-align:center;">
                 <b style="color:var(--danger)">SOS CANCELED</b>
                 <p id="cancelReasonDisplay" style="font-size:13px; margin:10px 0;"></p>
-                <button onclick="window.acknowledgeCancel()" class="submit-btn" style="background:var(--text); padding:12px;">CLOSE</button>
+                <button onclick="window.acknowledgeCancel()" class="submit-btn" style="background:var(--text); padding:10px; font-size:13px;">CLOSE</button>
             </div>
         </div>
     </div>
@@ -168,6 +188,7 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
         </select>
         
         <button id="detAcceptBtn" class="submit-btn">ACCEPT & HELP</button>
+        <span id="detInProgressText" style="display:none; color:var(--success); font-weight:bold; text-align:center;">JOB IN PROGRESS...</span>
         <span class="cancel-link" onclick="window.closeModal('detailsModal')">Go Back</span>
     </div>
 </div>
@@ -198,7 +219,6 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
             <div class="v-type" onclick="window.selectVehicle('HeavyDuty', this)">🚛 Heavy Duty</div>
         </div>
         
-        <!-- NEW TIP SECTION -->
         <label style="font-size:11px; font-weight:bold; color:var(--muted); margin-bottom:8px; display:block;">TIP NOT REQUIRED, BUT APPRECIATED!</label>
         <div style="display:flex; gap:10px; margin-bottom:12px;">
             <div class="tip-btn" onclick="window.setTip(5, this)">$5</div>
@@ -233,7 +253,7 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
         
         <div style="background: #f8fafc; padding: 20px; border-radius: 20px; margin-bottom: 20px;">
             <label style="font-size:11px; font-weight:900; color:var(--muted);">SERVICE RADIUS: <span id="radiusVal" style="color:var(--accent);">25</span> miles</label>
-            <input type="range" id="profileRadius" min="5" max="100" step="5" value="25" style="margin: 15px 0 0 0;" oninput="window.updateRadius(this.value)">
+            <input type="range" id="profileRadius" min="5" max="100" step="5" value="25" style="margin: 15px 0 0 0;" oninput="document.getElementById('radiusVal').innerText = this.value">
         </div>
 
         <button class="submit-btn" onclick="window.saveProfile()">Save Settings</button>
@@ -264,10 +284,10 @@ const myId = localStorage.getItem('heroUserId');
 let map, seekerMiniMap, userLocation, selectedVehicle = "Car", damageImgData = null, myRadius = 25, heroMarker;
 let sosCache = {}, profilesCache = {}, markers = {}, seekerHeroMarker, seekerUserMarker;
 
-const alertIcon = {
+const getMarkerIcon = (color) => ({
     path: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z",
-    fillColor: "#EE611C", fillOpacity: 1, strokeWeight: 2, strokeColor: "#ffffff", scale: 1.5, anchor: new google.maps.Point(12, 12)
-};
+    fillColor: color, fillOpacity: 1, strokeWeight: 2, strokeColor: "#ffffff", scale: 1.5, anchor: new google.maps.Point(12, 12)
+});
 
 window.onload = () => {
     if (navigator.geolocation) {
@@ -289,6 +309,11 @@ window.onload = () => {
             syncUI();
         }, (err) => console.error(err), { enableHighAccuracy: true });
     }
+};
+
+window.toggleTaskCard = () => {
+    const card = document.getElementById('activeTask');
+    card.classList.toggle('expanded');
 };
 
 window.setTip = (amt, el) => {
@@ -385,14 +410,32 @@ window.sendChatImg = (input) => {
 window.viewRequest = (id) => {
     const r = sosCache[id];
     if(!r) return;
+    
     document.getElementById('detVehicle').innerText = r.vehicle + " Request";
     document.getElementById('detIssue').innerText = r.issue;
     document.getElementById('detTip').innerText = (r.tip && r.tip > 0) ? "💰 Offering $" + r.tip + " Tip" : "";
+    
     const dist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609).toFixed(1) : "?";
     document.getElementById('detDist').innerText = "📍 " + dist + " miles from you";
+    
     const img = document.getElementById('detImg');
     if(r.damagePic) { img.src = r.damagePic; img.style.display = "block"; } else { img.style.display = "none"; }
-    document.getElementById('detAcceptBtn').onclick = () => window.confirmHelp(id);
+    
+    const acceptBtn = document.getElementById('detAcceptBtn');
+    const progressText = document.getElementById('detInProgressText');
+    const etaRow = document.getElementById('detETA').parentElement;
+
+    if(r.status === 'accepted' || r.status === 'arrived') {
+        acceptBtn.style.display = "none";
+        progressText.style.display = "block";
+        document.getElementById('detETA').style.display = "none";
+    } else {
+        acceptBtn.style.display = "block";
+        progressText.style.display = "none";
+        document.getElementById('detETA').style.display = "block";
+        acceptBtn.onclick = () => window.confirmHelp(id);
+    }
+    
     window.openModal('detailsModal');
 };
 
@@ -401,6 +444,7 @@ window.confirmHelp = (sosId) => {
     const eta = document.getElementById('detETA').value;
     update(ref(db, `sosRequests/${sosId}`), { status: 'accepted', helperId: myId, helperAcknowledged: false, eta: eta });
     window.closeModal('detailsModal');
+    document.getElementById('activeTask').classList.add('expanded');
 };
 window.markArrived = () => {
     const active = Object.entries(sosCache).find(([id, r]) => r.helperId === myId && r.status === 'accepted');
@@ -453,10 +497,16 @@ function syncUI() {
         if((r.status === 'open' && r.ownerId !== myId) || isMyJob) {
             if((r.status === 'open' && distMiles <= myRadius) || isMyJob) {
                 if(r.status === 'open') openCount++;
+                
+                // Color Code: Orange for open, Green for accepted
+                const markerColor = isMyJob ? "#22c55e" : "#EE611C";
+
                 if(!markers[id] && map) {
-                    const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: alertIcon });
+                    const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: getMarkerIcon(markerColor) });
                     marker.addListener('click', () => window.viewRequest(id));
                     markers[id] = marker;
+                } else if(markers[id]) {
+                    markers[id].setIcon(getMarkerIcon(markerColor));
                 }
             } else {
                 if(markers[id]) { markers[id].setMap(null); delete markers[id]; }
@@ -472,9 +522,18 @@ function syncUI() {
         history.innerHTML += `<div class="history-item" style="padding:15px; background:#f8fafc; border-radius:15px; margin-bottom:10px; border:1px solid #e2e8f0;"><span class="status-pill" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; color:white; float:right; background:${statusColor};">${r.status}</span><b>${r.vehicle}</b><br><small>${r.issue}</small></div>`;
     });
 
+    // Update Status Indicator Icon
+    const indicator = document.getElementById('statusIndicator');
+    if(currentTask) {
+        indicator.style.background = "var(--success)"; // Green
+    } else if (openCount > 0) {
+        indicator.style.background = "var(--danger)"; // Red
+    } else {
+        indicator.style.background = "#94a3b8"; // Gray
+    }
+
     const taskCard = document.getElementById('activeTask');
     if(currentTask) {
-        taskCard.style.display = "block";
         if(currentTask.status === 'canceled') {
             document.getElementById('taskNormalView').style.display = 'none';
             document.getElementById('taskCanceledView').style.display = 'block';
@@ -483,13 +542,15 @@ function syncUI() {
             document.getElementById('taskNormalView').style.display = 'block';
             document.getElementById('taskCanceledView').style.display = 'none';
             document.getElementById('taskStatusLabel').innerText = currentTask.status.toUpperCase() + " JOB";
-            document.getElementById('taskUser').innerText = `Issue: ${currentTask.issue}`;
+            document.getElementById('taskUser').innerText = `${currentTask.vehicle}: ${currentTask.issue}`;
             document.getElementById('taskTipLabel').innerText = (currentTask.tip && currentTask.tip > 0) ? "💰 Tip: $" + currentTask.tip : "";
             document.getElementById('navBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${currentTask.lat},${currentTask.lng}`;
             document.getElementById('arrivedBtn').style.display = currentTask.status === 'accepted' ? 'block' : 'none';
             document.getElementById('completeBtn').style.display = currentTask.status === 'arrived' ? 'block' : 'none';
         }
-    } else { taskCard.style.display = "none"; }
+    } else { 
+        taskCard.classList.remove('expanded');
+    }
 
     if(myActiveSOS && (myActiveSOS.status === 'accepted' || myActiveSOS.status === 'arrived')) {
         document.getElementById('searchingState').style.display = 'none';
@@ -532,6 +593,14 @@ window.saveProfile = () => {
         pic: document.getElementById("profileDisplayPic").src,
         radius: myRadius
     });
+    
+    // ADJUST MAP ZOOM TO RADIUS
+    if(map && userLocation) {
+        const radiusInMeters = myRadius * 1609.34;
+        const circle = new google.maps.Circle({center: userLocation, radius: radiusInMeters});
+        map.fitBounds(circle.getBounds());
+    }
+
     window.closeModal("profileModal");
 };
 
