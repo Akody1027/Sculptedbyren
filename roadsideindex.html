@@ -84,12 +84,14 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 </div>
 
 <div id="seekerUI" class="view">
-    <button onclick="window.openModal('cancelConfirmModal')" style="align-self: flex-start; background: none; border: none; font-weight: 800; color: var(--danger); padding: 20px;">✕ CANCEL SOS</button>
+    <button id="cancelSosBtn" onclick="window.openModal('cancelConfirmModal')" style="align-self: flex-start; background: none; border: none; font-weight: 800; color: var(--danger); padding: 20px;">✕ CANCEL SOS</button>
+    
     <div id="searchingState" class="status-card">
         <div class="search-pulse">📡</div>
         <h3>Broadcasting SOS...</h3>
         <p>Finding Heroes nearby...</p>
     </div>
+
     <div id="matchedState" class="status-card" style="display:none; border-color: var(--success);">
         <div id="seekerStatusPill" style="background: var(--success); color: white; padding: 6px 16px; border-radius: 20px; display: inline-block; font-size: 12px; font-weight: 800; margin-bottom: 15px;">HERO CONNECTED</div>
         <div style="display: flex; align-items: center; gap: 15px; text-align: left;">
@@ -103,6 +105,14 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
         <div id="seekerMap"></div>
         <p style="font-size:11px; color:var(--muted)">LIVE HERO TRACKING ENABLED</p>
     </div>
+
+    <div id="completionConfirmState" class="status-card" style="display:none; border-color: var(--success);">
+        <div style="font-size: 40px; margin-bottom: 15px;">✅</div>
+        <h3>Job Completed!</h3>
+        <p>Your Hero has marked the job as finished. Is everything okay?</p>
+        <button class="submit-btn" style="background: var(--success); margin-top: 15px;" onclick="window.finalSeekerConfirm()">YES, I'M GOOD TO GO!</button>
+    </div>
+
     <div class="footer">
         <div class="footer-icons">
             <img src="thishomeicon.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1946/1946436.png'" class="icon-btn" onclick="location.reload()">
@@ -131,7 +141,7 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
                 <div style="display:flex; gap:8px;">
                     <a id="navBtn" href="" target="_blank" style="flex:1; background:var(--success); color:white; text-align:center; padding:12px; border-radius:12px; text-decoration:none; font-weight:700; font-size:13px;">MAPS</a>
                     <button id="arrivedBtn" onclick="window.markArrived()" style="flex:1; background:var(--warning); color:white; border:none; border-radius:12px; font-weight:700; font-size:13px;">HERE</button>
-                    <button id="completeBtn" onclick="window.completeTask()" style="flex:1; border:1px solid #ddd; background:white; border-radius:12px; font-weight:700; font-size:13px; display:none;">DONE</button>
+                    <button id="completeBtn" onclick="window.completeTask()" style="flex:1; background:var(--success); color:white; border:none; border-radius:12px; font-weight:700; font-size:13px; display:none;">DONE</button>
                 </div>
             </div>
             <div id="taskCanceledView" style="display:none; text-align:center;">
@@ -426,6 +436,14 @@ window.submitCancellation = (reason) => {
     window.closeModal('cancelConfirmModal'); window.switchView('landingPage'); damageImgData = null;
 };
 
+// NEW: SOS user confirms completion and goes home
+window.finalSeekerConfirm = () => {
+    const myReqId = Object.keys(sosCache).find(k => sosCache[k].ownerId === myId && sosCache[k].status === 'completed');
+    if(myReqId) update(ref(db, `sosRequests/${myReqId}`), { status: 'finalized' });
+    damageImgData = null;
+    window.switchView('landingPage');
+};
+
 function initMap() { map = new google.maps.Map(document.getElementById("map"), { center: userLocation || {lat: 40, lng: -74}, zoom: 14, disableDefaultUI: true, styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }] }); }
 
 function syncUI() {
@@ -447,7 +465,7 @@ function syncUI() {
         } else if(markers[id]) { markers[id].setMap(null); delete markers[id]; }
 
         if(r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived' || (r.status === 'canceled' && r.helperAcknowledged !== true))) currentTask = r;
-        if(r.ownerId === myId && (r.status === 'open' || r.status === 'accepted' || r.status === 'arrived')) myActiveSOS = r;
+        if(r.ownerId === myId && (r.status === 'open' || r.status === 'accepted' || r.status === 'arrived' || r.status === 'completed')) myActiveSOS = r;
         if((r.ownerId === myId || r.helperId === myId) && (r.status === 'accepted' || r.status === 'arrived')) {
             jobActive = true; 
             if (activeChatId !== id) {
@@ -458,7 +476,7 @@ function syncUI() {
                 });
             }
         }
-        let sCol = r.status === 'completed' ? '#22c55e' : (r.status === 'canceled' ? '#ef4444' : '#2563eb');
+        let sCol = r.status === 'completed' || r.status === 'finalized' ? '#22c55e' : (r.status === 'canceled' ? '#ef4444' : '#2563eb');
         history.innerHTML += `<div class="history-item" style="padding:15px; background:#f8fafc; border-radius:15px; margin-bottom:10px; border:1px solid #e2e8f0;"><span class="status-pill" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; color:white; float:right; background:${sCol};">${r.status}</span><b>${r.vehicle}</b><br><small>${r.issue}</small></div>`;
     });
 
@@ -492,15 +510,27 @@ function syncUI() {
         setTimeout(() => { if(!currentTask) tCard.style.display = 'none'; }, 400);
     }
 
-    if(myActiveSOS && (myActiveSOS.status === 'accepted' || myActiveSOS.status === 'arrived')) {
-        document.getElementById('searchingState').style.display = 'none';
-        document.getElementById('matchedState').style.display = 'block';
-        const hero = profilesCache[myActiveSOS.helperId] || {};
-        document.getElementById('matchName').innerText = hero.name || "Roadside Hero";
-        document.getElementById('matchPic').src = hero.pic || "https://via.placeholder.com/65";
-        document.getElementById('matchETA').innerText = myActiveSOS.status === 'arrived' ? "Hero is at your location!" : `Arriving in ${myActiveSOS.eta || '...'}`;
-        updateSeekerMiniMap(myActiveSOS, hero);
+    // UPDATED SEEKER REAL-TIME COMPLETION LOGIC
+    if(myActiveSOS) {
+        const searching = document.getElementById('searchingState');
+        const matched = document.getElementById('matchedState');
+        const completed = document.getElementById('completionConfirmState');
+        const cancelBtn = document.getElementById('cancelSosBtn');
+
+        if(myActiveSOS.status === 'open') {
+            searching.style.display = 'block'; matched.style.display = 'none'; completed.style.display = 'none'; cancelBtn.style.display = 'block';
+        } else if(myActiveSOS.status === 'accepted' || myActiveSOS.status === 'arrived') {
+            searching.style.display = 'none'; matched.style.display = 'block'; completed.style.display = 'none'; cancelBtn.style.display = 'block';
+            const hero = profilesCache[myActiveSOS.helperId] || {};
+            document.getElementById('matchName').innerText = hero.name || "Roadside Hero";
+            document.getElementById('matchPic').src = hero.pic || "https://via.placeholder.com/65";
+            document.getElementById('matchETA').innerText = myActiveSOS.status === 'arrived' ? "Hero is at your location!" : `Arriving in ${myActiveSOS.eta || '...'}`;
+            updateSeekerMiniMap(myActiveSOS, hero);
+        } else if(myActiveSOS.status === 'completed') {
+            searching.style.display = 'none'; matched.style.display = 'none'; completed.style.display = 'block'; cancelBtn.style.display = 'none';
+        }
     }
+    
     const badge = document.getElementById('notifBadge'); badge.innerText = openCount; badge.style.display = openCount > 0 ? "flex" : "none";
 }
 
