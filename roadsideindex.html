@@ -42,8 +42,11 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 #heroPanel { width:100%; max-width: 400px; position: fixed; bottom: 85px; left: 0; z-index: 100; display: flex; flex-direction: column; padding: 0 15px; pointer-events: none; }
 #heroPanel > * { pointer-events: auto; }
 
-.task-card { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 20px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border-left: 6px solid var(--accent); display: none; transform: translateX(-110%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+.task-card { background: rgba(255,255,255,0.98); backdrop-filter: blur(10px); padding: 20px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border-left: 6px solid var(--accent); display: none; transform: translateX(-110%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); max-height: 400px; overflow-y: auto; }
 .task-card.expanded { display: block; transform: translateX(0); }
+
+.sos-list-item { padding: 12px; border-bottom: 1px solid #f1f5f9; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.sos-list-item:active { background: #f8fafc; }
 
 .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
 .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 32px 32px 0 0; padding: 30px; max-height: 95vh; overflow-y: auto; transform: translateY(100%); animation: slideUp 0.3s forwards cubic-bezier(0, 0, 0.2, 1); }
@@ -83,6 +86,7 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
     <button class="mode-btn btn-hero" onclick="window.enterHeroMode()">Become a Hero!</button>
 </div>
 
+<!-- SEEKER UI -->
 <div id="seekerUI" class="view">
     <button id="cancelSosBtn" onclick="window.openModal('cancelConfirmModal')" style="align-self: flex-start; background: none; border: none; font-weight: 800; color: var(--danger); padding: 20px;">✕ CANCEL SOS</button>
     
@@ -109,8 +113,8 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
     <div id="completionConfirmState" class="status-card" style="display:none; border-color: var(--success);">
         <div style="font-size: 40px; margin-bottom: 15px;">✅</div>
         <h3>Job Completed!</h3>
-        <p>Your Hero has marked the job as finished. Is everything okay?</p>
-        <button class="submit-btn" style="background: var(--success); margin-top: 15px;" onclick="window.finalSeekerConfirm()">YES, I'M GOOD TO GO!</button>
+        <p>Your Hero has marked the job as finished.</p>
+        <button class="submit-btn" style="background: var(--success); margin-top: 15px;" onclick="window.finalSeekerConfirm()">CONFIRM & FINISH</button>
     </div>
 
     <div class="footer">
@@ -125,30 +129,14 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
     </div>
 </div>
 
+<!-- HERO UI -->
 <div id="heroUI" class="view">
     <button class="center-btn" onclick="window.centerOnMe()">📍 RE-CENTER</button>
     <div id="statusIndicator" style="background: #94a3b8;" onclick="window.toggleTaskCard()">!</div>
     <div id="map"></div>
     <div id="heroPanel">
         <div id="activeTask" class="task-card">
-            <div id="taskNormalView">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <b id="taskStatusLabel" style="color: var(--accent);">ONGOING JOB</b>
-                    <button onclick="window.openChat()" style="background:var(--accent); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:bold; font-size:12px;">CHAT</button>
-                </div>
-                <p id="taskUser" style="margin:10px 0; font-weight:700; font-size:15px;"></p>
-                <p id="taskTipLabel" style="margin: 0 0 10px 0; font-weight: 800; color: var(--success); font-size: 14px;"></p>
-                <div style="display:flex; gap:8px;">
-                    <a id="navBtn" href="" target="_blank" style="flex:1; background:var(--success); color:white; text-align:center; padding:12px; border-radius:12px; text-decoration:none; font-weight:700; font-size:13px;">MAPS</a>
-                    <button id="arrivedBtn" onclick="window.markArrived()" style="flex:1; background:var(--warning); color:white; border:none; border-radius:12px; font-weight:700; font-size:13px;">HERE</button>
-                    <button id="completeBtn" onclick="window.completeTask()" style="flex:1; background:var(--success); color:white; border:none; border-radius:12px; font-weight:700; font-size:13px; display:none;">DONE</button>
-                </div>
-            </div>
-            <div id="taskCanceledView" style="display:none; text-align:center;">
-                <b style="color:var(--danger)">SOS CANCELED</b>
-                <p id="cancelReasonDisplay" style="font-size:13px; margin:10px 0;"></p>
-                <button onclick="window.acknowledgeCancel()" class="submit-btn" style="background:var(--text); padding:10px; font-size:13px;">CLOSE</button>
-            </div>
+            <!-- CONTENT INJECTED BY SYNCUI -->
         </div>
     </div>
     <div class="footer">
@@ -406,20 +394,13 @@ window.completeTask = () => { const active = Object.entries(sosCache).find(([id,
 
 window.acknowledgeCancel = () => {
     const canceledTask = Object.entries(sosCache).find(([id, r]) => 
-        r.helperId === myId && 
-        r.status === 'canceled' && 
-        r.helperAcknowledged !== true
+        r.helperId === myId && r.status === 'canceled' && r.helperAcknowledged !== true
     );
-    
     if(canceledTask) {
         update(ref(db, `sosRequests/${canceledTask[0]}`), { helperAcknowledged: true });
         const tCard = document.getElementById('activeTask');
         tCard.classList.remove('expanded');
-        setTimeout(() => {
-            if(!Object.values(sosCache).some(r => r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived'))) {
-                tCard.style.display = 'none';
-            }
-        }, 400);
+        setTimeout(() => { tCard.style.display = 'none'; }, 400);
     }
 };
 
@@ -436,7 +417,6 @@ window.submitCancellation = (reason) => {
     window.closeModal('cancelConfirmModal'); window.switchView('landingPage'); damageImgData = null;
 };
 
-// NEW: SOS user confirms completion and goes home
 window.finalSeekerConfirm = () => {
     const myReqId = Object.keys(sosCache).find(k => sosCache[k].ownerId === myId && sosCache[k].status === 'completed');
     if(myReqId) update(ref(db, `sosRequests/${myReqId}`), { status: 'finalized' });
@@ -448,33 +428,39 @@ function initMap() { map = new google.maps.Map(document.getElementById("map"), {
 
 function syncUI() {
     const history = document.getElementById('notifHistory'); history.innerHTML = "";
-    let openCount = 0; let currentTask = null; let myActiveSOS = null;
+    let nearbySOS = [];
+    let currentTask = null; 
+    let myActiveSOS = null;
     let jobActive = false;
 
     Object.entries(sosCache).forEach(([id, r]) => {
         const isMyJob = (r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived'));
         const distMiles = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609.34) : 999;
         
-        if((r.status === 'open' && r.ownerId !== myId) || isMyJob) {
-            if((r.status === 'open' && distMiles <= myRadius) || isMyJob) {
-                if(r.status === 'open') openCount++;
-                const markerColor = isMyJob ? "#22c55e" : "#EE611C";
-                if(!markers[id] && map) { const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: getMarkerIcon(markerColor) }); marker.addListener('click', () => window.viewRequest(id)); markers[id] = marker; }
-                else if(markers[id]) { markers[id].setIcon(getMarkerIcon(markerColor)); }
-            } else if(markers[id]) { markers[id].setMap(null); delete markers[id]; }
-        } else if(markers[id]) { markers[id].setMap(null); delete markers[id]; }
+        if (r.status === 'open' && r.ownerId !== myId && distMiles <= myRadius) {
+            nearbySOS.push({id, ...r, dist: distMiles});
+            if(!markers[id] && map) { 
+                const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: getMarkerIcon("#EE611C") }); 
+                marker.addListener('click', () => window.viewRequest(id)); 
+                markers[id] = marker; 
+            }
+        } else if (isMyJob) {
+            if(!markers[id] && map) {
+                const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: getMarkerIcon("#22c55e") });
+                marker.addListener('click', () => window.viewRequest(id)); 
+                markers[id] = marker;
+            } else if (markers[id]) {
+                markers[id].setIcon(getMarkerIcon("#22c55e"));
+            }
+        } else if (markers[id]) {
+            markers[id].setMap(null); delete markers[id];
+        }
 
         if(r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived' || (r.status === 'canceled' && r.helperAcknowledged !== true))) currentTask = r;
         if(r.ownerId === myId && (r.status === 'open' || r.status === 'accepted' || r.status === 'arrived' || r.status === 'completed')) myActiveSOS = r;
+        
         if((r.ownerId === myId || r.helperId === myId) && (r.status === 'accepted' || r.status === 'arrived')) {
             jobActive = true; 
-            if (activeChatId !== id) {
-                activeChatId = id;
-                onValue(ref(db, `chats/${id}`), (snap) => {
-                    const data = snap.val() || {}; const msgCount = Object.keys(data).length;
-                    if (document.getElementById('chatModal').style.display !== 'flex') { updateChatBadges(msgCount - lastMsgCount); }
-                });
-            }
         }
         let sCol = r.status === 'completed' || r.status === 'finalized' ? '#22c55e' : (r.status === 'canceled' ? '#ef4444' : '#2563eb');
         history.innerHTML += `<div class="history-item" style="padding:15px; background:#f8fafc; border-radius:15px; margin-bottom:10px; border:1px solid #e2e8f0;"><span class="status-pill" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; color:white; float:right; background:${sCol};">${r.status}</span><b>${r.vehicle}</b><br><small>${r.issue}</small></div>`;
@@ -483,34 +469,49 @@ function syncUI() {
     document.getElementById('footerChatBtn').style.display = jobActive ? 'block' : 'none';
     document.getElementById('heroFooterChatBtn').style.display = jobActive ? 'block' : 'none';
 
+    // HERO STATUS INDICATOR COLORS
     const ind = document.getElementById('statusIndicator');
-    if(currentTask) { ind.style.background = currentTask.status === 'canceled' ? "var(--danger)" : "var(--success)"; } else if (openCount > 0) { ind.style.background = "var(--danger)"; } else { ind.style.background = "#94a3b8"; }
+    if(currentTask) { ind.style.background = "var(--success)"; } 
+    else if (nearbySOS.length > 0) { ind.style.background = "var(--danger)"; } 
+    else { ind.style.background = "#94a3b8"; }
     
+    // THE HERO TASK PANEL (DYNAMIC LIST)
     const tCard = document.getElementById('activeTask');
+    tCard.innerHTML = ""; // Clear existing
+
     if(currentTask) {
         tCard.style.display = 'block';
         if(currentTask.status === 'canceled') {
-            document.getElementById('taskNormalView').style.display = 'none';
-            document.getElementById('taskCanceledView').style.display = 'block';
-            document.getElementById('cancelReasonDisplay').innerText = `Reason: ${currentTask.cancelReason || 'None'}`;
-            tCard.classList.add('expanded');
+            tCard.innerHTML = `<div style="text-align:center;"><b style="color:var(--danger)">SOS CANCELED</b><p style="font-size:13px; margin:10px 0;">Reason: ${currentTask.cancelReason || 'None'}</p><button onclick="window.acknowledgeCancel()" class="submit-btn" style="background:var(--text); padding:10px; font-size:13px;">CLOSE</button></div>`;
         } else {
-            document.getElementById('taskNormalView').style.display = 'block';
-            document.getElementById('taskCanceledView').style.display = 'none';
-            document.getElementById('taskStatusLabel').innerText = currentTask.status.toUpperCase() + " JOB";
-            document.getElementById('taskStatusLabel').style.color = currentTask.status === 'arrived' ? 'var(--warning)' : 'var(--accent)';
-            document.getElementById('taskUser').innerText = `${currentTask.vehicle}: ${currentTask.issue}`;
-            document.getElementById('taskTipLabel').innerText = (currentTask.tip && currentTask.tip > 0) ? "💰 Tip: $" + currentTask.tip : "";
-            document.getElementById('navBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${currentTask.lat},${currentTask.lng}`;
-            document.getElementById('arrivedBtn').style.display = currentTask.status === 'accepted' ? 'block' : 'none';
-            document.getElementById('completeBtn').style.display = currentTask.status === 'arrived' ? 'block' : 'none';
+            tCard.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <b style="color:${currentTask.status === 'arrived' ? 'var(--warning)' : 'var(--accent)'};">${currentTask.status.toUpperCase()} JOB</b>
+                    <button onclick="window.openChat()" style="background:var(--accent); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:bold; font-size:12px;">CHAT</button>
+                </div>
+                <p style="margin:10px 0; font-weight:700; font-size:15px;">${currentTask.vehicle}: ${currentTask.issue}</p>
+                ${(currentTask.tip > 0) ? `<p style="margin: 0 0 10px 0; font-weight: 800; color: var(--success); font-size: 14px;">💰 Tip: $${currentTask.tip}</p>` : ''}
+                <div style="display:flex; gap:8px;">
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${currentTask.lat},${currentTask.lng}" target="_blank" style="flex:1; background:var(--success); color:white; text-align:center; padding:12px; border-radius:12px; text-decoration:none; font-weight:700; font-size:13px;">MAPS</a>
+                    ${currentTask.status === 'accepted' ? `<button onclick="window.markArrived()" style="flex:1; background:var(--warning); color:white; border:none; border-radius:12px; font-weight:700; font-size:13px;">HERE</button>` : `<button onclick="window.completeTask()" style="flex:1; background:var(--success); color:white; border:none; border-radius:12px; font-weight:700; font-size:13px;">DONE</button>`}
+                </div>`;
         }
-    } else { 
-        tCard.classList.remove('expanded'); 
-        setTimeout(() => { if(!currentTask) tCard.style.display = 'none'; }, 400);
+    } else if (nearbySOS.length > 0) {
+        tCard.style.display = 'block';
+        let listHtml = `<b style="color:var(--danger); display:block; margin-bottom:10px;">${nearbySOS.length} SOS NEARBY</b>`;
+        nearbySOS.forEach(s => {
+            listHtml += `<div class="sos-list-item" onclick="window.viewRequest('${s.id}')">
+                <div><b>${s.vehicle}</b><br><small>${s.dist.toFixed(1)} miles away</small></div>
+                <div style="color:var(--success); font-weight:bold;">${s.tip > 0 ? '$'+s.tip : 'HELP'}</div>
+            </div>`;
+        });
+        tCard.innerHTML = listHtml;
+    } else {
+        tCard.style.display = 'block';
+        tCard.innerHTML = `<div style="text-align:center; color:var(--muted); padding:10px;"><b>No help needed right now.</b><p style="font-size:11px;">We'll alert you if someone nearby sends an SOS.</p></div>`;
     }
 
-    // UPDATED SEEKER REAL-TIME COMPLETION LOGIC
+    // SEEKER NOTIFICATION SYNC
     if(myActiveSOS) {
         const searching = document.getElementById('searchingState');
         const matched = document.getElementById('matchedState');
@@ -527,11 +528,15 @@ function syncUI() {
             document.getElementById('matchETA').innerText = myActiveSOS.status === 'arrived' ? "Hero is at your location!" : `Arriving in ${myActiveSOS.eta || '...'}`;
             updateSeekerMiniMap(myActiveSOS, hero);
         } else if(myActiveSOS.status === 'completed') {
-            searching.style.display = 'none'; matched.style.display = 'none'; completed.style.display = 'block'; cancelBtn.style.display = 'none';
+            // THIS TRIGGER IS NOW RELIABLE
+            searching.style.display = 'none'; 
+            matched.style.display = 'none'; 
+            completed.style.display = 'block'; 
+            cancelBtn.style.display = 'none';
         }
     }
     
-    const badge = document.getElementById('notifBadge'); badge.innerText = openCount; badge.style.display = openCount > 0 ? "flex" : "none";
+    const badge = document.getElementById('notifBadge'); badge.innerText = nearbySOS.length; badge.style.display = nearbySOS.length > 0 ? "flex" : "none";
 }
 
 function updateSeekerMiniMap(sos, hero) {
