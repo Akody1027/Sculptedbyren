@@ -38,6 +38,7 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 
 #map { width: 100%; height: 100%; position: absolute; top:0; left:0; z-index: 1; }
 #statusIndicator { position: fixed; left: 15px; bottom: 150px; z-index: 150; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 28px; cursor: pointer; box-shadow: var(--shadow); border: 3px solid white; transition: 0.3s; }
+
 #heroPanel { width:100%; max-width: 400px; position: fixed; bottom: 85px; left: 0; z-index: 100; display: flex; flex-direction: column; padding: 0 15px; pointer-events: none; }
 #heroPanel > * { pointer-events: auto; }
 
@@ -63,18 +64,18 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 .submit-btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 16px; font-weight: 700; cursor: pointer; font-size: 16px; }
 .cancel-link { display: block; text-align: center; padding: 15px; color: var(--muted); cursor: pointer; font-weight: 600; }
 
-/* FOOTER UPDATED FOR CHAT ICON */
 .footer { position: fixed; bottom: 0; width: 100%; height: 75px; background: rgba(238, 97, 28, 0.9); backdrop-filter: blur(10px); display: flex; justify-content:center; align-items: center; z-index: 200; border-top: 1px solid rgba(255,255,255,0.2); }
 .footer-icons { display:flex; gap:40px; align-items: center; }
 .icon-btn { cursor: pointer; width: 32px; height: 32px; filter: brightness(0) invert(1); }
-#notifBadge, #chatBadge { position: absolute; top: -5px; right: -5px; background: white; color: var(--danger); font-size: 10px; width: 20px; height: 20px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 900; }
-#chatBadge { background: var(--accent); color: white; }
+#notifBadge, #chatBadge, #chatBadgeHero { position: absolute; top: -5px; right: -5px; background: white; color: var(--danger); font-size: 10px; width: 20px; height: 20px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 900; }
+#chatBadge, #chatBadgeHero { background: var(--accent); color: white; }
 
 .center-btn { position: absolute; top: 20px; right: 20px; background: white; border: none; padding: 12px; border-radius: 12px; box-shadow: var(--shadow); cursor: pointer; z-index: 5; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
 
+<!-- APP CONTENT -->
 <div id="landingPage" class="view view-active">
     <img src="Roadsidelogo.png" onerror="this.src='https://via.placeholder.com/240x80?text=Roadside+Hero'" alt="Logo">
     <h2 style="color: var(--muted); margin-bottom: 40px; font-weight: 500; font-size: 18px;">Reliable help, wherever you are.</h2>
@@ -102,7 +103,6 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
         <div id="seekerMap"></div>
         <p style="font-size:11px; color:var(--muted)">LIVE HERO TRACKING ENABLED</p>
     </div>
-    <!-- Seeker Footer so they can also use the Chat Icon -->
     <div class="footer">
         <div class="footer-icons">
             <img src="thishomeicon.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1946/1946436.png'" class="icon-btn" onclick="location.reload()">
@@ -157,7 +157,7 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
     </div>
 </div>
 
-<!-- Same Modals (Details, Chat, SOS, Cancel, Profile, History) as before -->
+<!-- MODALS -->
 <div id="detailsModal" class="modal">
     <div class="modal-content">
         <h3 id="detVehicle">Vehicle Request</h3>
@@ -262,8 +262,7 @@ const myId = localStorage.getItem('heroUserId');
 
 let map, seekerMiniMap, userLocation, selectedVehicle = "Car", damageImgData = null, myRadius = 25, heroMarker;
 let sosCache = {}, profilesCache = {}, markers = {}, seekerHeroMarker, seekerUserMarker;
-let activeChatId = null;
-let lastMsgCount = 0;
+let activeChatId = null, lastMsgCount = 0;
 
 const getMarkerIcon = (color) => ({
     path: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z",
@@ -338,7 +337,6 @@ window.openChat = () => {
             box.innerHTML += `<div class="msg ${side}">${content}</div>`;
         });
         box.scrollTop = box.scrollHeight;
-        // Reset badge when chat is opened
         lastMsgCount = msgs.length;
         updateChatBadges(0);
     });
@@ -358,15 +356,11 @@ window.sendChatImg = (input) => {
 };
 
 function updateChatBadges(count) {
-    const seekerBadge = document.getElementById('chatBadge');
-    const heroBadge = document.getElementById('chatBadgeHero');
-    if(count > 0) {
-        if(seekerBadge) { seekerBadge.innerText = count; seekerBadge.style.display = 'flex'; }
-        if(heroBadge) { heroBadge.innerText = count; heroBadge.style.display = 'flex'; }
-    } else {
-        if(seekerBadge) seekerBadge.style.display = 'none';
-        if(heroBadge) heroBadge.style.display = 'none';
-    }
+    const sB = document.getElementById('chatBadge'); const hB = document.getElementById('chatBadgeHero');
+    if(count > 0) { 
+        if(sB){ sB.innerText = count; sB.style.display = 'flex'; } 
+        if(hB){ hB.innerText = count; hB.style.display = 'flex'; }
+    } else { if(sB) sB.style.display = 'none'; if(hB) hB.style.display = 'none'; }
 }
 
 window.viewRequest = (id) => {
@@ -424,6 +418,7 @@ function syncUI() {
     Object.entries(sosCache).forEach(([id, r]) => {
         const isMyJob = (r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived'));
         const distMiles = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609.34) : 999;
+        
         if((r.status === 'open' && r.ownerId !== myId) || isMyJob) {
             if((r.status === 'open' && distMiles <= myRadius) || isMyJob) {
                 if(r.status === 'open') openCount++;
@@ -432,39 +427,61 @@ function syncUI() {
                 else if(markers[id]) { markers[id].setIcon(getMarkerIcon(markerColor)); }
             } else if(markers[id]) { markers[id].setMap(null); delete markers[id]; }
         } else if(markers[id]) { markers[id].setMap(null); delete markers[id]; }
+
         if(r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived' || (r.status === 'canceled' && !r.helperAcknowledged))) currentTask = r;
         if(r.ownerId === myId && (r.status === 'open' || r.status === 'accepted' || r.status === 'arrived')) myActiveSOS = r;
         if((r.ownerId === myId || r.helperId === myId) && (r.status === 'accepted' || r.status === 'arrived')) {
             jobActive = true; 
             if (activeChatId !== id) {
                 activeChatId = id;
-                // Listen for messages to update footer badge
                 onValue(ref(db, `chats/${id}`), (snap) => {
-                    const data = snap.val() || {};
-                    const msgCount = Object.keys(data).length;
-                    // If chat modal is closed, show badge
-                    if (document.getElementById('chatModal').style.display !== 'flex') {
-                        updateChatBadges(msgCount - lastMsgCount);
-                    }
+                    const data = snap.val() || {}; const msgCount = Object.keys(data).length;
+                    if (document.getElementById('chatModal').style.display !== 'flex') { updateChatBadges(msgCount - lastMsgCount); }
                 });
             }
         }
-        let statusColor = r.status === 'completed' ? '#22c55e' : (r.status === 'canceled' ? '#ef4444' : '#2563eb');
-        history.innerHTML += `<div class="history-item" style="padding:15px; background:#f8fafc; border-radius:15px; margin-bottom:10px; border:1px solid #e2e8f0;"><span class="status-pill" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; color:white; float:right; background:${statusColor};">${r.status}</span><b>${r.vehicle}</b><br><small>${r.issue}</small></div>`;
+        let sCol = r.status === 'completed' ? '#22c55e' : (r.status === 'canceled' ? '#ef4444' : '#2563eb');
+        history.innerHTML += `<div class="history-item" style="padding:15px; background:#f8fafc; border-radius:15px; margin-bottom:10px; border:1px solid #e2e8f0;"><span class="status-pill" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; color:white; float:right; background:${sCol};">${r.status}</span><b>${r.vehicle}</b><br><small>${r.issue}</small></div>`;
     });
 
-    // Toggle Chat Icon Visibility
     document.getElementById('footerChatBtn').style.display = jobActive ? 'block' : 'none';
     document.getElementById('heroFooterChatBtn').style.display = jobActive ? 'block' : 'none';
 
-    const indicator = document.getElementById('statusIndicator');
-    if(currentTask) { indicator.style.background = "var(--success)"; } else if (openCount > 0) { indicator.style.background = "var(--danger)"; } else { indicator.style.background = "#94a3b8"; }
-    const taskCard = document.getElementById('activeTask');
+    const ind = document.getElementById('statusIndicator');
+    if(currentTask) { ind.style.background = "var(--success)"; } else if (openCount > 0) { ind.style.background = "var(--danger)"; } else { ind.style.background = "#94a3b8"; }
+    
+    // START: REAL-TIME DRAWER UPDATE LOGIC
+    const tCard = document.getElementById('activeTask');
     if(currentTask) {
-        if(currentTask.status === 'canceled') { document.getElementById('taskNormalView').style.display = 'none'; document.getElementById('taskCanceledView').style.display = 'block'; document.getElementById('cancelReasonDisplay').innerText = `Reason: ${currentTask.cancelReason || 'None'}`; }
-        else { document.getElementById('taskNormalView').style.display = 'block'; document.getElementById('taskCanceledView').style.display = 'none'; document.getElementById('taskStatusLabel').innerText = currentTask.status.toUpperCase() + " JOB"; document.getElementById('taskUser').innerText = `${currentTask.vehicle}: ${currentTask.issue}`; document.getElementById('taskTipLabel').innerText = (currentTask.tip && currentTask.tip > 0) ? "💰 Tip: $" + currentTask.tip : ""; document.getElementById('navBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${currentTask.lat},${currentTask.lng}`; document.getElementById('arrivedBtn').style.display = currentTask.status === 'accepted' ? 'block' : 'none'; document.getElementById('completeBtn').style.display = currentTask.status === 'arrived' ? 'block' : 'none'; }
-    } else { taskCard.classList.remove('expanded'); }
-    if(myActiveSOS && (myActiveSOS.status === 'accepted' || myActiveSOS.status === 'arrived')) { document.getElementById('searchingState').style.display = 'none'; document.getElementById('matchedState').style.display = 'block'; const hero = profilesCache[myActiveSOS.helperId] || {}; document.getElementById('matchName').innerText = hero.name || "Roadside Hero"; document.getElementById('matchPic').src = hero.pic || "https://via.placeholder.com/65"; document.getElementById('matchETA').innerText = myActiveSOS.status === 'arrived' ? "Hero is at your location!" : `Arriving in ${myActiveSOS.eta || '...'}`; updateSeekerMiniMap(myActiveSOS, hero); }
+        if(currentTask.status === 'canceled') {
+            document.getElementById('taskNormalView').style.display = 'none';
+            document.getElementById('taskCanceledView').style.display = 'block';
+            document.getElementById('cancelReasonDisplay').innerText = `Reason: ${currentTask.cancelReason || 'None'}`;
+        } else {
+            document.getElementById('taskNormalView').style.display = 'block';
+            document.getElementById('taskCanceledView').style.display = 'none';
+            document.getElementById('taskStatusLabel').innerText = currentTask.status.toUpperCase() + " JOB";
+            document.getElementById('taskStatusLabel').style.color = currentTask.status === 'arrived' ? 'var(--warning)' : 'var(--accent)';
+            document.getElementById('taskUser').innerText = `${currentTask.vehicle}: ${currentTask.issue}`;
+            document.getElementById('taskTipLabel').innerText = (currentTask.tip && currentTask.tip > 0) ? "💰 Tip: $" + currentTask.tip : "";
+            document.getElementById('navBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${currentTask.lat},${currentTask.lng}`;
+            document.getElementById('arrivedBtn').style.display = currentTask.status === 'accepted' ? 'block' : 'none';
+            document.getElementById('completeBtn').style.display = currentTask.status === 'arrived' ? 'block' : 'none';
+        }
+    } else { 
+        tCard.classList.remove('expanded'); 
+    }
+    // END: REAL-TIME DRAWER UPDATE LOGIC
+
+    if(myActiveSOS && (myActiveSOS.status === 'accepted' || myActiveSOS.status === 'arrived')) {
+        document.getElementById('searchingState').style.display = 'none';
+        document.getElementById('matchedState').style.display = 'block';
+        const hero = profilesCache[myActiveSOS.helperId] || {};
+        document.getElementById('matchName').innerText = hero.name || "Roadside Hero";
+        document.getElementById('matchPic').src = hero.pic || "https://via.placeholder.com/65";
+        document.getElementById('matchETA').innerText = myActiveSOS.status === 'arrived' ? "Hero is at your location!" : `Arriving in ${myActiveSOS.eta || '...'}`;
+        updateSeekerMiniMap(myActiveSOS, hero);
+    }
     const badge = document.getElementById('notifBadge'); badge.innerText = openCount; badge.style.display = openCount > 0 ? "flex" : "none";
 }
 
@@ -481,7 +498,14 @@ onValue(ref(db, "profiles"), (snap) => { profilesCache = snap.val() || {}; syncU
 window.saveProfile = () => {
     myRadius = parseInt(document.getElementById("profileRadius").value);
     update(ref(db, `profiles/${myId}`), { name: document.getElementById("profileName").value, bio: document.getElementById("profileBio").value, pic: document.getElementById("profileDisplayPic").src, radius: myRadius });
-    if(map && userLocation) { const radiusInMeters = myRadius * 1609.34; const circle = new google.maps.Circle({center: userLocation, radius: radiusInMeters}); map.fitBounds(circle.getBounds()); }
+    
+    // FIXED: Adjust map immediately after saving
+    if(map && userLocation) { 
+        const radiusInMeters = myRadius * 1609.34; 
+        const circle = new google.maps.Circle({center: userLocation, radius: radiusInMeters}); 
+        map.setCenter(userLocation);
+        map.fitBounds(circle.getBounds()); 
+    }
     window.closeModal("profileModal");
 };
 
