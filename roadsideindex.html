@@ -44,7 +44,7 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 #heroPanel > * { pointer-events: auto; }
 .task-card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-left: 6px solid var(--accent); margin-bottom: 10px; }
 
-/* --- MODALS (Enhanced with Bottom Sheet Animation) --- */
+/* --- MODALS --- */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
 .modal-content { 
     background: white; width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; padding: 25px; max-height: 95vh; overflow-y: auto; 
@@ -71,14 +71,9 @@ input, textarea, select { width: 100%; padding: 14px; border-radius: 12px; borde
 
 /* FOOTER */
 .footer { position: fixed; bottom: 0; width: 100%; height: 60px; background: #ee611cb8; display: flex; justify-content:center; align-items: center;  z-index: 200; }
-.footer-icons { display:flex; gap:40px; align-items: center; }
+.footer-icons { display:flex; gap:60px; align-items: center; }
 .icon-btn { cursor: pointer; width: 35px; height: 35px; object-fit: contain; }
 #notifBadge { position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid white; }
-
-/* ONLINE TOGGLE */
-.toggle-container { background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; display: flex; align-items: center; gap: 8px; color: white; font-weight: bold; font-size: 12px; cursor: pointer; }
-.dot { width: 10px; height: 10px; background: #ccc; border-radius: 50%; }
-.dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
 </style>
 </head>
 <body>
@@ -140,10 +135,6 @@ input, textarea, select { width: 100%; padding: 14px; border-radius: 12px; borde
     </div>
     <div class="footer">
         <div class="footer-icons">
-            <div class="toggle-container" onclick="window.toggleHeroStatus()">
-                <div id="statusDot" class="dot"></div>
-                <span id="statusText">OFFLINE</span>
-            </div>
             <div style="position:relative">
                 <img src="notificationicon.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3119/3119338.png'" class="icon-btn" onclick="window.openModal('notifModal')">
                 <span id="notifBadge">0</span>
@@ -214,7 +205,24 @@ input, textarea, select { width: 100%; padding: 14px; border-radius: 12px; borde
 </div>
 
 <div id="profileModal" class="modal">
-    <div class="modal-content"><h3>Hero Profile</h3><div style="text-align:center; margin-bottom:15px;"><img id="profileDisplayPic" src="https://via.placeholder.com/85" style="width:85px; height:85px; border-radius:50%; object-fit:cover; border:3px solid var(--accent);"><input type="file" id="picInput" style="display:none" onchange="window.handleImageUpload(this, 'profile')"><button onclick="document.getElementById('picInput').click()" style="display:block; margin:5px auto; border:none; background:none; color:var(--accent); font-weight:bold; cursor:pointer;">Update Photo</button></div><input id="profileName" placeholder="Hero Name"><textarea id="profileBio" placeholder="Bio / Tools Available..." rows="2"></textarea><button class="submit-btn" onclick="window.saveProfile()">Save Settings</button><span class="cancel-link" onclick="window.closeModal('profileModal')">Close</span></div>
+    <div class="modal-content">
+        <h3>Hero Profile</h3>
+        <div style="text-align:center; margin-bottom:15px;">
+            <img id="profileDisplayPic" src="https://via.placeholder.com/85" style="width:85px; height:85px; border-radius:50%; object-fit:cover; border:3px solid var(--accent);">
+            <input type="file" id="picInput" style="display:none" onchange="window.handleImageUpload(this, 'profile')">
+            <button onclick="document.getElementById('picInput').click()" style="display:block; margin:5px auto; border:none; background:none; color:var(--accent); font-weight:bold; cursor:pointer;">Update Photo</button>
+        </div>
+        <input id="profileName" placeholder="Hero Name">
+        <textarea id="profileBio" placeholder="Bio / Tools Available..." rows="2"></textarea>
+        
+        <div style="margin: 10px 0;">
+            <label style="font-size:12px; font-weight:bold; color:var(--muted)">SERVICE RADIUS: <span id="radiusVal">25</span> miles</label>
+            <input type="range" id="profileRadius" min="5" max="100" step="5" value="25" style="margin: 10px 0;" oninput="document.getElementById('radiusVal').innerText = this.value">
+        </div>
+
+        <button class="submit-btn" onclick="window.saveProfile()">Save Settings</button>
+        <span class="cancel-link" onclick="window.closeModal('profileModal')">Close</span>
+    </div>
 </div>
 
 <div id="notifModal" class="modal"><div class="modal-content"><h3>Activity History</h3><div id="notifHistory"></div><button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:15px;" onclick="window.closeModal('notifModal')">CLOSE</button></div></div>
@@ -237,7 +245,7 @@ const db = getDatabase(app);
 if(!localStorage.getItem('heroUserId')) localStorage.setItem('heroUserId', 'u_' + Math.random().toString(36).substr(2, 9));
 const myId = localStorage.getItem('heroUserId');
 
-let map, seekerMiniMap, userLocation, selectedVehicle = "Car", damageImgData = null, isHeroOnline = false;
+let map, seekerMiniMap, userLocation, selectedVehicle = "Car", damageImgData = null, myRadius = 25;
 let sosCache = {}, profilesCache = {}, markers = {}, seekerHeroMarker, seekerUserMarker;
 
 const alertIcon = {
@@ -261,7 +269,7 @@ window.selectVehicle = (type, el) => {
     el.classList.add("active");
 };
 
-// --- IMAGE COMPRESSION (To prevent DB bloat) ---
+// --- IMAGE COMPRESSION ---
 window.handleImageUpload = (input, target) => {
     const file = input.files[0];
     if(!file) return;
@@ -289,23 +297,6 @@ window.handleImageUpload = (input, target) => {
         img.src = e.target.result;
     };
     reader.readAsDataURL(file);
-};
-
-// --- PIN INTERACTION ---
-window.viewRequest = (id) => {
-    const r = sosCache[id];
-    if(!r) return;
-    document.getElementById('detVehicle').innerText = r.vehicle + " Request";
-    document.getElementById('detIssue').innerText = r.issue;
-    const dist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609).toFixed(1) : "?";
-    document.getElementById('detDist').innerText = dist + " miles away from you";
-    
-    const img = document.getElementById('detImg');
-    if(r.damagePic) { img.src = r.damagePic; img.style.display = "block"; } 
-    else { img.style.display = "none"; }
-    
-    document.getElementById('detAcceptBtn').onclick = () => window.confirmHelp(id);
-    window.openModal('detailsModal');
 };
 
 // --- CHAT LOGIC ---
@@ -343,19 +334,27 @@ window.sendChatImg = (input) => {
     reader.readAsDataURL(file);
 };
 
+// --- PIN INTERACTION ---
+window.viewRequest = (id) => {
+    const r = sosCache[id];
+    if(!r) return;
+    document.getElementById('detVehicle').innerText = r.vehicle + " Request";
+    document.getElementById('detIssue').innerText = r.issue;
+    const dist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609).toFixed(1) : "?";
+    document.getElementById('detDist').innerText = dist + " miles away from you";
+    
+    const img = document.getElementById('detImg');
+    if(r.damagePic) { img.src = r.damagePic; img.style.display = "block"; } 
+    else { img.style.display = "none"; }
+    
+    document.getElementById('detAcceptBtn').onclick = () => window.confirmHelp(id);
+    window.openModal('detailsModal');
+};
+
 // --- HERO LOGIC ---
 window.enterHeroMode = () => { 
     window.switchView('heroUI'); 
     setTimeout(() => { if(!map) initMap(); }, 200); 
-};
-
-window.toggleHeroStatus = () => {
-    isHeroOnline = !isHeroOnline;
-    const dot = document.getElementById('statusDot');
-    const txt = document.getElementById('statusText');
-    dot.className = isHeroOnline ? 'dot online' : 'dot';
-    txt.innerText = isHeroOnline ? 'ONLINE' : 'OFFLINE';
-    update(ref(db, `profiles/${myId}`), { isOnline: isHeroOnline });
 };
 
 window.confirmHelp = (sosId) => {
@@ -414,12 +413,27 @@ function syncUI() {
     Object.entries(sosCache).forEach(([id, r]) => {
         const isMyJob = (r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived'));
         
+        // Calculate Distance for Filtering
+        const distMiles = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609.34) : 0;
+
         if((r.status === 'open' && r.ownerId !== myId) || isMyJob) {
-            if(r.status === 'open') openCount++;
-            if(!markers[id] && map && isHeroOnline) {
-                const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: alertIcon });
-                marker.addListener('click', () => window.viewRequest(id));
-                markers[id] = marker;
+            // Only show open requests if within HERO RADIUS
+            if(r.status === 'open' && distMiles <= myRadius) {
+                openCount++;
+                if(!markers[id] && map) {
+                    const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: alertIcon });
+                    marker.addListener('click', () => window.viewRequest(id));
+                    markers[id] = marker;
+                }
+            } else if (isMyJob) {
+                // Always show my accepted job
+                if(!markers[id] && map) {
+                    const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: alertIcon });
+                    marker.addListener('click', () => window.viewRequest(id));
+                    markers[id] = marker;
+                }
+            } else {
+                if(markers[id]) { markers[id].setMap(null); delete markers[id]; }
             }
         } else {
             if(markers[id]) { markers[id].setMap(null); delete markers[id]; }
@@ -445,8 +459,6 @@ function syncUI() {
             document.getElementById('taskStatusLabel').innerText = currentTask.status.toUpperCase() + " JOB";
             document.getElementById('taskUser').innerText = `Issue: ${currentTask.issue}`;
             document.getElementById('navBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${currentTask.lat},${currentTask.lng}`;
-            
-            // Arrived/Complete Button Toggle
             document.getElementById('arrivedBtn').style.display = currentTask.status === 'accepted' ? 'block' : 'none';
             document.getElementById('completeBtn').style.display = currentTask.status === 'arrived' ? 'block' : 'none';
         }
@@ -460,7 +472,6 @@ function syncUI() {
             const hero = profilesCache[myActiveSOS.helperId] || {};
             document.getElementById('matchName').innerText = hero.name || "Roadside Hero";
             document.getElementById('matchPic').src = hero.pic || "https://via.placeholder.com/65";
-            
             if(myActiveSOS.status === 'arrived') {
                 document.getElementById('seekerStatusPill').innerText = "HERO ARRIVED!";
                 document.getElementById('seekerStatusPill').style.background = "var(--warning)";
@@ -503,9 +514,17 @@ navigator.geolocation.watchPosition(p => {
 }, null, { enableHighAccuracy: true });
 
 window.saveProfile = () => {
-    update(ref(db, `profiles/${myId}`), { name: document.getElementById("profileName").value, bio: document.getElementById("profileBio").value, pic: document.getElementById("profileDisplayPic").src });
+    myRadius = parseInt(document.getElementById("profileRadius").value);
+    update(ref(db, `profiles/${myId}`), { 
+        name: document.getElementById("profileName").value, 
+        bio: document.getElementById("profileBio").value, 
+        pic: document.getElementById("profileDisplayPic").src,
+        radius: myRadius
+    });
     window.closeModal("profileModal");
+    syncUI();
 };
+
 window.openProfile = async () => {
     window.openModal("profileModal");
     const snap = await get(ref(db, `profiles/${myId}`));
@@ -514,6 +533,11 @@ window.openProfile = async () => {
         document.getElementById("profileName").value = d.name || "";
         document.getElementById("profileBio").value = d.bio || "";
         if(d.pic) document.getElementById("profileDisplayPic").src = d.pic;
+        if(d.radius) {
+            myRadius = d.radius;
+            document.getElementById("profileRadius").value = d.radius;
+            document.getElementById("radiusVal").innerText = d.radius;
+        }
     }
 };
 
