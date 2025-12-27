@@ -74,6 +74,9 @@ input, textarea, select { width: 100%; padding: 14px; border-radius: 12px; borde
 .footer-icons { display:flex; gap:60px; align-items: center; }
 .icon-btn { cursor: pointer; width: 35px; height: 35px; object-fit: contain; }
 #notifBadge { position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid white; }
+
+/* CENTER BUTTON */
+.center-btn { position: absolute; top: 10px; right: 10px; background: white; border: none; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; z-index: 5; font-weight: bold; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -111,6 +114,7 @@ input, textarea, select { width: 100%; padding: 14px; border-radius: 12px; borde
 
 <!-- 3. HERO UI -->
 <div id="heroUI" class="view">
+    <button class="center-btn" onclick="window.centerOnMe()">📍 RE-CENTER</button>
     <div id="map"></div>
     <div id="heroPanel">
         <div id="activeTask" class="task-card" style="display:none;">
@@ -245,7 +249,7 @@ const db = getDatabase(app);
 if(!localStorage.getItem('heroUserId')) localStorage.setItem('heroUserId', 'u_' + Math.random().toString(36).substr(2, 9));
 const myId = localStorage.getItem('heroUserId');
 
-let map, seekerMiniMap, userLocation, selectedVehicle = "Car", damageImgData = null, myRadius = 25;
+let map, seekerMiniMap, userLocation, selectedVehicle = "Car", damageImgData = null, myRadius = 25, heroMarker;
 let sosCache = {}, profilesCache = {}, markers = {}, seekerHeroMarker, seekerUserMarker;
 
 const alertIcon = {
@@ -254,7 +258,48 @@ const alertIcon = {
 };
 
 window.onload = () => {
-    if (navigator.geolocation) navigator.geolocation.getCurrentPosition(() => {}, () => alert("Enable GPS."));
+    if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(p => {
+            const freshLoc = { lat: p.coords.latitude, lng: p.coords.longitude };
+            const isFirstLoad = !userLocation;
+            userLocation = freshLoc;
+            
+            // Sync location to Firebase for seeker tracking
+            update(ref(db, `profiles/${myId}`), { ...userLocation, id: myId });
+
+            // On the hero's map, show their own location as a blue dot
+            if (map) {
+                if (!heroMarker) {
+                    heroMarker = new google.maps.Marker({
+                        position: userLocation,
+                        map: map,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 8,
+                            fillColor: "#2563eb",
+                            fillOpacity: 1,
+                            strokeColor: "white",
+                            strokeWeight: 2
+                        }
+                    });
+                } else {
+                    heroMarker.setPosition(userLocation);
+                }
+
+                // Auto-center on first time GPS is found if we are in Hero UI
+                if (isFirstLoad && document.getElementById('heroUI').classList.contains('view-active')) {
+                    map.setCenter(userLocation);
+                }
+            }
+            syncUI();
+        }, (err) => console.error("GPS Error:", err), { enableHighAccuracy: true });
+    } else {
+        alert("GPS not supported.");
+    }
+};
+
+window.centerOnMe = () => {
+    if (map && userLocation) map.panTo(userLocation);
 };
 
 window.openModal = (id) => document.getElementById(id).style.display = "flex";
@@ -262,6 +307,10 @@ window.closeModal = (id) => document.getElementById(id).style.display = "none";
 window.switchView = (id) => {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('view-active'));
     document.getElementById(id).classList.add('view-active');
+    if (id === 'heroUI' && map && userLocation) {
+        map.setCenter(userLocation);
+        google.maps.event.trigger(map, 'resize');
+    }
 };
 window.selectVehicle = (type, el) => {
     selectedVehicle = type;
@@ -354,7 +403,7 @@ window.viewRequest = (id) => {
 // --- HERO LOGIC ---
 window.enterHeroMode = () => { 
     window.switchView('heroUI'); 
-    setTimeout(() => { if(!map) initMap(); }, 200); 
+    if(!map) initMap();
 };
 
 window.confirmHelp = (sosId) => {
@@ -412,21 +461,12 @@ function syncUI() {
 
     Object.entries(sosCache).forEach(([id, r]) => {
         const isMyJob = (r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived'));
-        
-        // Calculate Distance for Filtering
-        const distMiles = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609.34) : 0;
+        const distMiles = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609.34) : 999;
 
         if((r.status === 'open' && r.ownerId !== myId) || isMyJob) {
-            // Only show open requests if within HERO RADIUS
-            if(r.status === 'open' && distMiles <= myRadius) {
-                openCount++;
-                if(!markers[id] && map) {
-                    const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: alertIcon });
-                    marker.addListener('click', () => window.viewRequest(id));
-                    markers[id] = marker;
-                }
-            } else if (isMyJob) {
-                // Always show my accepted job
+            // Apply Service Radius Filtering
+            if((r.status === 'open' && distMiles <= myRadius) || isMyJob) {
+                if(r.status === 'open') openCount++;
                 if(!markers[id] && map) {
                     const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: alertIcon });
                     marker.addListener('click', () => window.viewRequest(id));
@@ -507,11 +547,6 @@ function updateSeekerMiniMap(sos, hero) {
 
 onValue(ref(db, "sosRequests"), (snap) => { sosCache = snap.val() || {}; syncUI(); });
 onValue(ref(db, "profiles"), (snap) => { profilesCache = snap.val() || {}; syncUI(); });
-
-navigator.geolocation.watchPosition(p => {
-    userLocation = { lat: p.coords.latitude, lng: p.coords.longitude };
-    update(ref(db, `profiles/${myId}`), { lat: userLocation.lat, lng: userLocation.lng, id: myId });
-}, null, { enableHighAccuracy: true });
 
 window.saveProfile = () => {
     myRadius = parseInt(document.getElementById("profileRadius").value);
