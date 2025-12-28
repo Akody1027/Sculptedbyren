@@ -131,7 +131,7 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 
 <!-- HERO UI -->
 <div id="heroUI" class="view">
-    <button class="center-btn" onclick="window.centerOnMe()">📍 RE-CENTER</button>
+    <button class="center-btn" onclick="window.centerOnMe()">RE-CENTER</button>
     <div id="statusIndicator" style="background: #94a3b8;" onclick="window.toggleTaskCard()">!</div>
     <div id="map"></div>
     <div id="heroPanel">
@@ -192,7 +192,7 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 
 <div id="requestModal" class="modal">
     <div class="modal-content">
-        <h3>Request Help</h3>
+        <h3>Request Hero</h3>
         <div class="vehicle-grid">
             <div class="v-type active" onclick="window.selectVehicle('Car', this)">🚗 Car</div>
             <div class="v-type" onclick="window.selectVehicle('Truck', this)">🛻 Truck</div>
@@ -210,7 +210,7 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
         <input type="file" id="damageInput" accept="image/*" style="display:none" onchange="window.handleImageUpload(this, 'damage')">
         <button onclick="document.getElementById('damageInput').click()" style="width:100%; padding:15px; border-radius:16px; border:2px dashed #cbd5e1; background:none; margin-bottom:15px; cursor:pointer; font-weight:bold; color:var(--muted);">📷 Add Damage Photo</button>
         <textarea id="reqIssue" placeholder="What's the problem?" rows="2"></textarea>
-        <button class="submit-btn" onclick="window.submitSOS()">SUBMIT SOS</button>
+        <button class="submit-btn" onclick="window.submitSOS()">FIND HERO</button>
         <p onclick="window.closeModal('requestModal')" class="cancel-link">Cancel</p>
     </div>
 </div>
@@ -585,3 +585,4 @@ window.openProfile = async () => {
 </script>
 </body>
 </html>
+
