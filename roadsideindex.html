@@ -261,6 +261,22 @@ const myId = localStorage.getItem('heroUserId');
 let map, seekerMiniMap, userLocation, selectedVehicle = "Car", damageImgData = null, myRadius = 25, heroMarker;
 let sosCache = {}, profilesCache = {}, markers = {}, seekerHeroMarker, seekerUserMarker;
 let activeChatId = null, lastMsgCount = 0;
+let notifiedIds = new Set(); // TRACK NOTIFIED EVENTS
+
+// --- NOTIFICATION UTILITIES ---
+function requestNotificationPermission() {
+    if ("Notification" in window) {
+        Notification.requestPermission();
+    }
+}
+
+function sendAlert(title, body) {
+    if (Notification.permission === "granted") {
+        new Notification(title, { body: body, icon: "Roadsidelogo.png" });
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+        audio.play();
+    }
+}
 
 const getMarkerIcon = (color) => ({
     path: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z",
@@ -335,6 +351,13 @@ window.openChat = () => {
             box.innerHTML += `<div class="msg ${side}">${content}</div>`;
         });
         box.scrollTop = box.scrollHeight;
+        
+        // CHAT NOTIFICATION LOGIC
+        const lastMsg = msgs[msgs.length - 1];
+        if (lastMsg && lastMsg.sender !== myId && msgs.length > lastMsgCount) {
+            sendAlert("New Message", lastMsg.text || "Sent a photo");
+        }
+        
         lastMsgCount = msgs.length;
         updateChatBadges(0);
     });
@@ -382,7 +405,12 @@ window.viewRequest = (id) => {
     window.openModal('detailsModal');
 };
 
-window.enterHeroMode = () => { window.switchView('heroUI'); if(!map) initMap(); };
+window.enterHeroMode = () => { 
+    requestNotificationPermission(); // REQUEST PERMS
+    window.switchView('heroUI'); 
+    if(!map) initMap(); 
+};
+
 window.confirmHelp = (sosId) => {
     const eta = document.getElementById('detETA').value;
     update(ref(db, `sosRequests/${sosId}`), { status: 'accepted', helperId: myId, helperAcknowledged: false, eta: eta });
@@ -405,6 +433,7 @@ window.acknowledgeCancel = () => {
 };
 
 window.submitSOS = () => {
+    requestNotificationPermission(); // REQUEST PERMS
     const issue = document.getElementById('reqIssue').value; const tip = document.getElementById('customTip').value || 0;
     if(!issue || !userLocation) return alert("Please describe the issue.");
     push(ref(db, "sosRequests"), { ownerId: myId, userName: "Driver", issue, vehicle: selectedVehicle, damagePic: damageImgData, tip: tip, lat: userLocation.lat, lng: userLocation.lng, status: 'open', timestamp: Date.now() });
@@ -560,7 +589,30 @@ function updateSeekerMiniMap(sos, hero) {
     else { seekerMiniMap.setCenter(userPos); }
 }
 
-onValue(ref(db, "sosRequests"), (snap) => { sosCache = snap.val() || {}; syncUI(); });
+onValue(ref(db, "sosRequests"), (snap) => { 
+    const newData = snap.val() || {};
+    
+    // --- PUSH NOTIFICATION LOGIC ---
+    Object.entries(newData).forEach(([id, r]) => {
+        // Notification for Hero (New SOS nearby)
+        if (r.status === 'open' && r.ownerId !== myId && !notifiedIds.has(id)) {
+            const dist = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609).toFixed(1) : "999";
+            if (parseFloat(dist) <= myRadius) {
+                sendAlert("New SOS Nearby!", `${r.vehicle} needs help ${dist} miles away.`);
+                notifiedIds.add(id);
+            }
+        }
+        // Notification for Seeker (Hero accepted)
+        if (r.ownerId === myId && r.status === 'accepted' && !notifiedIds.has(id + '_accepted')) {
+            sendAlert("Hero Found!", "A Hero is on their way to help you!");
+            notifiedIds.add(id + '_accepted');
+        }
+    });
+
+    sosCache = newData; 
+    syncUI(); 
+});
+
 onValue(ref(db, "profiles"), (snap) => { profilesCache = snap.val() || {}; syncUI(); });
 
 window.saveProfile = () => {
@@ -585,11 +637,3 @@ window.openProfile = async () => {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
