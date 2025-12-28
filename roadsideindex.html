@@ -11,7 +11,7 @@
 <style>
 :root {
   --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b;
-  --accent: #EE611C; --danger: #EE611C; --success: #22c55e; --warning: #f59e0b;
+  --accent: #2563eb; --danger: #EE611C; --success: #22c55e; --warning: #f59e0b;
   --shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
 }
 
@@ -37,7 +37,7 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 @keyframes pulse { 0% { transform: scale(1); opacity: 0.4; } 100% { transform: scale(2.5); opacity: 0; } }
 
 #map { width: 100%; height: 100%; position: absolute; top:0; left:0; z-index: 1; }
-#statusIndicator { position: fixed; left: 5px; bottom: 50px; z-index: 150; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 28px; cursor: pointer; box-shadow: var(--shadow); border: 3px solid white; transition: 0.3s; }
+#statusIndicator { position: fixed; left: 15px; bottom: 150px; z-index: 150; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 28px; cursor: pointer; box-shadow: var(--shadow); border: 3px solid white; transition: 0.3s; }
 
 #heroPanel { width:100%; max-width: 400px; position: fixed; bottom: 85px; left: 0; z-index: 100; display: flex; flex-direction: column; padding: 0 15px; pointer-events: none; }
 #heroPanel > * { pointer-events: auto; }
@@ -59,21 +59,21 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 
 .vehicle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 15px 0; }
 .v-type { padding: 15px; border: 2px solid #f1f5f9; border-radius: 16px; text-align: center; cursor: pointer; font-weight: 700; }
-.v-type.active { border-color: #EE611C; background: #ee611c45; color: #EE611C; }
+.v-type.active { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
 .tip-btn { border: 2px solid #f1f5f9; border-radius: 12px; padding: 12px; flex: 1; text-align: center; cursor: pointer; font-weight: 800; background: white; }
 .tip-btn.active { border-color: var(--success); background: #f0fdf4; color: var(--success); }
 
 input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 12px; font-size: 15px; background: #f8fafc; }
-.submit-btn { width: 100%; padding: 18px; background: #EE611C; color: white; border: none; border-radius: 16px; font-weight: 700; cursor: pointer; font-size: 16px; }
+.submit-btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 16px; font-weight: 700; cursor: pointer; font-size: 16px; }
 .cancel-link { display: block; text-align: center; padding: 15px; color: var(--muted); cursor: pointer; font-weight: 600; }
 
-.footer { position: fixed; bottom: 0; width: 100%;  background: rgba(238, 97, 28, 0.9); backdrop-filter: blur(10px); display: flex; justify-content:center; align-items: center; z-index: 200; border-top: 1px solid rgba(255,255,255,0.2); }
-.footer-icons { display:flex; gap:100px; padding:5px; }
+.footer { position: fixed; bottom: 0; width: 100%; height: 75px; background: rgba(238, 97, 28, 0.9); backdrop-filter: blur(10px); display: flex; justify-content:center; align-items: center; z-index: 200; border-top: 1px solid rgba(255,255,255,0.2); }
+.footer-icons { display:flex; gap:40px; align-items: center; }
 .icon-btn { cursor: pointer; width: 32px; height: 32px; filter: brightness(0) invert(1); }
 #notifBadge, #chatBadge, #chatBadgeHero { position: absolute; top: -5px; right: -5px; background: white; color: var(--danger); font-size: 10px; width: 20px; height: 20px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 900; }
 #chatBadge, #chatBadgeHero { background: var(--accent); color: white; }
 
-.center-btn { position: absolute; top: 20px; right: 20px; background: #EE611C; border: none; padding: 12px; border-radius: 12px; box-shadow: var(--shadow); cursor: pointer; z-index: 5; font-weight: 800; font-size: 11px; color:white; }
+.center-btn { position: absolute; top: 20px; right: 20px; background: white; border: none; padding: 12px; border-radius: 12px; box-shadow: var(--shadow); cursor: pointer; z-index: 5; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -81,8 +81,8 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 <!-- APP CONTENT -->
 <div id="landingPage" class="view view-active">
     <img src="Roadsidelogo.png" onerror="this.src='https://via.placeholder.com/240x80?text=Roadside+Hero'" alt="Logo">
-    <h2 style="color: var(--muted); margin-bottom: 40px; font-weight: 500; font-size: 18px;">Help is just a click away.</h2>
-    <button class="mode-btn btn-req" onclick="window.openModal('requestModal')">Find a Hero!</button>
+    <h2 style="color: var(--muted); margin-bottom: 40px; font-weight: 500; font-size: 18px;">Reliable help, wherever you are.</h2>
+    <button class="mode-btn btn-req" onclick="window.openModal('requestModal')">Request Help!</button>
     <button class="mode-btn btn-hero" onclick="window.enterHeroMode()">Become a Hero!</button>
 </div>
 
@@ -124,14 +124,14 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
                 <img src="https://cdn-icons-png.flaticon.com/512/589/589708.png" class="icon-btn" onclick="window.openChat()">
                 <span id="chatBadge">0</span>
             </div>
-            <img src="usericon.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1077/1077063.png'" class="icon-btn" onclick="window.openProfile()">
+            <!-- Profile icon removed from seeker side as requested -->
         </div>
     </div>
 </div>
 
 <!-- HERO UI -->
 <div id="heroUI" class="view">
-    <button class="center-btn" onclick="window.centerOnMe()">RE-CENTER</button>
+    <button class="center-btn" onclick="window.centerOnMe()">📍 RE-CENTER</button>
     <div id="statusIndicator" style="background: #94a3b8;" onclick="window.toggleTaskCard()">!</div>
     <div id="map"></div>
     <div id="heroPanel">
@@ -192,7 +192,7 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 
 <div id="requestModal" class="modal">
     <div class="modal-content">
-        <h3>Request Hero</h3>
+        <h3>Request Help</h3>
         <div class="vehicle-grid">
             <div class="v-type active" onclick="window.selectVehicle('Car', this)">🚗 Car</div>
             <div class="v-type" onclick="window.selectVehicle('Truck', this)">🛻 Truck</div>
@@ -210,7 +210,7 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
         <input type="file" id="damageInput" accept="image/*" style="display:none" onchange="window.handleImageUpload(this, 'damage')">
         <button onclick="document.getElementById('damageInput').click()" style="width:100%; padding:15px; border-radius:16px; border:2px dashed #cbd5e1; background:none; margin-bottom:15px; cursor:pointer; font-weight:bold; color:var(--muted);">📷 Add Damage Photo</button>
         <textarea id="reqIssue" placeholder="What's the problem?" rows="2"></textarea>
-        <button class="submit-btn" onclick="window.submitSOS()">FIND HERO</button>
+        <button class="submit-btn" onclick="window.submitSOS()">SUBMIT SOS</button>
         <p onclick="window.closeModal('requestModal')" class="cancel-link">Cancel</p>
     </div>
 </div>
@@ -260,7 +260,7 @@ const myId = localStorage.getItem('heroUserId');
 
 let map, seekerMiniMap, userLocation, selectedVehicle = "Car", damageImgData = null, myRadius = 25, heroMarker;
 let sosCache = {}, profilesCache = {}, markers = {}, seekerHeroMarker, seekerUserMarker;
-let activeChatId = null, lastMsgCount = 0;
+let activeChatId = null, lastMsgCount = 0, readMessagesCount = 0; // Added read count for badges
 
 const getMarkerIcon = (color) => ({
     path: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z",
@@ -335,7 +335,9 @@ window.openChat = () => {
             box.innerHTML += `<div class="msg ${side}">${content}</div>`;
         });
         box.scrollTop = box.scrollHeight;
-        lastMsgCount = msgs.length;
+        
+        // Update read count when opening/viewing
+        readMessagesCount = msgs.length;
         updateChatBadges(0);
     });
 };
@@ -405,6 +407,15 @@ window.acknowledgeCancel = () => {
 };
 
 window.submitSOS = () => {
+    // Session Lock: Check if already have an active SOS
+    const existing = Object.values(sosCache).find(r => r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status));
+    if(existing) {
+        alert("You already have an active request.");
+        window.closeModal('requestModal');
+        window.switchView('seekerUI');
+        return;
+    }
+
     const issue = document.getElementById('reqIssue').value; const tip = document.getElementById('customTip').value || 0;
     if(!issue || !userLocation) return alert("Please describe the issue.");
     push(ref(db, "sosRequests"), { ownerId: myId, userName: "Driver", issue, vehicle: selectedVehicle, damagePic: damageImgData, tip: tip, lat: userLocation.lat, lng: userLocation.lng, status: 'open', timestamp: Date.now() });
@@ -466,6 +477,15 @@ function syncUI() {
         
         if((r.ownerId === myId || r.helperId === myId) && (r.status === 'accepted' || r.status === 'arrived')) {
             jobActive = true; 
+            // Handle Message Badges logic
+            if(!activeChatId || activeChatId !== id) {
+               activeChatId = id;
+               onValue(ref(db, `chats/${id}`), (snap) => {
+                  const msgs = snap.val() ? Object.values(snap.val()) : [];
+                  const unread = msgs.length - readMessagesCount;
+                  updateChatBadges(unread > 0 ? unread : 0);
+               });
+            }
         }
         let sCol = r.status === 'completed' || r.status === 'finalized' ? '#22c55e' : (r.status === 'canceled' ? '#ef4444' : '#2563eb');
         history.innerHTML += `<div class="history-item" style="padding:15px; background:#f8fafc; border-radius:15px; margin-bottom:10px; border:1px solid #e2e8f0;"><span class="status-pill" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; color:white; float:right; background:${sCol};">${r.status}</span><b>${r.vehicle}</b><br><small>${r.issue}</small></div>`;
@@ -516,22 +536,24 @@ function syncUI() {
         tCard.innerHTML = `<div style="text-align:center; color:var(--muted); padding:10px;"><b>No help needed right now.</b><p style="font-size:11px;">We'll alert you if someone nearby sends an SOS.</p></div>`;
     }
 
-    // FIXED SEEKER MATCHING LOGIC
+    // FIXED SEEKER MATCHING LOGIC & Persistence Session Check
     if(myActiveSOS) {
+        // Resume View if on landing page
+        if(document.getElementById('landingPage').classList.contains('view-active')) {
+            window.switchView('seekerUI');
+        }
+
         const searching = document.getElementById('searchingState');
         const matched = document.getElementById('matchedState');
         const completed = document.getElementById('completionConfirmState');
         const cancelBtn = document.getElementById('cancelSosBtn');
 
-        // STRICT STATE TRANSITIONS
         if(myActiveSOS.status === 'open') {
-            // Must stay broadcasting until status is changed by a hero
             searching.style.display = 'block'; 
             matched.style.display = 'none'; 
             completed.style.display = 'none'; 
             cancelBtn.style.display = 'block';
         } else if(myActiveSOS.status === 'accepted' || myActiveSOS.status === 'arrived') {
-            // Only hide the pulse once status is 'accepted'
             searching.style.display = 'none'; 
             matched.style.display = 'block'; 
             completed.style.display = 'none'; 
@@ -585,12 +607,3 @@ window.openProfile = async () => {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
