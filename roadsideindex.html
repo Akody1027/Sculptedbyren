@@ -407,12 +407,12 @@ window.acknowledgeCancel = () => {
 window.submitSOS = () => {
     const issue = document.getElementById('reqIssue').value; const tip = document.getElementById('customTip').value || 0;
     
-    // PERSISTENT SESSION: Check if this user ALREADY has an active request before letting them submit another one
+    // SESSION PERSISTENCE: 1. Check if user already has an active help request before starting a new one
     const existingReq = Object.values(sosCache).find(r => r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status));
     if (existingReq) {
-        window.switchView('seekerUI'); // Just go back to the status screen
+        window.switchView('seekerUI'); // Go to status screen
         window.closeModal('requestModal');
-        return; // Stop the code here so it doesn't submit a second time
+        return; // Don't submit a second request
     }
 
     if(!issue || !userLocation) return alert("Please describe the issue.");
@@ -526,7 +526,7 @@ function syncUI() {
     }
 
     if(myActiveSOS) {
-        // PERSISTENT SESSION: If we are currently on the landing page but we have an active SOS, jump to the seeker UI automatically
+        // SESSION PERSISTENCE: 2. If an active SOS is detected, force the view to seekerUI if they refresh back to the landing page
         if (document.getElementById('landingPage').classList.contains('view-active')) {
             window.switchView('seekerUI');
         }
@@ -575,7 +575,7 @@ onValue(ref(db, "sosRequests"), (snap) => {
     sosCache = snap.val() || {}; 
     syncUI(); 
     
-    // PERSISTENT SESSION: Check for active session upon the database loading
+    // SESSION PERSISTENCE: 3. Immediately switch the view if the database loads and sees you have an active session
     const myActive = Object.values(sosCache).find(r => r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status));
     if (myActive && document.getElementById('landingPage').classList.contains('view-active')) {
         window.switchView('seekerUI');
