@@ -406,13 +406,6 @@ window.acknowledgeCancel = () => {
 
 window.submitSOS = () => {
     const issue = document.getElementById('reqIssue').value; const tip = document.getElementById('customTip').value || 0;
-    // Prevents multiple active requests
-    const existingReq = Object.values(sosCache).find(r => r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status));
-    if (existingReq) {
-        window.switchView('seekerUI');
-        window.closeModal('requestModal');
-        return;
-    }
     if(!issue || !userLocation) return alert("Please describe the issue.");
     push(ref(db, "sosRequests"), { ownerId: myId, userName: "Driver", issue, vehicle: selectedVehicle, damagePic: damageImgData, tip: tip, lat: userLocation.lat, lng: userLocation.lng, status: 'open', timestamp: Date.now() });
     window.closeModal('requestModal'); window.switchView('seekerUI');
@@ -524,9 +517,6 @@ function syncUI() {
     }
 
     // FIXED SEEKER MATCHING LOGIC
-    if (!document.getElementById('seekerUI').classList.contains('view-active') && !document.getElementById('heroUI').classList.contains('view-active')) { window.switchView('seekerUI'); }
-
-  
     if(myActiveSOS) {
         const searching = document.getElementById('searchingState');
         const matched = document.getElementById('matchedState');
@@ -570,17 +560,7 @@ function updateSeekerMiniMap(sos, hero) {
     else { seekerMiniMap.setCenter(userPos); }
 }
 
-onValue(ref(db, "sosRequests"), (snap) => { 
-    sosCache = snap.val() || {}; 
-    syncUI(); 
-
-    // Persistent Session: If user has an active SOS, force them into Seeker UI
-    const myActive = Object.values(sosCache).find(r => r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status));
-    const isLanding = document.getElementById('landingPage').classList.contains('view-active');
-    if (myActive && isLanding) {
-        window.switchView('seekerUI');
-    }
-});
+onValue(ref(db, "sosRequests"), (snap) => { sosCache = snap.val() || {}; syncUI(); });
 onValue(ref(db, "profiles"), (snap) => { profilesCache = snap.val() || {}; syncUI(); });
 
 window.saveProfile = () => {
@@ -605,8 +585,6 @@ window.openProfile = async () => {
 </script>
 </body>
 </html>
-
-
 
 
 
