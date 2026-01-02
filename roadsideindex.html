@@ -424,6 +424,7 @@ window.submitCancellation = (reason) => {
     const myReqId = Object.keys(sosCache).find(k => sosCache[k].ownerId === myId && (sosCache[k].status === 'open' || sosCache[k].status === 'accepted' || sosCache[k].status === 'arrived'));
     if(myReqId) update(ref(db, `sosRequests/${myReqId}`), { status: 'canceled', cancelReason: reason });
     window.closeModal('cancelConfirmModal'); window.switchView('landingPage'); damageImgData = null;
+    document.querySelector('#seekerUI .footer').style.display = 'flex'; // Show footer when returning to landing
 };
 
 window.finalSeekerConfirm = () => {
@@ -431,6 +432,7 @@ window.finalSeekerConfirm = () => {
     if(myReqId) update(ref(db, `sosRequests/${myReqId}`), { status: 'finalized' });
     damageImgData = null;
     window.switchView('landingPage');
+    document.querySelector('#seekerUI .footer').style.display = 'flex'; // Show footer when returning to landing
 };
 
 function initMap() { map = new google.maps.Map(document.getElementById("map"), { center: userLocation || {lat: 40, lng: -74}, zoom: 14, disableDefaultUI: true, styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }] }); }
@@ -476,8 +478,12 @@ function syncUI() {
         if((r.ownerId === myId || r.helperId === myId) && (r.status === 'accepted' || r.status === 'arrived')) {
             jobActive = true; 
         }
-        let sCol = r.status === 'completed' || r.status === 'finalized' ? '#22c55e' : (r.status === 'canceled' ? '#ef4444' : '#2563eb');
-        history.innerHTML += `<div class="history-item" style="padding:15px; background:#f8fafc; border-radius:15px; margin-bottom:10px; border:1px solid #e2e8f0;"><span class="status-pill" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; color:white; float:right; background:${sCol};">${r.status}</span><b>${r.vehicle}</b><br><small>${r.issue}</small></div>`;
+        
+        // MODIFICATION FOR CONCERN 2: Filter notification history for hero-specific tasks
+        if (r.helperId === myId) { 
+            let sCol = r.status === 'completed' || r.status === 'finalized' ? '#22c55e' : (r.status === 'canceled' ? '#ef4444' : '#2563eb');
+            history.innerHTML += `<div class="history-item" style="padding:15px; background:#f8fafc; border-radius:15px; margin-bottom:10px; border:1px solid #e2e8f0;"><span class="status-pill" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; color:white; float:right; background:${sCol};">${r.status}</span><b>${r.vehicle}</b><br><small>${r.issue}</small></div>`;
+        }
     });
 
     document.getElementById('footerChatBtn').style.display = jobActive ? 'block' : 'none';
@@ -535,6 +541,10 @@ function syncUI() {
         const matched = document.getElementById('matchedState');
         const completed = document.getElementById('completionConfirmState');
         const cancelBtn = document.getElementById('cancelSosBtn');
+        const seekerFooter = document.querySelector('#seekerUI .footer'); // Get the seeker's footer
+
+        // MODIFICATION FOR CONCERN 1: Control seeker footer visibility
+        seekerFooter.style.display = 'none'; // Initially hide the footer within the active SOS state
 
         // STRICT STATE TRANSITIONS
         if(myActiveSOS.status === 'open') {
@@ -547,6 +557,7 @@ function syncUI() {
             matched.style.display = 'block'; 
             completed.style.display = 'none'; 
             cancelBtn.style.display = 'block';
+            seekerFooter.style.display = 'flex'; // Show footer once hero is connected
             
             const hero = profilesCache[myActiveSOS.helperId] || {};
             document.getElementById('matchName').innerText = hero.name || "Roadside Hero";
@@ -558,6 +569,7 @@ function syncUI() {
             matched.style.display = 'none'; 
             completed.style.display = 'block'; 
             cancelBtn.style.display = 'none';
+            seekerFooter.style.display = 'flex'; // Show footer for completion confirmation
         }
     }
     
@@ -606,4 +618,3 @@ window.openProfile = async () => {
 </script>
 </body>
 </html>
-
