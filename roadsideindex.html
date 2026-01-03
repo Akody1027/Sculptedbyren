@@ -435,62 +435,73 @@ function syncUI() {
     const history = document.getElementById('notifHistory'); history.innerHTML = "";
     let nearbySOS = [];
     let currentTask = null; 
-    let myActiveSOS = null;
-    let jobActive = false;
+    let myActiveSOS = null; // This will hold the SOS request owned by the current user (seeker)
+    let jobActive = false; // Indicates if *any* job (hero or seeker) is active for the current user
 
     // --- NEW LOGIC FOR CONCERN: Seeker UI not updating ---
-    // First, evaluate myActiveSOS to determine the current state
+    // First, identify the user's *own* active SOS request if they are a seeker.
+    // This is crucial for the seeker UI to know its state.
     Object.values(sosCache).forEach(r => {
         if(r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status)) {
-            if (!myActiveSOS || r.timestamp > myActiveSOS.timestamp) myActiveSOS = r;
+            // Prioritize the latest active request if multiple exist (though ideally there's only one)
+            if (!myActiveSOS || r.timestamp > myActiveSOS.timestamp) {
+                myActiveSOS = r;
+            }
         }
     });
 
-    // Explicitly manage seekerUI view based on myActiveSOS
+    // Explicitly manage seekerUI view based on myActiveSOS state
+    const seekerUI = document.getElementById('seekerUI');
+    const landingPage = document.getElementById('landingPage');
+    const heroUI = document.getElementById('heroUI');
+
     if (myActiveSOS) {
-        document.getElementById('seekerUI').classList.add('view-active');
-        document.getElementById('landingPage').classList.remove('view-active');
-    } else {
-        // Only switch to landing if no active SOS and not already there or in hero mode
-        if (!document.getElementById('landingPage').classList.contains('view-active') && !document.getElementById('heroUI').classList.contains('view-active')) {
-            document.getElementById('landingPage').classList.add('view-active');
-            document.getElementById('seekerUI').classList.remove('view-active');
-        }
+        // If the user has an active SOS request, ensure seekerUI is active.
+        seekerUI.classList.add('view-active');
+        landingPage.classList.remove('view-active');
+        heroUI.classList.remove('view-active'); // Ensure heroUI is not active if they have an active SOS
+    } else if (!heroUI.classList.contains('view-active')) {
+        // If no active SOS and not in hero mode, default to landing page.
+        landingPage.classList.add('view-active');
+        seekerUI.classList.remove('view-active');
     }
-    // --- END NEW LOGIC ---
+    // --- END NEW LOGIC for primary view management ---
+
 
     // Now, re-loop to build the rest of the UI based on the determined myActiveSOS and other data
     Object.entries(sosCache).forEach(([id, r]) => {
-        const isMyJob = (r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived'));
+        const isMyHeroJob = (r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived'));
         const distMiles = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609.34) : 999;
         
+        // Handle hero-side map markers for nearby requests
         if (r.status === 'open' && r.ownerId !== myId && distMiles <= myRadius) {
             nearbySOS.push({id, ...r, dist: distMiles});
             if(!markers[id] && map) { 
                 const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: getMarkerIcon("#EE611C") }); 
                 marker.addListener('click', () => window.viewRequest(id)); 
                 markers[id] = marker; 
+            } else if (markers[id]) { // Ensure existing markers for open requests have the correct color
+                 markers[id].setIcon(getMarkerIcon("#EE611C"));
             }
-        } else if (isMyJob) {
+        } else if (isMyHeroJob) { // Hero's accepted/arrived job marker
             if(!markers[id] && map) {
                 const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: getMarkerIcon("#22c55e") });
                 marker.addListener('click', () => window.viewRequest(id)); 
                 markers[id] = marker;
-            } else if (markers[id]) {
+            } else if (markers[id]) { // Ensure existing markers for accepted/arrived jobs have the correct color
                 markers[id].setIcon(getMarkerIcon("#22c55e"));
             }
-        } else if (markers[id]) {
+        } else if (markers[id] && (r.status === 'canceled' || r.status === 'completed' || r.status === 'finalized' || r.ownerId === myId)) {
+            // Remove markers for finalized, completed, or seeker's own requests that are no longer 'open'
             markers[id].setMap(null); delete markers[id];
         }
 
-        // Identify current hero task
-        if(r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived' || (r.status === 'canceled' && r.helperAcknowledged !== true))) currentTask = r;
+        // Identify current hero task (for the hero panel)
+        if(r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived' || (r.status === 'canceled' && r.helperAcknowledged !== true))) {
+            currentTask = r;
+        }
         
-        // This part was moved outside the loop for myActiveSOS to be determined first.
-        // if(r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status)) {
-        //     if (!myActiveSOS || r.timestamp > myActiveSOS.timestamp) myActiveSOS = r;
-        // }
-        
+        // Determine if *any* job is active for the current user (either as seeker or hero)
         if((r.ownerId === myId || r.helperId === myId) && (r.status === 'accepted' || r.status === 'arrived')) {
             jobActive = true; 
         }
@@ -502,8 +513,6 @@ function syncUI() {
         }
     });
 
-    // The chat button visibility logic remains as is for the hero footer
-    document.getElementById('footerChatBtn').style.display = jobActive ? 'block' : 'none'; // This is for the *removed* seeker footer, but kept here for completeness of original code intentions for chat.
     document.getElementById('heroFooterChatBtn').style.display = jobActive ? 'block' : 'none';
 
     // HERO STATUS INDICATOR COLORS
@@ -548,23 +557,14 @@ function syncUI() {
         tCard.innerHTML = `<div style="text-align:center; color:var(--muted); padding:10px;"><b>No help needed right now.</b><p style="font-size:11px;">We'll alert you if someone nearby sends an SOS.</p></div>`;
     }
 
-    if(myActiveSOS) {
-        // SESSION PERSISTENCE: 2. If an active SOS is detected, force the view to seekerUI if they refresh back to the landing page
-        // This is handled by the new explicit view management at the top of syncUI.
-        // if (document.getElementById('landingPage').classList.contains('view-active')) {
-        //     window.switchView('seekerUI');
-        // }
+    // --- SEEKER UI MANAGEMENT ---
+    const searching = document.getElementById('searchingState');
+    const matched = document.getElementById('matchedState');
+    const completed = document.getElementById('completionConfirmState');
+    const cancelBtn = document.getElementById('cancelSosBtn');
 
-        const searching = document.getElementById('searchingState');
-        const matched = document.getElementById('matchedState');
-        const completed = document.getElementById('completionConfirmState');
-        const cancelBtn = document.getElementById('cancelSosBtn');
-        // const seekerFooter = document.querySelector('#seekerUI .footer'); // This element is removed.
-
-        // MODIFICATION FOR CONCERN 1: Control seeker footer visibility (footer is now completely removed)
-        // The display logic for seekerFooter is no longer needed here.
-
-        // STRICT STATE TRANSITIONS
+    if (myActiveSOS) {
+        // If myActiveSOS exists, then we are in a seeker state.
         if(myActiveSOS.status === 'open') {
             searching.style.display = 'block'; 
             matched.style.display = 'none'; 
@@ -575,7 +575,6 @@ function syncUI() {
             matched.style.display = 'block'; 
             completed.style.display = 'none'; 
             cancelBtn.style.display = 'block';
-            // seekerFooter.style.display = 'flex'; // This line is no longer needed.
             
             const hero = profilesCache[myActiveSOS.helperId] || {};
             document.getElementById('matchName').innerText = hero.name || "Roadside Hero";
@@ -587,14 +586,13 @@ function syncUI() {
             matched.style.display = 'none'; 
             completed.style.display = 'block'; 
             cancelBtn.style.display = 'none';
-            // seekerFooter.style.display = 'flex'; // This line is no longer needed.
         }
     } else {
-        // If no active SOS, hide all seeker states
-        document.getElementById('searchingState').style.display = 'none';
-        document.getElementById('matchedState').style.display = 'none';
-        document.getElementById('completionConfirmState').style.display = 'none';
-        document.getElementById('cancelSosBtn').style.display = 'none';
+        // If no active SOS for the current user as a seeker, hide all seeker states
+        searching.style.display = 'none';
+        matched.style.display = 'none';
+        completed.style.display = 'none';
+        cancelBtn.style.display = 'none';
     }
     
     const badge = document.getElementById('notifBadge'); badge.innerText = nearbySOS.length; badge.style.display = nearbySOS.length > 0 ? "flex" : "none";
