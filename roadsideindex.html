@@ -230,14 +230,35 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
     </div>
 </div>
 
-<div id="notifModal" class="modal"><div class="modal-content"><h3>Activity History</h3><div id="notifHistory"></div><button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:20px;" onclick="window.closeModal('notifModal')">CLOSE</button></div></div>
+<!-- UPDATED: Added select/delete buttons and structure for checkboxes -->
+<div id="notifModal" class="modal">
+    <div class="modal-content">
+        <h3>Activity History</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <button id="selectAllHistoryBtn" class="submit-btn" style="flex:1; background:#f1f5f9; color:var(--text); margin-right:10px; padding:10px; font-size:14px; display:none;" onclick="window.toggleSelectAllHistory()">Select All</button>
+            <button id="clearHistoryBtn" class="submit-btn" style="flex:1; background:var(--danger); padding:10px; font-size:14px; display:none;" onclick="window.openModal('clearHistoryConfirmModal')">Delete Selected</button>
+        </div>
+        <div id="notifHistory"></div>
+        <button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:20px;" onclick="window.closeModal('notifModal')">CLOSE</button>
+    </div>
+</div>
+
+<!-- New Confirmation Modal for Clearing History -->
+<div id="clearHistoryConfirmModal" class="modal">
+    <div class="modal-content">
+        <h3>Confirm Deletion</h3>
+        <p>Are you sure you want to delete the selected history items? This action cannot be undone.</p>
+        <button class="submit-btn" style="background:var(--danger); margin-bottom:10px;" onclick="window.deleteSelectedHistory()">Yes, Delete</button>
+        <span class="cancel-link" onclick="window.closeModal('clearHistoryConfirmModal')">Cancel</span>
+    </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getDatabase, ref, push, onValue, set, get, update, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBgXWZkH0WMjhGmOfxjqbIDoJHlyA1pc-o",
+  apiKey: "AIzaSyB5GbyoapPOyLYJLNo9y85cyorIczEI-WU",
   authDomain: "roadsidehero-104ea.firebaseapp.com",
   databaseURL: "https://roadsidehero-104ea-default-rtdb.firebaseio.com",
   projectId: "roadsidehero-104ea",
@@ -253,6 +274,7 @@ const myId = localStorage.getItem('heroUserId');
 let map, seekerMiniMap, userLocation, selectedVehicle = "Car", damageImgData = null, myRadius = 25, heroMarker;
 let sosCache = {}, profilesCache = {}, markers = {}, seekerHeroMarker, seekerUserMarker;
 let activeChatId = null, lastMsgCount = 0;
+let allHistorySelected = false; // Global flag for select all state
 
 const getMarkerIcon = (color) => ({
     path: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z",
@@ -431,12 +453,54 @@ window.finalSeekerConfirm = () => {
 
 function initMap() { map = new google.maps.Map(document.getElementById("map"), { center: userLocation || {lat: 40, lng: -74}, zoom: 14, disableDefaultUI: true, styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }] }); }
 
+window.toggleSelectAllHistory = () => {
+    allHistorySelected = !allHistorySelected;
+    const checkboxes = document.querySelectorAll('#notifHistory .history-checkbox');
+    checkboxes.forEach(cb => cb.checked = allHistorySelected);
+
+    const selectAllBtn = document.getElementById('selectAllHistoryBtn');
+    selectAllBtn.innerText = allHistorySelected ? "Deselect All" : "Select All";
+};
+
+window.deleteSelectedHistory = async () => {
+    const checkboxes = document.querySelectorAll('#notifHistory .history-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert("Please select at least one item to delete.");
+        window.closeModal('clearHistoryConfirmModal');
+        return;
+    }
+
+    const deletePromises = [];
+    checkboxes.forEach(cb => {
+        const sosId = cb.dataset.sosId;
+        if (sosId) {
+            // We're adding a flag to the existing SOS request to hide it from THIS hero's history view.
+            // The SOS request itself remains in the database for the seeker's reference.
+            const updates = {};
+            updates[`hiddenFromHero_${myId}`] = true;
+            deletePromises.push(update(ref(db, `sosRequests/${sosId}`), updates));
+        }
+    });
+
+    try {
+        await Promise.all(deletePromises);
+        alert("Selected history items have been deleted from your view.");
+        window.closeModal('clearHistoryConfirmModal');
+        window.closeModal('notifModal'); // Close the history modal too
+        // syncUI will be called automatically by the Firebase listener on `sosRequests`
+    } catch (error) {
+        console.error("Error deleting history items:", error);
+        alert("Failed to delete history items. Please try again.");
+    }
+};
+
 function syncUI() {
     const history = document.getElementById('notifHistory'); history.innerHTML = "";
     let nearbySOS = [];
     let currentTask = null; 
     let myActiveSOS = null; // This will hold the SOS request owned by the current user (seeker)
-    let jobActive = false; // Indicates if *any* job (hero or seeker) is active for the current user
+    let jobActive = false;
+    let myHeroHistoryCount = 0; // New counter for hero history items
 
     // --- NEW LOGIC FOR CONCERN: Seeker UI not updating ---
     // First, identify the user's *own* active SOS request before starting a new one.
@@ -506,14 +570,34 @@ function syncUI() {
             jobActive = true; 
         }
         
-        // MODIFICATION FOR CONCERN 2: Filter notification history for hero-specific tasks
-        if (r.helperId === myId) { 
+        // Filter notification history for hero-specific tasks AND if not hidden from this hero
+        if (r.helperId === myId && !r[`hiddenFromHero_${myId}`]) { // ADDED FILTER CONDITION
+            myHeroHistoryCount++; // Increment counter
             let sCol = r.status === 'completed' || r.status === 'finalized' ? '#22c55e' : (r.status === 'canceled' ? '#ef4444' : '#2563eb');
-            history.innerHTML += `<div class="history-item" style="padding:15px; background:#f8fafc; border-radius:15px; margin-bottom:10px; border:1px solid #e2e8f0;"><span class="status-pill" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; color:white; float:right; background:${sCol};">${r.status}</span><b>${r.vehicle}</b><br><small>${r.issue}</small></div>`;
+            // Added a checkbox for selection
+            history.innerHTML += `
+                <div class="history-item" style="padding:15px; background:#f8fafc; border-radius:15px; margin-bottom:10px; border:1px solid #e2e8f0; display:flex; align-items:center;">
+                    <input type="checkbox" class="history-checkbox" data-sos-id="${id}" style="margin-right:10px; width:20px; height:20px;">
+                    <div style="flex:1;">
+                        <span class="status-pill" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; color:white; float:right; background:${sCol};">${r.status}</span>
+                        <b>${r.vehicle}</b><br><small>${r.issue}</small>
+                    </div>
+                </div>`;
         }
     });
 
     document.getElementById('heroFooterChatBtn').style.display = jobActive ? 'block' : 'none';
+
+    // Show/hide clear history buttons based on if there's any history
+    const selectAllBtn = document.getElementById('selectAllHistoryBtn');
+    const deleteSelectedBtn = document.getElementById('clearHistoryBtn');
+    if (myHeroHistoryCount > 0) {
+        selectAllBtn.style.display = 'block';
+        deleteSelectedBtn.style.display = 'block';
+    } else {
+        selectAllBtn.style.display = 'none';
+        deleteSelectedBtn.style.display = 'none';
+    }
 
     // HERO STATUS INDICATOR COLORS
     const ind = document.getElementById('statusIndicator');
@@ -555,44 +639,6 @@ function syncUI() {
     } else {
         tCard.style.display = 'block';
         tCard.innerHTML = `<div style="text-align:center; color:var(--muted); padding:10px;"><b>No help needed right now.</b><p style="font-size:11px;">We'll alert you if someone nearby sends an SOS.</p></div>`;
-    }
-
-    // --- SEEKER UI MANAGEMENT ---
-    const searching = document.getElementById('searchingState');
-    const matched = document.getElementById('matchedState');
-    const completed = document.getElementById('completionConfirmState');
-    const cancelBtn = document.getElementById('cancelSosBtn');
-
-    if (myActiveSOS) {
-        // If myActiveSOS exists, then we are in a seeker state.
-        if(myActiveSOS.status === 'open') {
-            searching.style.display = 'block'; 
-            matched.style.display = 'none'; 
-            completed.style.display = 'none'; 
-            cancelBtn.style.display = 'block';
-        } else if(myActiveSOS.status === 'accepted' || myActiveSOS.status === 'arrived') {
-            searching.style.display = 'none'; 
-            matched.style.display = 'block'; 
-            completed.style.display = 'none'; 
-            cancelBtn.style.display = 'block';
-            
-            const hero = profilesCache[myActiveSOS.helperId] || {};
-            document.getElementById('matchName').innerText = hero.name || "Roadside Hero";
-            document.getElementById('matchPic').src = hero.pic || "https://via.placeholder.com/65";
-            document.getElementById('matchETA').innerText = myActiveSOS.status === 'arrived' ? "Hero is at your location!" : `Arriving in ${myActiveSOS.eta || '...'}`;
-            updateSeekerMiniMap(myActiveSOS, hero);
-        } else if(myActiveSOS.status === 'completed') {
-            searching.style.display = 'none'; 
-            matched.style.display = 'none'; 
-            completed.style.display = 'block'; 
-            cancelBtn.style.display = 'none';
-        }
-    } else {
-        // If no active SOS for the current user as a seeker, hide all seeker states
-        searching.style.display = 'none';
-        matched.style.display = 'none';
-        completed.style.display = 'none';
-        cancelBtn.style.display = 'none';
     }
     
     // UPDATED: Removed the notification badge logic here
