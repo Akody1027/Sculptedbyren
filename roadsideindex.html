@@ -74,6 +74,9 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 #chatBadge, #chatBadgeHero { background: var(--accent); color: white; }
 
 .center-btn { position: absolute; top: 20px; right: 20px; background: #EE611C; border: none; padding: 12px; border-radius: 12px; box-shadow: var(--shadow); cursor: pointer; z-index: 5; font-weight: 800; font-size: 11px; color:white; }
+
+/* The previous specific CSS rule to hide the user icon in seekerUI footer is no longer needed
+   as the entire footer is removed from #seekerUI. */
 </style>
 </head>
 <body>
@@ -116,8 +119,6 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
         <p>Your Hero has marked the job as finished.</p>
         <button class="submit-btn" style="background: var(--success); margin-top: 15px;" onclick="window.finalSeekerConfirm()">CONFIRM & FINISH</button>
     </div>
-
-
 </div>
 
 <!-- HERO UI -->
@@ -414,8 +415,10 @@ window.submitSOS = () => {
 window.submitCancellation = (reason) => {
     const myReqId = Object.keys(sosCache).find(k => sosCache[k].ownerId === myId && (sosCache[k].status === 'open' || sosCache[k].status === 'accepted' || sosCache[k].status === 'arrived'));
     if(myReqId) update(ref(db, `sosRequests/${myReqId}`), { status: 'canceled', cancelReason: reason });
-    window.closeModal('cancelConfirmModal'); window.switchView('landingPage'); damageImgData = null;
-    document.querySelector('#seekerUI .footer').style.display = 'flex'; // Show footer when returning to landing
+    window.closeModal('cancelConfirmModal'); 
+    window.switchView('landingPage'); 
+    damageImgData = null;
+    document.getElementById('seekerUI').classList.remove('view-active'); // Ensure seekerUI is deactivated
 };
 
 window.finalSeekerConfirm = () => {
@@ -423,7 +426,7 @@ window.finalSeekerConfirm = () => {
     if(myReqId) update(ref(db, `sosRequests/${myReqId}`), { status: 'finalized' });
     damageImgData = null;
     window.switchView('landingPage');
-    document.querySelector('#seekerUI .footer').style.display = 'flex'; // Show footer when returning to landing
+    document.getElementById('seekerUI').classList.remove('view-active'); // Ensure seekerUI is deactivated
 };
 
 function initMap() { map = new google.maps.Map(document.getElementById("map"), { center: userLocation || {lat: 40, lng: -74}, zoom: 14, disableDefaultUI: true, styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }] }); }
@@ -435,6 +438,28 @@ function syncUI() {
     let myActiveSOS = null;
     let jobActive = false;
 
+    // --- NEW LOGIC FOR CONCERN: Seeker UI not updating ---
+    // First, evaluate myActiveSOS to determine the current state
+    Object.values(sosCache).forEach(r => {
+        if(r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status)) {
+            if (!myActiveSOS || r.timestamp > myActiveSOS.timestamp) myActiveSOS = r;
+        }
+    });
+
+    // Explicitly manage seekerUI view based on myActiveSOS
+    if (myActiveSOS) {
+        document.getElementById('seekerUI').classList.add('view-active');
+        document.getElementById('landingPage').classList.remove('view-active');
+    } else {
+        // Only switch to landing if no active SOS and not already there or in hero mode
+        if (!document.getElementById('landingPage').classList.contains('view-active') && !document.getElementById('heroUI').classList.contains('view-active')) {
+            document.getElementById('landingPage').classList.add('view-active');
+            document.getElementById('seekerUI').classList.remove('view-active');
+        }
+    }
+    // --- END NEW LOGIC ---
+
+    // Now, re-loop to build the rest of the UI based on the determined myActiveSOS and other data
     Object.entries(sosCache).forEach(([id, r]) => {
         const isMyJob = (r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived'));
         const distMiles = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609.34) : 999;
@@ -461,10 +486,10 @@ function syncUI() {
         // Identify current hero task
         if(r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived' || (r.status === 'canceled' && r.helperAcknowledged !== true))) currentTask = r;
         
-        // Identify active seeker request (Only latest non-finalized)
-        if(r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status)) {
-            if (!myActiveSOS || r.timestamp > myActiveSOS.timestamp) myActiveSOS = r;
-        }
+        // This part was moved outside the loop for myActiveSOS to be determined first.
+        // if(r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status)) {
+        //     if (!myActiveSOS || r.timestamp > myActiveSOS.timestamp) myActiveSOS = r;
+        // }
         
         if((r.ownerId === myId || r.helperId === myId) && (r.status === 'accepted' || r.status === 'arrived')) {
             jobActive = true; 
@@ -477,7 +502,8 @@ function syncUI() {
         }
     });
 
-    document.getElementById('footerChatBtn').style.display = jobActive ? 'block' : 'none';
+    // The chat button visibility logic remains as is for the hero footer
+    document.getElementById('footerChatBtn').style.display = jobActive ? 'block' : 'none'; // This is for the *removed* seeker footer, but kept here for completeness of original code intentions for chat.
     document.getElementById('heroFooterChatBtn').style.display = jobActive ? 'block' : 'none';
 
     // HERO STATUS INDICATOR COLORS
@@ -524,18 +550,19 @@ function syncUI() {
 
     if(myActiveSOS) {
         // SESSION PERSISTENCE: 2. If an active SOS is detected, force the view to seekerUI if they refresh back to the landing page
-        if (document.getElementById('landingPage').classList.contains('view-active')) {
-            window.switchView('seekerUI');
-        }
+        // This is handled by the new explicit view management at the top of syncUI.
+        // if (document.getElementById('landingPage').classList.contains('view-active')) {
+        //     window.switchView('seekerUI');
+        // }
 
         const searching = document.getElementById('searchingState');
         const matched = document.getElementById('matchedState');
         const completed = document.getElementById('completionConfirmState');
         const cancelBtn = document.getElementById('cancelSosBtn');
-        const seekerFooter = document.querySelector('#seekerUI .footer'); // Get the seeker's footer
+        // const seekerFooter = document.querySelector('#seekerUI .footer'); // This element is removed.
 
-        // MODIFICATION FOR CONCERN 1: Control seeker footer visibility
-        seekerFooter.style.display = 'none'; // Initially hide the footer within the active SOS state
+        // MODIFICATION FOR CONCERN 1: Control seeker footer visibility (footer is now completely removed)
+        // The display logic for seekerFooter is no longer needed here.
 
         // STRICT STATE TRANSITIONS
         if(myActiveSOS.status === 'open') {
@@ -548,7 +575,7 @@ function syncUI() {
             matched.style.display = 'block'; 
             completed.style.display = 'none'; 
             cancelBtn.style.display = 'block';
-            seekerFooter.style.display = 'flex'; // Show footer once hero is connected
+            // seekerFooter.style.display = 'flex'; // This line is no longer needed.
             
             const hero = profilesCache[myActiveSOS.helperId] || {};
             document.getElementById('matchName').innerText = hero.name || "Roadside Hero";
@@ -560,8 +587,14 @@ function syncUI() {
             matched.style.display = 'none'; 
             completed.style.display = 'block'; 
             cancelBtn.style.display = 'none';
-            seekerFooter.style.display = 'flex'; // Show footer for completion confirmation
+            // seekerFooter.style.display = 'flex'; // This line is no longer needed.
         }
+    } else {
+        // If no active SOS, hide all seeker states
+        document.getElementById('searchingState').style.display = 'none';
+        document.getElementById('matchedState').style.display = 'none';
+        document.getElementById('completionConfirmState').style.display = 'none';
+        document.getElementById('cancelSosBtn').style.display = 'none';
     }
     
     const badge = document.getElementById('notifBadge'); badge.innerText = nearbySOS.length; badge.style.display = nearbySOS.length > 0 ? "flex" : "none";
@@ -579,6 +612,7 @@ onValue(ref(db, "sosRequests"), (snap) => {
     syncUI(); 
     
     // SESSION PERSISTENCE: 3. Immediately switch the view if the database loads and sees you have an active session
+    // This is now primarily handled by the explicit view management at the top of syncUI, but this serves as a fallback for initial load.
     const myActive = Object.values(sosCache).find(r => r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status));
     if (myActive && document.getElementById('landingPage').classList.contains('view-active')) {
         window.switchView('seekerUI');
@@ -609,5 +643,3 @@ window.openProfile = async () => {
 </script>
 </body>
 </html>
-
-
