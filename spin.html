@@ -1,37 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Image Rotator</title>
+<title>Enhanced Image Editor</title>
 <style>
 body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background-color: #f0f0f0; }
-.container { background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; }
-#image-display { margin-top: 20px; border: 1px solid #ddd; max-width: 80vw; max-height: 60vh; overflow: hidden; display: flex; justify-content: center; align-items: center; background-color: #eee; }
-#image-display img { max-width: 100%; max-height: 100%; display: block; }
-.controls { margin-top: 20px; display: flex; gap: 10px; align-items: center; }
-input[type="range"] { width: 200px; }
-button { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; background-color: #007bff; color: white; font-size: 16px; }
+.container { background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; width: 90%; max-width: 800px; }
+#image-display-wrapper {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    max-width: 100%;
+    max-height: 60vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #eee; /* Default background */
+    position: relative; /* Needed for zoom scaling */
+}
+#rotating-image {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    object-fit: contain; /* Ensures the entire image is visible without cropping */
+    transform-origin: center center; /* Ensure zoom and rotate work from center */
+}
+.controls { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; width: 100%; }
+.control-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.control-group.row { flex-direction: row; align-items: center; }
+input[type="range"] { width: 150px; }
+button { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; background-color: #007bff; color: white; font-size: 14px; }
 button:hover { background-color: #0056b3; }
 #copy-button { background-color: #28a745; }
 #copy-button:hover { background-color: #218838; }
-.output-container { margin-top: 20px; width: 80%; }
-textarea { width: 100%; height: 100px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; resize: vertical; font-family: monospace; }
+.output-container { margin-top: 20px; width: 100%; }
+textarea { width: 100%; height: 120px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; resize: vertical; font-family: monospace; box-sizing: border-box; }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Image Rotator</h1>
+    <h1>Enhanced Image Editor</h1>
     <input type="file" id="image-input" accept="image/*">
 
-    <div id="image-display">
+    <div id="image-display-wrapper">
         <img id="rotating-image" src="" alt="Selected Image" style="display: none;">
     </div>
 
     <div class="controls">
-        <label for="rotation-speed">Rotation Speed:</label>
-        <input type="range" id="rotation-speed" min="0" max="100" value="0">
-        <span id="speed-value">0</span>
-        <button id="start-stop-button">Start Rotation</button>
+        <div class="control-group">
+            <label for="rotation-speed">Rotation Speed:</label>
+            <input type="range" id="rotation-speed" min="0" max="100" value="0">
+            <span id="speed-value">0</span>
+            <button id="start-stop-button">Start Rotation</button>
+        </div>
+
+        <div class="control-group">
+            <label for="bg-color-picker">Background Color:</label>
+            <input type="color" id="bg-color-picker" value="#EEEEEE">
+        </div>
+
+        <div class="control-group">
+            <label for="image-width">Image Width:</label>
+            <input type="range" id="image-width" min="10" max="100" value="100">
+            <span id="width-value">100%</span>
+        </div>
+
+        <div class="control-group row">
+            <label>Zoom:</label>
+            <button id="zoom-in-button">+</button>
+            <button id="zoom-out-button">-</button>
+        </div>
     </div>
 
     <div class="output-container">
@@ -43,10 +81,16 @@ textarea { width: 100%; height: 100px; border: 1px solid #ddd; padding: 10px; bo
 
 <script>
 const imageInput = document.getElementById('image-input');
+const imageDisplayWrapper = document.getElementById('image-display-wrapper');
 const rotatingImage = document.getElementById('rotating-image');
 const rotationSpeedSlider = document.getElementById('rotation-speed');
 const speedValueSpan = document.getElementById('speed-value');
 const startStopButton = document.getElementById('start-stop-button');
+const bgColorPicker = document.getElementById('bg-color-picker');
+const imageWidthSlider = document.getElementById('image-width');
+const widthValueSpan = document.getElementById('width-value');
+const zoomInButton = document.getElementById('zoom-in-button');
+const zoomOutButton = document.getElementById('zoom-out-button');
 const outputCode = document.getElementById('output-code');
 const copyButton = document.getElementById('copy-button');
 
@@ -54,6 +98,7 @@ let rotationAngle = 0;
 let rotationInterval = null;
 let isRotating = false;
 let currentImageSrc = '';
+let currentImageScale = 1; // For zoom functionality
 
 imageInput.addEventListener('change', (event) => {
     const file = event.target.files[0];
@@ -63,16 +108,28 @@ imageInput.addEventListener('change', (event) => {
             currentImageSrc = e.target.result;
             rotatingImage.src = currentImageSrc;
             rotatingImage.style.display = 'block';
+            resetImageStyles(); // Reset all styles for new image
             updateOutputCode();
-            stopRotation(); // Stop any existing rotation when a new image is loaded
-            rotationAngle = 0; // Reset rotation angle
-            rotatingImage.style.transform = `rotate(0deg)`; // Reset visual rotation
+            stopRotation();
             startStopButton.textContent = 'Start Rotation';
             isRotating = false;
         };
         reader.readAsDataURL(file);
     }
 });
+
+function resetImageStyles() {
+    rotationAngle = 0;
+    currentImageScale = 1;
+    rotatingImage.style.transform = `rotate(0deg) scale(1)`;
+    imageDisplayWrapper.style.backgroundColor = bgColorPicker.value;
+    rotationSpeedSlider.value = 0;
+    speedValueSpan.textContent = 0;
+    imageWidthSlider.value = 100;
+    widthValueSpan.textContent = '100%';
+    rotatingImage.style.width = '100%'; // Reset image width
+    rotatingImage.style.height = 'auto'; // Maintain aspect ratio
+}
 
 rotationSpeedSlider.addEventListener('input', () => {
     speedValueSpan.textContent = rotationSpeedSlider.value;
@@ -96,6 +153,39 @@ startStopButton.addEventListener('click', () => {
     }
 });
 
+bgColorPicker.addEventListener('input', () => {
+    imageDisplayWrapper.style.backgroundColor = bgColorPicker.value;
+    updateOutputCode();
+});
+
+imageWidthSlider.addEventListener('input', () => {
+    const widthPercent = imageWidthSlider.value;
+    rotatingImage.style.width = `${widthPercent}%`;
+    rotatingImage.style.height = 'auto'; // Maintain aspect ratio
+    widthValueSpan.textContent = `${widthPercent}%`;
+    updateOutputCode();
+});
+
+zoomInButton.addEventListener('click', () => {
+    if (currentImageSrc) {
+        currentImageScale = Math.min(3, currentImageScale + 0.1); // Max zoom 3x
+        applyImageTransform();
+        updateOutputCode();
+    }
+});
+
+zoomOutButton.addEventListener('click', () => {
+    if (currentImageSrc) {
+        currentImageScale = Math.max(0.5, currentImageScale - 0.1); // Min zoom 0.5x
+        applyImageTransform();
+        updateOutputCode();
+    }
+});
+
+function applyImageTransform() {
+    rotatingImage.style.transform = `rotate(${rotationAngle}deg) scale(${currentImageScale})`;
+}
+
 copyButton.addEventListener('click', () => {
     outputCode.select();
     document.execCommand('copy');
@@ -106,11 +196,10 @@ function startRotation() {
     stopRotation(); // Clear any existing interval
     const speed = parseInt(rotationSpeedSlider.value);
     if (speed > 0) {
-        // Lower the interval for faster rotation, higher for slower
         const intervalTime = Math.max(1, 100 - speed); // Max speed (100) -> 1ms interval, Min speed (0) -> no rotation
         rotationInterval = setInterval(() => {
             rotationAngle = (rotationAngle + 1) % 360;
-            rotatingImage.style.transform = `rotate(${rotationAngle}deg)`;
+            applyImageTransform(); // Apply rotation and current scale
             updateOutputCode(); // Update code on each rotation tick
         }, intervalTime);
         isRotating = true;
@@ -131,36 +220,54 @@ function updateOutputCode() {
     }
 
     const speed = parseInt(rotationSpeedSlider.value);
+    const imageWidth = imageWidthSlider.value;
+    const bgColor = bgColorPicker.value;
+
     let cssAnimation = '';
     if (isRotating && speed > 0) {
-        // Calculate animation duration based on speed slider
-        // Higher speed slider value means faster rotation, so shorter duration
-        const duration = (100 - speed + 1) / 10; // Adjust multiplier for desired range, e.g., 0.1s to 10s
+        const duration = (100 - speed + 1) / 10;
         cssAnimation = `animation: spin ${duration}s linear infinite;`;
     }
 
     const htmlCode = `
 <style>
+/* Container for the image, applies background color */
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Important for preventing zoom overflow */
+    background-color: ${bgColor};
+    /* You might want to define a specific width/height for this container, e.g.: */
+    /* width: 400px; */
+    /* height: 300px; */
+}
+
 .rotating-image {
-    max-width: 100%;
-    max-height: 100%;
     display: block;
-    transform: rotate(${rotationAngle}deg); /* Current state */
+    width: ${imageWidth}%; /* Adjust based on slider */
+    height: auto; /* Maintain aspect ratio */
+    object-fit: contain;
+    transform-origin: center center;
+    transform: rotate(${rotationAngle}deg) scale(${currentImageScale}); /* Current state for static copy */
     ${cssAnimation}
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from { transform: rotate(0deg) scale(${currentImageScale}); } /* Ensure zoom is maintained during rotation */
+    to { transform: rotate(360deg) scale(${currentImageScale}); }
 }
 </style>
 
-<img class="rotating-image" src="${currentImageSrc}" alt="Rotating Image">
+<div class="image-container">
+    <img class="rotating-image" src="${currentImageSrc}" alt="Rotating Image">
+</div>
 `;
     outputCode.value = htmlCode.trim();
 }
 
-// Initial call to set up the output area
+// Initial calls to set up the output area and default styles
+resetImageStyles();
 updateOutputCode();
 
 </script>
