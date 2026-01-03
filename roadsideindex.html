@@ -56,8 +56,6 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -app
 .msg { padding: 12px 16px; border-radius: 18px; max-width: 80%; font-size: 14px; line-height: 1.4; }
 .msg-me { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 4px; }
 .msg-them { align-self: flex-start; background: white; color: var(--text); border-bottom-left-radius: 4px; border: 1px solid #e2e8f0; }
-#chatTypingIndicator { font-size: 12px; color: var(--muted); margin-top: -8px; margin-bottom: 8px; align-self: flex-start; }
-
 
 .vehicle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 15px 0; }
 .v-type { padding: 15px; border: 2px solid #f1f5f9; border-radius: 16px; text-align: center; cursor: pointer; font-weight: 700; }
@@ -174,7 +172,6 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
     <div class="modal-content" style="height:85vh">
         <h3 id="chatTitle">Messages</h3>
         <div id="chatBox"></div>
-        <div id="chatTypingIndicator" style="display:none;"></div>
         <div style="display:flex; gap:10px;">
             <button onclick="document.getElementById('chatImgInput').click()" style="padding:15px; background:#f1f5f9; border:none; border-radius:15px;">📷</button>
             <input type="file" id="chatImgInput" accept="image/*" style="display:none" onchange="window.sendChatImg(this)">
@@ -237,7 +234,7 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getDatabase, ref, push, onValue, set, get, update, remove, enablePersistence } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref, push, onValue, set, get, update, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBgXWZkH0WMjhGmOfxjqbIDoJHlyA1pc-o",
@@ -250,38 +247,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Enable Firebase Realtime Database offline persistence
-// This needs to be called *before* any other DB operations for it to work.
-enablePersistence(db)
-  .catch(err => {
-    if (err.code === 'failed-precondition') {
-      console.warn("Offline persistence cannot be enabled in this tab (likely multiple tabs open).");
-    } else if (err.code === 'unimplemented') {
-      console.warn("Offline persistence not fully supported by this browser.");
-    } else {
-      console.error("Error enabling offline persistence:", err);
-    }
-  });
-
-
 if(!localStorage.getItem('heroUserId')) localStorage.setItem('heroUserId', 'u_' + Math.random().toString(36).substr(2, 9));
 const myId = localStorage.getItem('heroUserId');
 
 let map, seekerMiniMap, userLocation, selectedVehicle = "Car", damageImgData = null, myRadius = 25, heroMarker;
 let sosCache = {}, profilesCache = {}, markers = {}, seekerHeroMarker, seekerUserMarker;
-let activeChatId = null; // Store the ID of the currently open chat
-let chatUnsubscribe = null; // To unsubscribe from chat listeners
-let typingTimeout = null; // For typing indicator debounce
-
-// --- Utility Functions ---
-function debounce(func, delay) {
-    let timeout;
-    return function(...args) {
-        const context = this;
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(context, args), delay);
-    };
-}
+let activeChatId = null, lastMsgCount = 0;
 
 const getMarkerIcon = (color) => ({
     path: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z",
@@ -294,7 +265,7 @@ window.onload = () => {
             const freshLoc = { lat: p.coords.latitude, lng: p.coords.longitude };
             const isFirstLoad = !userLocation;
             userLocation = freshLoc;
-            update(ref(db, `profiles/${myId}`), { ...userLocation, id: myId }); // Always update own location
+            update(ref(db, `profiles/${myId}`), { ...userLocation, id: myId });
             if (map) {
                 if (!heroMarker) {
                     heroMarker = new google.maps.Marker({
@@ -314,22 +285,7 @@ window.setTip = (amt, el) => { document.querySelectorAll('.tip-btn').forEach(b =
 window.updateRadius = (val) => { myRadius = parseInt(val); document.getElementById('radiusVal').innerText = val; syncUI(); };
 window.centerOnMe = () => { if (map && userLocation) map.setCenter(userLocation); };
 window.openModal = (id) => document.getElementById(id).style.display = "flex";
-window.closeModal = (id) => {
-    document.getElementById(id).style.display = "none";
-    if (id === 'chatModal') {
-        if (chatUnsubscribe) {
-            chatUnsubscribe(); // Unsubscribe from chat messages and typing indicator when chat closes
-            chatUnsubscribe = null;
-        }
-        // Mark messages as read when closing chat
-        if (activeChatId) {
-            update(ref(db, `chats/${activeChatId}/metadata/${myId}`), { lastReadTimestamp: Date.now(), unreadCount: 0 });
-            set(ref(db, `chats/${activeChatId}/typingUsers/${myId}`), null); // Clear typing status
-        }
-        activeChatId = null;
-        updateChatBadges(); // Recalculate global badge
-    }
-};
+window.closeModal = (id) => document.getElementById(id).style.display = "none";
 window.switchView = (id) => {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('view-active'));
     document.getElementById(id).classList.add('view-active');
@@ -348,7 +304,7 @@ window.handleImageUpload = (input, target) => {
             const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             const compressedData = canvas.toDataURL('image/jpeg', 0.7);
             if(target === 'damage') { damageImgData = compressedData; document.getElementById('damagePreview').src = compressedData; document.getElementById('damagePreview').style.display = 'block'; }
-            else if(target === 'profile') { document.getElementById('profileDisplayPic').src = compressedData; update(ref(db, `profiles/${myId}`), { pic: compressedData }); } // Update profile pic immediately
+            else if(target === 'profile') { document.getElementById('profileDisplayPic').src = compressedData; }
         };
         img.src = e.target.result;
     };
@@ -358,128 +314,44 @@ window.handleImageUpload = (input, target) => {
 window.openChat = () => {
     const activeReq = Object.entries(sosCache).find(([id, r]) => (r.ownerId === myId || r.helperId === myId) && (r.status === 'accepted' || r.status === 'arrived'));
     if(!activeReq) return;
-    activeChatId = activeReq[0]; // Set active chat ID
-
+    activeChatId = activeReq[0];
     window.openModal('chatModal');
-    const chatBox = document.getElementById('chatBox');
-    const chatInput = document.getElementById('chatInput');
-    const chatTypingIndicator = document.getElementById('chatTypingIndicator');
-
-    // If there's an existing listener, unsubscribe first
-    if (chatUnsubscribe) chatUnsubscribe();
-
-    // Listen for messages
-    const chatMessagesRef = ref(db, `chats/${activeChatId}/messages`);
-    chatUnsubscribe = onValue(chatMessagesRef, (snap) => {
-        chatBox.innerHTML = "";
+    onValue(ref(db, `chats/${activeChatId}`), (snap) => {
+        const box = document.getElementById('chatBox'); box.innerHTML = "";
         const data = snap.val() || {};
         const msgs = Object.values(data);
-        msgs.sort((a,b) => a.timestamp - b.timestamp); // Ensure messages are sorted by timestamp
         msgs.forEach(m => {
-            const senderProfile = profilesCache[m.sender] || {};
-            const senderName = senderProfile.name || (m.sender === myId ? "Me" : "Unknown");
             const side = m.sender === myId ? 'msg-me' : 'msg-them';
             let content = m.text ? `<div>${m.text}</div>` : "";
             if(m.img) content += `<img src="${m.img}" style="max-width:100%; border-radius:10px; margin-top:5px;">`;
-            chatBox.innerHTML += `<div class="msg ${side}"><small style="opacity:0.7; font-size:10px; ${m.sender === myId ? 'text-align:right;' : 'text-align:left;'} display:block; margin-bottom:3px;">${senderName}</small>${content}</div>`;
+            box.innerHTML += `<div class="msg ${side}">${content}</div>`;
         });
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-        // Mark messages as read when chat is open and updated
-        update(ref(db, `chats/${activeChatId}/metadata/${myId}`), { lastReadTimestamp: Date.now(), unreadCount: 0 });
-        updateChatBadges(); // Recalculate global badge after marking as read
+        box.scrollTop = box.scrollHeight;
+        lastMsgCount = msgs.length;
+        updateChatBadges(0);
     });
-
-    // Listen for typing indicators
-    const typingRef = ref(db, `chats/${activeChatId}/typingUsers`);
-    onValue(typingRef, (snap) => {
-        const typingUsers = snap.val() || {};
-        const otherTypers = Object.keys(typingUsers).filter(uid => uid !== myId && typingUsers[uid]);
-        if (otherTypers.length > 0) {
-            const firstTyperName = profilesCache[otherTypers[0]]?.name || "Someone";
-            chatTypingIndicator.innerText = `${firstTyperName} is typing...`;
-            chatTypingIndicator.style.display = 'block';
-        } else {
-            chatTypingIndicator.style.display = 'none';
-        }
-        chatBox.scrollTop = chatBox.scrollHeight; // Scroll to show indicator if it appears
-    });
-
-    // Handle typing events for input
-    chatInput.oninput = debounce(() => {
-        if (activeChatId) {
-            set(ref(db, `chats/${activeChatId}/typingUsers/${myId}`), true);
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => {
-                set(ref(db, `chats/${activeChatId}/typingUsers/${myId}`), null); // Clear typing status after a delay
-            }, 3000); // 3 seconds debounce for clearing typing
-        }
-    }, 500); // Update typing status every 500ms
-    chatInput.onblur = () => { // Clear typing status when input loses focus
-        if (activeChatId) {
-            set(ref(db, `chats/${activeChatId}/typingUsers/${myId}`), null);
-            clearTimeout(typingTimeout);
-        }
-    };
 };
 
 window.sendTextMsg = () => {
     const input = document.getElementById('chatInput'); if(!input.value.trim() || !activeChatId) return;
-    const messageRef = push(ref(db, `chats/${activeChatId}/messages`));
-    set(messageRef, { sender: myId, text: input.value, timestamp: Date.now() });
+    push(ref(db, `chats/${activeChatId}`), { sender: myId, text: input.value, timestamp: Date.now() });
     input.value = "";
-    // Clear typing status immediately after sending message
-    set(ref(db, `chats/${activeChatId}/typingUsers/${myId}`), null);
-    clearTimeout(typingTimeout);
-
-    // Increment unread count for the other participant
-    const activeReq = Object.entries(sosCache).find(([id, r]) => id === activeChatId);
-    if (activeReq) {
-        const otherParticipantId = activeReq[1].ownerId === myId ? activeReq[1].helperId : activeReq[1].ownerId;
-        get(ref(db, `chats/${activeChatId}/metadata/${otherParticipantId}/unreadCount`)).then(snap => {
-            const currentUnread = snap.val() || 0;
-            update(ref(db, `chats/${activeChatId}/metadata/${otherParticipantId}`), { unreadCount: currentUnread + 1 });
-        });
-    }
 };
 
 window.sendChatImg = (input) => {
     const file = input.files[0]; if(!file || !activeChatId) return;
     const reader = new FileReader();
-    reader.onload = (e) => {
-        const messageRef = push(ref(db, `chats/${activeChatId}/messages`));
-        set(messageRef, { sender: myId, img: e.target.result, timestamp: Date.now() });
-        // Increment unread count for the other participant
-        const activeReq = Object.entries(sosCache).find(([id, r]) => id === activeChatId);
-        if (activeReq) {
-            const otherParticipantId = activeReq[1].ownerId === myId ? activeReq[1].helperId : activeReq[1].ownerId;
-            get(ref(db, `chats/${activeChatId}/metadata/${otherParticipantId}/unreadCount`)).then(snap => {
-                const currentUnread = snap.val() || 0;
-                update(ref(db, `chats/${activeChatId}/metadata/${otherParticipantId}`), { unreadCount: currentUnread + 1 });
-            });
-        }
-    };
+    reader.onload = (e) => push(ref(db, `chats/${activeChatId}`), { sender: myId, img: e.target.result, timestamp: Date.now() });
     reader.readAsDataURL(file);
 };
 
-// Update all chat badges based on unread counts from metadata
-function updateChatBadges() {
-    let totalUnread = 0;
-    Object.entries(sosCache).forEach(([sosId, req]) => {
-        if ((req.ownerId === myId || req.helperId === myId) && (req.status === 'accepted' || req.status === 'arrived')) {
-            // Only count unread if the chat is not currently open
-            if (sosId === activeChatId) return;
-            get(ref(db, `chats/${sosId}/metadata/${myId}/unreadCount`)).then(snap => {
-                totalUnread += snap.val() || 0;
-                const sB = document.getElementById('chatBadge');
-                const hB = document.getElementById('chatBadgeHero');
-                if (sB) { sB.innerText = totalUnread; sB.style.display = totalUnread > 0 ? 'flex' : 'none'; }
-                if (hB) { hB.innerText = totalUnread; hB.style.display = totalUnread > 0 ? 'flex' : 'none'; }
-            }).catch(error => console.error("Error getting unread count:", error));
-        }
-    });
+function updateChatBadges(count) {
+    const sB = document.getElementById('chatBadge'); const hB = document.getElementById('chatBadgeHero');
+    if(count > 0) { 
+        if(sB){ sB.innerText = count; sB.style.display = 'flex'; } 
+        if(hB){ hB.innerText = count; hB.style.display = 'flex'; }
+    } else { if(sB) sB.style.display = 'none'; if(hB) hB.style.display = 'none'; }
 }
-
 
 window.viewRequest = (id) => {
     const r = sosCache[id]; if(!r) return;
@@ -682,7 +554,7 @@ function syncUI() {
         tCard.innerHTML = listHtml;
     } else {
         tCard.style.display = 'block';
-        tCard.innerHTML = `<div style="text-align:center; color:var(--muted); padding:10px;"><b>No help needed right now.</b><p style="font-size:11px;">We'll alert you if someone nearby sends an an SOS.</p></div>`;
+        tCard.innerHTML = `<div style="text-align:center; color:var(--muted); padding:10px;"><b>No help needed right now.</b><p style="font-size:11px;">We'll alert you if someone nearby sends an SOS.</p></div>`;
     }
 
     // --- SEEKER UI MANAGEMENT ---
@@ -724,7 +596,6 @@ function syncUI() {
     }
     
     const badge = document.getElementById('notifBadge'); badge.innerText = nearbySOS.length; badge.style.display = nearbySOS.length > 0 ? "flex" : "none";
-    updateChatBadges(); // Call to update chat badges globally
 }
 
 function updateSeekerMiniMap(sos, hero) {
@@ -746,20 +617,11 @@ onValue(ref(db, "sosRequests"), (snap) => {
     }
 });
 
-onValue(ref(db, "profiles"), (snap) => { 
-    profilesCache = snap.val() || {}; 
-    syncUI(); 
-});
-
-// Listener for all chat metadata to update global badges efficiently
-onValue(ref(db, "chats"), (snap) => {
-    updateChatBadges();
-});
-
+onValue(ref(db, "profiles"), (snap) => { profilesCache = snap.val() || {}; syncUI(); });
 
 window.saveProfile = () => {
     myRadius = parseInt(document.getElementById("profileRadius").value);
-    update(ref(db, `profiles/${myId}`), { name: document.getElementById("profileName").value, bio: document.getElementById("profileBio").value, radius: myRadius });
+    update(ref(db, `profiles/${myId}`), { name: document.getElementById("profileName").value, bio: document.getElementById("profileBio").value, pic: document.getElementById("profileDisplayPic").src, radius: myRadius });
     if(map && userLocation) { 
         const radiusInMeters = myRadius * 1609.34; 
         const circle = new google.maps.Circle({center: userLocation, radius: radiusInMeters}); 
