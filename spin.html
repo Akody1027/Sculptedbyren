@@ -49,7 +49,7 @@ textarea { width: 100%; height: 120px; border: 1px solid #ddd; padding: 10px; bo
     <div class="controls">
         <div class="control-group">
             <label for="rotation-speed">Rotation Speed:</label>
-            <input type="range" id="rotation-speed" min="0" max="100" value="0">
+            <input type="range" id="rotation-speed" min="0" max="1000" value="0"> <!-- Increased max to 1000 -->
             <span id="speed-value">0</span>
             <button id="start-stop-button">Start Rotation</button>
         </div>
@@ -74,7 +74,7 @@ textarea { width: 100%; height: 120px; border: 1px solid #ddd; padding: 10px; bo
 
     <div class="output-container">
         <h2>Copy Image HTML/CSS</h2>
-        <textarea id="output-code" readonly></textarea>
+        <textarea id="output-code"></textarea> <!-- Removed readonly attribute -->
         <button id="copy-button">Copy to Clipboard</button>
     </div>
 </div>
@@ -196,7 +196,9 @@ function startRotation() {
     stopRotation(); // Clear any existing interval
     const speed = parseInt(rotationSpeedSlider.value);
     if (speed > 0) {
-        const intervalTime = Math.max(1, 100 - speed); // Max speed (100) -> 1ms interval, Min speed (0) -> no rotation
+        // Adjusted calculation for intervalTime to allow for much faster rotation
+        // A speed of 1000 will result in 1ms interval.
+        const intervalTime = Math.max(1, 101 - Math.floor(speed / 10)); 
         rotationInterval = setInterval(() => {
             rotationAngle = (rotationAngle + 1) % 360;
             applyImageTransform(); // Apply rotation and current scale
@@ -225,7 +227,8 @@ function updateOutputCode() {
 
     let cssAnimation = '';
     if (isRotating && speed > 0) {
-        const duration = (100 - speed + 1) / 10;
+        // Adjusted duration for CSS animation to match new speed range
+        const duration = (1000 - speed + 1) / 100; // Faster duration for higher speed
         cssAnimation = `animation: spin ${duration}s linear infinite;`;
     }
 
