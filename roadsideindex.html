@@ -76,8 +76,20 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 
 .center-btn { position: absolute; top: 20px; right: 20px; background: #EE611C; border: none; padding: 12px; border-radius: 12px; box-shadow: var(--shadow); cursor: pointer; z-index: 5; font-weight: 800; font-size: 11px; color:white; }
 
-/* The previous specific CSS rule to hide the user icon in seekerUI footer is no longer needed
-   as the entire footer is removed from #seekerUI. */
+/* Styles for the trash can icon */
+.delete-history-btn {
+    background: none;
+    border: none;
+    color: var(--danger);
+    font-size: 20px;
+    cursor: pointer;
+    margin-left: 10px;
+    padding: 0;
+    line-height: 1;
+}
+.delete-history-btn:hover {
+    opacity: 0.7;
+}
 </style>
 </head>
 <body>
@@ -134,7 +146,6 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
     </div>
     <div class="footer">
         <div class="footer-icons">
-            <!-- UPDATED: Replaced Notification Bell with History/List Icon and removed the badge wrapper -->
             <img src="notificationicon.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2956/2956860.png'" class="icon-btn" onclick="window.openModal('notifModal')">
             
             <img src="thishomeicon.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1946/1946436.png'" class="icon-btn" onclick="location.reload()">
@@ -230,18 +241,11 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
     </div>
 </div>
 
-<!-- UPDATED: Added Edit button, moved action buttons, removed checkboxes -->
+<!-- UPDATED: Removed Edit button and action buttons, trash icon added per item -->
 <div id="notifModal" class="modal">
     <div class="modal-content">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h3>Activity History</h3>
-            <button id="editHistoryBtn" class="submit-btn" style="background:#f1f5f9; color:var(--text); padding:8px 15px; font-size:13px; display:none;" onclick="window.toggleEditMode()">Edit</button>
-        </div>
-
-        <!-- These buttons will only show when in edit mode AND items are selected -->
-        <div id="historyActionButtons" style="display:none; justify-content:flex-end; gap:10px; margin-bottom:15px;">
-             <button id="selectAllHistoryBtn" class="submit-btn" style="background:#f1f5f9; color:var(--text); padding:10px; font-size:14px; flex:1;" onclick="window.toggleSelectAllHistory()">Select All</button>
-             <button id="clearHistoryBtn" class="submit-btn" style="background:var(--danger); padding:10px; font-size:14px; flex:1;" onclick="window.openModal('clearHistoryConfirmModal')">Delete Selected</button>
         </div>
 
         <div id="notifHistory"></div>
@@ -249,12 +253,12 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
     </div>
 </div>
 
-<!-- clearHistoryConfirmModal remains the same -->
+<!-- clearHistoryConfirmModal is no longer needed for multiple deletions but will be repurposed for single item confirmation -->
 <div id="clearHistoryConfirmModal" class="modal">
     <div class="modal-content">
         <h3>Confirm Deletion</h3>
-        <p>Are you sure you want to delete the selected history items? This action cannot be undone.</p>
-        <button class="submit-btn" style="background:var(--danger); margin-bottom:10px;" onclick="window.deleteSelectedHistory()">Yes, Delete</button>
+        <p id="confirmDeleteText">Are you sure you want to delete this history item? This action cannot be undone.</p>
+        <button class="submit-btn" style="background:var(--danger); margin-bottom:10px;" onclick="window.confirmSingleHistoryDelete()">Yes, Delete</button>
         <span class="cancel-link" onclick="window.closeModal('clearHistoryConfirmModal')">Cancel</span>
     </div>
 </div>
@@ -281,12 +285,8 @@ let map, seekerMiniMap, userLocation, selectedVehicle = "Car", damageImgData = n
 let sosCache = {}, profilesCache = {}, markers = {}, seekerHeroMarker, seekerUserMarker;
 let activeChatId = null, lastMsgCount = 0;
 
-// New global variables for history selection
-let editMode = false;
-let selectedHistoryItems = []; // Array to store IDs of selected items
-let longPressTimer;
-const LONG_PRESS_THRESHOLD = 500; // milliseconds for long press
-let allHistorySelected = false; // To track state of "Select All" button
+// New global variable for single history item deletion
+let sosIdToDelete = null;
 
 const getMarkerIcon = (color) => ({
     path: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z",
@@ -466,99 +466,27 @@ window.finalSeekerConfirm = () => {
 function initMap() { map = new google.maps.Map(document.getElementById("map"), { center: userLocation || {lat: 40, lng: -74}, zoom: 14, disableDefaultUI: true, styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }] }); }
 
 
-// --- New History Management Functions ---
+// --- UPDATED History Management Functions ---
 
-window.toggleEditMode = () => {
-    editMode = !editMode;
-    document.getElementById('editHistoryBtn').innerText = editMode ? "Done" : "Edit";
-    
-    // Clear selections and reset 'Select All' state when toggling edit mode
-    selectedHistoryItems = [];
-    allHistorySelected = false;
-
-    syncUI(); // Re-render UI to reflect edit mode state
+window.openDeleteConfirm = (sosId) => {
+    sosIdToDelete = sosId;
+    window.openModal('clearHistoryConfirmModal');
 };
 
-window.startLongPress = (event, sosId) => {
-    if (!editMode) return; // Only allow long press selection in edit mode
-
-    // For touch devices, prevent default context menu, but be careful with scrolling.
-    // event.preventDefault(); 
-
-    // Clear any existing timer to prevent multiple selections from rapid taps
-    clearTimeout(longPressTimer); 
-
-    longPressTimer = setTimeout(() => {
-        window.toggleHistoryItemSelection(sosId);
-        longPressTimer = null; // Reset timer after successful long press
-    }, LONG_PRESS_THRESHOLD);
-};
-
-window.cancelLongPress = (event) => {
-    clearTimeout(longPressTimer);
-    longPressTimer = null;
-    // You might want to prevent default for specific events here, 
-    // but a general preventDefault on touchmove could break scrolling.
-};
-
-window.toggleHistoryItemSelection = (sosId) => {
-    if (!editMode) return; // Only allow selection if in edit mode
-
-    const index = selectedHistoryItems.indexOf(sosId);
-    if (index > -1) {
-        selectedHistoryItems.splice(index, 1); // Deselect
-    } else {
-        selectedHistoryItems.push(sosId); // Select
-    }
-    
-    // Update the "Select All" button state based on current selections
-    const totalHeroHistory = Object.values(sosCache).filter(r => r.helperId === myId && !r[`hiddenFromHero_${myId}`]).length;
-    allHistorySelected = (selectedHistoryItems.length === totalHeroHistory) && totalHeroHistory > 0;
-
-    syncUI(); // Re-render to update visual selection
-};
-
-window.toggleSelectAllHistory = () => {
-    const allVisibleHistoryIds = Object.entries(sosCache)
-        .filter(([id, r]) => r.helperId === myId && !r[`hiddenFromHero_${myId}`])
-        .map(([id, r]) => id);
-
-    if (allHistorySelected) {
-        selectedHistoryItems = []; // Deselect all
-    } else {
-        selectedHistoryItems = [...allVisibleHistoryIds]; // Select all visible
-    }
-    allHistorySelected = !allHistorySelected;
-    syncUI(); // Re-render to update visual selection and button text
-};
-
-window.deleteSelectedHistory = async () => {
-    if (selectedHistoryItems.length === 0) {
-        alert("Please select at least one item to delete.");
-        window.closeModal('clearHistoryConfirmModal');
-        return;
-    }
-
-    const deletePromises = [];
-    selectedHistoryItems.forEach(sosId => {
-        // Add a flag to the existing SOS request to hide it from THIS hero's history view.
-        const updates = {};
-        updates[`hiddenFromHero_${myId}`] = true;
-        deletePromises.push(update(ref(db, `sosRequests/${sosId}`), updates));
-    });
+window.confirmSingleHistoryDelete = async () => {
+    if (!sosIdToDelete) return;
 
     try {
-        await Promise.all(deletePromises);
-        alert("Selected history items have been deleted from your view.");
+        const updates = {};
+        updates[`hiddenFromHero_${myId}`] = true;
+        await update(ref(db, `sosRequests/${sosIdToDelete}`), updates);
+        alert("History item has been deleted from your view.");
         window.closeModal('clearHistoryConfirmModal');
-        window.closeModal('notifModal'); // Close the history modal too
-        selectedHistoryItems = []; // Clear selection after deletion
-        editMode = false; // Exit edit mode
-        allHistorySelected = false; // Reset select all state
-        // syncUI will be called automatically by the Firebase listener on `sosRequests`
+        // No need to close notifModal, syncUI will re-render
+        sosIdToDelete = null; // Reset for next deletion
     } catch (error) {
-        console.error("Error deleting history items:", error);
-        alert("Failed to delete history items. Please try again.");
+        console.error("Error deleting history item:", error);
+        alert("Failed to delete history item. Please try again.");
     }
 };
 
@@ -571,12 +499,9 @@ function syncUI() {
     let jobActive = false;
     let myHeroHistoryCount = 0; // Counter for hero history items not hidden
 
-    // --- NEW LOGIC FOR CONCERN: Seeker UI not updating ---
-    // First, identify the user's *own* active SOS request before starting a new one.
-    // This is crucial for the seeker UI to know its state.
+    // First, identify the user's *own* active SOS request.
     Object.values(sosCache).forEach(r => {
         if(r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status)) {
-            // Prioritize the latest active request if multiple exist (though ideally there's only one)
             if (!myActiveSOS || r.timestamp > myActiveSOS.timestamp) {
                 myActiveSOS = r;
             }
@@ -589,16 +514,13 @@ function syncUI() {
     const heroUI = document.getElementById('heroUI');
 
     if (myActiveSOS) {
-        // If the user has an active SOS request, ensure seekerUI is active.
         seekerUI.classList.add('view-active');
         landingPage.classList.remove('view-active');
-        heroUI.classList.remove('view-active'); // Ensure heroUI is not active if they have an active SOS
+        heroUI.classList.remove('view-active');
     } else if (!heroUI.classList.contains('view-active')) {
-        // If no active SOS and not in hero mode, default to landing page.
         landingPage.classList.add('view-active');
         seekerUI.classList.remove('view-active');
     }
-    // --- END NEW LOGIC for primary view management ---
 
 
     // Now, re-loop to build the rest of the UI based on the determined myActiveSOS and other data
@@ -644,49 +566,23 @@ function syncUI() {
             myHeroHistoryCount++; 
             let sCol = r.status === 'completed' || r.status === 'finalized' ? '#22c55e' : (r.status === 'canceled' ? '#ef4444' : '#2563eb');
             
-            const isSelected = selectedHistoryItems.includes(id);
-            const selectedStyle = isSelected ? 'border: 2px solid var(--accent); background: #fffbeb;' : '';
-
             history.innerHTML += `
-                <div class="history-item ${isSelected ? 'selected' : ''}" data-sos-id="${id}" 
-                     style="padding:15px; background:#f8fafc; border-radius:15px; margin-bottom:10px; border:1px solid #e2e8f0; display:flex; align-items:center; ${selectedStyle}"
-                     onmousedown="window.startLongPress(event, '${id}')" ontouchstart="window.startLongPress(event, '${id}')"
-                     onmouseup="window.cancelLongPress(event)" ontouchend="window.cancelLongPress(event)" ontouchmove="window.cancelLongPress(event)"
+                <div class="history-item" data-sos-id="${id}" 
+                     style="padding:15px; background:#f8fafc; border-radius:15px; margin-bottom:10px; border:1px solid #e2e8f0; display:flex; align-items:center;"
                 >
                     <div style="flex:1;">
                         <span class="status-pill" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; color:white; float:right; background:${sCol};">${r.status}</span>
                         <b>${r.vehicle}</b><br><small>${r.issue}</small>
                     </div>
+                    <button class="delete-history-btn" onclick="window.openDeleteConfirm('${id}')">🗑️</button>
                 </div>`;
         }
     });
 
     document.getElementById('heroFooterChatBtn').style.display = jobActive ? 'block' : 'none';
 
-    // Control visibility of "Edit" button
-    const editHistoryBtn = document.getElementById('editHistoryBtn');
-    if (myHeroHistoryCount > 0) {
-        editHistoryBtn.style.display = 'block';
-    } else {
-        editHistoryBtn.style.display = 'none';
-    }
-
-    // Control visibility of action buttons based on editMode and selected items
-    const historyActionButtons = document.getElementById('historyActionButtons');
-    const selectAllBtn = document.getElementById('selectAllHistoryBtn');
-    const deleteSelectedBtn = document.getElementById('clearHistoryBtn');
-
-    if (editMode) {
-        historyActionButtons.style.display = 'flex'; // Show the container
-        selectAllBtn.style.display = 'block';
-        deleteSelectedBtn.style.display = selectedHistoryItems.length > 0 ? 'block' : 'none';
-        selectAllBtn.innerText = allHistorySelected ? "Deselect All" : "Select All";
-    } else {
-        historyActionButtons.style.display = 'none';
-        // Ensure selections are cleared when exiting edit mode by non-delete means
-        selectedHistoryItems = []; 
-        allHistorySelected = false;
-    }
+    // No "Edit" button logic anymore
+    // No "Select All" or "Delete Selected" buttons anymore
 
     // HERO STATUS INDICATOR COLORS
     const ind = document.getElementById('statusIndicator');
@@ -774,4 +670,3 @@ window.openProfile = async () => {
 </script>
 </body>
 </html>
-
