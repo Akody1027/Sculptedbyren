@@ -70,8 +70,9 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 .footer { position: fixed; bottom: 0; width: 100%;  background: rgba(238, 97, 28, 0.9); backdrop-filter: blur(10px); display: flex; justify-content:center; align-items: center; z-index: 200; border-top: 1px solid rgba(255,255,255,0.2); }
 .footer-icons { display:flex; gap:100px; padding:5px; }
 .icon-btn { cursor: pointer; width: 32px; height: 32px; filter: brightness(0) invert(1); }
-#notifBadge, #chatBadge, #chatBadgeHero { position: absolute; top: -5px; right: -5px; background: white; color: var(--danger); font-size: 10px; width: 20px; height: 20px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 900; }
-#chatBadge, #chatBadgeHero { background: var(--accent); color: white; }
+/* chatBadge and chatBadgeHero are kept as they relate to active chat, not general notifications */
+#chatBadge, #chatBadgeHero { position: absolute; top: -5px; right: -5px; background: var(--accent); color: white; font-size: 10px; width: 20px; height: 20px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 900; }
+
 
 .center-btn { position: absolute; top: 20px; right: 20px; background: #EE611C; border: none; padding: 12px; border-radius: 12px; box-shadow: var(--shadow); cursor: pointer; z-index: 5; font-weight: 800; font-size: 11px; color:white; }
 
@@ -133,10 +134,9 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
     </div>
     <div class="footer">
         <div class="footer-icons">
-            <div style="position:relative">
-                <img src="notificationicon.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3119/3119338.png'" class="icon-btn" onclick="window.openModal('notifModal')">
-                <span id="notifBadge">0</span>
-            </div>
+            <!-- UPDATED: Replaced Notification Bell with History/List Icon and removed the badge wrapper -->
+            <img src="notificationicon.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2956/2956860.png'" class="icon-btn" onclick="window.openModal('notifModal')">
+            
             <img src="thishomeicon.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1946/1946436.png'" class="icon-btn" onclick="location.reload()">
             <div id="heroFooterChatBtn" style="position:relative; display:none;">
                 <img src="https://cdn-icons-png.flaticon.com/512/589/589708.png" class="icon-btn" onclick="window.openChat()">
@@ -439,7 +439,7 @@ function syncUI() {
     let jobActive = false; // Indicates if *any* job (hero or seeker) is active for the current user
 
     // --- NEW LOGIC FOR CONCERN: Seeker UI not updating ---
-    // First, identify the user's *own* active SOS request if they are a seeker.
+    // First, identify the user's *own* active SOS request before starting a new one.
     // This is crucial for the seeker UI to know its state.
     Object.values(sosCache).forEach(r => {
         if(r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status)) {
@@ -595,7 +595,10 @@ function syncUI() {
         cancelBtn.style.display = 'none';
     }
     
-    const badge = document.getElementById('notifBadge'); badge.innerText = nearbySOS.length; badge.style.display = nearbySOS.length > 0 ? "flex" : "none";
+    // UPDATED: Removed the notification badge logic here
+    // const badge = document.getElementById('notifBadge'); 
+    // badge.innerText = nearbySOS.length; 
+    // badge.style.display = nearbySOS.length > 0 ? "flex" : "none";
 }
 
 function updateSeekerMiniMap(sos, hero) {
