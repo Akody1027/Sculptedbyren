@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Image Rotator</title>
+<style>
+body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background-color: #f0f0f0; }
+.container { background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; }
+#image-display { margin-top: 20px; border: 1px solid #ddd; max-width: 80vw; max-height: 60vh; overflow: hidden; display: flex; justify-content: center; align-items: center; background-color: #eee; }
+#image-display img { max-width: 100%; max-height: 100%; display: block; }
+.controls { margin-top: 20px; display: flex; gap: 10px; align-items: center; }
+input[type="range"] { width: 200px; }
+button { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; background-color: #007bff; color: white; font-size: 16px; }
+button:hover { background-color: #0056b3; }
+#copy-button { background-color: #28a745; }
+#copy-button:hover { background-color: #218838; }
+.output-container { margin-top: 20px; width: 80%; }
+textarea { width: 100%; height: 100px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; resize: vertical; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Image Rotator</h1>
+    <input type="file" id="image-input" accept="image/*">
+
+    <div id="image-display">
+        <img id="rotating-image" src="" alt="Selected Image" style="display: none;">
+    </div>
+
+    <div class="controls">
+        <label for="rotation-speed">Rotation Speed:</label>
+        <input type="range" id="rotation-speed" min="0" max="100" value="0">
+        <span id="speed-value">0</span>
+        <button id="start-stop-button">Start Rotation</button>
+    </div>
+
+    <div class="output-container">
+        <h2>Copy Image HTML/CSS</h2>
+        <textarea id="output-code" readonly></textarea>
+        <button id="copy-button">Copy to Clipboard</button>
+    </div>
+</div>
+
+<script>
+const imageInput = document.getElementById('image-input');
+const rotatingImage = document.getElementById('rotating-image');
+const rotationSpeedSlider = document.getElementById('rotation-speed');
+const speedValueSpan = document.getElementById('speed-value');
+const startStopButton = document.getElementById('start-stop-button');
+const outputCode = document.getElementById('output-code');
+const copyButton = document.getElementById('copy-button');
+
+let rotationAngle = 0;
+let rotationInterval = null;
+let isRotating = false;
+let currentImageSrc = '';
+
+imageInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            currentImageSrc = e.target.result;
+            rotatingImage.src = currentImageSrc;
+            rotatingImage.style.display = 'block';
+            updateOutputCode();
+            stopRotation(); // Stop any existing rotation when a new image is loaded
+            rotationAngle = 0; // Reset rotation angle
+            rotatingImage.style.transform = `rotate(0deg)`; // Reset visual rotation
+            startStopButton.textContent = 'Start Rotation';
+            isRotating = false;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+rotationSpeedSlider.addEventListener('input', () => {
+    speedValueSpan.textContent = rotationSpeedSlider.value;
+    if (isRotating) {
+        startRotation(); // Restart rotation with new speed
+    }
+    updateOutputCode();
+});
+
+startStopButton.addEventListener('click', () => {
+    if (currentImageSrc) {
+        if (isRotating) {
+            stopRotation();
+            startStopButton.textContent = 'Start Rotation';
+        } else {
+            startRotation();
+            startStopButton.textContent = 'Stop Rotation';
+        }
+    } else {
+        alert('Please select an image first!');
+    }
+});
+
+copyButton.addEventListener('click', () => {
+    outputCode.select();
+    document.execCommand('copy');
+    alert('HTML/CSS copied to clipboard!');
+});
+
+function startRotation() {
+    stopRotation(); // Clear any existing interval
+    const speed = parseInt(rotationSpeedSlider.value);
+    if (speed > 0) {
+        // Lower the interval for faster rotation, higher for slower
+        const intervalTime = Math.max(1, 100 - speed); // Max speed (100) -> 1ms interval, Min speed (0) -> no rotation
+        rotationInterval = setInterval(() => {
+            rotationAngle = (rotationAngle + 1) % 360;
+            rotatingImage.style.transform = `rotate(${rotationAngle}deg)`;
+            updateOutputCode(); // Update code on each rotation tick
+        }, intervalTime);
+        isRotating = true;
+    } else {
+        isRotating = false;
+    }
+}
+
+function stopRotation() {
+    clearInterval(rotationInterval);
+    isRotating = false;
+}
+
+function updateOutputCode() {
+    if (!currentImageSrc) {
+        outputCode.value = "Select an image to see the HTML/CSS code.";
+        return;
+    }
+
+    const speed = parseInt(rotationSpeedSlider.value);
+    let cssAnimation = '';
+    if (isRotating && speed > 0) {
+        // Calculate animation duration based on speed slider
+        // Higher speed slider value means faster rotation, so shorter duration
+        const duration = (100 - speed + 1) / 10; // Adjust multiplier for desired range, e.g., 0.1s to 10s
+        cssAnimation = `animation: spin ${duration}s linear infinite;`;
+    }
+
+    const htmlCode = `
+<style>
+.rotating-image {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    transform: rotate(${rotationAngle}deg); /* Current state */
+    ${cssAnimation}
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+</style>
+
+<img class="rotating-image" src="${currentImageSrc}" alt="Rotating Image">
+`;
+    outputCode.value = htmlCode.trim();
+}
+
+// Initial call to set up the output area
+updateOutputCode();
+
+</script>
+
+</body>
+</html>
