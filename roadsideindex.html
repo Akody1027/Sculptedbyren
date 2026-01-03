@@ -70,25 +70,15 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
 .footer { position: fixed; bottom: 0; width: 100%;  background: rgba(238, 97, 28, 0.9); backdrop-filter: blur(10px); display: flex; justify-content:center; align-items: center; z-index: 200; border-top: 1px solid rgba(255,255,255,0.2); }
 .footer-icons { display:flex; gap:100px; padding:5px; }
 .icon-btn { cursor: pointer; width: 32px; height: 32px; filter: brightness(0) invert(1); }
-/* chatBadge and chatBadgeHero are kept as they relate to active chat, not general notifications */
-#chatBadge, #chatBadgeHero { position: absolute; top: -5px; right: -5px; background: var(--accent); color: white; font-size: 10px; width: 20px; height: 20px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 900; }
-
+/* #notifBadge, */ #chatBadge, #chatBadgeHero { position: absolute; top: -5px; right: -5px; background: white; color: var(--danger); font-size: 10px; width: 20px; height: 20px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 900; }
+#chatBadge, #chatBadgeHero { background: var(--accent); color: white; }
 
 .center-btn { position: absolute; top: 20px; right: 20px; background: #EE611C; border: none; padding: 12px; border-radius: 12px; box-shadow: var(--shadow); cursor: pointer; z-index: 5; font-weight: 800; font-size: 11px; color:white; }
-
-/* Styles for the trash can icon */
-.delete-history-btn {
-    background: none;
-    border: none;
-    color: var(--danger);
-    font-size: 20px;
+.trash-icon {
+    width: 20px;
+    height: 20px;
     cursor: pointer;
     margin-left: 10px;
-    padding: 0;
-    line-height: 1;
-}
-.delete-history-btn:hover {
-    opacity: 0.7;
 }
 </style>
 </head>
@@ -132,6 +122,17 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
         <p>Your Hero has marked the job as finished.</p>
         <button class="submit-btn" style="background: var(--success); margin-top: 15px;" onclick="window.finalSeekerConfirm()">CONFIRM & FINISH</button>
     </div>
+
+    <div class="footer">
+        <div class="footer-icons">
+            <img src="thishomeicon.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1946/1946436.png'" class="icon-btn" onclick="location.reload()">
+            <div id="footerChatBtn" style="position:relative; display:none;">
+                <img src="https://cdn-icons-png.flaticon.com/512/589/589708.png" class="icon-btn" onclick="window.openChat()">
+                <span id="chatBadge">0</span>
+            </div>
+            <img src="usericon.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1077/1077063.png'" class="icon-btn" onclick="window.openProfile()">
+        </div>
+    </div>
 </div>
 
 <!-- HERO UI -->
@@ -146,8 +147,10 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
     </div>
     <div class="footer">
         <div class="footer-icons">
-            <img src="notificationicon.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2956/2956860.png'" class="icon-btn" onclick="window.openModal('notifModal')">
-            
+            <div style="position:relative">
+                <img src="notificationicon.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3119/3119338.png'" class="icon-btn" onclick="window.openModal('notifModal')">
+                <!-- Removed #notifBadge as per request -->
+            </div>
             <img src="thishomeicon.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1946/1946436.png'" class="icon-btn" onclick="location.reload()">
             <div id="heroFooterChatBtn" style="position:relative; display:none;">
                 <img src="https://cdn-icons-png.flaticon.com/512/589/589708.png" class="icon-btn" onclick="window.openChat()">
@@ -241,23 +244,13 @@ input, textarea, select { width: 100%; padding: 15px; border-radius: 14px; borde
     </div>
 </div>
 
-<div id="notifModal" class="modal">
-    <div class="modal-content">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h3>Activity History</h3>
-        </div>
-
-        <div id="notifHistory"></div>
-        <button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:20px;" onclick="window.closeModal('notifModal')">CLOSE</button>
-    </div>
-</div>
-
-<div id="clearHistoryConfirmModal" class="modal">
+<div id="notifModal" class="modal"><div class="modal-content"><h3>Activity History</h3><div id="notifHistory"></div><button class="submit-btn" style="background:#f1f5f9; color:var(--text); margin-top:20px;" onclick="window.closeModal('notifModal')">CLOSE</button></div></div>
+<div id="deleteConfirmModal" class="modal">
     <div class="modal-content">
         <h3>Confirm Deletion</h3>
-        <p id="confirmDeleteText">Are you sure you want to delete this history item? This action cannot be undone.</p>
-        <button class="submit-btn" style="background:var(--danger); margin-bottom:10px;" onclick="window.confirmSingleHistoryDelete()">Yes, Delete</button>
-        <span class="cancel-link" onclick="window.closeModal('clearHistoryConfirmModal')">Cancel</span>
+        <p>Are you sure you want to delete this activity?</p>
+        <button class="submit-btn" style="background:var(--danger); margin-bottom:10px;" onclick="window.confirmDeleteActivity()">Delete</button>
+        <span class="cancel-link" onclick="window.closeModal('deleteConfirmModal')">Cancel</span>
     </div>
 </div>
 
@@ -266,7 +259,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebas
 import { getDatabase, ref, push, onValue, set, get, update, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB5GbyoapPOyLYJLNo9y85cyorIczEI-WU",
+  apiKey: "AIzaSyBgXWZkH0WMjhGmOfxjqbIDoJHlyA1pc-o",
   authDomain: "roadsidehero-104ea.firebaseapp.com",
   databaseURL: "https://roadsidehero-104ea-default-rtdb.firebaseio.com",
   projectId: "roadsidehero-104ea",
@@ -282,11 +275,7 @@ const myId = localStorage.getItem('heroUserId');
 let map, seekerMiniMap, userLocation, selectedVehicle = "Car", damageImgData = null, myRadius = 25, heroMarker;
 let sosCache = {}, profilesCache = {}, markers = {}, seekerHeroMarker, seekerUserMarker;
 let activeChatId = null, lastMsgCount = 0;
-
-let sosIdToDelete = null; // For single history item deletion
-
-// Global variable to track the currently active main app view (landingPage, seekerUI, heroUI)
-let currentActiveAppView = 'landingPage'; // Default to landing page
+let activityToDeleteId = null; // New variable to store the ID of the activity to delete
 
 const getMarkerIcon = (color) => ({
     path: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z",
@@ -307,22 +296,11 @@ window.onload = () => {
                         icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: "#2563eb", fillOpacity: 1, strokeColor: "white", strokeWeight: 2 }
                     });
                 } else { heroMarker.setPosition(userLocation); }
-                if (isFirstLoad && currentActiveAppView === 'heroUI') { map.setCenter(userLocation); } // Only center if heroUI is initially active
+                if (isFirstLoad && document.getElementById('heroUI').classList.contains('view-active')) { map.setCenter(userLocation); }
             }
-            syncUI(); // Call syncUI to update the map and overall UI state
-        }, (err) => {
-            console.error("Geolocation error:", err);
-            // Optionally alert user or show a message if location is critical
-            syncUI(); // Still call syncUI to attempt rendering without location
-        }, { enableHighAccuracy: true });
-    } else {
-        console.warn("Geolocation is not supported by this browser.");
-        syncUI(); // Still call syncUI to attempt rendering without location
+            syncUI();
+        }, (err) => console.error(err), { enableHighAccuracy: true });
     }
-    // Initial syncUI call to set the correct view if geolocation isn't immediately available
-    // or if the user already has an active session from local storage.
-    // This will default to 'landingPage' unless overriden by Firebase listeners.
-    syncUI(); 
 };
 
 window.toggleTaskCard = () => { document.getElementById('activeTask').classList.toggle('expanded'); };
@@ -331,48 +309,11 @@ window.updateRadius = (val) => { myRadius = parseInt(val); document.getElementBy
 window.centerOnMe = () => { if (map && userLocation) map.setCenter(userLocation); };
 window.openModal = (id) => document.getElementById(id).style.display = "flex";
 window.closeModal = (id) => document.getElementById(id).style.display = "none";
-
-// Centralized view switching function
 window.switchView = (id) => {
-    currentActiveAppView = id; // Update the global state
     document.querySelectorAll('.view').forEach(v => v.classList.remove('view-active'));
     document.getElementById(id).classList.add('view-active');
-
-    if (id === 'heroUI') { 
-        if (!map) initMap(); // Initialize map if not already
-        if (map && userLocation) {
-            google.maps.event.trigger(map, 'resize'); // Important for map to render correctly
-            map.setCenter(userLocation); 
-        }
-    }
-    // When switching to seekerUI, ensure its internal states are updated immediately
-    if (id === 'seekerUI') {
-        const myActive = Object.values(sosCache).find(r => r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status));
-        if (myActive) {
-            document.getElementById('searchingState').style.display = (myActive.status === 'open') ? 'block' : 'none';
-            document.getElementById('matchedState').style.display = (myActive.status === 'accepted' || myActive.status === 'arrived') ? 'block' : 'none';
-            document.getElementById('completionConfirmState').style.display = (myActive.status === 'completed') ? 'block' : 'none';
-            
-            if (myActive.status === 'accepted' || myActive.status === 'arrived') {
-                const helperProfile = profilesCache[myActive.helperId];
-                if (helperProfile) {
-                    document.getElementById('matchName').innerText = helperProfile.name || "A Hero";
-                    document.getElementById('matchPic').src = helperProfile.pic || "https://via.placeholder.com/70";
-                    document.getElementById('matchETA').innerText = `Arriving in ${myActive.eta || 'a moment'}`;
-                }
-                const heroLoc = helperProfile ? { lat: helperProfile.lat, lng: helperProfile.lng } : null;
-                updateSeekerMiniMap(myActive, heroLoc);
-            }
-        } else {
-             // If no active SOS for seeker, and they somehow landed on seekerUI, go to landing
-             currentActiveAppView = 'landingPage';
-             document.getElementById('landingPage').classList.add('view-active');
-             document.getElementById('seekerUI').classList.remove('view-active');
-        }
-    }
-    syncUI(); // Ensure all other elements are synced with the new view state
+    if (id === 'heroUI' && map && userLocation) { google.maps.event.trigger(map, 'resize'); map.setCenter(userLocation); }
 };
-
 window.selectVehicle = (type, el) => { selectedVehicle = type; document.querySelectorAll(".v-type").forEach(b => b.classList.remove("active")); el.classList.add("active"); };
 
 window.handleImageUpload = (input, target) => {
@@ -410,7 +351,7 @@ window.openChat = () => {
         });
         box.scrollTop = box.scrollHeight;
         lastMsgCount = msgs.length;
-        updateChatBadges(0); // Clear badge on opening chat
+        updateChatBadges(0);
     });
 };
 
@@ -428,10 +369,11 @@ window.sendChatImg = (input) => {
 };
 
 function updateChatBadges(count) {
-    const sB = document.getElementById('chatBadge'); 
-    const hB = document.getElementById('chatBadgeHero'); 
-    if(sB) { sB.innerText = count; sB.style.display = count > 0 ? 'flex' : 'none'; }
-    if(hB) { hB.innerText = count; hB.style.display = count > 0 ? 'flex' : 'none'; }
+    const sB = document.getElementById('chatBadge'); const hB = document.getElementById('chatBadgeHero');
+    if(count > 0) { 
+        if(sB){ sB.innerText = count; sB.style.display = 'flex'; } 
+        if(hB){ hB.innerText = count; hB.style.display = 'flex'; }
+    } else { if(sB) sB.style.display = 'none'; if(hB) hB.style.display = 'none'; }
 }
 
 window.viewRequest = (id) => {
@@ -455,16 +397,12 @@ window.viewRequest = (id) => {
     window.openModal('detailsModal');
 };
 
-window.enterHeroMode = () => { window.switchView('heroUI'); };
+window.enterHeroMode = () => { window.switchView('heroUI'); if(!map) initMap(); };
 window.confirmHelp = (sosId) => {
     const eta = document.getElementById('detETA').value;
     update(ref(db, `sosRequests/${sosId}`), { status: 'accepted', helperId: myId, helperAcknowledged: false, eta: eta });
     window.closeModal('detailsModal');
-    // Ensure task card is displayed and expanded upon accepting a job
-    const tCard = document.getElementById('activeTask');
-    tCard.style.display = 'block'; // Ensure it's visible
-    tCard.classList.add('expanded'); // Ensure it's expanded
-    syncUI(); // Re-sync the hero panel content
+    document.getElementById('activeTask').classList.add('expanded');
 };
 window.markArrived = () => { const active = Object.entries(sosCache).find(([id, r]) => r.helperId === myId && r.status === 'accepted'); if(active) update(ref(db, `sosRequests/${active[0]}`), { status: 'arrived' }); };
 window.completeTask = () => { const active = Object.entries(sosCache).find(([id, r]) => r.helperId === myId && r.status === 'arrived'); if(active) update(ref(db, `sosRequests/${active[0]}`), { status: 'completed' }); };
@@ -477,21 +415,14 @@ window.acknowledgeCancel = () => {
         update(ref(db, `sosRequests/${canceledTask[0]}`), { helperAcknowledged: true });
         const tCard = document.getElementById('activeTask');
         tCard.classList.remove('expanded');
-        // Give a moment for animation, then hide and clear
-        setTimeout(() => { 
-            tCard.style.display = 'none'; 
-            tCard.innerHTML = ""; // Clear content
-            syncUI(); // Re-sync UI to remove the task card visually and update status indicator
-        }, 400);
+        setTimeout(() => { tCard.style.display = 'none'; }, 400);
     }
 };
 
 window.submitSOS = () => {
-    const issue = document.getElementById('reqIssue').value; 
-    const customTipInput = document.getElementById('customTip').value;
-    const tip = customTipInput ? parseInt(customTipInput) : 0;
+    const issue = document.getElementById('reqIssue').value; const tip = document.getElementById('customTip').value || 0;
     
-    // Check if user already has an active help request before starting a new one
+    // SESSION PERSISTENCE: 1. Check if user already has an active help request before starting a new one
     const existingReq = Object.values(sosCache).find(r => r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status));
     if (existingReq) {
         window.switchView('seekerUI'); // Go to status screen
@@ -499,224 +430,83 @@ window.submitSOS = () => {
         return; // Don't submit a second request
     }
 
-    if(!issue || !userLocation) {
-        alert("Please describe the issue and ensure your location is available.");
-        return;
-    }
-
-    push(ref(db, "sosRequests"), { 
-        ownerId: myId, 
-        userName: "Driver", // Placeholder, ideally from user profile
-        issue, 
-        vehicle: selectedVehicle, 
-        damagePic: damageImgData, 
-        tip: tip, 
-        lat: userLocation.lat, 
-        lng: userLocation.lng, 
-        status: 'open', 
-        timestamp: Date.now() 
-    });
-    window.closeModal('requestModal'); 
-    window.switchView('seekerUI'); // Switch to seeker UI
-    // The seekerUI internal states will be handled by window.switchView and syncUI
+    if(!issue || !userLocation) return alert("Please describe the issue.");
+    push(ref(db, "sosRequests"), { ownerId: myId, userName: "Driver", issue, vehicle: selectedVehicle, damagePic: damageImgData, tip: tip, lat: userLocation.lat, lng: userLocation.lng, status: 'open', timestamp: Date.now() });
+    window.closeModal('requestModal'); window.switchView('seekerUI');
 };
 
 window.submitCancellation = (reason) => {
     const myReqId = Object.keys(sosCache).find(k => sosCache[k].ownerId === myId && (sosCache[k].status === 'open' || sosCache[k].status === 'accepted' || sosCache[k].status === 'arrived'));
-    if(myReqId) {
-        update(ref(db, `sosRequests/${myReqId}`), { status: 'canceled', cancelReason: reason, canceledBySeeker: true });
-    }
-    window.closeModal('cancelConfirmModal'); 
-    window.switchView('landingPage'); // Switch to landing page
-    damageImgData = null; // Clear image data
+    if(myReqId) update(ref(db, `sosRequests/${myReqId}`), { status: 'canceled', cancelReason: reason });
+    window.closeModal('cancelConfirmModal'); window.switchView('landingPage'); damageImgData = null;
 };
 
 window.finalSeekerConfirm = () => {
     const myReqId = Object.keys(sosCache).find(k => sosCache[k].ownerId === myId && sosCache[k].status === 'completed');
     if(myReqId) update(ref(db, `sosRequests/${myReqId}`), { status: 'finalized' });
-    damageImgData = null; // Clear image data
-    window.switchView('landingPage'); // Switch to landing page
+    damageImgData = null;
+    window.switchView('landingPage');
 };
 
-function initMap() { 
-    map = new google.maps.Map(document.getElementById("map"), { 
-        center: userLocation || {lat: 40.7128, lng: -74.0060}, // Default to NYC if no location
-        zoom: 14, 
-        disableDefaultUI: true, 
-        styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }] 
-    }); 
-    // Add hero marker if map initializes after userLocation is available
-    if (userLocation && !heroMarker) {
-        heroMarker = new google.maps.Marker({
-            position: userLocation, map: map,
-            icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: "#2563eb", fillOpacity: 1, strokeColor: "white", strokeWeight: 2 }
-        });
-    }
-}
-
-
-// --- History Management Functions ---
-
-window.openDeleteConfirm = (sosId) => {
-    sosIdToDelete = sosId;
-    window.openModal('clearHistoryConfirmModal');
-};
-
-window.confirmSingleHistoryDelete = async () => {
-    if (!sosIdToDelete) return;
-
-    try {
-        const updates = {};
-        // Add a flag to hide it from THIS hero's history view.
-        updates[`hiddenFromHero_${myId}`] = true;
-        await update(ref(db, `sosRequests/${sosIdToDelete}`), updates);
-        alert("History item has been deleted from your view.");
-        window.closeModal('clearHistoryConfirmModal');
-        sosIdToDelete = null; // Reset for next deletion
-        syncUI(); // Re-render to update the history list
-    } catch (error) {
-        console.error("Error deleting history item:", error);
-        alert("Failed to delete history item. Please try again.");
-    }
-};
-
+function initMap() { map = new google.maps.Map(document.getElementById("map"), { center: userLocation || {lat: 40, lng: -74}, zoom: 14, disableDefaultUI: true, styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }] }); }
 
 function syncUI() {
     const history = document.getElementById('notifHistory'); history.innerHTML = "";
     let nearbySOS = [];
     let currentTask = null; 
-    let myActiveSOS = null; 
+    let myActiveSOS = null;
     let jobActive = false;
-    let myHeroHistoryCount = 0; 
 
-    // 1. Identify the user's *own* active SOS request.
-    Object.values(sosCache).forEach(r => {
-        if(r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status)) {
-            if (!myActiveSOS || r.timestamp > myActiveSOS.timestamp) {
-                myActiveSOS = r;
-            }
-        }
-    });
-
-    // 2. Manage primary view based on myActiveSOS and currentActiveAppView state
-    const seekerUI = document.getElementById('seekerUI');
-    const landingPage = document.getElementById('landingPage');
-    const heroUI = document.getElementById('heroUI');
-
-    // Reset all views first
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('view-active'));
-
-    if (myActiveSOS) {
-        // If the user has an active SOS request, seekerUI takes precedence
-        currentActiveAppView = 'seekerUI'; // Update global state
-        seekerUI.classList.add('view-active');
-        // Update seekerUI specific states
-        document.getElementById('searchingState').style.display = (myActiveSOS.status === 'open') ? 'block' : 'none';
-        document.getElementById('matchedState').style.display = (myActiveSOS.status === 'accepted' || myActiveSOS.status === 'arrived') ? 'block' : 'none';
-        document.getElementById('completionConfirmState').style.display = (myActiveSOS.status === 'completed') ? 'block' : 'none';
-
-        if (myActiveSOS.status === 'accepted' || myActiveSOS.status === 'arrived') {
-            const helperProfile = profilesCache[myActiveSOS.helperId];
-            if (helperProfile) {
-                document.getElementById('matchName').innerText = helperProfile.name || "A Hero";
-                document.getElementById('matchPic').src = helperProfile.pic || "https://via.placeholder.com/70";
-                document.getElementById('matchETA').innerText = `Arriving in ${myActiveSOS.eta || 'a moment'}`;
-            }
-            const heroLoc = helperProfile ? { lat: helperProfile.lat, lng: helperProfile.lng } : null;
-            updateSeekerMiniMap(myActiveSOS, heroLoc);
-        }
-
-    } else if (currentActiveAppView === 'heroUI') {
-        // If no active SOS, but heroUI is the globally intended view
-        heroUI.classList.add('view-active');
-        if (!map) initMap(); // Ensure map is initialized
-        if (map && userLocation) {
-            google.maps.event.trigger(map, 'resize'); // Important for map to render correctly
-            map.setCenter(userLocation); 
-        }
-
-    } else {
-        // Otherwise, default to the landing page
-        currentActiveAppView = 'landingPage'; // Update global state
-        landingPage.classList.add('view-active');
-    }
-    // --- END primary view management ---
-
-
-    // 3. Loop through SOS requests for other UI updates (markers, hero panel, history)
     Object.entries(sosCache).forEach(([id, r]) => {
-        const isMyHeroJob = (r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived' || (r.status === 'canceled' && r.helperAcknowledged !== true)));
-        // Ensure distance calculation is safe if userLocation isn't available yet
-        const distMiles = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(r.lat, r.lng), new google.maps.LatLng(userLocation.lat, userLocation.lng)) / 1609.34) : 999;
+        const isMyJob = (r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived'));
+        const distMiles = userLocation ? (google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(userLocation.lat, userLocation.lng), new google.maps.LatLng(r.lat, r.lng)) / 1609.34) : 999;
         
-        // Handle map markers for nearby requests (Hero side) - only if heroUI is the active view
-        if (currentActiveAppView === 'heroUI') {
-            if (r.status === 'open' && r.ownerId !== myId && distMiles <= myRadius) {
-                nearbySOS.push({id, ...r, dist: distMiles});
-                if(map) { 
-                    if(!markers[id]) { 
-                        const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: getMarkerIcon("#EE611C") }); 
-                        marker.addListener('click', () => window.viewRequest(id)); 
-                        markers[id] = marker; 
-                    } else { 
-                        markers[id].setIcon(getMarkerIcon("#EE611C")); 
-                        markers[id].setMap(map); 
-                    }
-                }
-            } else if (isMyHeroJob) { // Hero's accepted/arrived job marker
-                if(map) { 
-                    if(!markers[id]) {
-                        const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: getMarkerIcon("#22c55e") });
-                        marker.addListener('click', () => window.viewRequest(id)); 
-                        markers[id] = marker;
-                    } else { 
-                        markers[id].setIcon(getMarkerIcon("#22c55e")); 
-                        markers[id].setMap(map); 
-                    }
-                }
-            } else {
-                // Remove markers for requests not relevant to hero map view or out of range
-                if (markers[id]) {
-                    markers[id].setMap(null); 
-                    delete markers[id];
-                }
+        if (r.status === 'open' && r.ownerId !== myId && distMiles <= myRadius) {
+            nearbySOS.push({id, ...r, dist: distMiles});
+            if(!markers[id] && map) { 
+                const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: getMarkerIcon("#EE611C") }); 
+                marker.addListener('click', () => window.viewRequest(id)); 
+                markers[id] = marker; 
             }
-        } else {
-            // If not in heroUI, clear all markers
-            if (markers[id]) {
-                markers[id].setMap(null); 
-                delete markers[id];
+        } else if (isMyJob) {
+            if(!markers[id] && map) {
+                const marker = new google.maps.Marker({ position: {lat: r.lat, lng: r.lng}, map, icon: getMarkerIcon("#22c55e") });
+                marker.addListener('click', () => window.viewRequest(id)); 
+                markers[id] = marker;
+            } else if (markers[id]) {
+                markers[id].setIcon(getMarkerIcon("#22c55e"));
             }
+        } else if (markers[id]) {
+            markers[id].setMap(null); delete markers[id];
         }
 
-        // Identify current hero task (for the hero panel)
-        if(isMyHeroJob) {
-            currentTask = r;
+        // Identify current hero task
+        if(r.helperId === myId && (r.status === 'accepted' || r.status === 'arrived' || (r.status === 'canceled' && r.helperAcknowledged !== true))) currentTask = r;
+        
+        // Identify active seeker request (Only latest non-finalized)
+        if(r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status)) {
+            if (!myActiveSOS || r.timestamp > myActiveSOS.timestamp) myActiveSOS = r;
         }
         
-        // Determine if *any* job is active for the current user (either as seeker or hero)
         if((r.ownerId === myId || r.helperId === myId) && (r.status === 'accepted' || r.status === 'arrived')) {
             jobActive = true; 
         }
-        
-        // Filter history for hero-specific tasks AND if not hidden from this hero's view
-        if (r.helperId === myId && !r[`hiddenFromHero_${myId}`]) {
-            myHeroHistoryCount++; 
+
+        // Filtered Activity History for the specific hero
+        if (r.ownerId === myId || r.helperId === myId) {
             let sCol = r.status === 'completed' || r.status === 'finalized' ? '#22c55e' : (r.status === 'canceled' ? '#ef4444' : '#2563eb');
-            
             history.innerHTML += `
-                <div class="history-item" data-sos-id="${id}" 
-                     style="padding:15px; background:#f8fafc; border-radius:15px; margin-bottom:10px; border:1px solid #e2e8f0; display:flex; align-items:center;"
-                >
-                    <div style="flex:1;">
-                        <span class="status-pill" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; color:white; float:right; background:${sCol};">${r.status}</span>
+                <div class="history-item" style="padding:15px; background:#f8fafc; border-radius:15px; margin-bottom:10px; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <span class="status-pill" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; color:white; background:${sCol};">${r.status}</span>
                         <b>${r.vehicle}</b><br><small>${r.issue}</small>
                     </div>
-                    <button class="delete-history-btn" onclick="window.openDeleteConfirm('${id}')">🗑️</button>
+                    <img src="https://cdn-icons-png.flaticon.com/512/3405/3405244.png" class="trash-icon" onclick="window.confirmDeleteActivityPrompt('${id}')">
                 </div>`;
         }
     });
 
+    document.getElementById('footerChatBtn').style.display = jobActive ? 'block' : 'none';
     document.getElementById('heroFooterChatBtn').style.display = jobActive ? 'block' : 'none';
 
     // HERO STATUS INDICATOR COLORS
@@ -727,118 +517,103 @@ function syncUI() {
     
     // HERO TASK PANEL
     const tCard = document.getElementById('activeTask');
-    // Ensure the task card's display is handled correctly based on `currentTask`
-    // Only update the task card if we are in heroUI
-    if (currentActiveAppView === 'heroUI') {
-        if(currentTask) {
-            tCard.style.display = 'block';
-            if(currentTask.status === 'canceled') {
-                tCard.innerHTML = `<div style="text-align:center;"><b style="color:var(--danger)">SOS CANCELED</b><p style="font-size:13px; margin:10px 0;">Reason: ${currentTask.cancelReason || 'None'}</p><button onclick="window.acknowledgeCancel()" class="submit-btn" style="background:var(--text); padding:10px; font-size:13px;">CLOSE</button></div>`;
-            } else {
-                tCard.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <b style="color:${currentTask.status === 'arrived' ? 'var(--warning)' : 'var(--accent)'};">${currentTask.status.toUpperCase()} JOB</b>
-                        <button onclick="window.openChat()" style="background:var(--accent); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:bold; font-size:12px;">CHAT</button>
-                    </div>
-                    <p style="margin:10px 0; font-weight:700; font-size:15px;">${currentTask.vehicle}: ${currentTask.issue}</p>
-                    ${(currentTask.tip > 0) ? `<p style="margin: 0 0 10px 0; font-weight: 800; color: var(--success); font-size: 14px;">💰 Tip: $${currentTask.tip}</p>` : ''}
-                    <div style="display:flex; gap:8px;">
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${currentTask.lat},${currentTask.lng}" target="_blank" style="flex:1; background:var(--success); color:white; text-align:center; padding:12px; border-radius:12px; text-decoration:none; font-weight:700; font-size:13px;">MAPS</a>
-                        ${currentTask.status === 'accepted' ? `<button onclick="window.markArrived()" style="flex:1; background:var(--warning); color:white; border:none; border-radius:12px; font-weight:700; font-size:13px;">HERE</button>` : `<button onclick="window.completeTask()" style="flex:1; background:var(--success); color:white; border:none; border-radius:12px; font-weight:700; font-size:13px;">DONE</button>`}
-                    </div>`;
-            }
-            if (!tCard.classList.contains('expanded')) {
-                tCard.classList.add('expanded');
-            }
-        } else if (nearbySOS.length > 0) {
-            tCard.style.display = 'block';
-            tCard.classList.add('expanded'); 
-            let listHtml = `<b style="color:var(--danger); display:block; margin-bottom:10px;">${nearbySOS.length} SOS NEARBY</b>`;
-            nearbySOS.forEach(s => {
-                listHtml += `<div class="sos-list-item" onclick="window.viewRequest('${s.id}')">
-                    <div><b>${s.vehicle}</b><br><small>${s.dist.toFixed(1)} miles away</small></div>
-                    <div style="color:var(--success); font-weight:bold;">${s.tip > 0 ? '$'+s.tip : 'HELP'}</div>
-                </div>`;
-            });
-            tCard.innerHTML = listHtml;
+    tCard.innerHTML = ""; 
+
+    if(currentTask) {
+        tCard.style.display = 'block';
+        if(currentTask.status === 'canceled') {
+            tCard.innerHTML = `<div style="text-align:center;"><b style="color:var(--danger)">SOS CANCELED</b><p style="font-size:13px; margin:10px 0;">Reason: ${currentTask.cancelReason || 'None'}</p><button onclick="window.acknowledgeCancel()" class="submit-btn" style="background:var(--text); padding:10px; font-size:13px;">CLOSE</button></div>`;
         } else {
-            // No current task and no nearby SOS, hide and clear the task card
-            tCard.style.display = 'none';
-            tCard.classList.remove('expanded');
-            tCard.innerHTML = ""; 
+            tCard.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <b style="color:${currentTask.status === 'arrived' ? 'var(--warning)' : 'var(--accent)'};">${currentTask.status.toUpperCase()} JOB</b>
+                    <button onclick="window.openChat()" style="background:var(--accent); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:bold; font-size:12px;">CHAT</button>
+                </div>
+                <p style="margin:10px 0; font-weight:700; font-size:15px;">${currentTask.vehicle}: ${currentTask.issue}</p>
+                ${(currentTask.tip > 0) ? `<p style="margin: 0 0 10px 0; font-weight: 800; color: var(--success); font-size: 14px;">💰 Tip: $${currentTask.tip}</p>` : ''}
+                <div style="display:flex; gap:8px;">
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${currentTask.lat},${currentTask.lng}" target="_blank" style="flex:1; background:var(--success); color:white; text-align:center; padding:12px; border-radius:12px; text-decoration:none; font-weight:700; font-size:13px;">MAPS</a>
+                    ${currentTask.status === 'accepted' ? `<button onclick="window.markArrived()" style="flex:1; background:var(--warning); color:white; border:none; border-radius:12px; font-weight:700; font-size:13px;">HERE</button>` : `<button onclick="window.completeTask()" style="flex:1; background:var(--success); color:white; border:none; border-radius:12px; font-weight:700; font-size:13px;">DONE</button>`}
+                </div>`;
         }
+    } else if (nearbySOS.length > 0) {
+        tCard.style.display = 'block';
+        let listHtml = `<b style="color:var(--danger); display:block; margin-bottom:10px;">${nearbySOS.length} SOS NEARBY</b>`;
+        nearbySOS.forEach(s => {
+            listHtml += `<div class="sos-list-item" onclick="window.viewRequest('${s.id}')">
+                <div><b>${s.vehicle}</b><br><small>${s.dist.toFixed(1)} miles away</small></div>
+                <div style="color:var(--success); font-weight:bold;">${s.tip > 0 ? '$'+s.tip : 'HELP'}</div>
+            </div>`;
+        });
+        tCard.innerHTML = listHtml;
     } else {
-        // If not in heroUI, ensure the task card is hidden
-        tCard.style.display = 'none';
-        tCard.classList.remove('expanded');
-        tCard.innerHTML = "";
+        tCard.style.display = 'block';
+        tCard.innerHTML = `<div style="text-align:center; color:var(--muted); padding:10px;"><b>No help needed right now.</b><p style="font-size:11px;">We'll alert you if someone nearby sends an SOS.</p></div>`;
     }
+
+    if(myActiveSOS) {
+        // SESSION PERSISTENCE: 2. If an active SOS is detected, force the view to seekerUI if they refresh back to the landing page
+        if (document.getElementById('landingPage').classList.contains('view-active')) {
+            window.switchView('seekerUI');
+        }
+
+        const searching = document.getElementById('searchingState');
+        const matched = document.getElementById('matchedState');
+        const completed = document.getElementById('completionConfirmState');
+        const cancelBtn = document.getElementById('cancelSosBtn');
+
+        // STRICT STATE TRANSITIONS
+        if(myActiveSOS.status === 'open') {
+            searching.style.display = 'block'; 
+            matched.style.display = 'none'; 
+            completed.style.display = 'none'; 
+            cancelBtn.style.display = 'block';
+        } else if(myActiveSOS.status === 'accepted' || myActiveSOS.status === 'arrived') {
+            searching.style.display = 'none'; 
+            matched.style.display = 'block'; 
+            completed.style.display = 'none'; 
+            cancelBtn.style.display = 'block';
+            
+            const hero = profilesCache[myActiveSOS.helperId] || {};
+            document.getElementById('matchName').innerText = hero.name || "Roadside Hero";
+            document.getElementById('matchPic').src = hero.pic || "https://via.placeholder.com/65";
+            document.getElementById('matchETA').innerText = myActiveSOS.status === 'arrived' ? "Hero is at your location!" : `Arriving in ${myActiveSOS.eta || '...'}`;
+            updateSeekerMiniMap(myActiveSOS, hero);
+        } else if(myActiveSOS.status === 'completed') {
+            searching.style.display = 'none'; 
+            matched.style.display = 'none'; 
+            completed.style.display = 'block'; 
+            cancelBtn.style.display = 'none';
+        }
+    }
+    
+    // Removed badge count for activity history
+    // const badge = document.getElementById('notifBadge'); badge.innerText = nearbySOS.length; badge.style.display = nearbySOS.length > 0 ? "flex" : "none";
 }
 
 function updateSeekerMiniMap(sos, hero) {
-    if(!seekerMiniMap) { 
-        seekerMiniMap = new google.maps.Map(document.getElementById('seekerMap'), { 
-            zoom: 14, 
-            disableDefaultUI: true,
-            styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }] 
-        }); 
-        seekerUserMarker = new google.maps.Marker({ map: seekerMiniMap, icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' }); 
-        seekerHeroMarker = new google.maps.Marker({ map: seekerMiniMap, icon: 'http://maps.google.com/mapfiles/ms/icons/truck.png' }); 
-    }
-    const userPos = {lat: sos.lat, lng: sos.lng}; 
-    seekerUserMarker.setPosition(userPos);
-
-    if(hero && hero.lat && hero.lng) { 
-        const heroPos = {lat: hero.lat, lng: hero.lng}; 
-        seekerHeroMarker.setPosition(heroPos); 
-        seekerHeroMarker.setMap(seekerMiniMap); 
-        const bounds = new google.maps.LatLngBounds(); 
-        bounds.extend(userPos); 
-        bounds.extend(heroPos); 
-        seekerMiniMap.fitBounds(bounds); 
-    } else { 
-        seekerHeroMarker.setMap(null); 
-        seekerMiniMap.setCenter(userPos); 
-        seekerMiniMap.setZoom(14); 
-    }
-    google.maps.event.trigger(seekerMiniMap, 'resize'); 
+    if(!seekerMiniMap) { seekerMiniMap = new google.maps.Map(document.getElementById('seekerMap'), { zoom: 14, disableDefaultUI: true }); seekerUserMarker = new google.maps.Marker({ map: seekerMiniMap, icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' }); seekerHeroMarker = new google.maps.Marker({ map: seekerMiniMap, icon: 'http://maps.google.com/mapfiles/ms/icons/truck.png' }); }
+    const userPos = {lat: sos.lat, lng: sos.lng}; seekerUserMarker.setPosition(userPos);
+    if(hero.lat) { const heroPos = {lat: hero.lat, lng: hero.lng}; seekerHeroMarker.setPosition(heroPos); const bounds = new google.maps.LatLngBounds(); bounds.extend(userPos); bounds.extend(heroPos); seekerMiniMap.fitBounds(bounds); }
+    else { seekerMiniMap.setCenter(userPos); }
 }
 
-// Firebase listeners
 onValue(ref(db, "sosRequests"), (snap) => { 
     sosCache = snap.val() || {}; 
     syncUI(); 
     
-    // Check for unread chat messages for current active chat
-    if (activeChatId) {
-        get(ref(db, `chats/${activeChatId}`)).then(chatSnap => {
-            const currentMsgCount = Object.keys(chatSnap.val() || {}).length;
-            if (currentMsgCount > lastMsgCount) {
-                if (document.getElementById('chatModal').style.display !== 'flex') {
-                    updateChatBadges(currentMsgCount - lastMsgCount);
-                }
-            }
-            lastMsgCount = currentMsgCount; 
-        });
+    // SESSION PERSISTENCE: 3. Immediately switch the view if the database loads and sees you have an active session
+    const myActive = Object.values(sosCache).find(r => r.ownerId === myId && ['open', 'accepted', 'arrived', 'completed'].includes(r.status));
+    if (myActive && document.getElementById('landingPage').classList.contains('view-active')) {
+        window.switchView('seekerUI');
     }
 });
 
-onValue(ref(db, "profiles"), (snap) => { 
-    profilesCache = snap.val() || {}; 
-    syncUI(); 
-});
+onValue(ref(db, "profiles"), (snap) => { profilesCache = snap.val() || {}; syncUI(); });
 
 window.saveProfile = () => {
     myRadius = parseInt(document.getElementById("profileRadius").value);
-    const profilePicSrc = document.getElementById("profileDisplayPic").src;
-    const picToSave = profilePicSrc.includes('placeholder') ? '' : profilePicSrc;
-
-    update(ref(db, `profiles/${myId}`), { 
-        name: document.getElementById("profileName").value, 
-        bio: document.getElementById("profileBio").value, 
-        pic: picToSave, 
-        radius: myRadius 
-    });
+    update(ref(db, `profiles/${myId}`), { name: document.getElementById("profileName").value, bio: document.getElementById("profileBio").value, pic: document.getElementById("profileDisplayPic").src, radius: myRadius });
     if(map && userLocation) { 
         const radiusInMeters = myRadius * 1609.34; 
         const circle = new google.maps.Circle({center: userLocation, radius: radiusInMeters}); 
@@ -852,22 +627,27 @@ window.openProfile = async () => {
     window.openModal("profileModal");
     const snap = await get(ref(db, `profiles/${myId}`));
     if(snap.exists()) {
-        const d = snap.val(); 
-        document.getElementById("profileName").value = d.name || ""; 
-        document.getElementById("profileBio").value = d.bio || ""; 
-        document.getElementById("profileDisplayPic").src = d.pic || "https://via.placeholder.com/100"; 
-        if(d.radius) { 
-            myRadius = d.radius; 
-            document.getElementById("profileRadius").value = d.radius; 
-            document.getElementById("radiusVal").innerText = d.radius; 
-        }
-    } else {
-        document.getElementById("profileName").value = "";
-        document.getElementById("profileBio").value = "";
-        document.getElementById("profileDisplayPic").src = "https://via.placeholder.com/100";
-        document.getElementById("profileRadius").value = "25";
-        document.getElementById("radiusVal").innerText = "25";
-        myRadius = 25;
+        const d = snap.val(); document.getElementById("profileName").value = d.name || ""; document.getElementById("profileBio").value = d.bio || ""; if(d.pic) document.getElementById("profileDisplayPic").src = d.pic; if(d.radius) { myRadius = d.radius; document.getElementById("profileRadius").value = d.radius; document.getElementById("radiusVal").innerText = d.radius; }
+    }
+};
+
+window.confirmDeleteActivityPrompt = (id) => {
+    activityToDeleteId = id;
+    window.openModal('deleteConfirmModal');
+};
+
+window.confirmDeleteActivity = () => {
+    if (activityToDeleteId) {
+        remove(ref(db, `sosRequests/${activityToDeleteId}`))
+            .then(() => {
+                console.log("Activity deleted successfully:", activityToDeleteId);
+                activityToDeleteId = null; // Clear the stored ID
+                window.closeModal('deleteConfirmModal');
+            })
+            .catch((error) => {
+                console.error("Error deleting activity:", error);
+                alert("Failed to delete activity. Please try again.");
+            });
     }
 };
 </script>
