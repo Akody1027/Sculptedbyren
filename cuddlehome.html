@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuddleSocial | Find Your Comfort</title>
+    
+    <!-- Tailwind CSS for Styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- CHANGE COLORS HERE --- */
+        :root {
+            --soft-peach: #FFDAB9;
+            --deep-teal: #008080;
+            --warm-white: #FDFDFD;
+            --accent-orange: #FF8C42;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--warm-white);
+            color: #333;
+            overflow-x: hidden;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .bg-peach { background-color: var(--soft-peach); }
+        .bg-teal { background-color: var(--deep-teal); }
+        .text-teal { color: var(--deep-teal); }
+        
+        .btn-primary {
+            background-color: var(--deep-teal);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 999px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary:active { transform: scale(0.95); }
+
+        /* Navigation logic: Hide sections by default */
+        section { display: none; min-height: 100vh; }
+        section.active { display: flex; flex-direction: column; }
+
+        /* Map styling */
+        #map { height: 400px; width: 100%; border-radius: 20px; z-index: 1; }
+
+        /* Custom Rounded Corners for Cards */
+        .card-ui {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        /* Biometric Animation */
+        .shimmer {
+            background: linear-gradient(90deg, #008080 25%, #00b3b3 50%, #008080 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. AGE VERIFICATION OVERLAY -->
+    <div id="age-gate" class="fixed inset-0 z-[9999] bg-teal flex items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-3xl text-center max-w-sm">
+            <h1 class="text-2xl font-bold mb-4">Welcome to CuddleSocial</h1>
+            <p class="mb-6">You must be at least 18 years old to join our community.</p>
+            <button onclick="verifyAge()" class="btn-primary w-full">I am 18 or older</button>
+            <p class="mt-4 text-xs text-gray-400 text-center">By clicking, you agree to our Terms of Service.</p>
+        </div>
+    </div>
+
+    <!-- 2. LANDING PAGE -->
+    <section id="landing-page" class="active items-center justify-center p-6 text-center">
+        <div class="max-w-md w-full">
+            <div class="mb-8">
+                <div class="w-24 h-24 bg-peach rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-4xl">🫂</span>
+                </div>
+                <h1 class="text-4xl font-bold text-teal mb-2">CuddleSocial</h1>
+                <p class="text-gray-600">Human connection, simplified.</p>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- Biometric Login Button -->
+                <button onclick="simulatedBiometrics()" id="bio-btn" class="w-full bg-white border-2 border-teal text-teal font-bold py-4 rounded-2xl flex items-center justify-center gap-3">
+                    <span id="bio-icon">📱</span> <span id="bio-text">Login with FaceID</span>
+                </button>
+                
+                <button onclick="showInstallInstructions()" class="text-teal font-semibold underline">Install App to Home Screen</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. MULTI-STEP ONBOARDING -->
+    <section id="onboarding" class="p-6 bg-peach bg-opacity-20">
+        <div class="max-w-md mx-auto w-full pt-10">
+            <div id="step-1">
+                <h2 class="text-3xl font-bold mb-2">Build your profile</h2>
+                <p class="mb-8 text-gray-500">Step 1: Choose a photo</p>
+                <div class="w-full aspect-square bg-white border-dashed border-2 border-teal rounded-3xl flex flex-col items-center justify-center mb-8 cursor-pointer" onclick="alert('In a live app, this opens the camera/gallery.')">
+                    <span class="text-5xl mb-2">📸</span>
+                    <span class="text-teal font-medium">Upload Photo</span>
+                </div>
+                <button onclick="nextStep(2)" class="btn-primary w-full">Next</button>
+            </div>
+
+            <div id="step-2" class="hidden">
+                <h2 class="text-3xl font-bold mb-2">Tell us about you</h2>
+                <p class="mb-8 text-gray-500">Step 2: Your bio</p>
+                <textarea id="user-bio" class="w-full p-4 rounded-2xl border-none shadow-sm focus:ring-2 focus:ring-teal mb-8" rows="4" placeholder="I love tea, blankets, and quiet conversations..."></textarea>
+                <button onclick="nextStep(3)" class="btn-primary w-full">Next</button>
+            </div>
+
+            <div id="step-3" class="hidden">
+                <h2 class="text-3xl font-bold mb-2">Preferences</h2>
+                <p class="mb-8 text-gray-500">Step 3: Cuddle Style</p>
+                <div class="grid grid-cols-1 gap-4 mb-8">
+                    <button onclick="setPref('Big Spoon')" class="pref-btn p-4 bg-white rounded-2xl border-2 border-transparent hover:border-teal">🥄 Big Spoon</button>
+                    <button onclick="setPref('Little Spoon')" class="pref-btn p-4 bg-white rounded-2xl border-2 border-transparent hover:border-teal">🥄 Little Spoon</button>
+                    <button onclick="setPref('Neutral')" class="pref-btn p-4 bg-white rounded-2xl border-2 border-transparent hover:border-teal">☁️ Neutral / Versatile</button>
+                </div>
+                <button onclick="finishOnboarding()" class="btn-primary w-full">Find Cuddlers</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. MAIN APP (MAP & CHAT) -->
+    <section id="main-app" class="bg-warm-white">
+        <!-- Header -->
+        <header class="p-4 flex justify-between items-center bg-white shadow-sm">
+            <span class="font-bold text-teal text-xl">CuddleSocial</span>
+            <button onclick="logout()" class="text-sm text-gray-400">Logout</button>
+        </header>
+
+        <!-- Map View -->
+        <div id="map-view" class="p-4 flex-1 overflow-y-auto">
+            <h3 class="font-bold mb-4">Nearby Cuddlers</h3>
+            <div id="map" class="mb-6 shadow-lg"></div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 bg-teal text-white rounded-2xl">
+                    <p class="text-xs uppercase opacity-70">Verified Spots</p>
+                    <p class="text-2xl font-bold">12</p>
+                </div>
+                <div class="p-4 bg-peach rounded-2xl">
+                    <p class="text-xs uppercase opacity-70">Nearby Active</p>
+                    <p class="text-2xl font-bold">48</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat View (Hidden by default) -->
+        <div id="chat-view" class="hidden p-4 flex flex-col h-full bg-white">
+            <div class="flex items-center gap-4 mb-6">
+                <button onclick="toggleView('map')" class="text-teal font-bold text-xl">←</button>
+                <div class="w-10 h-10 bg-peach rounded-full"></div>
+                <span class="font-bold" id="chat-name">Sarah</span>
+            </div>
+            <div class="flex-1 bg-gray-50 rounded-2xl p-4 overflow-y-auto mb-4 space-y-4" id="messages">
+                <div class="bg-teal text-white p-3 rounded-2xl rounded-tl-none self-start max-w-[80%]">Hi! I saw your profile. Are you near the park?</div>
+                <div class="bg-white border p-3 rounded-2xl rounded-tr-none self-end max-w-[80%] ml-auto text-gray-700">Hey! Yes, I'm grabbing coffee nearby.</div>
+            </div>
+            <div class="flex gap-2">
+                <input type="text" placeholder="Type a message..." class="flex-1 p-3 rounded-full bg-gray-100 border-none outline-none">
+                <button class="bg-teal text-white w-12 h-12 rounded-full flex items-center justify-center">▶</button>
+            </div>
+        </div>
+
+        <!-- Navigation Bar -->
+        <nav class="p-4 bg-white border-t flex justify-around items-center">
+            <button onclick="toggleView('map')" class="flex flex-col items-center">
+                <span class="text-xl">📍</span>
+                <span class="text-xs">Explore</span>
+            </button>
+            <button onclick="toggleView('chat')" class="flex flex-col items-center">
+                <span class="text-xl">💬</span>
+                <span class="text-xs">Chat</span>
+            </button>
+        </nav>
+    </section>
+
+    <!-- Leaflet JS for Maps -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Firebase SDK (Standard Setup) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // --- PASTE YOUR FIREBASE CONFIG HERE ---
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        // const app = initializeApp(firebaseConfig);
+        // const db = getFirestore(app);
+        // const auth = getAuth(app);
+    </script>
+
+    <!-- Core App Logic -->
+    <script>
+        // --- GLOBAL STATE ---
+        let userData = JSON.parse(localStorage.getItem('cuddleUser')) || {
+            onboarded: false,
+            preference: '',
+            bio: ''
+        };
+
+        let map;
+
+        // --- NAVIGATION ENGINE ---
+        function showScreen(screenId) {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            
+            // Refresh map layout if showing main app
+            if (screenId === 'main-app') {
+                setTimeout(() => { 
+                    if (!map) initMap();
+                    map.invalidateSize(); 
+                }, 100);
+            }
+        }
+
+        // --- AGE VERIFICATION ---
+        function verifyAge() {
+            document.getElementById('age-gate').style.display = 'none';
+            if (userData.onboarded) {
+                showScreen('main-app');
+            } else {
+                showScreen('landing-page');
+            }
+        }
+
+        // --- PWA INSTALL PROMPT ---
+        function showInstallInstructions() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            if (isIOS) {
+                alert("To install on iOS: Tap the 'Share' icon and then 'Add to Home Screen' 📱");
+            } else {
+                alert("To install on Android: Tap the three dots in your browser menu and select 'Install App' 📱");
+            }
+        }
+
+        // --- BIOMETRIC SIMULATION ---
+        function simulatedBiometrics() {
+            const btn = document.getElementById('bio-btn');
+            const text = document.getElementById('bio-text');
+            const icon = document.getElementById('bio-icon');
+
+            btn.classList.add('shimmer');
+            text.innerText = "Authenticating...";
+            
+            setTimeout(() => {
+                btn.classList.remove('shimmer');
+                icon.innerText = "✅";
+                text.innerText = "Identity Verified";
+                setTimeout(() => {
+                    if (userData.onboarded) showScreen('main-app');
+                    else showScreen('onboarding');
+                }, 1000);
+            }, 2000);
+        }
+
+        // --- ONBOARDING LOGIC ---
+        function nextStep(step) {
+            document.getElementById('step-1').classList.add('hidden');
+            document.getElementById('step-2').classList.add('hidden');
+            document.getElementById('step-3').classList.add('hidden');
+            document.getElementById('step-' + step).classList.remove('hidden');
+        }
+
+        function setPref(val) {
+            userData.preference = val;
+            document.querySelectorAll('.pref-btn').forEach(b => b.classList.remove('border-teal'));
+            event.target.classList.add('border-teal');
+        }
+
+        function finishOnboarding() {
+            userData.bio = document.getElementById('user-bio').value;
+            userData.onboarded = true;
+            localStorage.setItem('cuddleUser', JSON.stringify(userData));
+            showScreen('main-app');
+        }
+
+        // --- MAP LOGIC (LEAFLET) ---
+        function initMap() {
+            // Default to a generic city view (e.g., London or NYC)
+            map = L.map('map', { zoomControl: false }).setView([40.7128, -74.0060], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+
+            // SIMULATED DATA
+            const mockCuddlers = [
+                { name: "Sarah", lat: 40.715, lng: -74.009, type: 'person' },
+                { name: "Mike", lat: 40.710, lng: -74.002, type: 'person' },
+                { name: "Cozy Café (Verified Spot)", lat: 40.718, lng: -74.000, type: 'spot' }
+            ];
+
+            mockCuddlers.forEach(loc => {
+                // LOCATION FUZZING: Randomly offset markers so exact homes aren't shown
+                const fuzzLat = loc.lat + (Math.random() - 0.5) * 0.005;
+                const fuzzLng = loc.lng + (Math.random() - 0.5) * 0.005;
+
+                const iconEmoji = loc.type === 'person' ? '👤' : '☕';
+                const customIcon = L.divIcon({
+                    html: `<div style="font-size: 24px; background: white; border-radius: 50%; padding: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2)">${iconEmoji}</div>`,
+                    className: 'dummy',
+                    iconSize: [30, 30]
+                });
+
+                L.marker([fuzzLat, fuzzLng], { icon: customIcon }).addTo(map)
+                    .bindPopup(`<b>${loc.name}</b><br><button onclick="toggleView('chat')" class="text-teal font-bold mt-2">Send Message</button>`);
+            });
+        }
+
+        // --- NAVIGATION ---
+        function toggleView(view) {
+            if (view === 'map') {
+                document.getElementById('map-view').classList.remove('hidden');
+                document.getElementById('chat-view').classList.add('hidden');
+                map.invalidateSize();
+            } else {
+                document.getElementById('map-view').classList.add('hidden');
+                document.getElementById('chat-view').classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        // --- PWA SERVICE WORKER REGISTRATION ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed', err));
+            });
+        }
+    </script>
+
+    <!-- SERVICE WORKER (TEMPORARY FOR PWA COMPLIANCE) -->
+    <script id="sw-logic" type="application/javascript">
+        /* 
+        To use this, create a file named 'sw.js' and paste this:
+        
+        const cacheName = 'cuddle-v1';
+        const assets = ['/', '/index.html'];
+
+        self.addEventListener('install', e => {
+            e.waitUntil(caches.open(cacheName).then(cache => cache.addAll(assets)));
+        });
+
+        self.addEventListener('fetch', e => {
+            e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+        });
+        */
+    </script>
+</body>
+</html>
