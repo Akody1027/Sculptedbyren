@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Virtual World</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Basic Scene Setup
+        let scene, camera, renderer, controls;
+        let movingForward = false;
+        let movingBackward = false;
+        let movingLeft = false;
+        let movingRight = false;
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Add some basic lighting
+            const ambientLight = new THREE.AmbientLight(0x404040); // Soft white light
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(1, 1, 1).normalize();
+            scene.add(directionalLight);
+
+            // Create a ground plane
+            const planeGeometry = new THREE.PlaneGeometry(100, 100);
+            const planeMaterial = new THREE.MeshLambertMaterial({ color: 0xcccccc, side: THREE.DoubleSide });
+            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.rotation.x = Math.PI / 2; // Rotate to lie flat
+            scene.add(plane);
+
+            camera.position.set(0, 1.6, 5); // A typical human eye level
+
+            // Touch Controls (Simplified First-Person)
+            let isDragging = false;
+            let previousTouch = { x: 0, y: 0 };
+
+            renderer.domElement.addEventListener('touchstart', (event) => {
+                event.preventDefault(); // Prevent scrolling
+                if (event.touches.length === 1) {
+                    isDragging = true;
+                    previousTouch.x = event.touches[0].clientX;
+                    previousTouch.y = event.touches[0].clientY;
+                }
+            });
+
+            renderer.domElement.addEventListener('touchmove', (event) => {
+                event.preventDefault();
+                if (isDragging && event.touches.length === 1) {
+                    const deltaX = event.touches[0].clientX - previousTouch.x;
+                    const deltaY = event.touches[0].clientY - previousTouch.y;
+
+                    // Rotate camera based on touch movement
+                    const rotationSpeed = 0.005;
+                    camera.rotation.y -= deltaX * rotationSpeed;
+                    camera.rotation.x -= deltaY * rotationSpeed;
+
+                    // Clamp vertical rotation to prevent flipping
+                    camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+
+                    previousTouch.x = event.touches[0].clientX;
+                    previousTouch.y = event.touches[0].clientY;
+                }
+            });
+
+            renderer.domElement.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+
+            // Keyboard Controls (for testing on desktop)
+            document.addEventListener('keydown', (event) => {
+                switch (event.code) {
+                    case 'KeyW':
+                        movingForward = true;
+                        break;
+                    case 'KeyS':
+                        movingBackward = true;
+                        break;
+                    case 'KeyA':
+                        movingLeft = true;
+                        break;
+                    case 'KeyD':
+                        movingRight = true;
+                        break;
+                }
+            });
+
+            document.addEventListener('keyup', (event) => {
+                switch (event.code) {
+                    case 'KeyW':
+                        movingForward = false;
+                        break;
+                    case 'KeyS':
+                        movingBackward = false;
+                        break;
+                    case 'KeyA':
+                        movingLeft = false;
+                        break;
+                    case 'KeyD':
+                        movingRight = false;
+                        break;
+                }
+            });
+
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const moveSpeed = 0.1;
+
+            // Apply movement based on keyboard input (or virtual joystick if implemented)
+            if (movingForward) {
+                camera.translateZ(-moveSpeed);
+            }
+            if (movingBackward) {
+                camera.translateZ(moveSpeed);
+            }
+            if (movingLeft) {
+                camera.translateX(-moveSpeed);
+            }
+            if (movingRight) {
+                camera.translateX(moveSpeed);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        init();
+        animate();
+
+        // --- Functions for building storefronts and displaying items (Conceptual) ---
+
+        function createStorefront(x, y, z, width = 5, height = 3, depth = 0.5, color = 0x8B4513) {
+            const storefrontGeometry = new THREE.BoxGeometry(width, height, depth);
+            const storefrontMaterial = new THREE.MeshLambertMaterial({ color: color });
+            const storefront = new THREE.Mesh(storefrontGeometry, storefrontMaterial);
+            storefront.position.set(x, y + height / 2, z); // Position at its base
+            scene.add(storefront);
+
+            // You would add details like windows, doors, signs here
+            // Example: a simple window
+            const windowGeometry = new THREE.PlaneGeometry(width * 0.7, height * 0.5);
+            const windowMaterial = new THREE.MeshBasicMaterial({ color: 0x87CEEB, transparent: true, opacity: 0.6, side: THREE.DoubleSide });
+            const windowMesh = new THREE.Mesh(windowGeometry, windowMaterial);
+            windowMesh.position.set(x, y + height * 0.6, z + depth / 2 + 0.01); // Slightly in front of the wall
+            storefront.add(windowMesh); // Add window as a child of the storefront
+
+            return storefront;
+        }
+
+        function displayItem(parentStorefront, itemName, itemModelPath, xOffset, yOffset, zOffset) {
+            // This is where you would load and display actual 3D models of items.
+            // For simplicity, let's just add a placeholder box for now.
+            const itemGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            const itemMaterial = new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff });
+            const item = new THREE.Mesh(itemGeometry, itemMaterial);
+            item.position.set(xOffset, yOffset, zOffset); // Relative to the storefront
+
+            // Add some text for the item name (more complex in 3D, using TextGeometry or sprites)
+            // For now, let's just log it to console or display a simple 2D overlay if needed.
+            console.log(`Displaying item: ${itemName} at storefront.`);
+
+            parentStorefront.add(item); // Add the item to the storefront
+        }
+
+        // Example Usage:
+        // Create a storefront
+        const myStore = createStorefront(10, 0, 0); // Position it at x=10, ground level
+        const anotherStore = createStorefront(-10, 0, 0, 7, 4, 0.7, 0x4CAF50);
+
+        // Display items in the store (relative to the storefront's position)
+        displayItem(myStore, "Cool Gadget", "path/to/gadget.glb", 0, 1, 0.3);
+        displayItem(myStore, "Awesome Thing", "path/to/thing.obj", 1, 1, 0.3);
+        displayItem(anotherStore, "Green Potion", "path/to/potion.glb", -1, 1.5, 0.4);
+
+    </script>
+</body>
+</html>
