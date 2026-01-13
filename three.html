@@ -1,56 +1,148 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Virtual World</title>
+    <title>3D Business & Product Showcase</title>
     <style>
-        body { margin: 0; overflow: hidden; }
+        body { margin: 0; overflow: hidden; font-family: sans-serif; }
         canvas { display: block; }
+        #infoPanel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 300px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none; /* Hidden by default */
+            z-index: 1000;
+        }
+        #infoPanel h2 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+        #closeInfo {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            color: #ccc;
+        }
+        #closeInfo:hover {
+            color: white;
+        }
     </style>
 </head>
 <body>
+    <div id="infoPanel">
+        <span id="closeInfo">&times;</span>
+        <h2 id="panelTitle"></h2>
+        <p id="panelDescription"></p>
+        <button id="buyButton" style="background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; display: none;">Buy Now</button>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // Basic Scene Setup
-        let scene, camera, renderer, controls;
+        let scene, camera, renderer;
         let movingForward = false;
         let movingBackward = false;
         let movingLeft = false;
         let movingRight = false;
 
+        let isDragging = false;
+        let previousTouch = { x: 0, y: 0 };
+
+        let raycaster = new THREE.Raycaster();
+        let mouse = new THREE.Vector2();
+        let currentIntersected = null; // To store the currently hovered object
+
+        const clickableObjects = []; // Array to store objects that can be clicked
+
         function init() {
             scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xADD8E6); // Light blue sky-like background
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
-            // Add some basic lighting
-            const ambientLight = new THREE.AmbientLight(0x404040); // Soft white light
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.8);
             scene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-            directionalLight.position.set(1, 1, 1).normalize();
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            directionalLight.position.set(10, 20, 10).normalize();
             scene.add(directionalLight);
 
-            // Create a ground plane
-            const planeGeometry = new THREE.PlaneGeometry(100, 100);
-            const planeMaterial = new THREE.MeshLambertMaterial({ color: 0xcccccc, side: THREE.DoubleSide });
+            // Ground
+            const planeGeometry = new THREE.PlaneGeometry(200, 200);
+            const planeMaterial = new THREE.MeshLambertMaterial({ color: 0x8FBC8F, side: THREE.DoubleSide }); // Forest Green
             const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-            plane.rotation.x = Math.PI / 2; // Rotate to lie flat
+            plane.rotation.x = Math.PI / 2;
             scene.add(plane);
 
-            camera.position.set(0, 1.6, 5); // A typical human eye level
+            camera.position.set(0, 1.8, 5); // Start position
 
-            // Touch Controls (Simplified First-Person)
-            let isDragging = false;
-            let previousTouch = { x: 0, y: 0 };
+            // --- Build the 3D environment ---
 
+            // Business Information Kiosk (Central)
+            const kioskGeometry = new THREE.BoxGeometry(2, 3, 0.2);
+            const kioskMaterial = new THREE.MeshLambertMaterial({ color: 0x6A5ACD }); // Slate Blue
+            const kiosk = new THREE.Mesh(kioskGeometry, kioskMaterial);
+            kiosk.position.set(0, 1.5, -5);
+            kiosk.userData = {
+                type: 'info',
+                name: 'Our Business Story',
+                description: 'Welcome to our innovative 3D showcase! We are dedicated to bringing you high-quality products and services with a focus on customer satisfaction. Explore our virtual space to learn more about what we offer.',
+                link: null // No buy button for general info
+            };
+            scene.add(kiosk);
+            clickableObjects.push(kiosk);
+
+            // Product Display Pod 1 (Left)
+            const pod1 = createProductDisplayPod(-8, 0, -5, "Eco-Friendly Water Bottle", "Stay hydrated with our sustainably sourced, BPA-free water bottle. Durable design, vibrant colors, and keeps your drinks cold for hours!");
+            scene.add(pod1);
+            clickableObjects.push(pod1);
+
+            // Product Display Pod 2 (Right)
+            const pod2 = createProductDisplayPod(8, 0, -5, "Smart Home Assistant", "Experience the future of home automation. Our AI assistant manages your schedule, controls smart devices, and plays your favorite music.");
+            scene.add(pod2);
+            clickableObjects.push(pod2);
+
+            // Walls (example of a simple building structure)
+            const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xF5DEB3 }); // Wheat color
+            const wallGeometry = new THREE.BoxGeometry(20, 5, 0.5);
+
+            const wall1 = new THREE.Mesh(wallGeometry, wallMaterial);
+            wall1.position.set(0, 2.5, -15);
+            scene.add(wall1);
+
+            const wall2 = new THREE.Mesh(wallGeometry, wallMaterial);
+            wall2.position.set(0, 2.5, 5);
+            scene.add(wall2);
+
+            const wall3 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 5, 20), wallMaterial);
+            wall3.position.set(-10, 2.5, -5);
+            scene.add(wall3);
+
+            const wall4 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 5, 20), wallMaterial);
+            wall4.position.set(10, 2.5, -5);
+            scene.add(wall4);
+
+
+            // --- Controls Setup ---
+
+            // Touch Controls (look around)
             renderer.domElement.addEventListener('touchstart', (event) => {
-                event.preventDefault(); // Prevent scrolling
+                event.preventDefault();
                 if (event.touches.length === 1) {
                     isDragging = true;
                     previousTouch.x = event.touches[0].clientX;
                     previousTouch.y = event.touches[0].clientY;
                 }
+                // Also handle touch for clicking
+                handleInteraction(event.touches[0].clientX, event.touches[0].clientY);
             });
 
             renderer.domElement.addEventListener('touchmove', (event) => {
@@ -59,12 +151,10 @@
                     const deltaX = event.touches[0].clientX - previousTouch.x;
                     const deltaY = event.touches[0].clientY - previousTouch.y;
 
-                    // Rotate camera based on touch movement
                     const rotationSpeed = 0.005;
                     camera.rotation.y -= deltaX * rotationSpeed;
                     camera.rotation.x -= deltaY * rotationSpeed;
 
-                    // Clamp vertical rotation to prevent flipping
                     camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
 
                     previousTouch.x = event.touches[0].clientX;
@@ -76,42 +166,142 @@
                 isDragging = false;
             });
 
-            // Keyboard Controls (for testing on desktop)
+            // Mouse Controls (look around and click)
+            document.addEventListener('mousedown', (event) => {
+                isDragging = true;
+                previousTouch.x = event.clientX; // Re-use previousTouch for consistency
+                previousTouch.y = event.clientY;
+            });
+
+            document.addEventListener('mousemove', (event) => {
+                if (isDragging) {
+                    const deltaX = event.clientX - previousTouch.x;
+                    const deltaY = event.clientY - previousTouch.y;
+
+                    const rotationSpeed = 0.005;
+                    camera.rotation.y -= deltaX * rotationSpeed;
+                    camera.rotation.x -= deltaY * rotationSpeed;
+
+                    camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+
+                    previousTouch.x = event.clientX;
+                    previousTouch.y = event.clientY;
+                }
+                // For hovering
+                updateMouseCoords(event.clientX, event.clientY);
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            document.addEventListener('click', (event) => {
+                handleInteraction(event.clientX, event.clientY);
+            });
+
+
+            // Keyboard Controls (move)
             document.addEventListener('keydown', (event) => {
                 switch (event.code) {
-                    case 'KeyW':
-                        movingForward = true;
-                        break;
-                    case 'KeyS':
-                        movingBackward = true;
-                        break;
-                    case 'KeyA':
-                        movingLeft = true;
-                        break;
-                    case 'KeyD':
-                        movingRight = true;
-                        break;
+                    case 'KeyW': movingForward = true; break;
+                    case 'KeyS': movingBackward = true; break;
+                    case 'KeyA': movingLeft = true; break;
+                    case 'KeyD': movingRight = true; break;
                 }
             });
 
             document.addEventListener('keyup', (event) => {
                 switch (event.code) {
-                    case 'KeyW':
-                        movingForward = false;
-                        break;
-                    case 'KeyS':
-                        movingBackward = false;
-                        break;
-                    case 'KeyA':
-                        movingLeft = false;
-                        break;
-                    case 'KeyD':
-                        movingRight = false;
-                        break;
+                    case 'KeyW': movingForward = false; break;
+                    case 'KeyS': movingBackward = false; break;
+                    case 'KeyA': movingLeft = false; break;
+                    case 'KeyD': movingRight = false; break;
                 }
             });
 
             window.addEventListener('resize', onWindowResize, false);
+
+            document.getElementById('closeInfo').addEventListener('click', hideInfoPanel);
+            document.getElementById('buyButton').addEventListener('click', () => {
+                if (currentIntersected && currentIntersected.userData.link) {
+                    window.open(currentIntersected.userData.link, '_blank');
+                }
+            });
+        }
+
+        function createProductDisplayPod(x, y, z, productName, productDescription, productLink = 'https://example.com/buy-product') {
+            const group = new THREE.Group();
+            group.position.set(x, y, z);
+
+            // Base platform
+            const baseGeometry = new THREE.CylinderGeometry(2, 2, 0.5, 32);
+            const baseMaterial = new THREE.MeshLambertMaterial({ color: 0x778899 }); // Light Slate Gray
+            const baseMesh = new THREE.Mesh(baseGeometry, baseMaterial);
+            baseMesh.position.y = 0.25; // Sit on the ground
+            group.add(baseMesh);
+
+            // Placeholder for the product model
+            const productGeometry = new THREE.BoxGeometry(1, 1, 1);
+            const productMaterial = new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff });
+            const productMesh = new THREE.Mesh(productGeometry, productMaterial);
+            productMesh.position.y = 1.25; // On top of the base
+            group.add(productMesh);
+
+            // Store product data in the group's userData
+            group.userData = {
+                type: 'product',
+                name: productName,
+                description: productDescription,
+                link: productLink
+            };
+
+            return group;
+        }
+
+        function updateMouseCoords(clientX, clientY) {
+            // Calculate mouse position in normalized device coordinates (-1 to +1) for both components
+            mouse.x = (clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (clientY / window.innerHeight) * 2 + 1;
+        }
+
+        function handleInteraction(clientX, clientY) {
+            updateMouseCoords(clientX, clientY);
+
+            raycaster.setFromCamera(mouse, camera);
+
+            const intersects = raycaster.intersectObjects(clickableObjects, true);
+
+            if (intersects.length > 0) {
+                const object = intersects[0].object;
+                // Find the top-level clickable group/mesh
+                let clickable = object;
+                while (clickable && clickableObjects.indexOf(clickable) === -1) {
+                    clickable = clickable.parent;
+                }
+
+                if (clickable && clickable.userData) {
+                    displayInfoPanel(clickable.userData);
+                    currentIntersected = clickable;
+                }
+            } else {
+                hideInfoPanel();
+                currentIntersected = null;
+            }
+        }
+
+        function displayInfoPanel(data) {
+            document.getElementById('panelTitle').innerText = data.name;
+            document.getElementById('panelDescription').innerText = data.description;
+            if (data.link) {
+                document.getElementById('buyButton').style.display = 'block';
+            } else {
+                document.getElementById('buyButton').style.display = 'none';
+            }
+            document.getElementById('infoPanel').style.display = 'block';
+        }
+
+        function hideInfoPanel() {
+            document.getElementById('infoPanel').style.display = 'none';
         }
 
         function onWindowResize() {
@@ -125,18 +315,31 @@
 
             const moveSpeed = 0.1;
 
-            // Apply movement based on keyboard input (or virtual joystick if implemented)
-            if (movingForward) {
-                camera.translateZ(-moveSpeed);
-            }
-            if (movingBackward) {
-                camera.translateZ(moveSpeed);
-            }
-            if (movingLeft) {
-                camera.translateX(-moveSpeed);
-            }
-            if (movingRight) {
-                camera.translateX(moveSpeed);
+            if (movingForward) { camera.translateZ(-moveSpeed); }
+            if (movingBackward) { camera.translateZ(moveSpeed); }
+            if (movingLeft) { camera.translateX(-moveSpeed); }
+            if (movingRight) { camera.translateX(moveSpeed); }
+
+            // Raycasting for hover (optional, but good for feedback)
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(clickableObjects, true);
+
+            if (intersects.length > 0) {
+                if (currentIntersected !== intersects[0].object) {
+                    // Reset previous intersected object color
+                    if (currentIntersected && currentIntersected.material) {
+                        currentIntersected.material.emissive.setHex(currentIntersected.currentHex);
+                    }
+                    // Store current and highlight
+                    currentIntersected = intersects[0].object;
+                    currentIntersected.currentHex = currentIntersected.material.emissive.getHex();
+                    currentIntersected.material.emissive.setHex(0x00ff00); // Green highlight
+                }
+            } else {
+                if (currentIntersected && currentIntersected.material) {
+                    currentIntersected.material.emissive.setHex(currentIntersected.currentHex);
+                }
+                currentIntersected = null;
             }
 
             renderer.render(scene, camera);
@@ -144,52 +347,6 @@
 
         init();
         animate();
-
-        // --- Functions for building storefronts and displaying items (Conceptual) ---
-
-        function createStorefront(x, y, z, width = 5, height = 3, depth = 0.5, color = 0x8B4513) {
-            const storefrontGeometry = new THREE.BoxGeometry(width, height, depth);
-            const storefrontMaterial = new THREE.MeshLambertMaterial({ color: color });
-            const storefront = new THREE.Mesh(storefrontGeometry, storefrontMaterial);
-            storefront.position.set(x, y + height / 2, z); // Position at its base
-            scene.add(storefront);
-
-            // You would add details like windows, doors, signs here
-            // Example: a simple window
-            const windowGeometry = new THREE.PlaneGeometry(width * 0.7, height * 0.5);
-            const windowMaterial = new THREE.MeshBasicMaterial({ color: 0x87CEEB, transparent: true, opacity: 0.6, side: THREE.DoubleSide });
-            const windowMesh = new THREE.Mesh(windowGeometry, windowMaterial);
-            windowMesh.position.set(x, y + height * 0.6, z + depth / 2 + 0.01); // Slightly in front of the wall
-            storefront.add(windowMesh); // Add window as a child of the storefront
-
-            return storefront;
-        }
-
-        function displayItem(parentStorefront, itemName, itemModelPath, xOffset, yOffset, zOffset) {
-            // This is where you would load and display actual 3D models of items.
-            // For simplicity, let's just add a placeholder box for now.
-            const itemGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-            const itemMaterial = new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff });
-            const item = new THREE.Mesh(itemGeometry, itemMaterial);
-            item.position.set(xOffset, yOffset, zOffset); // Relative to the storefront
-
-            // Add some text for the item name (more complex in 3D, using TextGeometry or sprites)
-            // For now, let's just log it to console or display a simple 2D overlay if needed.
-            console.log(`Displaying item: ${itemName} at storefront.`);
-
-            parentStorefront.add(item); // Add the item to the storefront
-        }
-
-        // Example Usage:
-        // Create a storefront
-        const myStore = createStorefront(10, 0, 0); // Position it at x=10, ground level
-        const anotherStore = createStorefront(-10, 0, 0, 7, 4, 0.7, 0x4CAF50);
-
-        // Display items in the store (relative to the storefront's position)
-        displayItem(myStore, "Cool Gadget", "path/to/gadget.glb", 0, 1, 0.3);
-        displayItem(myStore, "Awesome Thing", "path/to/thing.obj", 1, 1, 0.3);
-        displayItem(anotherStore, "Green Potion", "path/to/potion.glb", -1, 1.5, 0.4);
-
     </script>
 </body>
 </html>
