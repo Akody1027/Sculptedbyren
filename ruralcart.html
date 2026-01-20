@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RuralDrop | Production Ready</title>
+    <title>RuralDrop | Smart Sync</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -11,19 +11,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* This prevents the curly brackets from showing while the page loads */
         [v-cloak] { display: none; }
-        
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; }
-        
         .driver-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        .status-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased">
 
 <div id="app" v-cloak>
-    
     <nav class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50">
         <div class="flex items-center gap-2">
             <div class="bg-indigo-600 text-white p-2 rounded-xl"><i class="fas fa-truck-fast"></i></div>
@@ -35,71 +31,69 @@
         </div>
     </nav>
 
+    <div v-if="isDemoMode" class="bg-amber-500 text-white text-[10px] font-black py-1 text-center uppercase tracking-widest">
+        Running in Local Demo Mode (Firebase not connected)
+    </div>
+
     <main v-if="view === 'driver'" class="p-6 max-w-6xl mx-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <div class="lg:col-span-4 space-y-4">
+            <div class="lg:col-span-4 space-y-6">
                 <div class="bg-white p-6 rounded-[2rem] shadow-xl border border-slate-100">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-black uppercase text-xs tracking-widest text-slate-400">Status</h2>
-                        <span :class="settings.isOffDuty ? 'text-slate-400' : 'text-green-500'" class="text-xs font-black">
-                            {{ settings.isOffDuty ? 'OFF DUTY' : 'LIVE ON MAP' }}
-                        </span>
-                    </div>
+                    <h2 class="font-black uppercase text-[10px] tracking-widest text-slate-400 mb-6">Driver Console</h2>
                     
                     <button @click="toggleDuty" :class="settings.isOffDuty ? 'bg-slate-100 text-slate-400' : 'bg-green-500 text-white'" class="w-full py-4 rounded-2xl font-black transition-all mb-6">
-                        {{ settings.isOffDuty ? 'Go On Duty' : 'Go Off Duty' }}
+                        {{ settings.isOffDuty ? 'OFF DUTY' : 'ON DUTY' }}
                     </button>
 
                     <div class="space-y-4">
                         <div class="p-4 bg-slate-50 rounded-2xl">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Emergency Base Price</label>
-                            <input type="number" v-model="settings.emergencyBase" @change="sync" class="bg-transparent text-xl font-black w-full outline-none">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Emergency Fee ($)</label>
+                            <input type="number" v-model="settings.emergencyBase" @change="save" class="bg-transparent text-xl font-black w-full outline-none">
                         </div>
                         <div class="p-4 bg-slate-50 rounded-2xl">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Next Run Time</label>
-                            <input type="time" v-model="settings.departureTime" @change="sync" class="bg-transparent text-xl font-black w-full outline-none">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Departure Time</label>
+                            <input type="time" v-model="settings.departureTime" @change="save" class="bg-transparent text-xl font-black w-full outline-none">
                         </div>
                     </div>
                 </div>
 
-                <div class="driver-bg p-6 rounded-[2rem] shadow-2xl text-white">
-                    <h3 class="text-[10px] font-black text-indigo-400 uppercase mb-4">Batch Progress</h3>
+                <div class="driver-bg p-8 rounded-[2rem] shadow-2xl text-white">
+                    <h3 class="text-[10px] font-black text-indigo-400 uppercase mb-4">Current Run Progress</h3>
                     <div class="flex justify-between items-end mb-2">
-                        <span class="text-3xl font-black">${{ currentBatchTotal }}</span>
-                        <span class="text-xs opacity-50">Target: ${{ settings.batchMin }}</span>
+                        <span class="text-4xl font-black">${{ currentBatchTotal }}</span>
+                        <span class="text-xs opacity-50 font-bold">Goal: ${{ settings.batchMin }}</span>
                     </div>
-                    <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden mb-6">
+                    <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden mb-8">
                         <div class="bg-indigo-400 h-full transition-all duration-1000" :style="{width: (currentBatchTotal/settings.batchMin*100)+'%'}"></div>
                     </div>
-                    <button @click="startBatch" v-if="tripStatus === 'idle'" class="w-full bg-indigo-500 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-500/20">
-                        Signal Run Start
+                    <button v-if="tripStatus === 'idle'" @click="startBatch" class="w-full bg-indigo-500 py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-indigo-500/30">
+                        Start Town Run
                     </button>
+                    <div v-else class="text-center py-4 bg-white/10 rounded-2xl border border-white/20">
+                        <span class="text-xs font-black status-pulse uppercase">Run in Progress</span>
+                    </div>
                 </div>
             </div>
 
             <div class="lg:col-span-8">
-                <div class="bg-white rounded-[2rem] shadow-xl border border-slate-100 min-h-screen overflow-hidden">
+                <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 min-h-screen overflow-hidden">
                     <div class="p-6 border-b flex justify-between items-center bg-slate-50/50">
-                        <h3 class="font-black text-xs uppercase tracking-widest">Route Sequence</h3>
-                        <span class="text-[10px] font-bold text-slate-400">{{ activeOrders.length }} Orders Pending</span>
+                        <h3 class="font-black text-xs uppercase tracking-widest text-slate-500">Scheduled Deliveries</h3>
                     </div>
 
                     <div class="p-6 space-y-4">
                         <div v-for="(order, index) in activeOrders" :key="order.id" 
                              :class="order.type === 'emergency' ? 'border-amber-400 bg-amber-50/50' : 'border-slate-100'"
-                             class="flex items-center gap-4 p-5 border-2 rounded-3xl transition-all">
+                             class="flex items-center gap-4 p-5 border-2 rounded-3xl transition-all hover:scale-[1.01]">
                             
-                            <div :class="order.type === 'emergency' ? 'bg-amber-500 shadow-amber-200' : 'bg-slate-900 shadow-slate-200'" class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black shadow-lg">
+                            <div :class="order.type === 'emergency' ? 'bg-amber-500' : 'bg-slate-900'" class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black shadow-lg">
                                 {{ index + 1 }}
                             </div>
 
                             <div class="flex-1">
-                                <div class="flex justify-between items-start">
-                                    <h4 class="font-black text-slate-800">{{ order.customer }}</h4>
-                                    <span class="font-black text-indigo-600">${{ order.total }}</span>
-                                </div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase mt-1">{{ order.distance }} MILES • {{ order.type.toUpperCase() }}</p>
+                                <h4 class="font-black text-slate-800">{{ order.customer }}</h4>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{{ order.type }} • {{ order.total }} USD</p>
                             </div>
 
                             <div class="flex gap-2">
@@ -108,8 +102,8 @@
                             </div>
                         </div>
                         
-                        <div v-if="activeOrders.length === 0" class="text-center py-20 opacity-20">
-                            <i class="fas fa-box-open text-6xl mb-4"></i>
+                        <div v-if="activeOrders.length === 0" class="text-center py-32 opacity-20">
+                            <i class="fas fa-inbox text-6xl mb-4"></i>
                             <p class="font-black uppercase tracking-tighter">Waiting for rural requests...</p>
                         </div>
                     </div>
@@ -119,15 +113,15 @@
     </main>
 
     <main v-if="view === 'seeker'" class="p-6 max-w-xl mx-auto">
-        <div v-if="myOrder" class="bg-white rounded-[2.5rem] p-8 shadow-2xl">
-            <div class="text-center mb-10">
-                <span class="bg-indigo-50 text-indigo-600 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-100">Live Journey</span>
-                <h2 class="text-2xl font-black mt-4">Order for {{ myOrder.customer }}</h2>
+        <div v-if="myOrder" class="bg-white rounded-[3rem] p-10 shadow-2xl">
+            <div class="text-center mb-12">
+                <span class="bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-100">Live Status</span>
+                <h2 class="text-3xl font-black mt-4">Order for {{ myOrder.customer }}</h2>
             </div>
 
-            <div class="space-y-8">
+            <div class="space-y-10">
                 <div v-for="(step, i) in steps" :key="i" class="flex items-center gap-6">
-                    <div :class="getStatusColor(step.id)" class="w-10 h-10 rounded-full flex items-center justify-center text-sm transition-all shadow-md">
+                    <div :class="getStatusColor(step.id)" class="w-12 h-12 rounded-2xl flex items-center justify-center text-lg transition-all shadow-md">
                         <i :class="step.icon"></i>
                     </div>
                     <div>
@@ -138,28 +132,17 @@
             </div>
         </div>
 
-        <div v-else class="bg-white rounded-[2.5rem] p-8 shadow-2xl text-center">
-            <h2 class="text-2xl font-black mb-2">Need a Town Run?</h2>
-            <p class="text-sm text-slate-500 mb-8 font-medium">Add your items to the next scheduled run.</p>
-            <input v-model="newOrder.name" placeholder="Full Name" class="w-full p-4 bg-slate-50 rounded-2xl mb-4 focus:ring-2 focus:ring-indigo-500 border-none font-bold">
-            <button @click="placeOrder('tomorrow')" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black mb-3">Join Batch List ($15)</button>
-            <button @click="placeOrder('emergency')" class="w-full border-2 border-amber-500 text-amber-600 py-4 rounded-2xl font-black italic">Emergency Dispatch (${{settings.emergencyBase}})</button>
+        <div v-else class="bg-white rounded-[3rem] p-10 shadow-2xl text-center">
+            <h2 class="text-3xl font-black mb-2">Need a Run?</h2>
+            <p class="text-sm text-slate-500 mb-10 font-medium">Add your items to the next scheduled trip.</p>
+            <input v-model="newOrder.name" placeholder="Enter Your Name" class="w-full p-5 bg-slate-50 rounded-2xl mb-4 focus:ring-2 focus:ring-indigo-500 border-none font-bold text-lg">
+            <button @click="placeOrder('tomorrow')" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black mb-4 shadow-xl">Join Batch Run ($15)</button>
+            <button @click="placeOrder('emergency')" class="w-full border-2 border-amber-500 text-amber-600 py-5 rounded-2xl font-black italic">Priority Emergency (${{settings.emergencyBase}})</button>
         </div>
     </main>
 </div>
 
-
-
 <script>
-// REPLACE WITH YOUR PROJECT CONFIG
-const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  databaseURL: "YOUR_URL",
-  projectId: "YOUR_PROJECT"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
 const { createApp } = Vue;
 
 createApp({
@@ -168,13 +151,14 @@ createApp({
             view: 'driver',
             tripStatus: 'idle',
             myOrder: null,
+            isDemoMode: true,
             newOrder: { name: '' },
             settings: { isOffDuty: true, emergencyBase: 45, departureTime: '08:00', batchMin: 60 },
             activeOrders: [],
             steps: [
-                { id: 'accepted', name: 'Order Accepted', icon: 'fas fa-check', sub: 'In Driver Queue' },
-                { id: 'started', name: 'Heading to City', icon: 'fas fa-truck-fast', sub: 'Run is Active' },
-                { id: 'picked_up', name: 'Items Secured', icon: 'fas fa-box', sub: 'Ready for delivery' },
+                { id: 'accepted', name: 'Accepted', icon: 'fas fa-check', sub: 'In Driver Queue' },
+                { id: 'started', name: 'On Road', icon: 'fas fa-truck-fast', sub: 'Driver is heading to town' },
+                { id: 'picked_up', name: 'Secured', icon: 'fas fa-box', sub: 'Items are in the truck' },
                 { id: 'delivered', name: 'Arrived', icon: 'fas fa-house', sub: 'Released from Escrow' }
             ]
         }
@@ -187,50 +171,67 @@ createApp({
     methods: {
         toggleDuty() {
             this.settings.isOffDuty = !this.settings.isOffDuty;
-            this.sync();
+            this.save();
         },
         async placeOrder(type) {
             const price = type === 'emergency' ? this.settings.emergencyBase : 15;
-            const o = { id: Date.now(), customer: this.newOrder.name, total: price, type: type, status: 'accepted', pickedUp: false, distance: 4.5 };
+            const o = { id: Date.now(), customer: this.newOrder.name || 'Guest', total: price, type: type, status: 'accepted', pickedUp: false };
             this.myOrder = o;
-            localStorage.setItem('myOrder', JSON.stringify(o));
-            await db.ref('orders/' + o.id).set(o);
+            this.activeOrders.push(o);
+            this.save();
+            if(!this.isDemoMode) await firebase.database().ref('orders/' + o.id).set(o);
         },
-        async startBatch() {
+        startBatch() {
             this.tripStatus = 'started';
-            this.activeOrders.forEach(o => db.ref('orders/' + o.id).update({ status: 'started' }));
+            this.activeOrders.forEach(o => {
+                o.status = 'started';
+                if(!this.isDemoMode) firebase.database().ref('orders/' + o.id).update({ status: 'started' });
+            });
+            this.save();
         },
-        async updateOrder(order, status) {
+        updateOrder(order, status) {
+            order.status = status;
             if(status === 'picked_up') order.pickedUp = true;
-            await db.ref('orders/' + order.id).update({ status: status, pickedUp: order.pickedUp });
+            if(!this.isDemoMode) firebase.database().ref('orders/' + order.id).update({ status, pickedUp: order.pickedUp });
+            this.save();
         },
-        getStatusColor(stepId) {
+        getStatusColor(id) {
             if(!this.myOrder) return 'bg-slate-100 text-slate-300';
-            if(this.myOrder.status === stepId) return 'bg-indigo-600 text-white animate-pulse';
+            if(this.myOrder.status === id) return 'bg-indigo-600 text-white status-pulse shadow-indigo-200';
             return 'bg-slate-100 text-slate-300';
         },
-        sync() {
-            localStorage.setItem('driverSettings', JSON.stringify(this.settings));
-            db.ref('settings').set(this.settings);
+        save() {
+            localStorage.setItem('rd_sets', JSON.stringify(this.settings));
+            localStorage.setItem('rd_orders', JSON.stringify(this.activeOrders));
+            if(this.myOrder) localStorage.setItem('rd_my', JSON.stringify(this.myOrder));
         }
     },
     mounted() {
-        // Load LocalStorage first
-        const s = localStorage.getItem('driverSettings');
+        // 1. Load LocalStorage first (Screen should never be white)
+        const s = localStorage.getItem('rd_sets');
         if(s) this.settings = JSON.parse(s);
-        const m = localStorage.getItem('myOrder');
+        const o = localStorage.getItem('rd_orders');
+        if(o) this.activeOrders = JSON.parse(o);
+        const m = localStorage.getItem('rd_my');
         if(m) this.myOrder = JSON.parse(m);
 
-        // Listen for Firebase
-        db.ref('orders').on('value', (snap) => {
-            const val = snap.val();
-            if(val) {
-                const list = Object.values(val);
-                this.activeOrders = list.filter(o => o.status !== 'delivered');
-                if(this.myOrder) this.myOrder = list.find(o => o.id === this.myOrder.id) || this.myOrder;
-            }
-        });
-        db.ref('settings').on('value', snap => { if(snap.val()) this.settings = snap.val(); });
+        // 2. Try Firebase connection
+        try {
+            const firebaseConfig = { apiKey: "YOUR_KEY", databaseURL: "YOUR_URL", projectId: "YOUR_PROJECT" };
+            // Simple check if user replaced placeholders
+            if (firebaseConfig.apiKey.includes("YOUR_")) throw new Error("No Config");
+            
+            firebase.initializeApp(firebaseConfig);
+            this.isDemoMode = false;
+            
+            const db = firebase.database();
+            db.ref('orders').on('value', snap => {
+                const val = snap.val();
+                if(val) this.activeOrders = Object.values(val).filter(x => x.status !== 'delivered');
+            });
+        } catch (e) {
+            console.log("Running in Demo Mode");
+        }
     }
 }).mount('#app');
 </script>
