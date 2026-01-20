@@ -3,180 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RuralDrop | Community Batch Delivery</title>
+    <title>RuralDrop | Driver Control</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .step-fade-enter-active, .step-fade-leave-active { transition: all 0.25s ease; }
-        .step-fade-enter-from { opacity: 0; transform: translateY(10px); }
-        .step-fade-leave-to { opacity: 0; transform: translateY(-10px); }
-        .progress-glow { transition: width 0.5s ease; box-shadow: 0 0 10px rgba(79, 70, 229, 0.4); }
-    </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-900">
+<body class="bg-slate-50">
 
-<div id="app">
-    <nav class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-2">
-            <div class="bg-indigo-600 text-white p-1.5 rounded-lg"><i class="fas fa-truck-ramp-box"></i></div>
-            <h1 class="text-xl font-black tracking-tight text-slate-800">RURAL<span class="text-indigo-600">DROP</span></h1>
-        </div>
-        <div class="flex bg-slate-100 p-1 rounded-xl">
-            <button @click="view = 'seeker'" :class="view === 'seeker' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-lg text-sm font-bold transition-all">Seeker</button>
-            <button @click="view = 'driver'" :class="view === 'driver' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-lg text-sm font-bold transition-all">Driver</button>
+<div id="app" class="min-h-screen">
+    <nav class="bg-white border-b px-6 py-4 flex justify-between items-center">
+        <h1 class="text-xl font-black text-indigo-600">RURALDROP</h1>
+        <div class="flex bg-slate-100 p-1 rounded-lg">
+            <button @click="view = 'seeker'" :class="view === 'seeker' ? 'bg-white shadow-sm' : ''" class="px-4 py-1 rounded-md text-sm font-bold">Seeker</button>
+            <button @click="view = 'driver'" :class="view === 'driver' ? 'bg-white shadow-sm' : ''" class="px-4 py-1 rounded-md text-sm font-bold">Driver</button>
         </div>
     </nav>
 
-    <main v-if="view === 'seeker'" class="max-w-xl mx-auto p-6">
-        <div class="flex items-center justify-between mb-8 px-2">
-            <div v-for="n in 3" :key="n" class="flex items-center">
-                <div :class="step >= n ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-400'" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors">
-                    {{n}}
+    <main v-if="view === 'driver'" class="max-w-2xl mx-auto p-6">
+        <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-8">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold">Driver Settings</h2>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-slate-500">{{ driverSettings.isOffDuty ? 'OFF DUTY' : 'ON DUTY' }}</span>
+                    <button @click="driverSettings.isOffDuty = !driverSettings.isOffDuty" 
+                            :class="driverSettings.isOffDuty ? 'bg-slate-300' : 'bg-green-500'"
+                            class="w-12 h-6 rounded-full relative transition-colors">
+                        <div :class="driverSettings.isOffDuty ? 'left-1' : 'left-7'" class="absolute top-1 bg-white w-4 h-4 rounded-full transition-all"></div>
+                    </button>
                 </div>
-                <div v-if="n < 3" :class="step > n ? 'bg-indigo-600' : 'bg-slate-200'" class="w-12 h-1 ml-2 mr-2 rounded-full transition-colors"></div>
-            </div>
-            <div class="text-right">
-                <span class="text-[10px] font-black uppercase text-slate-400 block">Status</span>
-                <span class="text-xs font-bold text-orange-500 italic">Payment Held in Escrow</span>
-            </div>
-        </div>
-
-        <transition name="step-fade" mode="out-in">
-            <div v-if="step === 1" key="s1" class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
-                <h2 class="text-xl font-bold mb-1">What do you need?</h2>
-                <p class="text-sm text-slate-500 mb-6">Add all stops you need in one trip.</p>
-                
-                <div v-for="(stop, i) in order.pickups" :key="i" class="mb-4 group">
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Pickup #{{i+1}}</label>
-                        <button v-if="i > 0" @click="removeStop(i)" class="text-red-400 text-xs font-bold">Remove</button>
-                    </div>
-                    <div class="space-y-2 p-4 bg-slate-50 rounded-2xl border border-slate-100 group-focus-within:border-indigo-300 transition-colors">
-                        <input v-model="stop.address" placeholder="Store Name or Address" class="w-full bg-transparent font-bold placeholder:font-normal focus:outline-none">
-                        <input v-model="stop.items" placeholder="List items (e.g. 2x Milk, Meds)" class="w-full bg-transparent text-sm focus:outline-none text-slate-600">
-                    </div>
-                </div>
-
-                <button @click="addStop" class="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-bold hover:text-indigo-500 hover:border-indigo-200 transition-all mb-6">
-                    + Add Another Store/Stop
-                </button>
-                
-                <button @click="step = 2" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-100">Continue to Delivery</button>
             </div>
 
-            <div v-else-if="step === 2" key="s2" class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
-                <h2 class="text-xl font-bold mb-6">Delivery Location</h2>
-                <div class="space-y-4 mb-8">
-                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Your Home Address</label>
-                        <input v-model="order.deliveryAddress" placeholder="Enter address" class="w-full bg-transparent font-bold focus:outline-none mt-1">
+            <div class="space-y-6">
+                <div class="p-4 bg-amber-50 rounded-2xl border border-amber-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-amber-900"><i class="fas fa-bolt mr-2"></i>Emergency Dispatch</h3>
                     </div>
-                </div>
-
-                <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 mb-6">
-                    <div class="flex gap-3">
-                        <div class="text-indigo-600 mt-1"><i class="fas fa-lightbulb"></i></div>
-                        <div>
-                            <h4 class="font-bold text-indigo-900 text-sm">Save $15 on this order?</h4>
-                            <p class="text-xs text-indigo-700 mt-1">Drivers are planning a "Town Run" for tomorrow morning. If this isn't an emergency, join the list!</p>
-                            <div class="mt-4 flex gap-2">
-                                <button @click="order.type = 'tomorrow'; step = 3" class="bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-lg">Join Tomorrow's List</button>
-                                <button @click="order.type = 'express'; step = 3" class="text-indigo-600 text-xs font-bold px-2 py-2">No, I need it today</button>
+                    <p class="text-xs text-amber-700 mb-4">The "Hefty Price" customers pay to make you leave your house immediately when you're off-duty or busy.</p>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1">
+                            <label class="text-[10px] font-black text-amber-600 uppercase">Base Call-Out Fee</label>
+                            <div class="flex items-center text-2xl font-black text-amber-900">
+                                <span>$</span>
+                                <input type="number" v-model="driverSettings.emergencyBase" class="bg-transparent w-full focus:outline-none">
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <button @click="step = 1" class="w-full text-slate-400 font-bold text-sm">Back to items</button>
-            </div>
 
-            <div v-else-if="step === 3" key="s3" class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
-                <div class="text-center mb-6">
-                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-                        <i class="fas fa-shield-halved"></i>
-                    </div>
-                    <h2 class="text-xl font-bold">Secure Escrow Payment</h2>
-                    <p class="text-xs text-slate-500 mt-2">Your funds are held safely. The driver only gets paid once you confirm the items arrived.</p>
-                </div>
-
-                <div class="bg-slate-50 rounded-2xl p-4 mb-6 space-y-3">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-slate-500">Service Fee ({{order.type}})</span>
-                        <span class="font-bold">${{order.type === 'express' ? '25.00' : '10.00'}}</span>
-                    </div>
-                    <div v-if="order.type === 'express'" class="flex justify-between items-center py-2 border-t border-slate-200">
-                        <span class="text-sm font-bold text-orange-600">Urgency Bribe</span>
-                        <input type="number" v-model="order.bribe" class="w-20 p-2 bg-white border rounded-lg text-right font-bold" placeholder="$0">
-                    </div>
-                    <div class="flex justify-between text-lg font-black border-t border-slate-200 pt-3">
-                        <span>Total Escrow</span>
-                        <span class="text-indigo-600">${{ (order.type === 'express' ? 25 : 10) + parseInt(order.bribe || 0) }}.00</span>
+                <div class="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                    <h3 class="font-bold text-indigo-900 mb-4"><i class="fas fa-calendar-alt mr-2"></i>Scheduled "Town Runs"</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[10px] font-black text-indigo-600 uppercase">Next Departure</label>
+                            <input type="time" v-model="driverSettings.departureTime" class="w-full bg-white p-3 rounded-xl font-bold mt-1 shadow-sm border-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-indigo-600 uppercase">Batch Min. $</label>
+                            <input type="number" v-model="driverSettings.batchMin" class="w-full bg-white p-3 rounded-xl font-bold mt-1 shadow-sm border-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
                     </div>
                 </div>
-
-                <button @click="submitToEscrow" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-100 mb-4">Pay & Post to List</button>
-                <button @click="step = 2" class="w-full text-slate-400 font-bold text-sm">Change timing</button>
             </div>
-        </transition>
+            
+            <button @click="saveSettings" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl mt-8">Save & Update Public Profile</button>
+        </div>
     </main>
 
-    <main v-if="view === 'driver'" class="max-w-4xl mx-auto p-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="md:col-span-1 space-y-6">
-                <div class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
-                    <h3 class="font-bold text-lg mb-4">Trip Thresholds</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-400 uppercase">Min. Payout to Leave</label>
-                            <div class="flex items-center gap-2 mt-1">
-                                <span class="text-slate-400 font-bold">$</span>
-                                <input type="number" v-model="driverPrefs.minPayout" class="w-full bg-slate-50 p-2 rounded-lg font-bold outline-none border border-transparent focus:border-indigo-300">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-400 uppercase">Target Departure</label>
-                            <input type="time" v-model="driverPrefs.departureTime" class="w-full mt-1 bg-slate-50 p-2 rounded-lg font-bold outline-none border border-transparent focus:border-indigo-300">
-                        </div>
-                    </div>
-                </div>
+    <main v-if="view === 'seeker'" class="max-w-lg mx-auto p-6">
+        <div class="bg-white rounded-3xl p-6 shadow-xl mb-6">
+            <h2 class="font-bold text-lg mb-2">Delivery Options</h2>
+            <p class="text-sm text-slate-500 mb-6">Based on your local driver's current schedule.</p>
 
-                <div class="bg-slate-900 rounded-3xl p-6 text-white shadow-xl">
-                    <h3 class="text-sm font-bold opacity-60 uppercase mb-4">Current Batch Progress</h3>
-                    <div class="flex justify-between mb-2 items-end">
-                        <span class="text-2xl font-black">${{currentTotalPayout}}</span>
-                        <span class="text-xs font-bold text-indigo-400">Goal: ${{driverPrefs.minPayout}}</span>
-                    </div>
-                    <div class="w-full bg-slate-700 h-3 rounded-full overflow-hidden mb-6">
-                        <div class="bg-indigo-500 h-full progress-glow" :style="{width: (currentTotalPayout / driverPrefs.minPayout * 100) + '%'}"></div>
-                    </div>
-                    <button v-if="currentTotalPayout >= driverPrefs.minPayout" class="w-full bg-green-500 py-3 rounded-xl font-black text-sm uppercase tracking-widest animate-pulse">Start Town Run</button>
-                    <p v-else class="text-[10px] text-center opacity-50">Waiting for ${{driverPrefs.minPayout - currentTotalPayout}} more in orders/bribes</p>
+            <div class="border-2 border-amber-500 p-5 rounded-2xl mb-4 bg-amber-50 relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-amber-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg">PRIORITY DISPATCH</div>
+                <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-black text-amber-900 text-xl">${{driverSettings.emergencyBase}}.00</h4>
                 </div>
+                <p class="text-sm font-bold text-amber-800">Leaves House Immediately</p>
+                <p class="text-xs text-amber-600 mt-1 italic">Best for emergencies. Driver dispatches specifically for you.</p>
+                <button class="w-full bg-amber-500 text-white font-black py-3 rounded-xl mt-4 shadow-lg shadow-amber-200">Request Emergency Pick-Up</button>
             </div>
 
-            <div class="md:col-span-2 space-y-4">
-                <div class="flex justify-between items-center px-2">
-                    <h3 class="font-bold text-slate-800">Available Orders Near You</h3>
-                    <span class="bg-indigo-100 text-indigo-600 text-[10px] font-black px-2 py-1 rounded-md uppercase">Live Map</span>
+            <div class="border-2 border-slate-200 p-5 rounded-2xl bg-white hover:border-indigo-500 transition-all group">
+                <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-black text-slate-900 text-xl">$15.00</h4>
+                    <span class="text-indigo-600 font-bold text-xs"><i class="fas fa-clock mr-1"></i>Next Run: {{driverSettings.departureTime}}</span>
                 </div>
-                
-                <div v-for="order in availableOrders" :key="order.id" class="bg-white rounded-2xl p-5 shadow-md border border-slate-100 flex gap-4">
-                    <div class="bg-slate-50 w-12 h-12 rounded-full flex items-center justify-center text-indigo-600 flex-shrink-0">
-                        <i class="fas fa-shopping-basket"></i>
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex justify-between items-start">
-                            <h4 class="font-bold text-sm">{{order.customer}}</h4>
-                            <span class="text-green-600 font-black text-lg">${{order.total}}</span>
-                        </div>
-                        <p class="text-xs text-slate-500 mb-3">{{order.stops}} stops • {{order.distance}} miles away</p>
-                        <div class="flex gap-2">
-                            <button @click="acceptOrder(order)" class="flex-1 bg-indigo-600 text-white text-xs font-bold py-2 rounded-lg">Add to My List</button>
-                            <button class="px-3 border border-slate-200 rounded-lg text-slate-400"><i class="fas fa-ellipsis-h"></i></button>
-                        </div>
-                    </div>
-                </div>
+                <p class="text-sm font-bold text-slate-700">Join the Town Run List</p>
+                <p class="text-xs text-slate-400 mt-1">Slower delivery. Your order is bundled with others to keep costs low.</p>
+                <button class="w-full bg-slate-100 text-slate-400 group-hover:bg-indigo-600 group-hover:text-white font-black py-3 rounded-xl mt-4 transition-all">Add to Batch List</button>
             </div>
         </div>
     </main>
@@ -184,50 +99,21 @@
 
 <script>
     const { createApp } = Vue
-
     createApp({
         data() {
             return {
-                view: 'seeker', 
-                step: 1,
-                order: {
-                    pickups: [{ address: '', items: '' }],
-                    deliveryAddress: '',
-                    type: 'tomorrow',
-                    bribe: 0
-                },
-                driverPrefs: {
-                    minPayout: 60,
-                    departureTime: '08:30'
-                },
-                availableOrders: [
-                    { id: 101, customer: "Sarah J.", total: 12, stops: 1, distance: "2.4" },
-                    { id: 102, customer: "Mike T.", total: 35, stops: 3, distance: "5.1" },
-                    { id: 103, customer: "Lisa R.", total: 18, stops: 1, distance: "0.8" }
-                ],
-                activeOrders: []
-            }
-        },
-        computed: {
-            currentTotalPayout() {
-                return this.activeOrders.reduce((sum, o) => sum + o.total, 0);
+                view: 'driver',
+                driverSettings: {
+                    isOffDuty: true,
+                    emergencyBase: 45,
+                    departureTime: '10:00',
+                    batchMin: 60
+                }
             }
         },
         methods: {
-            addStop() {
-                this.order.pickups.push({ address: '', items: '' });
-            },
-            removeStop(i) {
-                this.order.pickups.splice(i, 1);
-            },
-            submitToEscrow() {
-                alert("Payment authorized! Funds are now held in Escrow. Your order has been added to the local driver list.");
-                this.step = 1;
-                this.order = { pickups: [{ address: '', items: '' }], deliveryAddress: '', type: 'tomorrow', bribe: 0 };
-            },
-            acceptOrder(order) {
-                this.activeOrders.push(order);
-                this.availableOrders = this.availableOrders.filter(o => o.id !== order.id);
+            saveSettings() {
+                alert("Settings Updated! Customers will now see your departure time of " + this.driverSettings.departureTime);
             }
         }
     }).mount('#app')
