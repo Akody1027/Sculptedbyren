@@ -3,164 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwiftDrop | Pickup & Delivery</title>
+    <title>RuralDrop | Community Batch Delivery</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .card-enter-active, .card-leave-active { transition: all 0.3s ease; }
-        .card-enter-from { opacity: 0; transform: translateX(30px); }
-        .card-leave-to { opacity: 0; transform: translateX(-30px); }
-        .map-bg { background: #e5e7eb url('https://api.placeholder.com/800/600') no-repeat center; background-size: cover; }
+        .step-fade-enter-active, .step-fade-leave-active { transition: all 0.25s ease; }
+        .step-fade-enter-from { opacity: 0; transform: translateY(10px); }
+        .step-fade-leave-to { opacity: 0; transform: translateY(-10px); }
+        .progress-glow { transition: width 0.5s ease; box-shadow: 0 0 10px rgba(79, 70, 229, 0.4); }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-900">
 
-<div id="app" class="min-h-screen">
+<div id="app">
     <nav class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50">
-        <h1 class="text-2xl font-bold text-indigo-600">SwiftDrop</h1>
-        <div class="flex gap-4">
-            <button @click="view = 'seeker'" :class="view === 'seeker' ? 'text-indigo-600 border-b-2 border-indigo-600' : ''" class="font-medium pb-1">Customer</button>
-            <button @click="view = 'driver'" :class="view === 'driver' ? 'text-indigo-600 border-b-2 border-indigo-600' : ''" class="font-medium pb-1">Driver Login</button>
+        <div class="flex items-center gap-2">
+            <div class="bg-indigo-600 text-white p-1.5 rounded-lg"><i class="fas fa-truck-ramp-box"></i></div>
+            <h1 class="text-xl font-black tracking-tight text-slate-800">RURAL<span class="text-indigo-600">DROP</span></h1>
+        </div>
+        <div class="flex bg-slate-100 p-1 rounded-xl">
+            <button @click="view = 'seeker'" :class="view === 'seeker' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-lg text-sm font-bold transition-all">Seeker</button>
+            <button @click="view = 'driver'" :class="view === 'driver' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-lg text-sm font-bold transition-all">Driver</button>
         </div>
     </nav>
 
-    <main v-if="view === 'seeker'" class="max-w-lg mx-auto p-6">
-        <div class="mb-8">
-            <div class="flex justify-between mb-2">
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Step {{step}} of 3</span>
-                <span class="text-xs font-bold text-indigo-600">{{Math.round((step/3)*100)}}% Complete</span>
+    <main v-if="view === 'seeker'" class="max-w-xl mx-auto p-6">
+        <div class="flex items-center justify-between mb-8 px-2">
+            <div v-for="n in 3" :key="n" class="flex items-center">
+                <div :class="step >= n ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-400'" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors">
+                    {{n}}
+                </div>
+                <div v-if="n < 3" :class="step > n ? 'bg-indigo-600' : 'bg-slate-200'" class="w-12 h-1 ml-2 mr-2 rounded-full transition-colors"></div>
             </div>
-            <div class="w-full bg-slate-200 h-1.5 rounded-full">
-                <div class="bg-indigo-600 h-1.5 rounded-full transition-all" :style="{width: (step/3)*100 + '%'}"></div>
+            <div class="text-right">
+                <span class="text-[10px] font-black uppercase text-slate-400 block">Status</span>
+                <span class="text-xs font-bold text-orange-500 italic">Payment Held in Escrow</span>
             </div>
         </div>
 
-        <transition name="card" mode="out-in">
-            <div v-if="step === 1" key="step1" class="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">
-                <h2 class="text-2xl font-bold mb-2">Where are we picking up?</h2>
-                <p class="text-slate-500 mb-6 text-sm">Add one or multiple stops for your driver.</p>
+        <transition name="step-fade" mode="out-in">
+            <div v-if="step === 1" key="s1" class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
+                <h2 class="text-xl font-bold mb-1">What do you need?</h2>
+                <p class="text-sm text-slate-500 mb-6">Add all stops you need in one trip.</p>
                 
-                <div v-for="(stop, index) in order.pickups" :key="index" class="mb-4 p-4 bg-slate-50 rounded-xl relative border border-slate-200">
-                    <button v-if="index > 0" @click="removeStop(index)" class="absolute top-2 right-2 text-slate-400 hover:text-red-500"><i class="fas fa-times"></i></button>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Stop #{{index + 1}}</label>
-                    <input v-model="stop.address" type="text" placeholder="Store name or address" class="w-full bg-transparent border-b border-slate-300 py-2 focus:outline-none focus:border-indigo-600 mb-2">
-                    <input v-model="stop.items" type="text" placeholder="What are we picking up?" class="w-full bg-transparent border-b border-slate-300 py-2 focus:outline-none focus:border-indigo-600">
+                <div v-for="(stop, i) in order.pickups" :key="i" class="mb-4 group">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Pickup #{{i+1}}</label>
+                        <button v-if="i > 0" @click="removeStop(i)" class="text-red-400 text-xs font-bold">Remove</button>
+                    </div>
+                    <div class="space-y-2 p-4 bg-slate-50 rounded-2xl border border-slate-100 group-focus-within:border-indigo-300 transition-colors">
+                        <input v-model="stop.address" placeholder="Store Name or Address" class="w-full bg-transparent font-bold placeholder:font-normal focus:outline-none">
+                        <input v-model="stop.items" placeholder="List items (e.g. 2x Milk, Meds)" class="w-full bg-transparent text-sm focus:outline-none text-slate-600">
+                    </div>
                 </div>
 
-                <button @click="addStop" class="w-full py-3 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 font-medium hover:border-indigo-400 hover:text-indigo-600 transition-colors">
-                    + Add Another Stop
+                <button @click="addStop" class="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-bold hover:text-indigo-500 hover:border-indigo-200 transition-all mb-6">
+                    + Add Another Store/Stop
                 </button>
                 
-                <button @click="step = 2" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl mt-8 hover:bg-indigo-700 shadow-lg shadow-indigo-200">Next Step</button>
+                <button @click="step = 2" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-100">Continue to Delivery</button>
             </div>
 
-            <div v-else-if="step === 2" key="step2" class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
-                <h2 class="text-2xl font-bold mb-6">Delivery Details</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-1">Your Address</label>
-                        <input v-model="order.deliveryAddress" type="text" class="w-full p-4 bg-slate-50 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="123 Home St, Apt 4">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-1">Phone Number</label>
-                        <input v-model="order.phone" type="tel" class="w-full p-4 bg-slate-50 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="(555) 000-0000">
+            <div v-else-if="step === 2" key="s2" class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
+                <h2 class="text-xl font-bold mb-6">Delivery Location</h2>
+                <div class="space-y-4 mb-8">
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Your Home Address</label>
+                        <input v-model="order.deliveryAddress" placeholder="Enter address" class="w-full bg-transparent font-bold focus:outline-none mt-1">
                     </div>
                 </div>
-                <div class="flex gap-4 mt-8">
-                    <button @click="step = 1" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-2xl">Back</button>
-                    <button @click="step = 3" class="flex-[2] bg-indigo-600 text-white font-bold py-4 rounded-2xl">Finalize</button>
-                </div>
-            </div>
 
-            <div v-else-if="step === 3" key="step3" class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
-                <h2 class="text-2xl font-bold mb-6">Choose Service</h2>
+                <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 mb-6">
+                    <div class="flex gap-3">
+                        <div class="text-indigo-600 mt-1"><i class="fas fa-lightbulb"></i></div>
+                        <div>
+                            <h4 class="font-bold text-indigo-900 text-sm">Save $15 on this order?</h4>
+                            <p class="text-xs text-indigo-700 mt-1">Drivers are planning a "Town Run" for tomorrow morning. If this isn't an emergency, join the list!</p>
+                            <div class="mt-4 flex gap-2">
+                                <button @click="order.type = 'tomorrow'; step = 3" class="bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-lg">Join Tomorrow's List</button>
+                                <button @click="order.type = 'express'; step = 3" class="text-indigo-600 text-xs font-bold px-2 py-2">No, I need it today</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 
-                <div @click="order.type = 'express'" :class="order.type === 'express' ? 'border-indigo-600 ring-2 ring-indigo-100' : 'border-slate-200'" class="p-4 border-2 rounded-2xl cursor-pointer mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-bold">Immediate Pickup</span>
-                        <span class="text-indigo-600 font-bold">$25.00</span>
+                <button @click="step = 1" class="w-full text-slate-400 font-bold text-sm">Back to items</button>
+            </div>
+
+            <div v-else-if="step === 3" key="s3" class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                        <i class="fas fa-shield-halved"></i>
                     </div>
-                    <p class="text-xs text-slate-500">Driver heads to you right now. No other stops.</p>
-                    <div v-if="order.type === 'express'" class="mt-4 pt-4 border-t border-slate-100">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Bribe the Driver (Faster Response)</label>
-                        <input v-model="order.bribe" type="number" class="w-full p-3 bg-green-50 text-green-700 font-bold rounded-lg outline-none" placeholder="Add extra tip $">
+                    <h2 class="text-xl font-bold">Secure Escrow Payment</h2>
+                    <p class="text-xs text-slate-500 mt-2">Your funds are held safely. The driver only gets paid once you confirm the items arrived.</p>
+                </div>
+
+                <div class="bg-slate-50 rounded-2xl p-4 mb-6 space-y-3">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-500">Service Fee ({{order.type}})</span>
+                        <span class="font-bold">${{order.type === 'express' ? '25.00' : '10.00'}}</span>
+                    </div>
+                    <div v-if="order.type === 'express'" class="flex justify-between items-center py-2 border-t border-slate-200">
+                        <span class="text-sm font-bold text-orange-600">Urgency Bribe</span>
+                        <input type="number" v-model="order.bribe" class="w-20 p-2 bg-white border rounded-lg text-right font-bold" placeholder="$0">
+                    </div>
+                    <div class="flex justify-between text-lg font-black border-t border-slate-200 pt-3">
+                        <span>Total Escrow</span>
+                        <span class="text-indigo-600">${{ (order.type === 'express' ? 25 : 10) + parseInt(order.bribe || 0) }}.00</span>
                     </div>
                 </div>
 
-                <div @click="order.type = 'list'" :class="order.type === 'list' ? 'border-indigo-600 ring-2 ring-indigo-100' : 'border-slate-200'" class="p-4 border-2 rounded-2xl cursor-pointer">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-bold">Add to List (Town Run)</span>
-                        <span class="text-indigo-600 font-bold">$12.00</span>
-                    </div>
-                    <p class="text-xs text-slate-500">Add to a driver's morning/afternoon route. Lower cost.</p>
-                </div>
-
-                <button @click="submitOrder" class="w-full bg-green-600 text-white font-bold py-4 rounded-2xl mt-8 hover:bg-green-700 transition-all">Submit Request</button>
+                <button @click="submitToEscrow" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-100 mb-4">Pay & Post to List</button>
+                <button @click="step = 2" class="w-full text-slate-400 font-bold text-sm">Change timing</button>
             </div>
         </transition>
     </main>
 
-    <main v-if="view === 'driver'" class="h-[calc(100vh-73px)] relative overflow-hidden">
-        <div class="w-full h-full map-bg relative">
-            <button @click="selectedOrder = demoOrder" class="absolute top-1/3 left-1/4 bg-indigo-600 text-white p-3 rounded-full shadow-lg animate-bounce">
-                <i class="fas fa-shopping-cart"></i>
-            </button>
-            <button class="absolute top-1/2 right-1/3 bg-slate-400 text-white p-3 rounded-full shadow-lg">
-                <i class="fas fa-shopping-cart"></i>
-            </button>
-        </div>
+    <main v-if="view === 'driver'" class="max-w-4xl mx-auto p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-1 space-y-6">
+                <div class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
+                    <h3 class="font-bold text-lg mb-4">Trip Thresholds</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Min. Payout to Leave</label>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-slate-400 font-bold">$</span>
+                                <input type="number" v-model="driverPrefs.minPayout" class="w-full bg-slate-50 p-2 rounded-lg font-bold outline-none border border-transparent focus:border-indigo-300">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Target Departure</label>
+                            <input type="time" v-model="driverPrefs.departureTime" class="w-full mt-1 bg-slate-50 p-2 rounded-lg font-bold outline-none border border-transparent focus:border-indigo-300">
+                        </div>
+                    </div>
+                </div>
 
-        <div class="absolute top-4 left-4 bg-white p-4 rounded-2xl shadow-xl w-64 border border-slate-200">
-            <h3 class="font-bold text-sm mb-3">Capacity Management</h3>
-            <label class="text-[10px] font-bold text-slate-400 uppercase">Max "Town Run" Orders</label>
-            <input type="number" v-model="driverCapacity" class="w-full p-2 bg-slate-100 rounded-lg mb-4">
-            <div class="flex items-center justify-between text-sm">
-                <span>Active Route:</span>
-                <span class="font-bold text-green-600">0/{{driverCapacity}}</span>
+                <div class="bg-slate-900 rounded-3xl p-6 text-white shadow-xl">
+                    <h3 class="text-sm font-bold opacity-60 uppercase mb-4">Current Batch Progress</h3>
+                    <div class="flex justify-between mb-2 items-end">
+                        <span class="text-2xl font-black">${{currentTotalPayout}}</span>
+                        <span class="text-xs font-bold text-indigo-400">Goal: ${{driverPrefs.minPayout}}</span>
+                    </div>
+                    <div class="w-full bg-slate-700 h-3 rounded-full overflow-hidden mb-6">
+                        <div class="bg-indigo-500 h-full progress-glow" :style="{width: (currentTotalPayout / driverPrefs.minPayout * 100) + '%'}"></div>
+                    </div>
+                    <button v-if="currentTotalPayout >= driverPrefs.minPayout" class="w-full bg-green-500 py-3 rounded-xl font-black text-sm uppercase tracking-widest animate-pulse">Start Town Run</button>
+                    <p v-else class="text-[10px] text-center opacity-50">Waiting for ${{driverPrefs.minPayout - currentTotalPayout}} more in orders/bribes</p>
+                </div>
             </div>
-        </div>
 
-        <transition name="card">
-            <div v-if="selectedOrder" class="absolute inset-0 bg-black/50 flex items-end sm:items-center justify-center p-4">
-                <div class="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl">
-                    <div class="p-6">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h2 class="text-xl font-bold">New {{selectedOrder.type.toUpperCase()}} Request</h2>
-                                <p class="text-sm text-slate-500">2 Stops • 4.2 miles away</p>
-                            </div>
-                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold text-lg">${{selectedOrder.price + (selectedOrder.bribe || 0)}}</span>
+            <div class="md:col-span-2 space-y-4">
+                <div class="flex justify-between items-center px-2">
+                    <h3 class="font-bold text-slate-800">Available Orders Near You</h3>
+                    <span class="bg-indigo-100 text-indigo-600 text-[10px] font-black px-2 py-1 rounded-md uppercase">Live Map</span>
+                </div>
+                
+                <div v-for="order in availableOrders" :key="order.id" class="bg-white rounded-2xl p-5 shadow-md border border-slate-100 flex gap-4">
+                    <div class="bg-slate-50 w-12 h-12 rounded-full flex items-center justify-center text-indigo-600 flex-shrink-0">
+                        <i class="fas fa-shopping-basket"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-bold text-sm">{{order.customer}}</h4>
+                            <span class="text-green-600 font-black text-lg">${{order.total}}</span>
                         </div>
-                        
-                        <div class="space-y-3 mb-6">
-                            <div v-for="stop in selectedOrder.pickups" class="flex gap-3">
-                                <i class="fas fa-map-marker-alt text-indigo-500 mt-1"></i>
-                                <div><p class="text-sm font-bold">{{stop.address}}</p><p class="text-xs text-slate-500">Pick up: {{stop.items}}</p></div>
-                            </div>
-                            <div class="flex gap-3 pt-2 border-t">
-                                <i class="fas fa-home text-green-500 mt-1"></i>
-                                <div><p class="text-sm font-bold">{{selectedOrder.deliveryAddress}}</p></div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <button @click="selectedOrder = null" class="py-3 bg-slate-100 text-slate-600 font-bold rounded-xl">Ignore</button>
-                            <button @click="acceptOrder" class="py-3 bg-indigo-600 text-white font-bold rounded-xl">Accept</button>
-                            <button @click="negotiating = true" class="col-span-2 py-3 border-2 border-indigo-600 text-indigo-600 font-bold rounded-xl">Counter Offer</button>
-                        </div>
-
-                        <div v-if="negotiating" class="mt-4 p-4 bg-indigo-50 rounded-xl">
-                            <label class="block text-xs font-bold text-indigo-600 mb-2">Your Counter Price ($)</label>
-                            <div class="flex gap-2">
-                                <input type="number" class="flex-1 p-2 rounded-lg border border-indigo-200" placeholder="Enter amount...">
-                                <button @click="negotiating = false" class="bg-indigo-600 text-white px-4 rounded-lg text-sm">Send</button>
-                            </div>
+                        <p class="text-xs text-slate-500 mb-3">{{order.stops}} stops • {{order.distance}} miles away</p>
+                        <div class="flex gap-2">
+                            <button @click="acceptOrder(order)" class="flex-1 bg-indigo-600 text-white text-xs font-bold py-2 rounded-lg">Add to My List</button>
+                            <button class="px-3 border border-slate-200 rounded-lg text-slate-400"><i class="fas fa-ellipsis-h"></i></button>
                         </div>
                     </div>
                 </div>
             </div>
-        </transition>
+        </div>
     </main>
 </div>
 
@@ -170,46 +188,46 @@
     createApp({
         data() {
             return {
-                view: 'seeker', // 'seeker' or 'driver'
+                view: 'seeker', 
                 step: 1,
-                driverCapacity: 5,
-                selectedOrder: null,
-                negotiating: false,
                 order: {
                     pickups: [{ address: '', items: '' }],
                     deliveryAddress: '',
-                    phone: '',
-                    type: 'express',
+                    type: 'tomorrow',
                     bribe: 0
                 },
-                // Mock data for the driver view
-                demoOrder: {
-                    type: 'express',
-                    price: 25.00,
-                    bribe: 10,
-                    pickups: [
-                        { address: 'Starbucks Central', items: '2x Latte, 1x Muffin' },
-                        { address: 'Walgreens Pharmacy', items: 'Prescription' }
-                    ],
-                    deliveryAddress: '888 Luxury Ave, Apt 12'
-                }
+                driverPrefs: {
+                    minPayout: 60,
+                    departureTime: '08:30'
+                },
+                availableOrders: [
+                    { id: 101, customer: "Sarah J.", total: 12, stops: 1, distance: "2.4" },
+                    { id: 102, customer: "Mike T.", total: 35, stops: 3, distance: "5.1" },
+                    { id: 103, customer: "Lisa R.", total: 18, stops: 1, distance: "0.8" }
+                ],
+                activeOrders: []
+            }
+        },
+        computed: {
+            currentTotalPayout() {
+                return this.activeOrders.reduce((sum, o) => sum + o.total, 0);
             }
         },
         methods: {
             addStop() {
                 this.order.pickups.push({ address: '', items: '' });
             },
-            removeStop(index) {
-                this.order.pickups.splice(index, 1);
+            removeStop(i) {
+                this.order.pickups.splice(i, 1);
             },
-            submitOrder() {
-                alert("Order Submitted! Searching for nearby drivers...");
-                // Reset for demo
+            submitToEscrow() {
+                alert("Payment authorized! Funds are now held in Escrow. Your order has been added to the local driver list.");
                 this.step = 1;
+                this.order = { pickups: [{ address: '', items: '' }], deliveryAddress: '', type: 'tomorrow', bribe: 0 };
             },
-            acceptOrder() {
-                alert("Order Accepted! Added to your route list.");
-                this.selectedOrder = null;
+            acceptOrder(order) {
+                this.activeOrders.push(order);
+                this.availableOrders = this.availableOrders.filter(o => o.id !== order.id);
             }
         }
     }).mount('#app')
