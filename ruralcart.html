@@ -3,147 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RuralDrop | Complete Logistics v1.0</title>
+    <title>RuralDrop | Driver Command</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
         [v-cloak] { display: none; }
-        .driver-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
-        .amber-glow { box-shadow: 0 0 20px rgba(245, 158, 11, 0.2); }
-        .progress-bar { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-        .route-card { transition: all 0.2s ease; }
-        .route-card:hover { transform: translateY(-2px); }
+        .map-placeholder { background: #e2e8f0 url('https://api.placeholder.com/800/400') no-repeat center; background-size: cover; }
+        .tab-active { border-bottom: 4px solid #4f46e5; color: #4f46e5; }
+        .emergency-glow { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); border: 2px solid #f59e0b; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 antialiased font-sans">
+<body class="bg-slate-100 antialiased">
 
 <div id="app" v-cloak>
-    <nav class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-2">
-            <div class="bg-indigo-600 text-white p-2 rounded-xl"><i class="fas fa-truck-fast"></i></div>
-            <h1 class="text-xl font-black tracking-tighter">RURALDROP</h1>
-        </div>
-        <div class="flex bg-slate-100 p-1 rounded-2xl">
-            <button @click="view = 'seeker'" :class="view === 'seeker' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-6 py-2 rounded-xl text-xs font-black transition-all">SEEKER</button>
-            <button @click="view = 'driver'" :class="view === 'driver' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-6 py-2 rounded-xl text-xs font-black transition-all">DRIVER</button>
+    <nav class="bg-white px-6 py-4 flex justify-between items-center border-b sticky top-0 z-50">
+        <h1 class="text-xl font-black text-indigo-600 tracking-tighter">RURALDROP</h1>
+        <div class="flex bg-slate-100 p-1 rounded-xl">
+            <button @click="view = 'seeker'" :class="view === 'seeker' ? 'bg-white shadow-sm' : ''" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all">Seeker</button>
+            <button @click="view = 'driver'" :class="view === 'driver' ? 'bg-white shadow-sm' : ''" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all">Driver</button>
         </div>
     </nav>
 
-    <div v-if="isDemoMode" class="bg-amber-500 text-white text-[10px] font-black py-1 text-center uppercase tracking-widest">
-        Running in Local Demo Mode (Firebase Config Needed)
-    </div>
+    <main v-if="view === 'driver'" class="max-w-4xl mx-auto pb-20">
+        
+        <div class="w-full h-64 md:h-80 map-placeholder relative border-b-4 border-indigo-500 shadow-inner">
+            <div class="absolute inset-0 bg-indigo-900/10"></div>
+            <div v-for="(o, i) in currentBatch" :key="o.id" 
+                 :style="{ top: (20 + i*15) + '%', left: (30 + i*10) + '%' }"
+                 :class="o.type === 'emergency' ? 'bg-amber-500 scale-125' : 'bg-indigo-600'"
+                 class="absolute w-4 h-4 rounded-full border-2 border-white shadow-lg transition-all animate-bounce">
+            </div>
+            <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-4 py-2 rounded-2xl shadow-xl border border-white">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Route</p>
+                <p class="text-sm font-black text-slate-800">{{ currentBatch.length }} Stops Scheduled</p>
+            </div>
+        </div>
 
-    <main v-if="view === 'driver'" class="p-4 md:p-8 max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            <div class="lg:col-span-4 space-y-6">
-                <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-100">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-black uppercase text-[10px] tracking-widest text-slate-400">Dispatch Settings</h2>
-                        <span :class="settings.isOffDuty ? 'text-slate-400' : 'text-green-500 animate-pulse'" class="text-[10px] font-black uppercase">
-                            {{ settings.isOffDuty ? 'Off Duty' : 'Accepting Orders' }}
-                        </span>
-                    </div>
-                    
-                    <button @click="toggleDuty" :class="settings.isOffDuty ? 'bg-slate-100 text-slate-400' : 'bg-green-500 text-white'" class="w-full py-4 rounded-2xl font-black transition-all mb-6 text-sm">
-                        {{ settings.isOffDuty ? 'SET STATUS: ON DUTY' : 'SET STATUS: OFF DUTY' }}
-                    </button>
+        <div class="bg-slate-900 text-white px-6 py-5 flex justify-between items-center">
+            <div>
+                <p class="text-[10px] font-bold text-indigo-400 uppercase">Current Run Value</p>
+                <p class="text-2xl font-black">${{ currentBatchTotal }}.00</p>
+            </div>
+            <button v-if="tripStatus === 'idle'" @click="startRun" class="bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all">
+                Start Run
+            </button>
+            <div v-else class="flex items-center gap-2 text-green-400 font-black text-xs">
+                <i class="fas fa-circle-notch animate-spin"></i> LIVE
+            </div>
+        </div>
 
-                    <div class="space-y-4">
-                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Emergency Base Price</label>
-                            <div class="flex items-center gap-1">
-                                <span class="text-xl font-black text-slate-400">$</span>
-                                <input type="number" v-model="settings.emergencyBase" @change="save" class="bg-transparent text-xl font-black w-full outline-none">
-                            </div>
-                        </div>
-                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Target Departure</label>
-                            <input type="time" v-model="settings.departureTime" @change="save" class="bg-transparent text-xl font-black w-full outline-none">
-                        </div>
-                    </div>
-                </div>
+        <div class="bg-white sticky top-[73px] z-40 flex border-b">
+            <button @click="activeTab = 'current'" :class="activeTab === 'current' ? 'tab-active' : 'text-slate-400'" class="flex-1 py-4 text-xs font-black uppercase tracking-widest transition-all">Current Run</button>
+            <button @click="activeTab = 'future'" :class="activeTab === 'future' ? 'tab-active' : 'text-slate-400'" class="flex-1 py-4 text-xs font-black uppercase tracking-widest transition-all">Future Batch</button>
+            <button @click="activeTab = 'settings'" :class="activeTab === 'settings' ? 'tab-active' : 'text-slate-400'" class="flex-1 py-4 text-xs font-black uppercase tracking-widest transition-all">Settings</button>
+        </div>
 
-                <div class="driver-bg p-8 rounded-[2.5rem] shadow-2xl text-white">
-                    <h3 class="text-[10px] font-black text-indigo-400 uppercase mb-4 tracking-widest">Active Batch Value</h3>
-                    <div class="flex justify-between items-end mb-2">
-                        <span class="text-4xl font-black">${{ currentBatchTotal }}</span>
-                        <span class="text-xs opacity-50 font-bold">Goal: ${{ settings.batchMin }}</span>
+        <div class="p-4">
+            <div v-if="activeTab === 'current'" class="space-y-3">
+                <div v-for="(order, index) in currentBatch" :key="order.id" 
+                     :class="order.type === 'emergency' ? 'emergency-glow bg-amber-50' : 'bg-white'"
+                     class="p-5 rounded-3xl border border-slate-200 flex items-center gap-4 transition-all">
+                    <div :class="order.type === 'emergency' ? 'bg-amber-500' : 'bg-slate-900'" class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black">
+                        {{ index + 1 }}
                     </div>
-                    <div class="w-full bg-slate-700 h-2.5 rounded-full overflow-hidden mb-8 border border-slate-600">
-                        <div class="bg-indigo-400 h-full progress-bar shadow-[0_0_15px_rgba(129,140,248,0.5)]" :style="{width: (currentBatchTotal/settings.batchMin*100)+'%'}"></div>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 mb-8">
-                        <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Total Miles</p>
-                            <p class="text-lg font-black">{{ totalMiles }} mi</p>
+                    <div class="flex-1">
+                        <div class="flex justify-between">
+                            <h4 class="font-black text-sm">{{ order.customer }}</h4>
+                            <span class="font-black text-indigo-600">${{ order.total }}</span>
                         </div>
-                        <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Est. Fuel Cost</p>
-                            <p class="text-lg font-black text-red-400">-${{ (totalMiles * 0.25).toFixed(2) }}</p>
-                        </div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">{{ order.type }} • {{ order.distance }} mi</p>
                     </div>
-
-                    <button v-if="tripStatus === 'idle'" @click="startBatch" class="w-full bg-indigo-500 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">
-                        Commit to Run & Notify All
-                    </button>
-                    <div v-else class="text-center py-4 bg-white/10 rounded-2xl border border-white/20">
-                        <span class="text-xs font-black animate-pulse uppercase">Run in Progress</span>
-                    </div>
+                    <button @click="completeOrder(order.id)" class="bg-slate-100 p-2 rounded-lg text-slate-400 hover:text-green-500"><i class="fas fa-check"></i></button>
                 </div>
             </div>
 
-            <div class="lg:col-span-8">
-                <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 min-h-[80vh] flex flex-col">
-                    <div class="p-6 border-b flex justify-between items-center bg-slate-50/50">
-                        <h3 class="font-black text-xs uppercase tracking-widest text-slate-500">Scheduled Delivery Queue</h3>
-                        <div class="flex gap-2">
-                            <button @click="autoOptimize" class="text-[10px] font-black bg-white border border-slate-200 px-3 py-2 rounded-xl hover:bg-slate-900 hover:text-white transition-all">OPTIMIZE ROUTE</button>
-                            <button @click="seedTestData" class="text-[10px] font-black bg-indigo-50 text-indigo-600 px-3 py-2 rounded-xl border border-indigo-100">RESET TEST DATA</button>
-                        </div>
+            <div v-if="activeTab === 'future'" class="space-y-3">
+                <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 mb-4">
+                    <p class="text-xs font-bold text-indigo-700">These orders are waiting for your next departure window.</p>
+                </div>
+                <div v-for="order in futureOrders" :key="order.id" class="p-5 bg-white rounded-3xl border border-slate-200 opacity-60 flex justify-between items-center">
+                    <div>
+                        <h4 class="font-black text-sm text-slate-800">{{ order.customer }}</h4>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Wait Time: +24h</p>
                     </div>
+                    <button @click="moveToCurrent(order.id)" class="text-xs font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg">Add to Current</button>
+                </div>
+            </div>
 
-                    <div class="p-6 space-y-4 flex-grow">
-                        <transition-group name="fade-slide">
-                            <div v-for="(order, index) in activeOrders" :key="order.id" 
-                                 :class="order.type === 'emergency' ? 'border-amber-400 bg-amber-50/40 amber-glow' : 'border-slate-100 bg-white'"
-                                 class="route-card flex items-center gap-4 p-5 border-2 rounded-3xl relative">
-                                
-                                <div :class="order.type === 'emergency' ? 'bg-amber-500 shadow-amber-200' : 'bg-slate-900 shadow-slate-200'" class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black shadow-lg flex-shrink-0">
-                                    {{ index + 1 }}
-                                </div>
-
-                                <div class="flex-1">
-                                    <div class="flex justify-between items-start">
-                                        <h4 class="font-black text-slate-800">{{ order.customer }}</h4>
-                                        <span class="font-black" :class="order.type === 'emergency' ? 'text-amber-600' : 'text-indigo-600'">${{ order.total }}</span>
-                                    </div>
-                                    <div class="flex gap-3 mt-1">
-                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter"><i class="fas fa-route mr-1"></i>{{ order.distance }} MI</span>
-                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter"><i class="fas fa-shopping-basket mr-1"></i>{{ order.stops ? order.stops.length : 1 }} STOPS</span>
-                                    </div>
-                                </div>
-
-                                <div class="flex gap-2">
-                                    <button v-if="!order.pickedUp" @click="updateOrder(order, 'picked_up')" class="bg-slate-900 text-white text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-indigo-600 transition-colors">PICKUP</button>
-                                    <button v-else @click="updateOrder(order, 'delivered')" class="bg-green-500 text-white text-[10px] font-black px-4 py-2.5 rounded-xl">DELIVER</button>
-                                </div>
-
-                                <div v-if="tripStatus === 'idle'" class="flex flex-col gap-1 ml-2">
-                                    <button @click="moveOrder(index, -1)" v-if="index > 0" class="text-slate-300 hover:text-indigo-500"><i class="fas fa-chevron-up text-xs"></i></button>
-                                    <button @click="moveOrder(index, 1)" v-if="index < activeOrders.length - 1" class="text-slate-300 hover:text-indigo-500"><i class="fas fa-chevron-down text-xs"></i></button>
-                                </div>
-                            </div>
-                        </transition-group>
-                        
-                        <div v-if="activeOrders.length === 0" class="text-center py-32 opacity-20">
-                            <i class="fas fa-map-location-dot text-6xl mb-4"></i>
-                            <p class="font-black uppercase tracking-tighter">No current spokes on your route</p>
+            <div v-if="activeTab === 'settings'" class="space-y-6">
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-black text-sm uppercase tracking-widest text-slate-400">Availability</h3>
+                        <button @click="settings.isOffDuty = !settings.isOffDuty" 
+                                :class="settings.isOffDuty ? 'bg-slate-200' : 'bg-indigo-600'" 
+                                class="w-16 h-8 rounded-full relative p-1 transition-all">
+                            <div :class="settings.isOffDuty ? 'translate-x-0' : 'translate-x-8'" class="w-6 h-6 bg-white rounded-full transition-transform shadow-md"></div>
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4">When Off-Duty, customers are charged the Emergency Dispatch fee to make you leave your house.</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-slate-50 rounded-2xl">
+                            <label class="text-[10px] font-black text-slate-400 uppercase">Emergency Fee</label>
+                            <input type="number" v-model="settings.emergencyBase" class="w-full bg-transparent text-xl font-black outline-none mt-1">
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-2xl">
+                            <label class="text-[10px] font-black text-slate-400 uppercase">Departure</label>
+                            <input type="time" v-model="settings.departureTime" class="w-full bg-transparent text-xl font-black outline-none mt-1">
                         </div>
                     </div>
                 </div>
@@ -151,204 +117,60 @@
         </div>
     </main>
 
-    <main v-if="view === 'seeker'" class="p-6 max-w-xl mx-auto">
-        <div v-if="myOrder" class="bg-white rounded-[3rem] p-10 shadow-2xl border border-slate-100">
-            <div class="text-center mb-12">
-                <span class="bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-100">Escrow Protected Journey</span>
-                <h2 class="text-3xl font-black mt-4">Tracking: {{ myOrder.customer }}</h2>
-            </div>
-
-            <div class="space-y-10 relative before:content-[''] before:absolute before:left-6 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
-                <div v-for="(step, i) in steps" :key="i" class="flex items-center gap-8 relative z-10">
-                    <div :class="getStatusColor(step.id)" class="w-12 h-12 rounded-2xl flex items-center justify-center text-lg transition-all shadow-md">
-                        <i :class="step.icon"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-black text-sm uppercase tracking-tighter" :class="myOrder.status === step.id ? 'text-indigo-600' : 'text-slate-400'">{{ step.name }}</h4>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase">{{ step.sub }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-12 p-6 bg-slate-50 rounded-3xl border border-slate-100 text-center">
-                <p class="text-xs font-bold text-slate-500 uppercase">Driver Note</p>
-                <p class="text-sm font-medium text-slate-700 mt-1">"Heading to the city now for all batch pickups. Please be available for Stop #{{ myOrder.stopNumber || '?' }}."</p>
-            </div>
-        </div>
-
-        <div v-else class="bg-white rounded-[3rem] p-10 shadow-2xl text-center">
-            <h2 class="text-3xl font-black mb-2 text-slate-800">Need a Town Run?</h2>
-            <p class="text-sm text-slate-500 mb-10 font-medium">Add your items to the next local batch run.</p>
-            
-            <div class="space-y-4 mb-8">
-                <input v-model="newOrder.name" placeholder="Full Name" class="w-full p-5 bg-slate-50 rounded-2xl focus:ring-2 focus:ring-indigo-500 border-none font-bold text-lg">
-                <input v-model="newOrder.address" placeholder="Delivery Address" class="w-full p-5 bg-slate-50 rounded-2xl focus:ring-2 focus:ring-indigo-500 border-none font-bold text-lg">
-            </div>
-
-            <div class="grid grid-cols-1 gap-4">
-                <button @click="placeOrder('tomorrow')" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all">
-                    <span class="block">Join Batch Run</span>
-                    <span class="text-[10px] opacity-50 uppercase tracking-widest">$15.00 Escrow</span>
-                </button>
-                <div class="relative py-4">
-                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-100"></div></div>
-                    <span class="relative px-3 bg-white text-[10px] font-black text-slate-300 uppercase">OR</span>
-                </div>
-                <button @click="placeOrder('emergency')" class="w-full border-2 border-amber-500 text-amber-600 py-5 rounded-2xl font-black italic hover:bg-amber-50 transition-all">
-                    <span class="block">Priority Emergency Dispatch</span>
-                    <span class="text-[10px] uppercase tracking-widest">${{settings.emergencyBase}}.00 Call-out Fee</span>
-                </button>
-            </div>
-        </div>
+    <main v-if="view === 'seeker'" class="p-8 text-center">
+        <h2 class="text-2xl font-black mb-4">Seeker Portal</h2>
+        <button @click="placeEmergency" class="w-full bg-amber-500 text-white p-4 rounded-2xl font-black mb-4 shadow-lg shadow-amber-200">Request Emergency ($55)</button>
+        <button @click="placeBatch" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-black shadow-lg shadow-indigo-200">Join Next Batch ($15)</button>
     </main>
 </div>
 
-
-
 <script>
-// --- FIREBASE CONFIG ---
-const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  databaseURL: "YOUR_URL",
-  projectId: "YOUR_PROJECT"
-};
-
 const { createApp } = Vue;
 
 createApp({
     data() {
         return {
             view: 'driver',
+            activeTab: 'current',
             tripStatus: 'idle',
-            myOrder: null,
-            isDemoMode: true,
-            newOrder: { name: '', address: '' },
-            settings: { isOffDuty: true, emergencyBase: 55, departureTime: '09:30', batchMin: 100 },
-            activeOrders: [],
-            steps: [
-                { id: 'accepted', name: 'Order Accepted', icon: 'fas fa-check', sub: 'Queued for Batch' },
-                { id: 'started', name: 'Heading to City', icon: 'fas fa-truck-fast', sub: 'Run is Active' },
-                { id: 'picked_up', name: 'Items Secured', icon: 'fas fa-box', sub: 'In Driver Vehicle' },
-                { id: 'delivered', name: 'Delivered', icon: 'fas fa-house-circle-check', sub: 'Release Funds' }
+            settings: { isOffDuty: true, emergencyBase: 55, departureTime: '08:00' },
+            currentBatch: [
+                { id: 1, customer: 'Sarah J.', total: 55, type: 'emergency', distance: 4.2 },
+                { id: 2, customer: 'Miller Farm', total: 15, type: 'batch', distance: 12.8 },
+                { id: 3, customer: 'Creek Road Repair', total: 55, type: 'emergency', distance: 2.1 }
+            ],
+            futureOrders: [
+                { id: 4, customer: 'Henderson', total: 15, type: 'batch' },
+                { id: 5, customer: 'Wilson Cabin', total: 15, type: 'batch' }
             ]
         }
     },
     computed: {
         currentBatchTotal() {
-            return this.activeOrders.reduce((s, o) => s + o.total, 0);
-        },
-        totalMiles() {
-            return this.activeOrders.reduce((s, o) => s + parseFloat(o.distance || 0), 0).toFixed(1);
+            return this.currentBatch.reduce((sum, o) => sum + o.total, 0);
         }
     },
     methods: {
-        // --- SEED TEST DATA ---
-        seedTestData() {
-            this.activeOrders = [
-                { id: 1, customer: 'Sarah Jenkins', total: 55, type: 'emergency', status: 'accepted', pickedUp: false, distance: 8.5, stops: ['Pharmacy'] },
-                { id: 2, customer: 'Miller Farm', total: 15, type: 'tomorrow', status: 'accepted', pickedUp: false, distance: 12.2, stops: ['Feed Store', 'Tractor Supply'] },
-                { id: 3, customer: 'Old Man Henderson', total: 15, type: 'tomorrow', status: 'accepted', pickedUp: false, distance: 4.8, stops: ['Post Office'] },
-                { id: 4, customer: 'The Wilson Cabin', total: 15, type: 'tomorrow', status: 'accepted', pickedUp: false, distance: 22.4, stops: ['Grocery Mart'] },
-                { id: 5, customer: 'Creek Road Repair', total: 55, type: 'emergency', status: 'accepted', pickedUp: false, distance: 6.1, stops: ['Hardware Store'] }
-            ];
-            this.save();
-        },
-
-        toggleDuty() {
-            this.settings.isOffDuty = !this.settings.isOffDuty;
-            this.save();
-        },
-
-        async placeOrder(type) {
-            const price = type === 'emergency' ? this.settings.emergencyBase : 15;
-            const o = { 
-                id: Date.now(), 
-                customer: this.newOrder.name || 'Guest User', 
-                total: price, 
-                type: type, 
-                status: 'accepted', 
-                pickedUp: false,
-                distance: 5.0
-            };
-            this.myOrder = o;
-            this.activeOrders.push(o);
-            this.save();
-            if(!this.isDemoMode) await firebase.database().ref('orders/' + o.id).set(o);
-        },
-
-        async startBatch() {
+        startRun() {
             this.tripStatus = 'started';
-            this.activeOrders.forEach((o, i) => {
-                o.status = 'started';
-                o.stopNumber = i + 1;
-                if(!this.isDemoMode) firebase.database().ref('orders/' + o.id).update({ status: 'started', stopNumber: i+1 });
-            });
-            this.save();
+            alert("Notification sent to " + this.currentBatch.length + " customers: Driver is on the way!");
         },
-
-        async updateOrder(order, status) {
-            order.status = status;
-            if(status === 'picked_up') order.pickedUp = true;
-            if(status === 'delivered') {
-                this.activeOrders = this.activeOrders.filter(x => x.id !== order.id);
-            }
-            if(!this.isDemoMode) firebase.database().ref('orders/' + order.id).update({ status, pickedUp: order.pickedUp });
-            this.save();
+        completeOrder(id) {
+            this.currentBatch = this.currentBatch.filter(o => o.id !== id);
         },
-
-        autoOptimize() {
-            this.activeOrders.sort((a, b) => {
-                if (a.type === 'emergency') return -1;
-                if (b.type === 'emergency') return 1;
-                return a.distance - b.distance;
-            });
-            this.save();
+        moveToCurrent(id) {
+            const order = this.futureOrders.find(o => o.id === id);
+            this.currentBatch.push({ ...order, distance: 5.0 });
+            this.futureOrders = this.futureOrders.filter(o => o.id !== id);
         },
-
-        moveOrder(index, direction) {
-            const el = this.activeOrders.splice(index, 1)[0];
-            this.activeOrders.splice(index + direction, 0, el);
-            this.save();
+        placeEmergency() {
+            this.currentBatch.push({ id: Date.now(), customer: 'New Emergency', total: 55, type: 'emergency', distance: 3.5 });
+            alert("Emergency order added to current run!");
         },
-
-        getStatusColor(id) {
-            if(!this.myOrder) return 'bg-slate-100 text-slate-300';
-            if(this.myOrder.status === id) return 'bg-indigo-600 text-white shadow-indigo-200 animate-pulse scale-110';
-            const keys = this.steps.map(s => s.id);
-            if(keys.indexOf(this.myOrder.status) > keys.indexOf(id)) return 'bg-green-500 text-white';
-            return 'bg-slate-100 text-slate-300';
-        },
-
-        save() {
-            localStorage.setItem('rd_sets', JSON.stringify(this.settings));
-            localStorage.setItem('rd_orders', JSON.stringify(this.activeOrders));
-            if(this.myOrder) localStorage.setItem('rd_my', JSON.stringify(this.myOrder));
-            if(!this.isDemoMode) firebase.database().ref('settings').set(this.settings);
+        placeBatch() {
+            this.futureOrders.push({ id: Date.now(), customer: 'New Batch Request', total: 15, type: 'batch' });
+            alert("Order added to future batch.");
         }
-    },
-    mounted() {
-        // Load local first
-        const s = localStorage.getItem('rd_sets');
-        if(s) this.settings = JSON.parse(s);
-        const o = localStorage.getItem('rd_orders');
-        if(o) this.activeOrders = JSON.parse(o);
-        const m = localStorage.getItem('rd_my');
-        if(m) this.myOrder = JSON.parse(m);
-
-        // Try Firebase
-        try {
-            if (firebaseConfig.apiKey.includes("YOUR_")) throw "No Config";
-            firebase.initializeApp(firebaseConfig);
-            this.isDemoMode = false;
-            const db = firebase.database();
-            db.ref('orders').on('value', snap => {
-                if(snap.val()) this.activeOrders = Object.values(snap.val()).filter(x => x.status !== 'delivered');
-            });
-            db.ref('settings').on('value', snap => { if(snap.val()) this.settings = snap.val(); });
-        } catch (e) { console.log("Demo Mode Activated"); }
-
-        // Initial Seed for UX
-        if(this.activeOrders.length === 0) this.seedTestData();
     }
 }).mount('#app');
 </script>
