@@ -17,173 +17,231 @@
         :root {
             --primary: #e67e22; /* Fetch Orange */
             --secondary: #2c3e50;
-            --light: #f5f6fa;
+            --light: #f8f9fa;
             --dark: #2c3e50;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; font-family: -apple-system, system-ui, sans-serif; }
         body { margin: 0; background-color: var(--light); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* --- Map --- */
+        /* --- Map Container --- */
         #map-container {
-            height: 40vh; /* Takes up top 40% of screen */
+            height: 45vh; /* Slightly larger map */
             width: 100%;
             z-index: 1;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: relative;
         }
+
+        /* --- Search Bar Overlay --- */
+        .search-overlay {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            z-index: 1000;
+        }
+
+        .search-input-wrapper {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            height: 50px;
+        }
+
+        .search-input-wrapper i { color: #95a5a6; margin-right: 10px; }
+        
+        #location-search {
+            border: none;
+            width: 100%;
+            height: 100%;
+            font-size: 16px;
+            outline: none;
+        }
+
+        /* --- Autocomplete Results --- */
+        #search-results {
+            background: white;
+            border-radius: 12px;
+            margin-top: 5px;
+            box-shadow: var(--shadow);
+            max-height: 200px;
+            overflow-y: auto;
+            display: none; /* Hidden by default */
+        }
+
+        .result-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .result-item:last-child { border-bottom: none; }
+        .result-item i { margin-right: 10px; color: var(--primary); }
+        .result-item:active { background: #f9f9f9; }
 
         /* --- Content Container --- */
         #step-container {
             flex: 1;
             background: white;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            margin-top: -20px; /* Overlap map slightly */
+            border-top-left-radius: 25px;
+            border-top-right-radius: 25px;
+            margin-top: -25px; /* Overlap map */
             z-index: 2;
             padding: 25px;
             overflow-y: auto;
             position: relative;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
         }
 
-        /* --- Typography --- */
-        h2 { margin: 0 0 10px 0; color: var(--dark); font-size: 22px; }
-        p { color: #7f8c8d; margin-top: 0; font-size: 14px; line-height: 1.5; }
+        h2 { margin: 0 0 5px 0; color: var(--dark); font-size: 20px; }
+        p { color: #7f8c8d; margin-top: 0; font-size: 14px; line-height: 1.4; margin-bottom: 20px; }
         
         /* --- Buttons --- */
         .btn {
             background: var(--primary); color: white; border: none; padding: 16px;
-            border-radius: 12px; font-size: 16px; font-weight: 700; width: 100%;
+            border-radius: 15px; font-size: 16px; font-weight: 700; width: 100%;
             cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px;
-            margin-top: 15px; box-shadow: 0 4px 6px rgba(230, 126, 34, 0.3);
+            margin-top: 15px; box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
+            transition: transform 0.1s;
         }
-        .btn:active { transform: scale(0.98); }
-        .btn-outline { background: transparent; border: 2px solid #ddd; color: var(--dark); box-shadow: none; }
-        .btn-secondary { background: var(--secondary); box-shadow: 0 4px 6px rgba(44, 62, 80, 0.3); }
-
-        /* --- Inputs --- */
-        input, select {
-            width: 100%; padding: 14px; border: 2px solid #ecf0f1; border-radius: 10px;
-            font-size: 16px; margin-bottom: 10px; background: #fff;
-        }
-        input:focus { outline: none; border-color: var(--primary); }
+        .btn:active { transform: scale(0.97); }
+        .btn-secondary { background: var(--secondary); box-shadow: 0 4px 10px rgba(44, 62, 80, 0.3); }
+        .btn-outline { background: white; border: 2px solid #ecf0f1; color: var(--dark); box-shadow: none; }
 
         /* --- List Items --- */
         .stop-item {
             display: flex; align-items: center; background: #fff8f0; 
-            padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid var(--primary);
+            padding: 12px; border-radius: 12px; margin-bottom: 10px; 
+            border-left: 4px solid var(--primary);
         }
-        .stop-icon { margin-right: 10px; color: var(--primary); }
 
         /* --- Invoice --- */
-        .invoice-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
-        .total-row { font-weight: bold; font-size: 20px; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px; }
+        .invoice-box { background: #f8f9fa; padding: 20px; border-radius: 15px; }
+        .invoice-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: #555; }
+        .total-row { font-weight: bold; font-size: 20px; margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px; color: var(--dark); }
 
-        /* --- Steps Visibility --- */
-        .step-view { display: none; animation: fadeIn 0.3s ease; }
+        /* --- Progress Dots --- */
+        .progress-bar { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
+        .dot { width: 8px; height: 8px; background: #e0e0e0; border-radius: 50%; }
+        .dot.active { background: var(--primary); width: 20px; border-radius: 10px; transition: 0.3s; }
+
+        /* --- Views --- */
+        .step-view { display: none; animation: fadeIn 0.4s ease; }
         .step-view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- Progress Bar --- */
-        .progress-bar { display: flex; gap: 5px; margin-bottom: 20px; }
-        .dot { flex: 1; height: 4px; background: #eee; border-radius: 2px; }
-        .dot.active { background: var(--primary); }
 
     </style>
 </head>
 <body>
 
-    <!-- 1. THE MAP (Always Visible) -->
-    <div id="map-container"></div>
+    <!-- MAP AREA -->
+    <div id="map-container">
+        <!-- Floating Search Bar -->
+        <div class="search-overlay">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="location-search" placeholder="Search address or store..." autocomplete="off">
+                <!-- Clear Button -->
+                <i class="fas fa-times-circle" style="color:#ddd; margin-left:auto; display:none;" id="clear-search" onclick="wizard.clearSearch()"></i>
+            </div>
+            <!-- Autocomplete Results Dropdown -->
+            <div id="search-results"></div>
+        </div>
+    </div>
 
-    <!-- 2. THE CONTENT (Changes by Step) -->
+    <!-- CONTENT AREA -->
     <div id="step-container">
         
-        <!-- Progress Indicators -->
+        <!-- Progress Dots -->
         <div class="progress-bar">
             <div id="dot-1" class="dot active"></div>
             <div id="dot-2" class="dot"></div>
             <div id="dot-3" class="dot"></div>
         </div>
 
-        <!-- STEP 1: CONFIRM LOCATION -->
+        <!-- STEP 1: CONFIRM HOME LOCATION -->
         <div id="step-1" class="step-view active">
-            <h2>📍 Where are you?</h2>
-            <p>We used your GPS to find your location. Drag the pin if it's not exactly on your driveway.</p>
-            <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:10px;">
-                <strong>Current Location:</strong><br>
-                <span id="home-address-display">Locating...</span>
+            <h2>📍 Set Delivery Location</h2>
+            <p>We found you via GPS. Use the search bar above or drag the pin to adjust your drop-off point.</p>
+            
+            <div style="background:#f1f2f6; padding:15px; border-radius:12px; display:flex; align-items:center; gap:10px;">
+                <i class="fas fa-home" style="color:var(--secondary);"></i>
+                <div>
+                    <div style="font-size:12px; color:#999; font-weight:bold;">DELIVER TO:</div>
+                    <div id="home-address-display" style="font-weight:600;">Locating...</div>
+                </div>
             </div>
+
             <button class="btn" onclick="wizard.goToStep(2)">
-                Confirm Location <i class="fas fa-arrow-right"></i>
+                Confirm & Add Stops <i class="fas fa-arrow-right"></i>
             </button>
         </div>
 
-        <!-- STEP 2: ADD STOPS (No Price Yet) -->
+        <!-- STEP 2: ADD STOPS -->
         <div id="step-2" class="step-view">
-            <h2>🛒 What are we Fetching?</h2>
-            <p>Add the stores or locations you need us to visit.</p>
-            
-            <input type="text" id="store-input" placeholder="Start typing store name (e.g. Walmart)...">
-            <button class="btn btn-secondary" onclick="wizard.addStop()" style="margin-top:0; margin-bottom:15px;">
-                <i class="fas fa-plus"></i> Add Stop
-            </button>
+            <h2>🛒 Add Stops</h2>
+            <p>Search for stores above. When you select one, it will be added to your route.</p>
 
             <!-- List of added stops -->
-            <div id="stops-list">
-                <!-- Injected via JS -->
+            <div id="stops-list" style="min-height: 50px;">
+                <div id="empty-state" style="text-align:center; padding:20px; color:#ccc; border:2px dashed #eee; border-radius:10px;">
+                    <i class="fas fa-store" style="font-size:24px; margin-bottom:5px;"></i><br>
+                    Use search bar to add stops
+                </div>
             </div>
 
-            <button class="btn" onclick="wizard.goToStep(3)" id="btn-finish-stops" style="display:none;">
+            <button class="btn" onclick="wizard.goToStep(3)" id="btn-finish-stops" style="display:none; background:var(--secondary);">
                 Done Adding Stops <i class="fas fa-check"></i>
             </button>
             <button class="btn btn-outline" onclick="wizard.goToStep(1)">Back</button>
         </div>
 
-        <!-- STEP 3: PRICING & OPTIONS -->
+        <!-- STEP 3: PRICING -->
         <div id="step-3" class="step-view">
-            <h2>💳 Delivery Options</h2>
-            <p>Choose your speed and review the total.</p>
+            <h2>💳 Review & Pay</h2>
+            <p>Select your delivery speed.</p>
 
             <!-- Options -->
             <div style="margin-bottom:20px;">
-                <label style="display:flex; align-items:center; margin-bottom:10px; padding:10px; border:1px solid #eee; border-radius:8px;">
-                    <input type="radio" name="speed" value="standard" checked onclick="wizard.calculateTotal()">
-                    <div style="margin-left:10px;">
-                        <strong>Standard Run</strong><br>
-                        <small>Delivered Tomorrow</small>
-                    </div>
-                </label>
-                <label style="display:flex; align-items:center; padding:10px; border:1px solid #eee; border-radius:8px;">
-                    <input type="radio" name="speed" value="rush" onclick="wizard.calculateTotal()">
-                    <div style="margin-left:10px;">
-                        <strong>⚡ Rush (Line Jumper)</strong><br>
-                        <small>Immediate Delivery</small>
+                <label style="display:flex; align-items:center; padding:15px; border:2px solid #eee; border-radius:12px; margin-bottom:10px;" onclick="wizard.calculateTotal()">
+                    <input type="radio" name="speed" value="standard" checked style="width:20px; height:20px; margin-right:15px; accent-color:var(--primary);">
+                    <div>
+                        <strong style="color:var(--dark);">Standard Run</strong>
+                        <div style="font-size:12px; color:#7f8c8d;">Delivered Tomorrow</div>
                     </div>
                 </label>
                 
-                <div id="bribe-box" style="display:none; margin-top:10px;">
-                    <label>Your Bribe Offer ($):</label>
-                    <input type="number" id="bribe-amount" value="25" onchange="wizard.calculateTotal()">
+                <label style="display:flex; align-items:center; padding:15px; border:2px solid #eee; border-radius:12px;" onclick="wizard.calculateTotal()">
+                    <input type="radio" name="speed" value="rush" style="width:20px; height:20px; margin-right:15px; accent-color:var(--primary);">
+                    <div>
+                        <strong style="color:var(--dark);">⚡ Rush (Line Jumper)</strong>
+                        <div style="font-size:12px; color:#7f8c8d;">Immediate Delivery</div>
+                    </div>
+                </label>
+
+                <div id="bribe-box" style="display:none; margin-top:10px; padding-left:35px;">
+                    <label style="font-size:12px; font-weight:bold;">Your Bribe ($):</label>
+                    <input type="number" id="bribe-amount" value="25" style="width:80px; padding:8px; border-radius:8px; border:1px solid #ddd;" onchange="wizard.calculateTotal()">
                 </div>
             </div>
 
-            <label style="display:flex; align-items:center; margin-bottom:20px;">
-                <input type="checkbox" id="white-glove" onchange="wizard.calculateTotal()" style="width:auto; margin-right:10px;">
-                <span>🧤 Add White Glove Inspection (+$1.99)</span>
-            </label>
-
-            <!-- Final Invoice -->
-            <div style="background:#f9f9f9; padding:15px; border-radius:10px;">
-                <div class="invoice-row"><span>Driver Base Pay</span><span>$15.00</span></div>
+            <!-- Invoice -->
+            <div class="invoice-box">
+                <div class="invoice-row"><span>Driver Pay</span><span>$15.00</span></div>
                 <div class="invoice-row"><span>Platform Fee</span><span>$5.00</span></div>
-                <div class="invoice-row" id="inv-rush" style="display:none;"><span>Rush Fee</span><span id="inv-rush-amt">$0.00</span></div>
-                <div class="invoice-row" id="inv-glove" style="display:none;"><span>White Glove</span><span>$1.99</span></div>
+                <div class="invoice-row" id="inv-rush" style="display:none; color:var(--primary);"><span>Rush Bribe</span><span id="inv-rush-amt">$0.00</span></div>
                 <div class="total-row"><span>Total</span><span id="final-total">$20.00</span></div>
             </div>
 
-            <button class="btn" onclick="alert('Sending to Stripe...')">Pay & Order</button>
+            <button class="btn" onclick="alert('Order Placed! Driver Notified.')">Pay Now</button>
             <button class="btn btn-outline" onclick="wizard.goToStep(2)">Back</button>
         </div>
 
@@ -194,157 +252,182 @@
             map: null,
             userMarker: null,
             routeLine: null,
-            userLocation: { lat: 35.0, lng: -97.0 }, // Default fallback
-            stops: [], // Array of objects {name, lat, lng}
+            currentStep: 1,
+            userLocation: { lat: 35.0, lng: -97.0 },
+            stops: [],
+            searchDebounce: null,
 
-            // 1. Initialize
             init: () => {
-                // Init Map centered on fallback
-                wizard.map = L.map('map-container').setView([35.0, -97.0], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(wizard.map);
+                // 1. INIT MAP with CartoDB Voyager (Much cleaner/professional look)
+                wizard.map = L.map('map-container', {zoomControl: false}).setView([35.0, -97.0], 13);
                 
-                // Try GPS
-                wizard.map.locate({setView: true, maxZoom: 16});
-                
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    subdomains: 'abcd',
+                    maxZoom: 19
+                }).addTo(wizard.map);
+
+                // 2. Try GPS
+                wizard.map.locate({setView: true, maxZoom: 15});
                 wizard.map.on('locationfound', (e) => {
                     wizard.userLocation = e.latlng;
                     wizard.placeUserMarker(e.latlng);
                     document.getElementById('home-address-display').innerText = 
-                        `Lat: ${e.latlng.lat.toFixed(4)}, Lng: ${e.latlng.lng.toFixed(4)}`;
+                        `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
+                });
+                wizard.map.on('locationerror', () => {
+                    wizard.placeUserMarker(wizard.userLocation);
+                    alert("GPS failed. Please drag the pin.");
                 });
 
-                wizard.map.on('locationerror', () => {
-                    wizard.placeUserMarker(wizard.userLocation); // Use fallback
-                    alert("GPS not found. Please drag pin to your house.");
-                });
+                // 3. Setup Search Listener
+                document.getElementById('location-search').addEventListener('input', wizard.handleSearchInput);
             },
 
             placeUserMarker: (latlng) => {
                 if(wizard.userMarker) wizard.map.removeLayer(wizard.userMarker);
                 
-                // Custom Icon for Home
+                // Professional Home Icon
                 const homeIcon = L.divIcon({
-                    className: 'custom-div-icon',
-                    html: "<div style='background-color:#2c3e50; width:15px; height:15px; border-radius:50%; border:3px solid white; box-shadow:0 3px 5px rgba(0,0,0,0.3);'></div>",
+                    className: 'custom-pin',
+                    html: `<div style="background:#2c3e50; width:16px; height:16px; border:3px solid white; border-radius:50%; box-shadow:0 3px 6px rgba(0,0,0,0.4);"></div>`,
                     iconSize: [20, 20],
                     iconAnchor: [10, 10]
                 });
 
                 wizard.userMarker = L.marker(latlng, {draggable: true, icon: homeIcon}).addTo(wizard.map);
-                
-                // Update location on drag
                 wizard.userMarker.on('dragend', (e) => {
                     wizard.userLocation = e.target.getLatLng();
                 });
             },
 
-            // 2. Navigation Logic
-            goToStep: (stepNum) => {
-                // Hide all
-                document.querySelectorAll('.step-view').forEach(el => el.classList.remove('active'));
-                document.querySelectorAll('.dot').forEach(el => el.classList.remove('active'));
-                
-                // Show current
-                document.getElementById('step-' + stepNum).classList.add('active');
-                
-                // Update dots
-                for(let i=1; i<=stepNum; i++) {
-                    document.getElementById('dot-'+i).classList.add('active');
+            // --- AUTOCOMPLETE LOGIC ---
+            handleSearchInput: (e) => {
+                const query = e.target.value;
+                const resultsContainer = document.getElementById('search-results');
+                const clearBtn = document.getElementById('clear-search');
+
+                if(query.length > 0) clearBtn.style.display = 'block';
+                else clearBtn.style.display = 'none';
+
+                if(query.length < 3) {
+                    resultsContainer.style.display = 'none';
+                    return;
                 }
 
-                // Map Adjustments based on step
-                setTimeout(() => {
-                    wizard.map.invalidateSize(); // Fix grey tiles
-                    if (stepNum === 1) {
-                        wizard.map.setView(wizard.userLocation, 15);
-                    } else if (stepNum === 2 || stepNum === 3) {
-                        // Fit bounds to show route
-                        if(wizard.stops.length > 0) {
-                            const bounds = L.latLngBounds([wizard.userLocation]);
-                            wizard.stops.forEach(s => bounds.extend([s.lat, s.lng]));
-                            wizard.map.fitBounds(bounds, {padding: [50, 50]});
-                        }
-                    }
+                // Debounce to prevent API spam
+                clearTimeout(wizard.searchDebounce);
+                wizard.searchDebounce = setTimeout(() => {
+                    // Fetch from Nominatim (OpenStreetMap Free API)
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=5`)
+                        .then(response => response.json())
+                        .then(data => {
+                            resultsContainer.innerHTML = '';
+                            if(data.length > 0) {
+                                resultsContainer.style.display = 'block';
+                                data.forEach(place => {
+                                    const div = document.createElement('div');
+                                    div.className = 'result-item';
+                                    // Make name shorter
+                                    const shortName = place.display_name.split(',')[0] + ', ' + place.display_name.split(',')[1];
+                                    div.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${shortName}`;
+                                    div.onclick = () => wizard.selectPlace(place);
+                                    resultsContainer.appendChild(div);
+                                });
+                            }
+                        });
                 }, 300);
             },
 
-            // 3. Adding Stops Logic
-            addStop: () => {
-                const name = document.getElementById('store-input').value;
-                if(!name) return alert("Please type a store name");
+            selectPlace: (place) => {
+                const lat = parseFloat(place.lat);
+                const lng = parseFloat(place.lon);
+                const name = place.display_name.split(',')[0];
 
-                // Simulate Geocoding (In real app, fetch lat/lng from API)
-                // Here we just mock a point slightly offset from user
-                const offset = 0.01 + (Math.random() * 0.02);
-                const newLat = wizard.userLocation.lat + (Math.random() > 0.5 ? offset : -offset);
-                const newLng = wizard.userLocation.lng + (Math.random() > 0.5 ? offset : -offset);
+                // Clear Search UI
+                document.getElementById('location-search').value = "";
+                document.getElementById('search-results').style.display = 'none';
+                document.getElementById('clear-search').style.display = 'none';
 
-                const stop = { name: name, lat: newLat, lng: newLng };
+                // Behavior depends on Step
+                if(wizard.currentStep === 1) {
+                    // Move Home Pin
+                    const newLoc = new L.LatLng(lat, lng);
+                    wizard.userLocation = newLoc;
+                    wizard.placeUserMarker(newLoc);
+                    wizard.map.setView(newLoc, 16);
+                    document.getElementById('home-address-display').innerText = name;
+                } 
+                else if (wizard.currentStep === 2) {
+                    // Add Stop
+                    wizard.addStopToRoute(name, lat, lng);
+                }
+            },
+
+            addStopToRoute: (name, lat, lng) => {
+                const stop = { name: name, lat: lat, lng: lng };
                 wizard.stops.push(stop);
 
-                // Add Marker to Map
-                L.marker([newLat, newLng]).addTo(wizard.map)
-                 .bindPopup(name).openPopup();
-
-                // Draw Line (Route)
+                // Add Marker
+                L.marker([lat, lng]).addTo(wizard.map).bindPopup(name).openPopup();
+                
+                // Draw Route
                 wizard.drawRoute();
 
-                // Add to List UI
+                // Update UI
                 const list = document.getElementById('stops-list');
+                document.getElementById('empty-state').style.display = 'none';
+                
                 const item = document.createElement('div');
                 item.className = 'stop-item';
-                item.innerHTML = `<i class="fas fa-store stop-icon"></i> <strong>${name}</strong>`;
+                item.innerHTML = `<i class="fas fa-store" style="margin-right:10px; color:#e67e22;"></i> <strong>${name}</strong>`;
                 list.appendChild(item);
 
-                // Clear input and show Next button
-                document.getElementById('store-input').value = "";
-                document.getElementById('btn-finish-stops').style.display = "flex";
+                document.getElementById('btn-finish-stops').style.display = 'flex';
+            },
+
+            clearSearch: () => {
+                document.getElementById('location-search').value = "";
+                document.getElementById('search-results').style.display = 'none';
+                document.getElementById('clear-search').style.display = 'none';
             },
 
             drawRoute: () => {
                 if(wizard.routeLine) wizard.map.removeLayer(wizard.routeLine);
-                
-                // Build path: Stop 1 -> Stop 2 -> ... -> Home
                 const latlngs = wizard.stops.map(s => [s.lat, s.lng]);
                 latlngs.push([wizard.userLocation.lat, wizard.userLocation.lng]);
-
-                wizard.routeLine = L.polyline(latlngs, {color: '#e67e22', weight: 4}).addTo(wizard.map);
-                
-                // Zoom to show everything
-                const bounds = wizard.routeLine.getBounds();
-                wizard.map.fitBounds(bounds, {padding: [50, 50]});
+                wizard.routeLine = L.polyline(latlngs, {color: '#2c3e50', weight: 4, dashArray: '10, 10'}).addTo(wizard.map);
+                wizard.map.fitBounds(wizard.routeLine.getBounds(), {padding: [50, 50]});
             },
 
-            // 4. Pricing Logic
+            goToStep: (stepNum) => {
+                document.querySelectorAll('.step-view').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.dot').forEach(el => el.classList.remove('active'));
+                document.getElementById('step-' + stepNum).classList.add('active');
+                for(let i=1; i<=stepNum; i++) document.getElementById('dot-'+i).classList.add('active');
+                
+                wizard.currentStep = stepNum;
+
+                // Adjust Input Placeholder based on step
+                const searchInput = document.getElementById('location-search');
+                if(stepNum === 1) searchInput.placeholder = "Search your home address...";
+                else if (stepNum === 2) searchInput.placeholder = "Search store (e.g. Walmart)...";
+
+                setTimeout(() => wizard.map.invalidateSize(), 300);
+            },
+
             calculateTotal: () => {
                 const speed = document.querySelector('input[name="speed"]:checked').value;
-                const isGlove = document.getElementById('white-glove').checked;
+                let rush = (speed === 'rush') ? (parseFloat(document.getElementById('bribe-amount').value) || 0) : 0;
                 
-                let base = 15.00;
-                let fee = 5.00;
-                let rush = 0;
-                let glove = isGlove ? 1.99 : 0;
-
-                if (speed === 'rush') {
-                    document.getElementById('bribe-box').style.display = 'block';
-                    document.getElementById('inv-rush').style.display = 'flex';
-                    rush = parseFloat(document.getElementById('bribe-amount').value) || 0;
-                } else {
-                    document.getElementById('bribe-box').style.display = 'none';
-                    document.getElementById('inv-rush').style.display = 'none';
-                }
-
-                if (isGlove) document.getElementById('inv-glove').style.display = 'flex';
-                else document.getElementById('inv-glove').style.display = 'none';
-
+                document.getElementById('bribe-box').style.display = (speed === 'rush') ? 'block' : 'none';
+                document.getElementById('inv-rush').style.display = (speed === 'rush') ? 'flex' : 'none';
                 document.getElementById('inv-rush-amt').innerText = '$' + rush.toFixed(2);
-                document.getElementById('final-total').innerText = '$' + (base + fee + rush + glove).toFixed(2);
+                document.getElementById('final-total').innerText = '$' + (15 + 5 + rush).toFixed(2);
             }
         };
 
-        // Boot up
         window.onload = wizard.init;
-
     </script>
 </body>
 </html>
