@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#e67e22"> <!-- Burnt Orange -->
+    <meta name="theme-color" content="#e67e22">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Fetch</title>
 
-    <!-- External Libraries -->
+    <!-- Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -16,486 +16,334 @@
     <style>
         :root {
             --primary: #e67e22; /* Fetch Orange */
-            --primary-dark: #d35400;
-            --secondary: #2c3e50; /* Slate Blue */
-            --danger: #e74c3c;
-            --dark: #2c3e50;
+            --secondary: #2c3e50;
             --light: #f5f6fa;
-            --grey: #bdc3c7;
+            --dark: #2c3e50;
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-
-        body {
-            margin: 0;
-            background-color: var(--light);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* --- App Shell --- */
-        .view {
-            display: none;
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            padding-bottom: 90px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .view.active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        h1, h2, h3 { margin-top: 0; color: var(--dark); }
-        p { color: #7f8c8d; line-height: 1.5; }
-
-        /* --- Components --- */
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        .btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            width: 100%;
-            cursor: pointer;
-            margin-top: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            transition: transform 0.1s;
-        }
-        .btn:active { transform: scale(0.98); }
-        .btn-blue { background: var(--secondary); }
-        .btn-red { background: var(--danger); }
-        .btn-outline { background: transparent; border: 2px solid #ddd; color: var(--dark); }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #ecf0f1;
-            border-radius: 10px;
-            font-size: 16px;
-            margin-bottom: 10px;
-            background: #fff;
-        }
-        input:focus { outline: none; border-color: var(--primary); }
-
-        /* --- Gateway --- */
-        .gateway-split {
-            height: 50vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .gateway-customer { background: white; color: var(--primary); }
-        .gateway-driver { background: var(--secondary); color: white; }
-        .gateway-driver:active { opacity: 0.9; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; font-family: -apple-system, system-ui, sans-serif; }
+        body { margin: 0; background-color: var(--light); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
         /* --- Map --- */
         #map-container {
-            height: 250px;
+            height: 40vh; /* Takes up top 40% of screen */
             width: 100%;
-            border-radius: 12px;
-            margin-bottom: 15px;
             z-index: 1;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        /* --- Bottom Nav --- */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: white;
-            display: none;
-            justify-content: space-around;
-            padding: 12px 0 calc(12px + var(--safe-bottom)) 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            z-index: 1000;
-        }
-        .nav-item {
-            text-align: center;
-            color: var(--grey);
-            font-size: 10px;
+        /* --- Content Container --- */
+        #step-container {
             flex: 1;
+            background: white;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            margin-top: -20px; /* Overlap map slightly */
+            z-index: 2;
+            padding: 25px;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
         }
-        .nav-item.active { color: var(--primary); font-weight: bold; }
-        .nav-icon { font-size: 22px; display: block; margin-bottom: 4px; }
 
-        /* --- Invoice Rows --- */
+        /* --- Typography --- */
+        h2 { margin: 0 0 10px 0; color: var(--dark); font-size: 22px; }
+        p { color: #7f8c8d; margin-top: 0; font-size: 14px; line-height: 1.5; }
+        
+        /* --- Buttons --- */
+        .btn {
+            background: var(--primary); color: white; border: none; padding: 16px;
+            border-radius: 12px; font-size: 16px; font-weight: 700; width: 100%;
+            cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px;
+            margin-top: 15px; box-shadow: 0 4px 6px rgba(230, 126, 34, 0.3);
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-outline { background: transparent; border: 2px solid #ddd; color: var(--dark); box-shadow: none; }
+        .btn-secondary { background: var(--secondary); box-shadow: 0 4px 6px rgba(44, 62, 80, 0.3); }
+
+        /* --- Inputs --- */
+        input, select {
+            width: 100%; padding: 14px; border: 2px solid #ecf0f1; border-radius: 10px;
+            font-size: 16px; margin-bottom: 10px; background: #fff;
+        }
+        input:focus { outline: none; border-color: var(--primary); }
+
+        /* --- List Items --- */
+        .stop-item {
+            display: flex; align-items: center; background: #fff8f0; 
+            padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid var(--primary);
+        }
+        .stop-icon { margin-right: 10px; color: var(--primary); }
+
+        /* --- Invoice --- */
         .invoice-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
-        .invoice-row.total { font-weight: bold; font-size: 18px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
-        .invoice-row.fee { color: #7f8c8d; font-size: 12px; }
+        .total-row { font-weight: bold; font-size: 20px; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px; }
 
-        /* --- Badges --- */
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .badge-pending { background: #f1c40f; color: #333; }
-        .badge-success { background: #2ecc71; color: white; }
+        /* --- Steps Visibility --- */
+        .step-view { display: none; animation: fadeIn 0.3s ease; }
+        .step-view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Progress Bar --- */
+        .progress-bar { display: flex; gap: 5px; margin-bottom: 20px; }
+        .dot { flex: 1; height: 4px; background: #eee; border-radius: 2px; }
+        .dot.active { background: var(--primary); }
+
     </style>
 </head>
 <body>
 
-    <!-- ================= VIEWS ================= -->
+    <!-- 1. THE MAP (Always Visible) -->
+    <div id="map-container"></div>
 
-    <!-- 1. GATEWAY (Landing) -->
-    <div id="view-gateway" style="display:block; padding:0; height:100vh;">
-        <!-- Customer: No Login Required -->
-        <div class="gateway-split gateway-customer" onclick="app.guestEntry()">
-            <i class="fas fa-dog fa-3x"></i>
-            <h1>Fetch</h1>
-            <p>Order Delivery (Guest)</p>
-        </div>
-        <!-- Driver: Login Required -->
-        <div class="gateway-split gateway-driver" onclick="app.navTo('auth')">
-            <i class="fas fa-truck-pickup fa-3x"></i>
-            <h1>Driver Login</h1>
-            <p>Log in to access your routes.</p>
-        </div>
-    </div>
-
-    <!-- 2. AUTHENTICATION (Drivers Only) -->
-    <div id="view-auth" class="view">
-        <h2 style="margin-top:40px;">Driver Access</h2>
-        <p>Sign in to your account.</p>
+    <!-- 2. THE CONTENT (Changes by Step) -->
+    <div id="step-container">
         
-        <div class="card">
-            <input type="email" id="email" placeholder="Email Address">
-            <input type="password" id="password" placeholder="Password">
-            
-            <button class="btn btn-blue" onclick="app.login()">Sign In / Sign Up</button>
-            <button class="btn btn-outline" onclick="app.navTo('gateway')">Back</button>
-        </div>
-    </div>
-
-    <!-- 3. CUSTOMER DASHBOARD (Guest Mode) -->
-    <div id="view-customer" class="view">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2>Order Delivery</h2>
-            <div class="badge badge-success">Guest</div>
+        <!-- Progress Indicators -->
+        <div class="progress-bar">
+            <div id="dot-1" class="dot active"></div>
+            <div id="dot-2" class="dot"></div>
+            <div id="dot-3" class="dot"></div>
         </div>
 
-        <!-- Address Selection -->
-        <div class="card">
-            <div id="map-container"></div>
-            <p style="font-size:12px; color:var(--primary); text-align:center;">
-                <i class="fas fa-map-pin"></i> Drag pin to your exact driveway
-            </p>
-            <input type="text" placeholder="Start typing store name (e.g. Walmart)...">
-        </div>
-
-        <!-- Contact Info (Required for Guests) -->
-        <div class="card">
-            <h3>Contact Info</h3>
-            <input type="text" placeholder="Your Name">
-            <input type="tel" placeholder="Mobile Number (for updates)">
-        </div>
-
-        <!-- Delivery Type Selection -->
-        <div class="card">
-            <h3>Delivery Speed</h3>
-            <label style="display:flex; align-items:center; margin-bottom:15px;" onclick="app.updateTotal()">
-                <input type="radio" name="speed" value="standard" checked style="width:20px; margin-right:10px;">
-                <div>
-                    <strong>Standard</strong><br>
-                    <small>Waitlist • Flat Fee</small>
-                </div>
-                <div style="margin-left:auto;">$15.00</div>
-            </label>
-
-            <label style="display:flex; align-items:center;" onclick="app.updateTotal()">
-                <input type="radio" name="speed" value="rush" style="width:20px; margin-right:10px;">
-                <div>
-                    <strong>⚡ Rush (Line Jumper)</strong><br>
-                    <small>Delivered Today • Bribe Driver</small>
-                </div>
-            </label>
-            
-            <div id="rush-bid-container" style="display:none; margin-top:10px; padding:10px; background:var(--light); border-radius:8px;">
-                <label style="font-size:12px;">Your Bribe Offer:</label>
-                <input type="number" id="rush-amount" value="25.00" onchange="app.updateTotal()">
+        <!-- STEP 1: CONFIRM LOCATION -->
+        <div id="step-1" class="step-view active">
+            <h2>📍 Where are you?</h2>
+            <p>We used your GPS to find your location. Drag the pin if it's not exactly on your driveway.</p>
+            <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:10px;">
+                <strong>Current Location:</strong><br>
+                <span id="home-address-display">Locating...</span>
             </div>
+            <button class="btn" onclick="wizard.goToStep(2)">
+                Confirm Location <i class="fas fa-arrow-right"></i>
+            </button>
         </div>
 
-        <!-- Add-ons -->
-        <div class="card">
-            <label style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="display:flex; align-items:center;">
-                    <input type="checkbox" id="white-glove" style="width:20px; margin-right:10px;" onchange="app.updateTotal()">
-                    <div>
-                        <strong>🧤 White Glove Service</strong><br>
-                        <small>Verify items at store</small>
+        <!-- STEP 2: ADD STOPS (No Price Yet) -->
+        <div id="step-2" class="step-view">
+            <h2>🛒 What are we Fetching?</h2>
+            <p>Add the stores or locations you need us to visit.</p>
+            
+            <input type="text" id="store-input" placeholder="Start typing store name (e.g. Walmart)...">
+            <button class="btn btn-secondary" onclick="wizard.addStop()" style="margin-top:0; margin-bottom:15px;">
+                <i class="fas fa-plus"></i> Add Stop
+            </button>
+
+            <!-- List of added stops -->
+            <div id="stops-list">
+                <!-- Injected via JS -->
+            </div>
+
+            <button class="btn" onclick="wizard.goToStep(3)" id="btn-finish-stops" style="display:none;">
+                Done Adding Stops <i class="fas fa-check"></i>
+            </button>
+            <button class="btn btn-outline" onclick="wizard.goToStep(1)">Back</button>
+        </div>
+
+        <!-- STEP 3: PRICING & OPTIONS -->
+        <div id="step-3" class="step-view">
+            <h2>💳 Delivery Options</h2>
+            <p>Choose your speed and review the total.</p>
+
+            <!-- Options -->
+            <div style="margin-bottom:20px;">
+                <label style="display:flex; align-items:center; margin-bottom:10px; padding:10px; border:1px solid #eee; border-radius:8px;">
+                    <input type="radio" name="speed" value="standard" checked onclick="wizard.calculateTotal()">
+                    <div style="margin-left:10px;">
+                        <strong>Standard Run</strong><br>
+                        <small>Delivered Tomorrow</small>
                     </div>
-                </div>
-                <div>+$1.99</div>
-            </label>
-        </div>
-
-        <!-- Invoice -->
-        <div class="card">
-            <div class="invoice-row"><span>Driver Pay</span><span>$15.00</span></div>
-            <div class="invoice-row fee"><span>Platform Fee</span><span>$5.00</span></div>
-            <div class="invoice-row" id="rush-row" style="display:none; color:var(--primary);"><span>⚡ Rush Bribe</span><span id="rush-display">$0.00</span></div>
-            <div class="invoice-row" id="glove-row" style="display:none;"><span>White Glove</span><span>$1.99</span></div>
-            <div class="invoice-row total"><span>Total</span><span id="grand-total">$20.00</span></div>
-            
-            <button class="btn" onclick="alert('Proceeding to Stripe Payment...')">Pay & Book</button>
-        </div>
-    </div>
-
-    <!-- 4. DRIVER DASHBOARD -->
-    <div id="view-driver" class="view">
-        <!-- If Pending, show Application Status -->
-        <div id="driver-pending-msg" class="card" style="display:none; background:#fff3cd; border:1px solid #ffeeba;">
-            <h3>⚠️ Access Restricted</h3>
-            <p>Your application is pending approval from Dispatch. Check back later.</p>
-        </div>
-
-        <!-- If Active, show Controls -->
-        <div id="driver-active-controls">
-            <div class="card" style="background:var(--secondary); color:white;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <h2 style="color:white; margin:0;">Dashboard</h2>
-                        <small>Status: Online</small>
+                </label>
+                <label style="display:flex; align-items:center; padding:10px; border:1px solid #eee; border-radius:8px;">
+                    <input type="radio" name="speed" value="rush" onclick="wizard.calculateTotal()">
+                    <div style="margin-left:10px;">
+                        <strong>⚡ Rush (Line Jumper)</strong><br>
+                        <small>Immediate Delivery</small>
                     </div>
-                    <i class="fas fa-satellite-dish fa-2x"></i>
+                </label>
+                
+                <div id="bribe-box" style="display:none; margin-top:10px;">
+                    <label>Your Bribe Offer ($):</label>
+                    <input type="number" id="bribe-amount" value="25" onchange="wizard.calculateTotal()">
                 </div>
             </div>
 
-            <!-- Magnet Mode -->
-            <div class="card">
-                <h3>🧲 Magnet Mode</h3>
-                <p>Highlight orders within 3 miles of my route.</p>
-                <button class="btn btn-outline">Configure Radius</button>
+            <label style="display:flex; align-items:center; margin-bottom:20px;">
+                <input type="checkbox" id="white-glove" onchange="wizard.calculateTotal()" style="width:auto; margin-right:10px;">
+                <span>🧤 Add White Glove Inspection (+$1.99)</span>
+            </label>
+
+            <!-- Final Invoice -->
+            <div style="background:#f9f9f9; padding:15px; border-radius:10px;">
+                <div class="invoice-row"><span>Driver Base Pay</span><span>$15.00</span></div>
+                <div class="invoice-row"><span>Platform Fee</span><span>$5.00</span></div>
+                <div class="invoice-row" id="inv-rush" style="display:none;"><span>Rush Fee</span><span id="inv-rush-amt">$0.00</span></div>
+                <div class="invoice-row" id="inv-glove" style="display:none;"><span>White Glove</span><span>$1.99</span></div>
+                <div class="total-row"><span>Total</span><span id="final-total">$20.00</span></div>
             </div>
 
-            <!-- Active Order List -->
-            <h3>Available Orders</h3>
-            <div class="card">
-                <div style="display:flex; justify-content:space-between;">
-                    <strong>Walmart -> Miller Farm</strong>
-                    <span class="badge badge-success">Rush</span>
-                </div>
-                <p>5 items • 8.2 miles</p>
-                <div style="display:flex; justify-content:space-between; margin-top:10px;">
-                    <strong>Payout: $42.00</strong>
-                    <button class="btn btn-blue" style="width:auto; padding:8px 15px; margin:0;">Details</button>
-                </div>
-            </div>
+            <button class="btn" onclick="alert('Sending to Stripe...')">Pay & Order</button>
+            <button class="btn btn-outline" onclick="wizard.goToStep(2)">Back</button>
         </div>
+
     </div>
 
-    <!-- 5. PROFILE (Where Drivers Apply) -->
-    <div id="view-profile" class="view">
-        <h2>My Account</h2>
-        <div class="card">
-            <p><strong>Email:</strong> <span id="profile-email">driver@example.com</span></p>
-            <p><strong>Status:</strong> <span id="profile-status" class="badge badge-pending">General User</span></p>
-        </div>
-
-        <!-- Application Form (Hidden if already driver) -->
-        <div id="driver-application-form" class="card" style="display:none;">
-            <h3>🚛 Apply to Drive</h3>
-            <p>Fill out this form to join the Fetch fleet.</p>
-            <input type="text" id="app-name" placeholder="Full Legal Name">
-            <input type="text" id="app-vehicle" placeholder="Vehicle Make/Model">
-            <input type="text" id="app-license" placeholder="Driver's License #">
-            <input type="text" id="app-insurance" placeholder="Insurance Policy #">
-            <button class="btn btn-blue" onclick="app.submitApplication()">Submit Application</button>
-        </div>
-
-        <button class="btn btn-outline" onclick="app.logout()">Log Out</button>
-    </div>
-
-    <!-- ================= NAV BAR ================= -->
-    <div class="bottom-nav" id="main-nav">
-        <!-- Customer Nav -->
-        <div class="nav-item active" id="nav-home" onclick="app.navTo('customer')">
-            <i class="fas fa-home nav-icon"></i> Home
-        </div>
-        <div class="nav-item" onclick="app.navTo('gateway')">
-            <i class="fas fa-sign-out-alt nav-icon"></i> Exit
-        </div>
-    </div>
-
-    <div class="bottom-nav" id="driver-nav">
-        <!-- Driver Nav -->
-        <div class="nav-item" onclick="app.navTo('driver')">
-            <i class="fas fa-road nav-icon"></i> Routes
-        </div>
-        <div class="nav-item" onclick="app.navTo('profile')">
-            <i class="fas fa-user nav-icon"></i> Profile
-        </div>
-    </div>
-
-    <!-- ================= LOGIC ================= -->
     <script>
-        // MOCK DATABASE STATE
-        let currentUser = {
-            email: "",
-            role: "user", // 'user', 'pending', 'driver'
-            isLoggedIn: false
-        };
-
-        const app = {
+        const wizard = {
             map: null,
+            userMarker: null,
+            routeLine: null,
+            userLocation: { lat: 35.0, lng: -97.0 }, // Default fallback
+            stops: [], // Array of objects {name, lat, lng}
 
-            // Navigation
-            navTo: (viewId) => {
-                document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-                document.getElementById('view-gateway').style.display = 'none';
-                document.getElementById('main-nav').style.display = 'none';
-                document.getElementById('driver-nav').style.display = 'none';
+            // 1. Initialize
+            init: () => {
+                // Init Map centered on fallback
+                wizard.map = L.map('map-container').setView([35.0, -97.0], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(wizard.map);
                 
-                if(viewId === 'gateway') {
-                    document.getElementById('view-gateway').style.display = 'block';
-                } else {
-                    document.getElementById('view-' + viewId).classList.add('active');
-                    
-                    // Show correct Nav Bar
-                    if(currentUser.isLoggedIn && (viewId === 'driver' || viewId === 'profile')) {
-                        document.getElementById('driver-nav').style.display = 'flex';
-                        app.updateProfileView();
-                    } else if (viewId === 'customer') {
-                        document.getElementById('main-nav').style.display = 'flex';
-                    }
-                }
-            },
-
-            // Guest Entry
-            guestEntry: () => {
-                currentUser.role = 'guest';
-                currentUser.isLoggedIn = false;
-                app.navTo('customer');
-                app.initMap();
-            },
-
-            // Driver Login
-            login: () => {
-                const email = document.getElementById('email').value;
-                if(email) {
-                    // Simulate Login
-                    currentUser.email = email;
-                    currentUser.isLoggedIn = true;
-                    // Default role is 'user' until they apply
-                    currentUser.role = "user"; 
-                    app.navTo('driver');
-                }
-            },
-
-            logout: () => {
-                currentUser.isLoggedIn = false;
-                app.navTo('gateway');
-            },
-
-            // Application Logic
-            updateProfileView: () => {
-                document.getElementById('profile-email').innerText = currentUser.email;
+                // Try GPS
+                wizard.map.locate({setView: true, maxZoom: 16});
                 
-                const statusSpan = document.getElementById('profile-status');
-                const form = document.getElementById('driver-application-form');
+                wizard.map.on('locationfound', (e) => {
+                    wizard.userLocation = e.latlng;
+                    wizard.placeUserMarker(e.latlng);
+                    document.getElementById('home-address-display').innerText = 
+                        `Lat: ${e.latlng.lat.toFixed(4)}, Lng: ${e.latlng.lng.toFixed(4)}`;
+                });
 
-                if(currentUser.role === 'user') {
-                    statusSpan.innerText = "Not Applied";
-                    statusSpan.className = "badge";
-                    form.style.display = 'block'; // Show Form
-                } else if (currentUser.role === 'pending') {
-                    statusSpan.innerText = "Pending Approval";
-                    statusSpan.className = "badge badge-pending";
-                    form.style.display = 'none';
-                } else if (currentUser.role === 'driver') {
-                    statusSpan.innerText = "Active Driver";
-                    statusSpan.className = "badge badge-success";
-                    form.style.display = 'none';
-                }
+                wizard.map.on('locationerror', () => {
+                    wizard.placeUserMarker(wizard.userLocation); // Use fallback
+                    alert("GPS not found. Please drag pin to your house.");
+                });
             },
 
-            submitApplication: () => {
-                const name = document.getElementById('app-name').value;
-                if(name) {
-                    alert("Application Submitted! Status: Pending Approval.");
-                    currentUser.role = 'pending';
-                    app.updateProfileView();
-                    app.navTo('driver'); // Go back to dashboard to see pending message
-                } else {
-                    alert("Please fill out all fields.");
-                }
+            placeUserMarker: (latlng) => {
+                if(wizard.userMarker) wizard.map.removeLayer(wizard.userMarker);
+                
+                // Custom Icon for Home
+                const homeIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: "<div style='background-color:#2c3e50; width:15px; height:15px; border-radius:50%; border:3px solid white; box-shadow:0 3px 5px rgba(0,0,0,0.3);'></div>",
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
+                });
+
+                wizard.userMarker = L.marker(latlng, {draggable: true, icon: homeIcon}).addTo(wizard.map);
+                
+                // Update location on drag
+                wizard.userMarker.on('dragend', (e) => {
+                    wizard.userLocation = e.target.getLatLng();
+                });
             },
 
-            // Map Logic
-            initMap: () => {
-                if(app.map) return;
+            // 2. Navigation Logic
+            goToStep: (stepNum) => {
+                // Hide all
+                document.querySelectorAll('.step-view').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.dot').forEach(el => el.classList.remove('active'));
+                
+                // Show current
+                document.getElementById('step-' + stepNum).classList.add('active');
+                
+                // Update dots
+                for(let i=1; i<=stepNum; i++) {
+                    document.getElementById('dot-'+i).classList.add('active');
+                }
+
+                // Map Adjustments based on step
                 setTimeout(() => {
-                    app.map = L.map('map-container').setView([35.0, -97.0], 13);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(app.map);
-                    L.marker([35.0, -97.0], {draggable: true}).addTo(app.map)
-                        .bindPopup("Drag to your driveway").openPopup();
-                }, 500);
+                    wizard.map.invalidateSize(); // Fix grey tiles
+                    if (stepNum === 1) {
+                        wizard.map.setView(wizard.userLocation, 15);
+                    } else if (stepNum === 2 || stepNum === 3) {
+                        // Fit bounds to show route
+                        if(wizard.stops.length > 0) {
+                            const bounds = L.latLngBounds([wizard.userLocation]);
+                            wizard.stops.forEach(s => bounds.extend([s.lat, s.lng]));
+                            wizard.map.fitBounds(bounds, {padding: [50, 50]});
+                        }
+                    }
+                }, 300);
             },
 
-            // Calculator
-            updateTotal: () => {
-                const speed = document.querySelector('input[name="speed"]:checked').value;
-                const whiteGlove = document.getElementById('white-glove').checked;
-                let rush = (speed === 'rush') ? (parseFloat(document.getElementById('rush-amount').value) || 0) : 0;
-                let glove = whiteGlove ? 1.99 : 0;
-                
-                document.getElementById('rush-bid-container').style.display = (speed === 'rush') ? 'block' : 'none';
-                document.getElementById('rush-row').style.display = (speed === 'rush') ? 'flex' : 'none';
-                document.getElementById('glove-row').style.display = whiteGlove ? 'flex' : 'none';
-                
-                document.getElementById('rush-display').innerText = '$' + rush.toFixed(2);
-                document.getElementById('grand-total').innerText = '$' + (15 + 5 + rush + glove).toFixed(2);
-            }
-        };
-        
-        // Initial Calculation
-        app.updateTotal();
+            // 3. Adding Stops Logic
+            addStop: () => {
+                const name = document.getElementById('store-input').value;
+                if(!name) return alert("Please type a store name");
 
-        // Driver Dashboard Logic Check
-        // If driver goes to dashboard but is pending/user, hide controls
-        const originalNavTo = app.navTo;
-        app.navTo = (viewId) => {
-            originalNavTo(viewId);
-            if(viewId === 'driver') {
-                if(currentUser.role === 'driver') {
-                    document.getElementById('driver-pending-msg').style.display = 'none';
-                    document.getElementById('driver-active-controls').style.display = 'block';
+                // Simulate Geocoding (In real app, fetch lat/lng from API)
+                // Here we just mock a point slightly offset from user
+                const offset = 0.01 + (Math.random() * 0.02);
+                const newLat = wizard.userLocation.lat + (Math.random() > 0.5 ? offset : -offset);
+                const newLng = wizard.userLocation.lng + (Math.random() > 0.5 ? offset : -offset);
+
+                const stop = { name: name, lat: newLat, lng: newLng };
+                wizard.stops.push(stop);
+
+                // Add Marker to Map
+                L.marker([newLat, newLng]).addTo(wizard.map)
+                 .bindPopup(name).openPopup();
+
+                // Draw Line (Route)
+                wizard.drawRoute();
+
+                // Add to List UI
+                const list = document.getElementById('stops-list');
+                const item = document.createElement('div');
+                item.className = 'stop-item';
+                item.innerHTML = `<i class="fas fa-store stop-icon"></i> <strong>${name}</strong>`;
+                list.appendChild(item);
+
+                // Clear input and show Next button
+                document.getElementById('store-input').value = "";
+                document.getElementById('btn-finish-stops').style.display = "flex";
+            },
+
+            drawRoute: () => {
+                if(wizard.routeLine) wizard.map.removeLayer(wizard.routeLine);
+                
+                // Build path: Stop 1 -> Stop 2 -> ... -> Home
+                const latlngs = wizard.stops.map(s => [s.lat, s.lng]);
+                latlngs.push([wizard.userLocation.lat, wizard.userLocation.lng]);
+
+                wizard.routeLine = L.polyline(latlngs, {color: '#e67e22', weight: 4}).addTo(wizard.map);
+                
+                // Zoom to show everything
+                const bounds = wizard.routeLine.getBounds();
+                wizard.map.fitBounds(bounds, {padding: [50, 50]});
+            },
+
+            // 4. Pricing Logic
+            calculateTotal: () => {
+                const speed = document.querySelector('input[name="speed"]:checked').value;
+                const isGlove = document.getElementById('white-glove').checked;
+                
+                let base = 15.00;
+                let fee = 5.00;
+                let rush = 0;
+                let glove = isGlove ? 1.99 : 0;
+
+                if (speed === 'rush') {
+                    document.getElementById('bribe-box').style.display = 'block';
+                    document.getElementById('inv-rush').style.display = 'flex';
+                    rush = parseFloat(document.getElementById('bribe-amount').value) || 0;
                 } else {
-                    document.getElementById('driver-pending-msg').style.display = 'block';
-                    document.getElementById('driver-active-controls').style.display = 'none';
-                    
-                    if(currentUser.role === 'user') {
-                         document.getElementById('driver-pending-msg').innerHTML = 
-                         `<h3>👋 Welcome</h3><p>You are logged in. Go to <a href="#" onclick="app.navTo('profile')">Profile</a> to apply to drive.</p>`;
-                    }
+                    document.getElementById('bribe-box').style.display = 'none';
+                    document.getElementById('inv-rush').style.display = 'none';
                 }
+
+                if (isGlove) document.getElementById('inv-glove').style.display = 'flex';
+                else document.getElementById('inv-glove').style.display = 'none';
+
+                document.getElementById('inv-rush-amt').innerText = '$' + rush.toFixed(2);
+                document.getElementById('final-total').innerText = '$' + (base + fee + rush + glove).toFixed(2);
             }
         };
+
+        // Boot up
+        window.onload = wizard.init;
 
     </script>
 </body>
