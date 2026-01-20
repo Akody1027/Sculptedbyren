@@ -3,120 +3,345 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RuralDrop | Driver Control</title>
+    <title>RuralDrop | Firebase Pro</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .fade-slide-enter-active, .fade-slide-leave-active { transition: all 0.3s ease; }
+        .fade-slide-enter-from { opacity: 0; transform: translateY(20px); }
+        .fade-slide-leave-to { opacity: 0; transform: translateY(-20px); }
+        .notification-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); } 100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); } }
+    </style>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-50 text-slate-900 antialiased">
 
 <div id="app" class="min-h-screen">
-    <nav class="bg-white border-b px-6 py-4 flex justify-between items-center">
-        <h1 class="text-xl font-black text-indigo-600">RURALDROP</h1>
-        <div class="flex bg-slate-100 p-1 rounded-lg">
-            <button @click="view = 'seeker'" :class="view === 'seeker' ? 'bg-white shadow-sm' : ''" class="px-4 py-1 rounded-md text-sm font-bold">Seeker</button>
-            <button @click="view = 'driver'" :class="view === 'driver' ? 'bg-white shadow-sm' : ''" class="px-4 py-1 rounded-md text-sm font-bold">Driver</button>
+    <div class="fixed top-4 right-4 z-[100] space-y-2">
+        <transition-group name="fade-slide">
+            <div v-for="note in notifications" :key="note.id" class="bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-slate-700">
+                <i class="fas fa-bell text-indigo-400"></i>
+                <span class="text-sm font-bold">{{ note.text }}</span>
+            </div>
+        </transition-group>
+    </div>
+
+    <nav class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <div class="bg-indigo-600 text-white p-2 rounded-xl"><i class="fas fa-truck-fast"></i></div>
+            <h1 class="text-xl font-black tracking-tighter">RURALDROP</h1>
+        </div>
+        <div class="flex bg-slate-100 p-1 rounded-2xl">
+            <button @click="view = 'seeker'" :class="view === 'seeker' ? 'bg-white shadow-sm' : ''" class="px-6 py-2 rounded-xl text-xs font-black transition-all">SEEKER</button>
+            <button @click="view = 'driver'" :class="view === 'driver' ? 'bg-white shadow-sm' : ''" class="px-6 py-2 rounded-xl text-xs font-black transition-all">DRIVER</button>
         </div>
     </nav>
 
-    <main v-if="view === 'driver'" class="max-w-2xl mx-auto p-6">
-        <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-8">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-bold">Driver Settings</h2>
-                <div class="flex items-center gap-2">
-                    <span class="text-sm font-bold text-slate-500">{{ driverSettings.isOffDuty ? 'OFF DUTY' : 'ON DUTY' }}</span>
-                    <button @click="driverSettings.isOffDuty = !driverSettings.isOffDuty" 
-                            :class="driverSettings.isOffDuty ? 'bg-slate-300' : 'bg-green-500'"
-                            class="w-12 h-6 rounded-full relative transition-colors">
-                        <div :class="driverSettings.isOffDuty ? 'left-1' : 'left-7'" class="absolute top-1 bg-white w-4 h-4 rounded-full transition-all"></div>
-                    </button>
+    <main v-if="view === 'driver'" class="max-w-6xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <div class="lg:col-span-4 space-y-6">
+            <div class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
+                <h2 class="text-lg font-black mb-6 uppercase tracking-widest">Driver Settings</h2>
+                
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl">
+                        <span class="text-xs font-black">AVAILABILITY</span>
+                        <button @click="toggleDuty" :class="settings.isOffDuty ? 'bg-slate-200' : 'bg-green-500'" class="w-14 h-7 rounded-full relative transition-all">
+                            <div :class="settings.isOffDuty ? 'left-1' : 'left-8'" class="absolute top-1 bg-white w-5 h-5 rounded-full shadow-md transition-all"></div>
+                        </button>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase">Emergency Dispatch Base</label>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="font-black text-xl">$</span>
+                            <input type="number" v-model="settings.emergencyBase" @change="syncSettings" class="w-full bg-slate-50 p-3 rounded-xl font-black text-xl outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase">Next Scheduled Departure</label>
+                        <input type="time" v-model="settings.departureTime" @change="syncSettings" class="w-full mt-1 bg-slate-50 p-3 rounded-xl font-black text-lg outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
                 </div>
             </div>
 
-            <div class="space-y-6">
-                <div class="p-4 bg-amber-50 rounded-2xl border border-amber-100">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-amber-900"><i class="fas fa-bolt mr-2"></i>Emergency Dispatch</h3>
-                    </div>
-                    <p class="text-xs text-amber-700 mb-4">The "Hefty Price" customers pay to make you leave your house immediately when you're off-duty or busy.</p>
-                    <div class="flex items-center gap-4">
-                        <div class="flex-1">
-                            <label class="text-[10px] font-black text-amber-600 uppercase">Base Call-Out Fee</label>
-                            <div class="flex items-center text-2xl font-black text-amber-900">
-                                <span>$</span>
-                                <input type="number" v-model="driverSettings.emergencyBase" class="bg-transparent w-full focus:outline-none">
+            <div class="bg-slate-900 rounded-3xl p-6 text-white shadow-2xl">
+                <h3 class="text-[10px] font-black text-indigo-400 uppercase mb-4">Batch Threshold Progress</h3>
+                <div class="flex justify-between items-end mb-2">
+                    <span class="text-3xl font-black">${{ currentBatchTotal }}</span>
+                    <span class="text-xs opacity-50 font-bold">Goal: ${{ settings.batchMin }}</span>
+                </div>
+                <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden mb-6">
+                    <div class="bg-indigo-500 h-full transition-all duration-700" :style="{width: (currentBatchTotal/settings.batchMin*100)+'%'}"></div>
+                </div>
+                
+                <button v-if="tripStatus === 'idle'" @click="startRun" class="w-full bg-indigo-600 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-500 transition-all">
+                    Start Run & Notify All
+                </button>
+                <div v-else class="text-center py-2 bg-indigo-500/20 rounded-xl border border-indigo-500/50">
+                    <span class="text-xs font-black animate-pulse">RUN IN PROGRESS</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8 space-y-6">
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 min-h-[400px]">
+                <div class="p-6 border-b flex justify-between items-center">
+                    <h3 class="font-black text-sm uppercase tracking-widest">Route Sequence</h3>
+                    <button @click="autoOptimize" class="text-[10px] font-black bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-indigo-600 hover:text-white transition-all">AUTO-OPTIMIZE</button>
+                </div>
+
+                <div class="p-6">
+                    <transition-group name="fade-slide" tag="div" class="space-y-4">
+                        <div v-for="(order, index) in activeOrders" :key="order.id" 
+                             :class="order.type === 'emergency' ? 'border-amber-400 bg-amber-50/30' : 'border-slate-100'"
+                             class="flex items-center gap-4 p-4 border-2 rounded-2xl group transition-all">
+                            
+                            <div :class="order.type === 'emergency' ? 'bg-amber-500' : 'bg-slate-200'" class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-xs">
+                                {{ index + 1 }}
+                            </div>
+
+                            <div class="flex-1">
+                                <div class="flex justify-between">
+                                    <h4 class="font-black text-sm">{{ order.customer }}</h4>
+                                    <span class="font-black text-indigo-600">${{ order.total }}</span>
+                                </div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">{{ order.distance }} Miles • {{ order.stops.length }} Stops</p>
+                            </div>
+
+                            <div v-if="tripStatus !== 'idle'" class="flex gap-2">
+                                <button @click="confirmPickup(order)" v-if="!order.pickedUp" class="bg-indigo-600 text-white text-[10px] font-black px-3 py-2 rounded-lg">PICKUP</button>
+                                <button @click="confirmDelivery(index)" v-else class="bg-green-500 text-white text-[10px] font-black px-3 py-2 rounded-lg">DELIVER</button>
+                            </div>
+
+                            <div v-else class="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button @click="moveOrder(index, -1)" class="text-slate-300 hover:text-indigo-600"><i class="fas fa-chevron-up"></i></button>
+                                <button @click="moveOrder(index, 1)" class="text-slate-300 hover:text-indigo-600"><i class="fas fa-chevron-down"></i></button>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </transition-group>
 
-                <div class="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-                    <h3 class="font-bold text-indigo-900 mb-4"><i class="fas fa-calendar-alt mr-2"></i>Scheduled "Town Runs"</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-[10px] font-black text-indigo-600 uppercase">Next Departure</label>
-                            <input type="time" v-model="driverSettings.departureTime" class="w-full bg-white p-3 rounded-xl font-bold mt-1 shadow-sm border-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-black text-indigo-600 uppercase">Batch Min. $</label>
-                            <input type="number" v-model="driverSettings.batchMin" class="w-full bg-white p-3 rounded-xl font-bold mt-1 shadow-sm border-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
+                    <div v-if="activeOrders.length === 0" class="text-center py-20">
+                        <i class="fas fa-route text-slate-200 text-6xl mb-4"></i>
+                        <p class="font-bold text-slate-300">No orders queued for the next run</p>
                     </div>
                 </div>
             </div>
-            
-            <button @click="saveSettings" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl mt-8">Save & Update Public Profile</button>
         </div>
     </main>
 
-    <main v-if="view === 'seeker'" class="max-w-lg mx-auto p-6">
-        <div class="bg-white rounded-3xl p-6 shadow-xl mb-6">
-            <h2 class="font-bold text-lg mb-2">Delivery Options</h2>
-            <p class="text-sm text-slate-500 mb-6">Based on your local driver's current schedule.</p>
-
-            <div class="border-2 border-amber-500 p-5 rounded-2xl mb-4 bg-amber-50 relative overflow-hidden">
-                <div class="absolute top-0 right-0 bg-amber-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg">PRIORITY DISPATCH</div>
-                <div class="flex justify-between items-start mb-2">
-                    <h4 class="font-black text-amber-900 text-xl">${{driverSettings.emergencyBase}}.00</h4>
-                </div>
-                <p class="text-sm font-bold text-amber-800">Leaves House Immediately</p>
-                <p class="text-xs text-amber-600 mt-1 italic">Best for emergencies. Driver dispatches specifically for you.</p>
-                <button class="w-full bg-amber-500 text-white font-black py-3 rounded-xl mt-4 shadow-lg shadow-amber-200">Request Emergency Pick-Up</button>
+    <main v-if="view === 'seeker'" class="max-w-xl mx-auto p-6">
+        <div v-if="myOrder" class="bg-white rounded-[2.5rem] p-8 shadow-2xl border border-slate-100">
+            <div class="text-center mb-8">
+                <span class="bg-indigo-100 text-indigo-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">Live Order Tracker</span>
+                <h2 class="text-3xl font-black mt-4">Hello, {{ myOrder.customer }}</h2>
             </div>
 
-            <div class="border-2 border-slate-200 p-5 rounded-2xl bg-white hover:border-indigo-500 transition-all group">
-                <div class="flex justify-between items-start mb-2">
-                    <h4 class="font-black text-slate-900 text-xl">$15.00</h4>
-                    <span class="text-indigo-600 font-bold text-xs"><i class="fas fa-clock mr-1"></i>Next Run: {{driverSettings.departureTime}}</span>
+            <div class="space-y-8 relative before:content-[''] before:absolute before:left-[19px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
+                
+                <div v-for="step in trackerSteps" :key="step.key" class="flex gap-6 relative z-10">
+                    <div :class="getStatusClass(step.key)" class="w-10 h-10 rounded-full flex items-center justify-center text-sm transition-all duration-500">
+                        <i :class="step.icon"></i>
+                    </div>
+                    <div>
+                        <h4 :class="myOrder.status === step.key ? 'text-slate-900' : 'text-slate-400'" class="font-black text-sm uppercase tracking-tighter">{{ step.label }}</h4>
+                        <p class="text-xs text-slate-500 font-medium">{{ step.desc }}</p>
+                    </div>
                 </div>
-                <p class="text-sm font-bold text-slate-700">Join the Town Run List</p>
-                <p class="text-xs text-slate-400 mt-1">Slower delivery. Your order is bundled with others to keep costs low.</p>
-                <button class="w-full bg-slate-100 text-slate-400 group-hover:bg-indigo-600 group-hover:text-white font-black py-3 rounded-xl mt-4 transition-all">Add to Batch List</button>
+            </div>
+
+            <div class="mt-12 p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xs font-black text-slate-400 uppercase">Current Position</span>
+                    <span class="text-xs font-black text-indigo-600" v-if="myOrder.stopNumber">STOP #{{ myOrder.stopNumber }}</span>
+                </div>
+                <p class="text-sm font-bold text-slate-700">Driver: John (RuralDrop Partner)</p>
+                <div v-if="myOrder.status === 'delivered'" class="mt-6">
+                    <button @click="completeEscrow" class="w-full bg-green-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-green-100">CONFIRM & RELEASE FUNDS</button>
+                </div>
+            </div>
+        </div>
+
+        <div v-else class="bg-white rounded-[2.5rem] p-8 shadow-2xl">
+            <h2 class="text-2xl font-black mb-6">New Request</h2>
+            <div class="space-y-4">
+                <input v-model="newOrder.customer" placeholder="Your Name" class="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-indigo-500 font-bold">
+                <input v-model="newOrder.address" placeholder="Delivery Address" class="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-indigo-500 font-bold">
+                
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <button @click="submitOrder('tomorrow')" class="p-6 border-2 rounded-3xl text-left hover:border-indigo-600 transition-all">
+                        <span class="block font-black text-lg">$15</span>
+                        <span class="block text-[10px] font-bold text-slate-400 uppercase mt-1">Next Batch</span>
+                    </button>
+                    <button @click="submitOrder('emergency')" class="p-6 border-2 border-amber-500 bg-amber-50 rounded-3xl text-left">
+                        <span class="block font-black text-lg text-amber-900">${{ settings.emergencyBase }}</span>
+                        <span class="block text-[10px] font-bold text-amber-600 uppercase mt-1">Emergency</span>
+                    </button>
+                </div>
             </div>
         </div>
     </main>
 </div>
 
+
+
 <script>
-    const { createApp } = Vue
-    createApp({
-        data() {
-            return {
-                view: 'driver',
-                driverSettings: {
-                    isOffDuty: true,
-                    emergencyBase: 45,
-                    departureTime: '10:00',
-                    batchMin: 60
+// --- FIREBASE CONFIGURATION ---
+// Replace these with your actual Firebase project details
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  databaseURL: "YOUR_DATABASE_URL",
+  projectId: "YOUR_PROJECT_ID",
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const { createApp } = Vue;
+
+createApp({
+    data() {
+        return {
+            view: 'driver',
+            tripStatus: 'idle', // idle, heading_to_town, delivering
+            currentDeliveryIndex: 0,
+            notifications: [],
+            settings: {
+                isOffDuty: true,
+                emergencyBase: 45,
+                departureTime: '10:00',
+                batchMin: 60
+            },
+            activeOrders: [],
+            myOrder: null, // For the seeker view
+            newOrder: { customer: '', address: '' },
+            trackerSteps: [
+                { key: 'accepted', label: 'Order Accepted', icon: 'fas fa-check', desc: 'Added to the driver\'s list' },
+                { key: 'started', label: 'Heading to City', icon: 'fas fa-truck-fast', desc: 'Driver is on the way to town' },
+                { key: 'picked_up', label: 'Items Picked Up', icon: 'fas fa-box', desc: 'Driver has secured your items' },
+                { key: 'delivering', label: 'On The Way', icon: 'fas fa-location-dot', desc: 'You are the next stop!' },
+                { key: 'delivered', label: 'Delivered', icon: 'fas fa-house-chimney', desc: 'Confirm to release payment' }
+            ]
+        }
+    },
+    computed: {
+        currentBatchTotal() {
+            return this.activeOrders.reduce((sum, o) => sum + o.total, 0);
+        }
+    },
+    methods: {
+        // --- CORE LOGIC ---
+        toggleDuty() {
+            this.settings.isOffDuty = !this.settings.isOffDuty;
+            this.syncSettings();
+            this.notify(this.settings.isOffDuty ? "You are now Off-Duty" : "You are now On-Duty!");
+        },
+
+        async submitOrder(type) {
+            const price = type === 'emergency' ? this.settings.emergencyBase : 15;
+            const orderData = {
+                id: Date.now(),
+                customer: this.newOrder.customer,
+                deliveryAddress: this.newOrder.address,
+                total: price,
+                type: type,
+                status: 'accepted',
+                distance: (Math.random() * 10).toFixed(1),
+                stops: [1],
+                pickedUp: false
+            };
+            
+            // Save to local storage (Line of defense 1)
+            localStorage.setItem('myOrder', JSON.stringify(orderData));
+            this.myOrder = orderData;
+
+            // Sync to Firebase (Line of defense 2)
+            await db.ref('orders/' + orderData.id).set(orderData);
+            this.notify("Order submitted to Escrow!");
+        },
+
+        // --- DRIVER ACTIONS ---
+        async startRun() {
+            this.tripStatus = 'heading_to_town';
+            this.notify("Run started! Customers notified.");
+            // Batch update all orders in Firebase
+            this.activeOrders.forEach(async (o) => {
+                await db.ref('orders/' + o.id).update({ status: 'started' });
+            });
+        },
+
+        async confirmPickup(order) {
+            order.pickedUp = true;
+            await db.ref('orders/' + order.id).update({ 
+                status: 'picked_up', 
+                pickedUp: true,
+                stopNumber: this.activeOrders.indexOf(order) + 1
+            });
+            this.notify(`Items for ${order.customer} confirmed!`);
+        },
+
+        async confirmDelivery(index) {
+            const order = this.activeOrders[index];
+            await db.ref('orders/' + order.id).update({ status: 'delivered' });
+            this.activeOrders.splice(index, 1);
+            this.notify("Delivery complete. Waiting for customer confirmation.");
+        },
+
+        // --- UI & SYNC ---
+        notify(text) {
+            const id = Date.now();
+            this.notifications.push({ id, text });
+            setTimeout(() => {
+                this.notifications = this.notifications.filter(n => n.id !== id);
+            }, 4000);
+        },
+
+        getStatusClass(stepKey) {
+            if (!this.myOrder) return 'bg-slate-100 text-slate-300';
+            if (this.myOrder.status === stepKey) return 'bg-indigo-600 text-white notification-pulse';
+            const keys = this.trackerSteps.map(s => s.key);
+            if (keys.indexOf(this.myOrder.status) > keys.indexOf(stepKey)) return 'bg-green-500 text-white';
+            return 'bg-slate-100 text-slate-300';
+        },
+
+        syncSettings() {
+            localStorage.setItem('driverSettings', JSON.stringify(this.settings));
+            db.ref('settings').set(this.settings);
+        }
+    },
+    mounted() {
+        // Init LocalStorage
+        const localSets = localStorage.getItem('driverSettings');
+        if(localSets) this.settings = JSON.parse(localSets);
+
+        const localOrder = localStorage.getItem('myOrder');
+        if(localOrder) this.myOrder = JSON.parse(localOrder);
+
+        // Firebase Listeners for Realtime updates
+        db.ref('orders').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                const list = Object.values(data);
+                this.activeOrders = list.filter(o => o.status !== 'delivered');
+                
+                // If I am a seeker, update my specific order
+                if(this.myOrder) {
+                    const updatedMe = list.find(o => o.id === this.myOrder.id);
+                    if(updatedMe) this.myOrder = updatedMe;
                 }
             }
-        },
-        methods: {
-            saveSettings() {
-                alert("Settings Updated! Customers will now see your departure time of " + this.driverSettings.departureTime);
-            }
-        }
-    }).mount('#app')
+        });
+
+        db.ref('settings').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if(data) this.settings = data;
+        });
+    }
+}).mount('#app');
 </script>
 </body>
 </html>
