@@ -8,83 +8,86 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Fetch</title>
 
-    <!-- FontAwesome for Icons -->
+    <!-- 1. Leaflet (The Free Engine) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+
+    <!-- 2. FontAwesome (Icons) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        /* GOOGLE MATERIAL DESIGN THEME */
         :root {
-            --primary: #e67e22; /* Fetch Orange */
-            --dark: #202124; /* Google Dark Grey */
-            --light: #f8f9fa; /* Google Light Grey */
-            --blue: #1a73e8; /* Google Blue */
-            --shadow: 0 2px 6px rgba(0,0,0,0.3);
+            --primary: #1a73e8; /* Google Blue */
+            --accent: #e67e22;  /* Fetch Orange */
+            --dark: #202124;    /* Google Text Black */
+            --grey: #5f6368;    /* Google Text Grey */
+            --light: #f8f9fa;
+            --shadow: 0 1px 2px rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; font-family: 'Roboto', -apple-system, sans-serif; }
         body { margin: 0; background-color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
         /* --- Map Container --- */
-        #map {
-            height: 50vh; 
-            width: 100%;
-        }
+        #map { height: 55vh; width: 100%; z-index: 1; background: #eef2f3; }
 
-        /* --- Google Style Search Bar --- */
+        /* --- Floating Search Bar (Google Style) --- */
         .search-container {
-            position: absolute;
-            top: 50px; left: 50%; transform: translateX(-50%);
-            width: 90%; z-index: 10;
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; z-index: 1000;
         }
 
         .search-box {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2), 0 -1px 0px rgba(0,0,0,0.02);
-            height: 48px;
+            background: white; border-radius: 8px;
+            box-shadow: var(--shadow); height: 48px;
             display: flex; align-items: center; padding: 0 15px;
-            transition: box-shadow 0.2s;
+            transition: all 0.2s;
         }
         
-        .search-box:focus-within { box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-
+        .search-box i.menu-icon { color: var(--grey); margin-right: 15px; font-size: 18px; }
+        .search-box i.search-icon { color: var(--primary); margin-left: auto; font-size: 20px;}
+        
         #place-input {
-            border: none; width: 100%; height: 100%; font-size: 16px; outline: none; margin-left: 10px;
-            text-overflow: ellipsis;
+            border: none; width: 100%; height: 100%; font-size: 16px; outline: none; 
+            color: var(--dark);
         }
 
-        /* --- Content Container (Sheet) --- */
+        /* --- Search Results Dropdown --- */
+        #search-results {
+            background: white; width: 100%; margin-top: 5px; border-radius: 8px;
+            box-shadow: var(--shadow); display: none; overflow: hidden; max-height: 250px; overflow-y: auto;
+        }
+        .result-item {
+            padding: 15px; border-bottom: 1px solid #f1f3f4; font-size: 14px; color: var(--dark);
+            display: flex; align-items: center; cursor: pointer;
+        }
+        .result-item:active { background: #f1f3f4; }
+        .result-item i { margin-right: 15px; color: var(--grey); }
+
+        /* --- Bottom Sheet --- */
         #step-container {
             flex: 1; background: white;
             border-top-left-radius: 24px; border-top-right-radius: 24px;
             margin-top: -20px; z-index: 2; padding: 24px;
             overflow-y: auto; position: relative;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
         }
 
-        h2 { margin: 0 0 8px 0; color: var(--dark); font-size: 22px; font-weight: 500; }
-        p { color: #5f6368; margin-top: 0; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
+        h2 { margin: 0 0 10px 0; color: var(--dark); font-size: 22px; font-weight: 400; }
+        p { color: var(--grey); margin-top: 0; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
         
-        /* --- Buttons (Google Material Style) --- */
+        /* --- Buttons --- */
         .btn {
-            background: var(--blue); color: white; border: none; padding: 12px 24px;
+            background: var(--primary); color: white; border: none; padding: 14px;
             border-radius: 24px; font-size: 14px; font-weight: 500; letter-spacing: 0.5px;
             width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;
-            margin-top: 20px; box-shadow: 0 1px 2px rgba(60,64,67,0.3);
+            margin-top: 20px; box-shadow: 0 1px 3px rgba(60,64,67,0.3);
             text-transform: uppercase;
         }
-        .btn:active { box-shadow: 0 1px 2px rgba(60,64,67,0.3); background: #1765cc; }
+        .btn:active { background: #1765cc; }
         
-        .btn-outline { background: white; border: 1px solid #dadce0; color: var(--blue); box-shadow: none; }
-        .btn-outline:active { background: #f8f9fa; }
-
-        /* --- List Items --- */
-        .stop-item {
-            display: flex; align-items: center; padding: 16px 0; 
-            border-bottom: 1px solid #f1f3f4;
-        }
-        .stop-item i { color: var(--primary); margin-right: 15px; font-size: 18px; }
-        .stop-text strong { display: block; color: var(--dark); font-size: 16px; }
-        .stop-text small { color: #70757a; font-size: 13px; }
+        .btn-outline { background: white; border: 1px solid #dadce0; color: var(--primary); box-shadow: none; }
 
         /* --- Location Choice Overlay --- */
         #location-choice {
@@ -92,51 +95,61 @@
             z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 30px;
         }
-
         .big-btn {
             width: 100%; padding: 20px; border: 1px solid #dadce0; border-radius: 12px;
             margin-bottom: 15px; text-align: left; display: flex; align-items: center;
             background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .big-btn i { font-size: 24px; color: var(--blue); margin-right: 20px; }
-        .big-btn strong { display: block; font-size: 16px; color: var(--dark); }
-        .big-btn small { color: #5f6368; }
+        .big-btn i { font-size: 24px; color: var(--primary); margin-right: 20px; }
+        .big-btn strong { display: block; font-size: 16px; color: var(--dark); margin-bottom: 4px; }
+        .big-btn small { color: var(--grey); font-size: 13px; }
+
+        /* --- List Items --- */
+        .stop-item {
+            display: flex; align-items: center; padding: 12px 0; 
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .stop-item i { color: var(--accent); margin-right: 15px; }
 
         /* --- Invoice --- */
         .invoice-box { background: #f8f9fa; padding: 15px; border-radius: 12px; margin-top: 10px; }
-        .invoice-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: #3c4043; }
-        .total-row { font-weight: bold; font-size: 18px; margin-top: 15px; border-top: 1px solid #dadce0; padding-top: 15px; color: var(--dark); }
+        .invoice-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; color: #3c4043; }
+        .total-row { font-weight: bold; font-size: 18px; margin-top: 10px; border-top: 1px solid #dadce0; padding-top: 10px; }
 
-        /* --- Views --- */
+        /* Views & Progress */
         .step-view { display: none; animation: fadeIn 0.3s ease; }
         .step-view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Progress Dots */
         .progress-bar { display: flex; justify-content: center; margin-bottom: 20px; gap: 8px; }
         .dot { width: 8px; height: 8px; background: #dadce0; border-radius: 50%; }
-        .dot.active { background: var(--blue); }
+        .dot.active { background: var(--primary); }
 
-        /* Pac-Man Loading (Google Style) */
-        #loading-screen { position: absolute; top:0; left:0; width:100%; height:100%; background:white; z-index:3000; display:flex; justify-content:center; align-items:center; }
+        /* Custom Markers */
+        .g-pin-red {
+            /* Standard Google Red Pin */
+            width: 30px; height: 30px;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/ec/RedDot.svg');
+            background-size: contain; background-repeat: no-repeat;
+        }
+        .g-pin-blue {
+            /* Standard Google Blue Dot */
+            width: 14px; height: 14px;
+            background: #1a73e8; border: 2px solid white; border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
     </style>
 </head>
 <body>
 
-    <!-- LOADING SPINNER (Visible until Maps API Loads) -->
-    <div id="loading-screen">
-        <i class="fas fa-circle-notch fa-spin fa-3x" style="color:var(--blue);"></i>
-    </div>
-
-    <!-- 1. LOCATION CHOICE OVERLAY -->
+    <!-- 1. LOCATION CHOICE -->
     <div id="location-choice">
-        <h1 style="color:var(--dark); margin-bottom:30px;">Fetch</h1>
+        <h1 style="color:var(--dark); margin-bottom:30px; font-weight:400;">Fetch</h1>
         
         <button class="big-btn" onclick="app.useGPS()">
             <i class="fas fa-crosshairs"></i>
             <div>
                 <strong>Use current location</strong>
-                <small>Using GPS</small>
+                <small>Auto-detect via GPS</small>
             </div>
         </button>
 
@@ -152,16 +165,17 @@
     <!-- 2. MAP AREA -->
     <div id="map"></div>
     
-    <!-- Floating Search Bar (Google Style) -->
+    <!-- SEARCH BAR -->
     <div class="search-container" id="search-bar" style="display:none;">
         <div class="search-box">
-            <i class="fas fa-bars" style="color:#5f6368; margin-right:15px;"></i>
-            <input type="text" id="place-input" placeholder="Search Google Maps">
-            <i class="fas fa-search" style="color:var(--blue);"></i>
+            <i class="fas fa-bars menu-icon"></i>
+            <input type="text" id="place-input" placeholder="Search home address..." autocomplete="off">
+            <i class="fas fa-search search-icon"></i>
         </div>
+        <div id="search-results"></div>
     </div>
 
-    <!-- 3. BOTTOM SHEET CONTENT -->
+    <!-- 3. CONTENT SHEET -->
     <div id="step-container">
         
         <div class="progress-bar">
@@ -173,31 +187,26 @@
         <!-- STEP 1: CONFIRM HOME -->
         <div id="step-1" class="step-view active">
             <h2>Confirm Location</h2>
-            <p>Drag the pin to adjust your delivery spot.</p>
-            
-            <div style="display:flex; align-items:center; margin-bottom:10px;">
-                <i class="fas fa-map-marker-alt" style="color:var(--primary); margin-right:10px;"></i>
+            <div style="display:flex; align-items:center; margin-bottom:15px; background:#f1f3f4; padding:12px; border-radius:8px;">
+                <i class="fas fa-map-marker-alt" style="color:#d93025; margin-right:12px; font-size:18px;"></i>
                 <div id="address-text" style="font-weight:500;">Locating...</div>
             </div>
-
-            <button class="btn" onclick="app.goToStep(2)">
-                Confirm Location
-            </button>
+            <button class="btn" onclick="app.goToStep(2)">Confirm Location</button>
         </div>
 
         <!-- STEP 2: ADD STOPS -->
         <div id="step-2" class="step-view">
             <h2>Add Stops</h2>
-            <p>Use the search bar above to find stores.</p>
+            <p>Search for stores (e.g. "Walmart") above.</p>
 
             <div id="stops-list">
                 <div id="empty-state" style="text-align:center; padding:30px; color:#bdc1c6;">
                     <i class="fas fa-store-alt" style="font-size:30px; margin-bottom:10px;"></i>
-                    <div>Search for "Walmart", "Gas", etc.</div>
+                    <div>No stops added yet</div>
                 </div>
             </div>
 
-            <button class="btn" id="finish-stops-btn" style="display:none; background:var(--primary);" onclick="app.goToStep(3)">
+            <button class="btn" id="finish-stops-btn" style="display:none; background:var(--accent);" onclick="app.goToStep(3)">
                 Done Adding Stops
             </button>
             <button class="btn btn-outline" onclick="app.goToStep(1)">Back</button>
@@ -207,26 +216,19 @@
         <div id="step-3" class="step-view">
             <h2>Review Order</h2>
             
-            <!-- Delivery Options -->
             <label style="display:flex; padding:15px; border:1px solid #dadce0; border-radius:8px; margin-bottom:10px;" onclick="app.calcTotal()">
-                <input type="radio" name="speed" value="standard" checked style="margin-right:15px;">
-                <div>
-                    <strong>Standard Delivery</strong>
-                    <div style="font-size:12px; color:#5f6368;">Waitlist • Delivered Tomorrow</div>
-                </div>
+                <input type="radio" name="speed" value="standard" checked style="margin-right:15px; accent-color:var(--primary);">
+                <div><strong>Standard</strong><br><small>Waitlist • Delivered Tomorrow</small></div>
             </label>
 
             <label style="display:flex; padding:15px; border:1px solid #dadce0; border-radius:8px;" onclick="app.calcTotal()">
-                <input type="radio" name="speed" value="rush" style="margin-right:15px;">
-                <div>
-                    <strong>Rush Delivery</strong>
-                    <div style="font-size:12px; color:#5f6368;">Immediate Dispatch</div>
-                </div>
+                <input type="radio" name="speed" value="rush" style="margin-right:15px; accent-color:var(--primary);">
+                <div><strong>Rush</strong><br><small>Immediate Dispatch</small></div>
             </label>
 
-            <div id="bribe-section" style="display:none; margin-top:15px; padding:10px; background:#f1f3f4; border-radius:8px;">
-                <label style="font-size:12px; font-weight:bold;">Driver Offer / Bribe ($):</label>
-                <input type="number" id="bribe-val" value="25" style="width:60px; padding:5px; border-radius:4px; border:1px solid #ccc;" onchange="app.calcTotal()">
+            <div id="bribe-section" style="display:none; margin-top:10px; padding:10px; background:#e8f0fe; border-radius:8px;">
+                <label style="font-size:12px; font-weight:bold;">Driver Offer ($):</label>
+                <input type="number" id="bribe-val" value="25" style="width:60px; padding:5px; border:1px solid #ccc; border-radius:4px;" onchange="app.calcTotal()">
             </div>
 
             <div class="invoice-box">
@@ -235,98 +237,45 @@
                 <div class="invoice-row" id="row-rush" style="display:none;"><span>Rush Fee</span><span id="rush-price">$0.00</span></div>
                 <div class="total-row"><span>Total</span><span id="total-price">$20.00</span></div>
             </div>
-
-            <button class="btn" style="background:var(--primary);" onclick="alert('Google Pay / Stripe triggered')">
-                Place Order
-            </button>
+            <button class="btn" onclick="alert('Order Placed!')">Place Order</button>
             <button class="btn btn-outline" onclick="app.goToStep(2)">Back</button>
         </div>
-
     </div>
 
-    <!-- GOOGLE MAPS SCRIPT -->
-    <!-- REPLACE 'YOUR_API_KEY' WITH YOUR ACTUAL KEY -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initApp" async defer></script>
-
     <script>
-        let map;
-        let userMarker;
-        let autocomplete;
-        let directionsService;
-        let directionsRenderer;
-        
-        const appData = {
-            step: 1,
-            homeLocation: { lat: 35.0, lng: -97.0 }, // Fallback
+        const state = {
+            map: null,
+            userMarker: null,
+            routeLine: null,
             stops: [],
-            isMapReady: false
+            currentStep: 1,
+            userLoc: { lat: 35.0, lng: -97.0 },
+            searchDebounce: null
         };
 
-        // 1. INIT (Called by Google Script)
-        function initApp() {
-            document.getElementById('loading-screen').style.display = 'none';
-            
-            // Setup Map
-            map = new google.maps.Map(document.getElementById("map"), {
-                center: appData.homeLocation,
-                zoom: 13,
-                disableDefaultUI: true, // Makes it look cleaner like an App
+        // --- INIT MAP (Uses Leaflet engine but loads Google Images) ---
+        function initMap() {
+            // MAGIC LINE: This loads Google Map Tiles without an API Key
+            const googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+                maxZoom: 20,
+                subdomains:['mt0','mt1','mt2','mt3']
+            });
+
+            state.map = L.map('map', {
                 zoomControl: false,
-                styles: [ /* Optional: You can paste JSON here to custom style the map */ ]
-            });
+                attributionControl: false // Cleaner look
+            }).setView([35.0, -97.0], 13);
 
-            // Setup Search
-            const input = document.getElementById("place-input");
-            autocomplete = new google.maps.places.Autocomplete(input);
-            autocomplete.bindTo("bounds", map);
-
-            // Setup Routing
-            directionsService = new google.maps.DirectionsService();
-            directionsRenderer = new google.maps.DirectionsRenderer({
-                map: map,
-                suppressMarkers: true, // We want to use our own custom markers
-                polylineOptions: { strokeColor: "#1a73e8", strokeWeight: 5 }
-            });
-
-            // Listen for search selection
-            autocomplete.addListener("place_changed", () => {
-                const place = autocomplete.getPlace();
-                if (!place.geometry || !place.geometry.location) return;
-
-                if (appData.step === 1) {
-                    // Moving Home
-                    appData.homeLocation = place.geometry.location;
-                    app.placeHomeMarker(place.geometry.location);
-                    map.setCenter(place.geometry.location);
-                    map.setZoom(16);
-                    document.getElementById('address-text').innerText = place.name;
-                } else if (appData.step === 2) {
-                    // Adding Stop
-                    app.addStop(place);
-                }
-                
-                // Clear input
-                input.value = "";
-            });
-
-            appData.isMapReady = true;
+            googleStreets.addTo(state.map);
         }
 
         const app = {
-            // FLOW CONTROLS
             useGPS: () => {
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
-                            const pos = {
-                                lat: position.coords.latitude,
-                                lng: position.coords.longitude,
-                            };
-                            appData.homeLocation = pos;
-                            map.setCenter(pos);
-                            map.setZoom(16);
-                            app.placeHomeMarker(pos);
-                            document.getElementById('address-text').innerText = "GPS Location";
+                            const pos = { lat: position.coords.latitude, lng: position.coords.longitude };
+                            app.setHome(pos, "GPS Location");
                             
                             // Hide Choice, Show Search
                             document.getElementById('location-choice').style.display = 'none';
@@ -334,7 +283,7 @@
                             document.getElementById('place-input').placeholder = "Search home address...";
                         },
                         () => {
-                            alert("GPS failed. Please enter address.");
+                            alert("GPS failed.");
                             app.useManual();
                         }
                     );
@@ -347,129 +296,150 @@
                 document.getElementById('place-input').focus();
             },
 
-            // MAP LOGIC
-            placeHomeMarker: (location) => {
-                if(userMarker) userMarker.setMap(null);
+            setHome: (latlng, text) => {
+                state.userLoc = latlng;
+                if(state.userMarker) state.map.removeLayer(state.userMarker);
                 
-                userMarker = new google.maps.Marker({
-                    position: location,
-                    map: map,
-                    draggable: true,
-                    animation: google.maps.Animation.DROP,
-                    // Use standard Google Red Pin or custom icon
+                // Red Google-Style Pin using CSS/Icon
+                const icon = L.divIcon({
+                    className: 'custom-pin',
+                    html: '<i class="fas fa-map-marker-alt fa-3x" style="color:#d93025; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.4));"></i>',
+                    iconSize: [30, 42],
+                    iconAnchor: [15, 42]
                 });
 
-                // Update on drag
-                userMarker.addListener('dragend', () => {
-                    appData.homeLocation = userMarker.getPosition();
+                state.userMarker = L.marker(latlng, {draggable: true, icon: icon}).addTo(state.map);
+                state.map.setView(latlng, 16);
+
+                state.userMarker.on('dragend', (e) => {
+                    state.userLoc = e.target.getLatLng();
                     document.getElementById('address-text').innerText = "Pin Dropped";
                 });
+                document.getElementById('address-text').innerText = text;
             },
 
-            addStop: (place) => {
-                // Add to data
-                appData.stops.push({
-                    name: place.name,
-                    location: place.geometry.location,
-                    address: place.formatted_address
-                });
+            // --- SEARCH LOGIC (Styled like Google, Powered by OSM) ---
+            handleSearch: (e) => {
+                const query = e.target.value;
+                const resultsBox = document.getElementById('search-results');
+                
+                if(query.length < 3) {
+                    resultsBox.style.display = 'none';
+                    return;
+                }
 
-                // Add Marker
-                new google.maps.Marker({
-                    position: place.geometry.location,
-                    map: map,
-                    title: place.name,
-                    icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' // Blue for shops
+                clearTimeout(state.searchDebounce);
+                state.searchDebounce = setTimeout(() => {
+                    // Using Nominatim (Free) but styled like Google
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=5`)
+                        .then(res => res.json())
+                        .then(data => {
+                            resultsBox.innerHTML = "";
+                            if(data.length > 0) {
+                                resultsBox.style.display = 'block';
+                                data.forEach(place => {
+                                    const div = document.createElement('div');
+                                    div.className = 'result-item';
+                                    const name = place.display_name.split(',')[0];
+                                    const addr = place.display_name.split(',').slice(1,3).join(',');
+                                    
+                                    div.innerHTML = `
+                                        <i class="fas fa-map-marker-alt"></i> 
+                                        <div>
+                                            <strong style="color:#202124">${name}</strong>
+                                            <div style="color:#70757a; font-size:12px;">${addr}</div>
+                                        </div>`;
+                                    
+                                    div.onclick = () => {
+                                        app.selectResult(place);
+                                        resultsBox.style.display = 'none';
+                                        document.getElementById('place-input').value = "";
+                                    };
+                                    resultsBox.appendChild(div);
+                                });
+                            }
+                        });
+                }, 300);
+            },
+
+            selectResult: (place) => {
+                const lat = parseFloat(place.lat);
+                const lng = parseFloat(place.lon);
+                const name = place.display_name.split(',')[0];
+
+                if(state.currentStep === 1) {
+                    app.setHome({lat, lng}, name);
+                } else {
+                    app.addStop(name, lat, lng);
+                }
+            },
+
+            addStop: (name, lat, lng) => {
+                state.stops.push({name, lat, lng});
+                
+                // Blue Google Dot
+                const icon = L.divIcon({
+                    className: 'stop-pin',
+                    html: '<div class="g-pin-blue"></div>',
+                    iconSize: [14, 14]
                 });
+                L.marker([lat, lng], {icon: icon}).addTo(state.map).bindPopup(name).openPopup();
 
                 // Add to List
                 const list = document.getElementById('stops-list');
                 document.getElementById('empty-state').style.display = 'none';
-                
-                const item = document.createElement('div');
-                item.className = 'stop-item';
-                item.innerHTML = `
-                    <i class="fas fa-store"></i>
-                    <div class="stop-text">
-                        <strong>${place.name}</strong>
-                        <small>${place.formatted_address.split(',')[0]}</small>
-                    </div>
-                `;
-                list.appendChild(item);
+                list.innerHTML += `
+                    <div class="stop-item">
+                        <i class="fas fa-store"></i>
+                        <div class="stop-text">
+                            <strong>${name}</strong>
+                            <div style="font-size:12px; color:#70757a;">Stop Added</div>
+                        </div>
+                    </div>`;
 
-                // Update Route Line
-                app.updateRoute();
-
+                app.drawRoute();
                 document.getElementById('finish-stops-btn').style.display = 'flex';
             },
 
-            updateRoute: () => {
-                if(appData.stops.length === 0) return;
-
-                const waypoints = appData.stops.map(stop => ({
-                    location: stop.location,
-                    stopover: true
-                }));
-
-                // Start: Home -> Stops -> End: Home
-                // Or usually: Store -> Home? 
-                // Let's assume User is at Home. They want: Stop 1 -> Stop 2 -> Home.
+            drawRoute: () => {
+                if(state.routeLine) state.map.removeLayer(state.routeLine);
                 
-                // For Visuals, let's route from First Stop -> Last Stop -> Home
-                // Actually, a loop: Home -> Stop 1 -> Stop 2 -> Home
-                
-                const request = {
-                    origin: appData.homeLocation,
-                    destination: appData.homeLocation, // Round trip
-                    waypoints: waypoints,
-                    optimizeWaypoints: true,
-                    travelMode: 'DRIVING'
-                };
+                const points = state.stops.map(s => [s.lat, s.lng]);
+                points.push([state.userLoc.lat, state.userLoc.lng]); // End at home
 
-                directionsService.route(request, (result, status) => {
-                    if (status === 'OK') {
-                        directionsRenderer.setDirections(result);
-                    }
-                });
+                // Blue Google Route Line
+                state.routeLine = L.polyline(points, {color: '#1a73e8', weight: 5, opacity: 0.8}).addTo(state.map);
+                state.map.fitBounds(state.routeLine.getBounds(), {padding: [50,50]});
             },
 
             goToStep: (num) => {
                 document.querySelectorAll('.step-view').forEach(el => el.classList.remove('active'));
                 document.querySelectorAll('.dot').forEach(el => el.classList.remove('active'));
-                
                 document.getElementById('step-' + num).classList.add('active');
                 for(let i=1; i<=num; i++) document.getElementById('dot-'+i).classList.add('active');
                 
-                appData.step = num;
+                state.currentStep = num;
                 const input = document.getElementById('place-input');
-
-                if(num === 1) {
-                    input.placeholder = "Search home address...";
-                    input.value = "";
-                } else if (num === 2) {
+                if(num === 1) input.placeholder = "Search home address...";
+                else if (num === 2) {
                     input.placeholder = "Search for stores (e.g. Walmart)...";
-                    input.value = "";
-                    map.setZoom(12); // Zoom out to see area
+                    state.map.setZoom(12);
                 }
             },
 
             calcTotal: () => {
                 const speed = document.querySelector('input[name="speed"]:checked').value;
-                let rush = 0;
-                
-                if (speed === 'rush') {
-                    document.getElementById('bribe-section').style.display = 'block';
-                    document.getElementById('row-rush').style.display = 'flex';
-                    rush = parseFloat(document.getElementById('bribe-val').value) || 0;
-                } else {
-                    document.getElementById('bribe-section').style.display = 'none';
-                    document.getElementById('row-rush').style.display = 'none';
-                }
-
+                let rush = (speed === 'rush') ? parseFloat(document.getElementById('bribe-val').value) : 0;
+                document.getElementById('bribe-section').style.display = (speed === 'rush') ? 'block' : 'none';
+                document.getElementById('row-rush').style.display = (speed === 'rush') ? 'flex' : 'none';
                 document.getElementById('rush-price').innerText = '$' + rush.toFixed(2);
                 document.getElementById('total-price').innerText = '$' + (15 + 5 + rush).toFixed(2);
             }
         };
+
+        // Init
+        document.getElementById('place-input').addEventListener('input', app.handleSearch);
+        window.onload = initMap;
     </script>
 </body>
 </html>
