@@ -3,98 +3,127 @@
 <head>
 <meta charset="UTF-8">
 <title>Country Cart</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+:root {
+  --primary: #000;
+  --accent: #f2f2f2;
+  --radius: 18px;
+}
+
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: white;
-    text-align: center;
+  margin: 0;
+  background: white;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-align: center;
 }
 
 header {
-    padding: 30px 0 10px;
+  padding: 30px 0 10px;
 }
 
 header h1 {
-    font-family: "cursive";
-    font-size: 42px;
-    font-weight: normal;
+  font-family: cursive;
+  font-size: 40px;
+  margin: 0;
 }
 
-#deliverBtn {
-    margin-top: 80px;
-    padding: 18px 40px;
-    font-size: 18px;
-    border: none;
-    border-radius: 50px;
-    background: black;
-    color: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
+#mainAction {
+  margin-top: 80px;
 }
 
-#deliverBtn:hover {
-    transform: scale(1.05);
-    background: #333;
+.primary-btn {
+  padding: 18px 46px;
+  font-size: 18px;
+  border-radius: 50px;
+  border: none;
+  background: var(--primary);
+  color: white;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    align-items: center;
-    justify-content: center;
+.primary-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
 }
 
-.modal-content {
-    background: white;
-    width: 90%;
-    max-width: 420px;
-    padding: 25px;
-    border-radius: 12px;
-    text-align: left;
+/* Bottom Sheet */
+.sheet {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: flex-end;
+  background: rgba(0,0,0,0.4);
 }
 
-.modal-content h2 {
-    text-align: center;
-    margin-bottom: 15px;
+.sheet-content {
+  background: white;
+  width: 100%;
+  max-height: 90%;
+  border-radius: 24px 24px 0 0;
+  padding: 20px;
+  animation: slideUp 0.35s ease;
 }
 
-.modal-content input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
-.nextBtn {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 30px;
-    background: black;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
+.step {
+  display: none;
 }
 
-.nextBtn:hover {
-    background: #333;
+.step.active {
+  display: block;
 }
 
-#stopInfo {
-    margin-top: 40px;
-    display: none;
+.progress {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
 }
 
-.infoBox {
-    max-width: 500px;
-    margin: auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    text-align: left;
+.card {
+  background: var(--accent);
+  padding: 14px;
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.footer-btn {
+  margin-top: 15px;
+}
+
+/* Summary */
+#summary {
+  display: none;
+  margin-top: 40px;
+}
+
+.summary-card {
+  max-width: 500px;
+  margin: auto;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.success {
+  text-align: center;
+  font-size: 18px;
+  margin-bottom: 10px;
 }
 </style>
 </head>
@@ -102,70 +131,99 @@ header h1 {
 <body>
 
 <header>
-    <h1>Country Cart</h1>
+  <h1>Country Cart</h1>
 </header>
 
-<button id="deliverBtn">Deliver My Cart</button>
-
-<div class="modal" id="modal">
-    <div class="modal-content">
-        <h2>Delivery Information</h2>
-
-        <input id="name" placeholder="Customer Name">
-        <input id="phone" placeholder="Phone Number">
-        <input id="homeAddress" placeholder="Home Delivery Address">
-        <input id="storeName" placeholder="Pickup Store Name">
-        <input id="storeAddress" placeholder="Pickup Store Address">
-        <input id="orderNumber" placeholder="Order Number">
-        <input type="file" id="screenshot" accept="image/*">
-
-        <button class="nextBtn" onclick="submitDelivery()">Next</button>
-    </div>
+<div id="mainAction">
+  <button class="primary-btn" onclick="openSheet()">Deliver My Cart</button>
 </div>
 
-<div id="stopInfo">
-    <div class="infoBox">
-        <h3>Delivery Stop Added</h3>
-        <p><strong>Name:</strong> <span id="outName"></span></p>
-        <p><strong>Phone:</strong> <span id="outPhone"></span></p>
-        <p><strong>Pickup:</strong> <span id="outStore"></span></p>
-        <p><strong>Delivery Address:</strong> <span id="outHome"></span></p>
-        <p><strong>Order #:</strong> <span id="outOrder"></span></p>
-        <p><strong>Estimated Distance:</strong> <span id="outMiles"></span> miles</p>
+<!-- Bottom Sheet -->
+<div class="sheet" id="sheet">
+
+  <div class="sheet-content">
+
+    <!-- STEP 1 -->
+    <div class="step active" id="step1">
+      <div class="progress">Step 1 of 2</div>
+
+      <div class="card">
+        <input id="name" placeholder="Customer Name" required>
+        <input id="phone" placeholder="Phone Number" required>
+        <input id="home" placeholder="Delivery Address" required>
+        <input id="store" placeholder="Store Name" required>
+        <input id="storeAddr" placeholder="Store Address" required>
+        <input id="order" placeholder="Order Number" required>
+        <input type="file" id="image" accept="image/*">
+      </div>
+
+      <button class="primary-btn footer-btn" onclick="nextStep()">Next</button>
     </div>
+
+    <!-- STEP 2 -->
+    <div class="step" id="step2">
+      <div class="progress">Step 2 of 2</div>
+
+      <div class="card" id="review"></div>
+
+      <button class="primary-btn footer-btn" onclick="confirm()">Confirm Delivery</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Summary -->
+<div id="summary">
+  <div class="summary-card">
+    <div class="success">✅ Delivery Stop Added</div>
+    <p><strong>Name:</strong> <span id="sName"></span></p>
+    <p><strong>Phone:</strong> <span id="sPhone"></span></p>
+    <p><strong>Pickup:</strong> <span id="sStore"></span></p>
+    <p><strong>Delivery:</strong> <span id="sHome"></span></p>
+    <p><strong>Order #:</strong> <span id="sOrder"></span></p>
+    <p><strong>Estimated Distance:</strong> <span id="sMiles"></span> miles</p>
+  </div>
 </div>
 
 <script>
-const modal = document.getElementById("modal");
+function openSheet() {
+  document.getElementById("sheet").style.display = "flex";
+}
 
-document.getElementById("deliverBtn").onclick = () => {
-    modal.style.display = "flex";
-};
+function nextStep() {
+  const required = ["name","phone","home","store","storeAddr","order"];
+  for (let id of required) {
+    if (!document.getElementById(id).value.trim()) {
+      alert("Please complete all required fields.");
+      return;
+    }
+  }
 
-function submitDelivery() {
-    modal.style.display = "none";
+  const review = `
+    <p><strong>Name:</strong> ${name.value}</p>
+    <p><strong>Phone:</strong> ${phone.value}</p>
+    <p><strong>Pickup:</strong> ${store.value}</p>
+    <p><strong>Delivery:</strong> ${home.value}</p>
+    <p><strong>Order #:</strong> ${order.value}</p>
+  `;
+  document.getElementById("review").innerHTML = review;
 
-    document.getElementById("outName").textContent =
-        document.getElementById("name").value;
+  step1.classList.remove("active");
+  step2.classList.add("active");
+}
 
-    document.getElementById("outPhone").textContent =
-        document.getElementById("phone").value;
+function confirm() {
+  document.getElementById("sheet").style.display = "none";
 
-    document.getElementById("outStore").textContent =
-        document.getElementById("storeName").value + " - " +
-        document.getElementById("storeAddress").value;
+  sName.textContent = name.value;
+  sPhone.textContent = phone.value;
+  sStore.textContent = store.value + " - " + storeAddr.value;
+  sHome.textContent = home.value;
+  sOrder.textContent = order.value;
 
-    document.getElementById("outHome").textContent =
-        document.getElementById("homeAddress").value;
+  sMiles.textContent = (Math.random() * 15 + 3).toFixed(1);
 
-    document.getElementById("outOrder").textContent =
-        document.getElementById("orderNumber").value;
-
-    // Simulated distance calculation
-    const miles = (Math.random() * 15 + 2).toFixed(1);
-    document.getElementById("outMiles").textContent = miles;
-
-    document.getElementById("stopInfo").style.display = "block";
+  document.getElementById("summary").style.display = "block";
 }
 </script>
 
