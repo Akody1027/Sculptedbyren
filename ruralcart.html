@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RuralDrop | Real Map & Multi-Driver</title>
+    <title>RuralDrop | GPS & Loaded Routes</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -11,23 +11,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         [v-cloak] { display: none; }
-        #map { height: 350px; width: 100%; z-index: 10; }
+        #map { height: 350px; width: 100%; z-index: 10; border-bottom: 4px solid #4f46e5; }
+        .autofill-results { position: absolute; width: 100%; background: white; z-index: 100; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .tab-active { color: #4f46e5; border-bottom: 4px solid #4f46e5; }
-        .login-pad { background: rgba(255,255,255,0.9); backdrop-filter: blur(15px); }
     </style>
 </head>
-<body class="bg-slate-50 antialiased">
+<body class="bg-slate-50 antialiased font-sans">
 
 <div id="app" v-cloak>
-    <div v-if="view === 'driver' && !isAuthenticated" class="fixed inset-0 z-[100] login-pad flex items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border border-slate-100">
+    <div v-if="view === 'driver' && !isAuthenticated" class="fixed inset-0 z-[100] bg-white/90 backdrop-blur-md flex items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border">
             <h2 class="text-2xl font-black mb-2">Driver Access</h2>
-            <p class="text-slate-500 text-sm mb-8">Enter your unique 6-digit PIN</p>
-            <input v-model="pinInput" type="password" maxlength="6" class="text-center text-4xl tracking-[0.5em] w-full border-b-2 border-slate-200 focus:border-indigo-600 outline-none pb-4 mb-8 font-black">
-            <div class="grid grid-cols-1 gap-3">
-                <button @click="attemptLogin" class="bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-indigo-200">Unlock</button>
-                <button @click="view = 'seeker'" class="text-slate-400 text-xs font-bold py-2">Return to Seeker</button>
-            </div>
+            <input v-model="pinInput" type="password" maxlength="6" class="text-center text-4xl tracking-widest w-full border-b-2 border-slate-200 outline-none pb-4 mb-8 font-black">
+            <button @click="attemptLogin" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black">Unlock</button>
+            <button @click="view = 'seeker'" class="mt-4 text-slate-400 text-xs font-bold uppercase">Back</button>
         </div>
     </div>
 
@@ -43,43 +40,59 @@
     </nav>
 
     <main v-if="view === 'seeker'" class="max-w-xl mx-auto p-6 min-h-[80vh] flex flex-col justify-center">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 relative">
             <div v-if="seekerStep === 1">
-                <h2 class="text-3xl font-black mb-6">New Order</h2>
+                <h2 class="text-3xl font-black mb-6 tracking-tight">New Order</h2>
                 <div class="space-y-4">
-                    <input v-model="newOrder.name" placeholder="Your Name" class="w-full p-4 bg-slate-50 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-indigo-500">
-                    <div v-for="(pickup, i) in newOrder.pickups" :key="i" class="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
-                        <input v-model="pickup.location" placeholder="Pick up from (e.g. Walmart)" class="w-full bg-transparent font-bold outline-none mb-1">
+                    <input v-model="newOrder.name" placeholder="Your Name" class="w-full p-4 bg-slate-50 rounded-2xl font-bold outline-none">
+                    
+                    <div v-for="(pickup, i) in newOrder.pickups" :key="i" class="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100 relative">
+                        <input @input="searchAddress($event, i)" v-model="pickup.location" placeholder="Store Address" class="w-full bg-transparent font-bold outline-none mb-1">
+                        <div v-if="suggestions[i]" class="autofill-results">
+                            <div v-for="res in suggestions[i]" @click="selectAddress(res, i)" class="p-3 border-b text-xs hover:bg-slate-50 cursor-pointer">
+                                {{ res.properties.label }}
+                            </div>
+                        </div>
                         <input v-model="pickup.items" placeholder="Items to get" class="w-full bg-transparent text-sm outline-none opacity-60">
                     </div>
-                    <button @click="addPickup" class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">+ Add Store</button>
+                    <button @click="addPickup" class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">+ Add Store (+$5.00 fee)</button>
                 </div>
-                <button @click="seekerStep = 2" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black mt-8 shadow-xl">Next: Delivery Address</button>
+                <button @click="seekerStep = 2" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black mt-8">Next: Delivery</button>
             </div>
 
             <div v-if="seekerStep === 2">
-                <h2 class="text-3xl font-black mb-8">Delivery</h2>
-                <input v-model="newOrder.delivery" placeholder="Where is it going?" class="w-full p-5 bg-slate-50 rounded-2xl font-bold mb-8 outline-none">
-                <div class="grid grid-cols-1 gap-4">
-                    <button @click="submitSeekerOrder('batch')" class="p-6 border-2 border-slate-100 rounded-3xl text-left hover:border-indigo-600 transition-all">
-                        <span class="block font-black text-2xl text-indigo-600">$20.00</span>
+                <h2 class="text-3xl font-black mb-8 tracking-tight">Delivery</h2>
+                <div class="relative mb-8">
+                    <input @input="searchAddress($event, 'delivery')" v-model="newOrder.delivery" placeholder="Where is it going?" class="w-full p-5 bg-slate-50 rounded-2xl font-bold outline-none">
+                    <div v-if="suggestions['delivery']" class="autofill-results">
+                        <div v-for="res in suggestions['delivery']" @click="selectAddress(res, 'delivery')" class="p-3 border-b text-xs hover:bg-slate-50 cursor-pointer">
+                            {{ res.properties.label }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between font-black text-sm uppercase text-slate-400">
+                        <span>Extra Stop Fees</span>
+                        <span>${{ (newOrder.pickups.length - 1) * 5 }}.00</span>
+                    </div>
+                    <button @click="submitSeekerOrder('batch')" class="p-6 border-2 border-slate-100 rounded-3xl text-left hover:border-indigo-600 transition-all w-full">
+                        <span class="block font-black text-2xl text-indigo-600">${{ 20 + (newOrder.pickups.length - 1) * 5 }}.00</span>
                         <span class="block text-xs font-bold text-slate-400 uppercase">Standard Batch Run</span>
                     </button>
-                    <button @click="submitSeekerOrder('emergency')" class="p-6 border-2 border-amber-500 bg-amber-50 rounded-3xl text-left">
-                        <span class="block font-black text-2xl text-amber-600">$60.00</span>
-                        <span class="block text-xs font-bold text-amber-700 uppercase">Priority Emergency</span>
+                    <button @click="submitSeekerOrder('emergency')" class="p-6 border-2 border-amber-500 bg-amber-50 rounded-3xl text-left w-full">
+                        <span class="block font-black text-2xl text-amber-600">${{ 60 + (newOrder.pickups.length - 1) * 5 }}.00</span>
+                        <span class="block text-xs font-bold text-amber-700 uppercase">Emergency Dispatch</span>
                     </button>
                 </div>
-                <button @click="seekerStep = 1" class="w-full text-slate-300 font-bold mt-8 text-sm uppercase">Go Back</button>
             </div>
         </div>
     </main>
 
     <main v-if="view === 'driver' && isAuthenticated" class="max-w-4xl mx-auto pb-24">
-        <div id="map" class="border-b shadow-inner"></div>
-
+        <div id="map"></div>
         <div class="bg-white flex border-b sticky top-[69px] z-40">
-            <button @click="activeTab = 'current'" :class="activeTab === 'current' ? 'tab-active' : 'text-slate-400'" class="flex-1 py-4 text-[10px] font-black uppercase tracking-widest">Current Run</button>
+            <button @click="activeTab = 'current'; updateMap()" :class="activeTab === 'current' ? 'tab-active' : 'text-slate-400'" class="flex-1 py-4 text-[10px] font-black uppercase tracking-widest">Current Run</button>
             <button @click="activeTab = 'future'" :class="activeTab === 'future' ? 'tab-active' : 'text-slate-400'" class="flex-1 py-4 text-[10px] font-black uppercase tracking-widest">Future Run</button>
             <button @click="activeTab = 'settings'" :class="activeTab === 'settings' ? 'tab-active' : 'text-slate-400'" class="flex-1 py-4 text-[10px] font-black uppercase tracking-widest">Settings</button>
         </div>
@@ -97,30 +110,6 @@
                     <button @click="completeOrder(order.id)" class="bg-green-100 text-green-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase">Delivered</button>
                 </div>
             </div>
-
-            <div v-if="activeTab === 'settings'" class="space-y-4">
-                <div class="bg-white p-8 rounded-[2rem] shadow-lg border border-slate-100">
-                    <h3 class="font-black text-xs uppercase text-slate-400 mb-6">Manage Driver PINs</h3>
-                    <div class="flex gap-2 mb-6">
-                        <input v-model="newDriverPin" placeholder="New 6-digit PIN" class="flex-1 bg-slate-50 p-4 rounded-xl font-black outline-none border border-slate-200">
-                        <button @click="addNewDriver" class="bg-indigo-600 text-white px-6 rounded-xl font-black text-xs">ADD DRIVER</button>
-                    </div>
-                    <div class="space-y-2">
-                        <div v-for="p in allDriverPins" class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                            <span class="font-black text-slate-700">Driver PIN: {{ p }}</span>
-                            <button @click="deletePin(p)" class="text-red-400 text-xs"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>
-                </div>
-                <button @click="logout" class="w-full bg-red-50 text-red-500 py-4 rounded-2xl font-black text-xs uppercase tracking-widest">Sign Out of Dashboard</button>
-            </div>
-
-            <div v-if="activeTab === 'future'" class="space-y-3">
-                 <div v-for="order in futureRun" :key="order.id" class="bg-white p-5 rounded-3xl border border-slate-200 flex justify-between items-center">
-                    <h4 class="font-black text-sm">{{ order.customer }}</h4>
-                    <button @click="moveToCurrent(order.id)" class="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl font-black text-[10px]">ADD TO RUN</button>
-                </div>
-            </div>
         </div>
     </main>
 </div>
@@ -136,102 +125,99 @@ createApp({
             seekerStep: 1,
             isAuthenticated: false,
             pinInput: '',
-            newDriverPin: '',
-            allDriverPins: ['123456'],
+            suggestions: {},
             map: null,
-            markers: [],
-            newOrder: { name: '', pickups: [{location: '', items: ''}], delivery: '' },
-            currentRun: [
-                { id: 1, customer: 'Sample A', type: 'emergency', pickups: [{lat: 41.25, lng: -95.85, name: 'Walmart'}], dLat: 41.28, dLng: -95.80 },
-                { id: 2, customer: 'Sample B', type: 'batch', pickups: [{lat: 41.25, lng: -95.85, name: 'Walmart'}], dLat: 41.30, dLng: -95.90 }
-            ],
+            driverLoc: [41.25, -95.85], // Default, will be updated by GPS
+            settings: { emergencyBase: 60 },
+            newOrder: { name: '', pickups: [{location: '', lat: null, lng: null, items: ''}], delivery: '', dLat: null, dLng: null },
+            currentRun: [],
             futureRun: []
         }
     },
     methods: {
-        initMap() {
-            setTimeout(() => {
-                this.map = L.map('map').setView([41.25, -95.85], 12);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.map);
-                this.drawRoutes();
-            }, 100);
+        async searchAddress(event, key) {
+            const query = event.target.value;
+            if (query.length < 3) return;
+            const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`);
+            const data = await res.json();
+            this.suggestions[key] = data.features;
         },
-        drawRoutes() {
-            if (!this.map) return;
-            // Clear existing layers
-            this.map.eachLayer((layer) => { if (layer instanceof L.Polyline || layer instanceof L.Marker) this.map.removeLayer(layer); });
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.map);
-
-            const startPos = [41.24, -95.88]; // Driver Home
-            const deliveryPath = [];
-
-            this.currentRun.forEach(o => {
-                const color = o.type === 'emergency' ? '#f59e0b' : '#4f46e5';
-                
-                // Pickup Phase (Dotted lines)
-                o.pickups.forEach(p => {
-                    L.polyline([startPos, [p.lat, p.lng]], {color: color, dashArray: '5, 10', weight: 2}).addTo(this.map);
-                    L.circleMarker([p.lat, p.lng], {radius: 5, color: '#334155', fillOpacity: 1}).addTo(this.map).bindPopup("Pickup: " + p.name);
-                });
-
-                // Delivery Segment
-                deliveryPath.push([o.dLat, o.dLng]);
-                L.circleMarker([o.dLat, o.dLng], {radius: 7, color: color, fillOpacity: 1}).addTo(this.map).bindPopup(o.customer);
-            });
-
-            // Connect deliveries in a single chain
-            if(deliveryPath.length > 1) {
-                L.polyline(deliveryPath, {color: '#6366f1', weight: 4}).addTo(this.map);
+        selectAddress(res, key) {
+            const coords = res.geometry.coordinates;
+            if (key === 'delivery') {
+                this.newOrder.delivery = res.properties.label;
+                this.newOrder.dLat = coords[1];
+                this.newOrder.dLng = coords[0];
+            } else {
+                this.newOrder.pickups[key].location = res.properties.label;
+                this.newOrder.pickups[key].lat = coords[1];
+                this.newOrder.pickups[key].lng = coords[0];
             }
+            this.suggestions[key] = null;
         },
         attemptLogin() {
-            if(this.allDriverPins.includes(this.pinInput)) {
+            if(this.pinInput === '123456') {
                 this.isAuthenticated = true;
-                this.initMap();
-            } else { alert("Access Denied"); }
-        },
-        addNewDriver() {
-            if(this.newDriverPin.length === 6) {
-                this.allDriverPins.push(this.newDriverPin);
-                localStorage.setItem('rd_pins', JSON.stringify(this.allDriverPins));
-                this.newDriverPin = '';
+                this.getDriverLocation();
             }
         },
-        deletePin(p) {
-            this.allDriverPins = this.allDriverPins.filter(x => x !== p);
-            localStorage.setItem('rd_pins', JSON.stringify(this.allDriverPins));
+        getDriverLocation() {
+            navigator.geolocation.getCurrentPosition((pos) => {
+                this.driverLoc = [pos.coords.latitude, pos.coords.longitude];
+                this.initMap();
+            }, () => this.initMap());
         },
-        logout() { this.isAuthenticated = false; this.pinInput = ''; },
+        initMap() {
+            setTimeout(() => {
+                this.map = L.map('map').setView(this.driverLoc, 12);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.map);
+                this.updateMap();
+            }, 100);
+        },
+        updateMap() {
+            if (!this.map) return;
+            this.map.eachLayer(l => { if (l instanceof L.Polyline || l instanceof L.Marker) this.map.removeLayer(l); });
+            
+            L.marker(this.driverLoc, {icon: L.divIcon({className: 'bg-blue-600 w-4 h-4 rounded-full border-2 border-white shadow-lg'})}).addTo(this.map).bindPopup("Driver Location");
+
+            let lastPoint = this.driverLoc;
+            let truckIsLoaded = false;
+
+            // Phase 1: All Pickups
+            this.currentRun.forEach(order => {
+                const color = order.type === 'emergency' ? '#f59e0b' : '#4f46e5';
+                order.pickups.forEach(p => {
+                    if (p.lat) {
+                        L.polyline([lastPoint, [p.lat, p.lng]], {color: '#334155', weight: 2, dashArray: '5, 10'}).addTo(this.map);
+                        L.circleMarker([p.lat, p.lng], {radius: 5, color: '#334155'}).addTo(this.map).bindPopup("Pickup: " + p.location);
+                        lastPoint = [p.lat, p.lng];
+                    }
+                });
+            });
+
+            // Phase 2: All Deliveries (Continuous Solid Line)
+            this.currentRun.forEach(order => {
+                if (order.dLat) {
+                    const color = order.type === 'emergency' ? '#f59e0b' : '#4f46e5';
+                    L.polyline([lastPoint, [order.dLat, order.dLng]], {color: color, weight: 4}).addTo(this.map);
+                    L.circleMarker([order.dLat, order.dLng], {radius: 7, color: color, fillOpacity: 1}).addTo(this.map).bindPopup(order.customer);
+                    lastPoint = [order.dLat, order.dLng];
+                }
+            });
+        },
         addPickup() { this.newOrder.pickups.push({location: '', items: ''}); },
         submitSeekerOrder(type) {
-            const o = {
-                id: Date.now(),
-                customer: this.newOrder.name,
-                total: type === 'emergency' ? 60 : 20,
-                type: type,
-                pickups: [{lat: 41.25, lng: -95.85, name: this.newOrder.pickups[0].location}],
-                dLat: 41.25 + (Math.random() * 0.1), dLng: -95.85 + (Math.random() * 0.1)
-            };
-            if(type === 'emergency') this.currentRun.push(o);
-            else this.futureRun.push(o);
-            this.seekerStep = 1;
-            this.newOrder = { name: '', pickups: [{location: '', items: ''}], delivery: '' };
+            const stopFee = (this.newOrder.pickups.length - 1) * 5;
+            const price = (type === 'emergency' ? 60 : 20) + stopFee;
+            const o = { ...this.newOrder, id: Date.now(), total: price, type: type, pickups: [...this.newOrder.pickups] };
+            if(type === 'emergency') this.currentRun.push(o); else this.futureRun.push(o);
+            this.seekerStep = 1; this.newOrder = { name: '', pickups: [{location: '', items: ''}], delivery: '' };
             alert("Order Submitted!");
         },
         completeOrder(id) {
             this.currentRun = this.currentRun.filter(o => o.id !== id);
-            if(this.currentRun.length === 0 && this.futureRun.length > 0) {
-                if(confirm("All delivered! Start Future Run now?")) {
-                    this.currentRun = [...this.futureRun];
-                    this.futureRun = [];
-                }
-            }
-            this.drawRoutes();
+            this.updateMap();
         }
-    },
-    mounted() {
-        const p = localStorage.getItem('rd_pins');
-        if(p) this.allDriverPins = JSON.parse(p);
     }
 }).mount('#app');
 </script>
