@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#2ecc71">
+    <meta name="theme-color" content="#e67e22"> <!-- Burnt Orange -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>RuralRun</title>
+    <title>Fetch</title>
 
-    <!-- 1. External Libraries (Leaflet for Maps, FontAwesome for Icons) -->
+    <!-- External Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 
-    <!-- 2. Professional App Styling -->
     <style>
         :root {
-            --primary: #2ecc71; /* Uber Green */
-            --primary-dark: #27ae60;
-            --secondary: #3498db; /* Driver Blue */
+            --primary: #e67e22; /* Fetch Orange */
+            --primary-dark: #d35400;
+            --secondary: #2c3e50; /* Slate Blue */
             --danger: #e74c3c;
             --dark: #2c3e50;
             --light: #f5f6fa;
@@ -48,7 +47,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            padding-bottom: 90px; /* Space for nav */
+            padding-bottom: 90px;
             animation: fadeIn 0.3s ease;
         }
 
@@ -90,7 +89,7 @@
         .btn-red { background: var(--danger); }
         .btn-outline { background: transparent; border: 2px solid #ddd; color: var(--dark); }
 
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 14px;
             border: 2px solid #ecf0f1;
@@ -101,7 +100,23 @@
         }
         input:focus { outline: none; border-color: var(--primary); }
 
-        /* --- Map Container --- */
+        /* --- Gateway --- */
+        .gateway-split {
+            height: 50vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .gateway-customer { background: white; color: var(--primary); }
+        .gateway-driver { background: var(--secondary); color: white; }
+        .gateway-driver:active { opacity: 0.9; }
+
+        /* --- Map --- */
         #map-container {
             height: 250px;
             width: 100%;
@@ -116,7 +131,7 @@
             bottom: 0;
             width: 100%;
             background: white;
-            display: none; /* Hidden on gateway */
+            display: none;
             justify-content: space-around;
             padding: 12px 0 calc(12px + var(--safe-bottom)) 0;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
@@ -131,95 +146,56 @@
         .nav-item.active { color: var(--primary); font-weight: bold; }
         .nav-icon { font-size: 22px; display: block; margin-bottom: 4px; }
 
-        /* --- Toggle Switch --- */
-        .switch {
-            position: relative; display: inline-block; width: 50px; height: 28px; float: right;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ccc; transition: .4s; border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px;
-            background-color: white; transition: .4s; border-radius: 50%;
-        }
-        input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(22px); }
-
-        /* --- Invoice/Receipt Rows --- */
+        /* --- Invoice Rows --- */
         .invoice-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
         .invoice-row.total { font-weight: bold; font-size: 18px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
         .invoice-row.fee { color: #7f8c8d; font-size: 12px; }
 
-        /* --- Gateway Specific --- */
-        .gateway-split {
-            height: 50vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .gateway-customer { background: white; color: var(--primary); }
-        .gateway-driver { background: var(--secondary); color: white; }
-        .gateway-split:active { opacity: 0.9; }
-
-        /* --- Badge --- */
-        .badge { background: #e8f8f5; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        /* --- Badges --- */
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .badge-pending { background: #f1c40f; color: #333; }
+        .badge-success { background: #2ecc71; color: white; }
     </style>
 </head>
 <body>
 
     <!-- ================= VIEWS ================= -->
 
-    <!-- 1. GATEWAY (First Load) -->
+    <!-- 1. GATEWAY (Landing) -->
     <div id="view-gateway" style="display:block; padding:0; height:100vh;">
-        <div class="gateway-split gateway-customer" onclick="app.openAuth('customer')">
-            <i class="fas fa-shopping-basket fa-3x"></i>
-            <h1>Order Delivery</h1>
-            <p>Get goods delivered to your door.</p>
+        <!-- Customer: No Login Required -->
+        <div class="gateway-split gateway-customer" onclick="app.guestEntry()">
+            <i class="fas fa-dog fa-3x"></i>
+            <h1>Fetch</h1>
+            <p>Order Delivery (Guest)</p>
         </div>
-        <div class="gateway-split gateway-driver" onclick="app.openAuth('driver')">
+        <!-- Driver: Login Required -->
+        <div class="gateway-split gateway-driver" onclick="app.navTo('auth')">
             <i class="fas fa-truck-pickup fa-3x"></i>
-            <h1>Drive & Earn</h1>
-            <p>Join the fleet. Be your own boss.</p>
+            <h1>Driver Login</h1>
+            <p>Log in to access your routes.</p>
         </div>
     </div>
 
-    <!-- 2. AUTHENTICATION -->
+    <!-- 2. AUTHENTICATION (Drivers Only) -->
     <div id="view-auth" class="view">
-        <h2 id="auth-title" style="margin-top:40px;">Welcome</h2>
-        <p id="auth-subtitle">Sign in to continue</p>
+        <h2 style="margin-top:40px;">Driver Access</h2>
+        <p>Sign in to your account.</p>
         
         <div class="card">
             <input type="email" id="email" placeholder="Email Address">
             <input type="password" id="password" placeholder="Password">
             
-            <div id="driver-fields" style="display:none;">
-                <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
-                <p style="font-size:12px; font-weight:bold;">DRIVER APPLICATION</p>
-                <input type="text" placeholder="Full Name">
-                <input type="text" placeholder="Vehicle Make/Model">
-                <input type="text" placeholder="License Number">
-            </div>
-
-            <button class="btn" onclick="app.login()">
-                <span id="auth-btn-text">Sign In</span>
-                <i class="fas fa-arrow-right"></i>
-            </button>
+            <button class="btn btn-blue" onclick="app.login()">Sign In / Sign Up</button>
             <button class="btn btn-outline" onclick="app.navTo('gateway')">Back</button>
         </div>
     </div>
 
-    <!-- 3. CUSTOMER DASHBOARD -->
+    <!-- 3. CUSTOMER DASHBOARD (Guest Mode) -->
     <div id="view-customer" class="view">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <h2>Order Delivery</h2>
-            <div class="badge"><i class="fas fa-star"></i> VIP</div>
+            <div class="badge badge-success">Guest</div>
         </div>
 
         <!-- Address Selection -->
@@ -231,32 +207,35 @@
             <input type="text" placeholder="Start typing store name (e.g. Walmart)...">
         </div>
 
+        <!-- Contact Info (Required for Guests) -->
+        <div class="card">
+            <h3>Contact Info</h3>
+            <input type="text" placeholder="Your Name">
+            <input type="tel" placeholder="Mobile Number (for updates)">
+        </div>
+
         <!-- Delivery Type Selection -->
         <div class="card">
             <h3>Delivery Speed</h3>
-            
-            <!-- Standard -->
             <label style="display:flex; align-items:center; margin-bottom:15px;" onclick="app.updateTotal()">
                 <input type="radio" name="speed" value="standard" checked style="width:20px; margin-right:10px;">
                 <div>
-                    <strong>Standard (Waitlist)</strong><br>
-                    <small>Delivered Tomorrow • Flat Fee</small>
+                    <strong>Standard</strong><br>
+                    <small>Waitlist • Flat Fee</small>
                 </div>
                 <div style="margin-left:auto;">$15.00</div>
             </label>
 
-            <!-- Rush -->
             <label style="display:flex; align-items:center;" onclick="app.updateTotal()">
                 <input type="radio" name="speed" value="rush" style="width:20px; margin-right:10px;">
                 <div>
                     <strong>⚡ Rush (Line Jumper)</strong><br>
-                    <small>Delivered Today • Dynamic Bid</small>
+                    <small>Delivered Today • Bribe Driver</small>
                 </div>
             </label>
             
-            <!-- Bid Input (Hidden unless Rush) -->
             <div id="rush-bid-container" style="display:none; margin-top:10px; padding:10px; background:var(--light); border-radius:8px;">
-                <label style="font-size:12px;">Your Offer (Bribe):</label>
+                <label style="font-size:12px;">Your Bribe Offer:</label>
                 <input type="number" id="rush-amount" value="25.00" onchange="app.updateTotal()">
             </div>
         </div>
@@ -268,7 +247,7 @@
                     <input type="checkbox" id="white-glove" style="width:20px; margin-right:10px;" onchange="app.updateTotal()">
                     <div>
                         <strong>🧤 White Glove Service</strong><br>
-                        <small>Driver inspects items for damage</small>
+                        <small>Verify items at store</small>
                     </div>
                 </div>
                 <div>+$1.99</div>
@@ -277,209 +256,246 @@
 
         <!-- Invoice -->
         <div class="card">
-            <div class="invoice-row"><span>Driver Pay (Base)</span><span>$15.00</span></div>
-            <div class="invoice-row fee"><span>Platform & Dispatch Fee</span><span>$5.00</span></div>
+            <div class="invoice-row"><span>Driver Pay</span><span>$15.00</span></div>
+            <div class="invoice-row fee"><span>Platform Fee</span><span>$5.00</span></div>
             <div class="invoice-row" id="rush-row" style="display:none; color:var(--primary);"><span>⚡ Rush Bribe</span><span id="rush-display">$0.00</span></div>
             <div class="invoice-row" id="glove-row" style="display:none;"><span>White Glove</span><span>$1.99</span></div>
             <div class="invoice-row total"><span>Total</span><span id="grand-total">$20.00</span></div>
             
-            <button class="btn" onclick="alert('Proceeding to Stripe Payment...')">
-                Pay & Book
-            </button>
+            <button class="btn" onclick="alert('Proceeding to Stripe Payment...')">Pay & Book</button>
         </div>
     </div>
 
     <!-- 4. DRIVER DASHBOARD -->
     <div id="view-driver" class="view">
-        <!-- Header Controls -->
-        <div class="card" style="background:var(--dark); color:white;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <h2 style="color:white; margin:0;">Hi, Wife</h2>
-                    <small>Admin / Dispatcher</small>
+        <!-- If Pending, show Application Status -->
+        <div id="driver-pending-msg" class="card" style="display:none; background:#fff3cd; border:1px solid #ffeeba;">
+            <h3>⚠️ Access Restricted</h3>
+            <p>Your application is pending approval from Dispatch. Check back later.</p>
+        </div>
+
+        <!-- If Active, show Controls -->
+        <div id="driver-active-controls">
+            <div class="card" style="background:var(--secondary); color:white;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h2 style="color:white; margin:0;">Dashboard</h2>
+                        <small>Status: Online</small>
+                    </div>
+                    <i class="fas fa-satellite-dish fa-2x"></i>
                 </div>
-                <label class="switch">
-                    <input type="checkbox" checked onchange="app.toggleStatus(this)">
-                    <span class="slider"></span>
-                </label>
             </div>
-            <p id="status-text" style="color:var(--primary); margin-top:5px; font-weight:bold;">🟢 OPEN: Accepting Orders</p>
-        </div>
 
-        <!-- Make Me Move Slider -->
-        <div class="card">
-            <h3>💰 Make Me Move</h3>
-            <p>Set today's rush fee minimum.</p>
-            <input type="range" min="10" max="50" step="5" value="25" oninput="document.getElementById('mmm-val').innerText = '$' + this.value">
-            <div style="text-align:center; font-weight:bold; font-size:24px; color:var(--primary);" id="mmm-val">$25</div>
-        </div>
-
-        <!-- Magnet Mode -->
-        <div class="card">
-            <div style="display:flex; justify-content:space-between;">
+            <!-- Magnet Mode -->
+            <div class="card">
                 <h3>🧲 Magnet Mode</h3>
-                <label class="switch">
-                    <input type="checkbox">
-                    <span class="slider"></span>
-                </label>
+                <p>Highlight orders within 3 miles of my route.</p>
+                <button class="btn btn-outline">Configure Radius</button>
             </div>
-            <p>Highlight orders within <strong>3 miles</strong> of my current route.</p>
-        </div>
 
-        <!-- Active Order List -->
-        <h3>Pending Orders</h3>
-        <div class="card">
-            <div style="display:flex; justify-content:space-between;">
-                <strong>Walmart -> Miller Farm</strong>
-                <span class="badge" style="background:var(--danger); color:white;">Rush</span>
-            </div>
-            <p>5 items • 8.2 miles</p>
-            <div style="display:flex; justify-content:space-between; margin-top:10px;">
-                <strong>Payout: $42.00</strong>
-                <button class="btn btn-blue" style="width:auto; padding:8px 15px; margin:0;" onclick="alert('Opening Route...')">Details</button>
+            <!-- Active Order List -->
+            <h3>Available Orders</h3>
+            <div class="card">
+                <div style="display:flex; justify-content:space-between;">
+                    <strong>Walmart -> Miller Farm</strong>
+                    <span class="badge badge-success">Rush</span>
+                </div>
+                <p>5 items • 8.2 miles</p>
+                <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                    <strong>Payout: $42.00</strong>
+                    <button class="btn btn-blue" style="width:auto; padding:8px 15px; margin:0;">Details</button>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- 5. PROFILE (Where Drivers Apply) -->
+    <div id="view-profile" class="view">
+        <h2>My Account</h2>
+        <div class="card">
+            <p><strong>Email:</strong> <span id="profile-email">driver@example.com</span></p>
+            <p><strong>Status:</strong> <span id="profile-status" class="badge badge-pending">General User</span></p>
+        </div>
+
+        <!-- Application Form (Hidden if already driver) -->
+        <div id="driver-application-form" class="card" style="display:none;">
+            <h3>🚛 Apply to Drive</h3>
+            <p>Fill out this form to join the Fetch fleet.</p>
+            <input type="text" id="app-name" placeholder="Full Legal Name">
+            <input type="text" id="app-vehicle" placeholder="Vehicle Make/Model">
+            <input type="text" id="app-license" placeholder="Driver's License #">
+            <input type="text" id="app-insurance" placeholder="Insurance Policy #">
+            <button class="btn btn-blue" onclick="app.submitApplication()">Submit Application</button>
+        </div>
+
+        <button class="btn btn-outline" onclick="app.logout()">Log Out</button>
+    </div>
+
     <!-- ================= NAV BAR ================= -->
     <div class="bottom-nav" id="main-nav">
-        <div class="nav-item active" id="nav-home" onclick="app.navToUserHome()">
+        <!-- Customer Nav -->
+        <div class="nav-item active" id="nav-home" onclick="app.navTo('customer')">
             <i class="fas fa-home nav-icon"></i> Home
         </div>
-        <div class="nav-item" onclick="alert('History Feature')">
-            <i class="fas fa-history nav-icon"></i> History
-        </div>
         <div class="nav-item" onclick="app.navTo('gateway')">
-            <i class="fas fa-sign-out-alt nav-icon"></i> Logout
+            <i class="fas fa-sign-out-alt nav-icon"></i> Exit
+        </div>
+    </div>
+
+    <div class="bottom-nav" id="driver-nav">
+        <!-- Driver Nav -->
+        <div class="nav-item" onclick="app.navTo('driver')">
+            <i class="fas fa-road nav-icon"></i> Routes
+        </div>
+        <div class="nav-item" onclick="app.navTo('profile')">
+            <i class="fas fa-user nav-icon"></i> Profile
         </div>
     </div>
 
     <!-- ================= LOGIC ================= -->
     <script>
-        // 1. MOCK FIREBASE CONFIG (Placeholders)
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "ruralrun.firebaseapp.com",
-            projectId: "ruralrun",
+        // MOCK DATABASE STATE
+        let currentUser = {
+            email: "",
+            role: "user", // 'user', 'pending', 'driver'
+            isLoggedIn: false
         };
 
-        // 2. APP LOGIC CONTROLLER
         const app = {
-            currentUserRole: 'customer', // 'customer' or 'driver'
             map: null,
 
-            // Navigation Handler
+            // Navigation
             navTo: (viewId) => {
-                // Hide all views
                 document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
                 document.getElementById('view-gateway').style.display = 'none';
+                document.getElementById('main-nav').style.display = 'none';
+                document.getElementById('driver-nav').style.display = 'none';
                 
-                // Show requested view
                 if(viewId === 'gateway') {
                     document.getElementById('view-gateway').style.display = 'block';
-                    document.getElementById('main-nav').style.display = 'none';
                 } else {
                     document.getElementById('view-' + viewId).classList.add('active');
+                    
+                    // Show correct Nav Bar
+                    if(currentUser.isLoggedIn && (viewId === 'driver' || viewId === 'profile')) {
+                        document.getElementById('driver-nav').style.display = 'flex';
+                        app.updateProfileView();
+                    } else if (viewId === 'customer') {
+                        document.getElementById('main-nav').style.display = 'flex';
+                    }
                 }
             },
 
-            // Auth Flow
-            openAuth: (role) => {
-                app.currentUserRole = role;
-                app.navTo('auth');
-                
-                if(role === 'driver') {
-                    document.getElementById('driver-fields').style.display = 'block';
-                    document.getElementById('auth-title').innerText = "Driver Application";
-                    document.getElementById('auth-btn-text').innerText = "Submit Application";
-                } else {
-                    document.getElementById('driver-fields').style.display = 'none';
-                    document.getElementById('auth-title').innerText = "Customer Login";
-                    document.getElementById('auth-btn-text').innerText = "Sign In";
-                }
+            // Guest Entry
+            guestEntry: () => {
+                currentUser.role = 'guest';
+                currentUser.isLoggedIn = false;
+                app.navTo('customer');
+                app.initMap();
             },
 
+            // Driver Login
             login: () => {
-                // SIMULATED LOGIN
-                if(app.currentUserRole === 'driver') {
+                const email = document.getElementById('email').value;
+                if(email) {
+                    // Simulate Login
+                    currentUser.email = email;
+                    currentUser.isLoggedIn = true;
+                    // Default role is 'user' until they apply
+                    currentUser.role = "user"; 
                     app.navTo('driver');
-                    document.getElementById('main-nav').style.display = 'flex';
-                } else {
-                    app.navTo('customer');
-                    document.getElementById('main-nav').style.display = 'flex';
-                    app.initMap(); // Load map when customer logs in
                 }
             },
 
-            navToUserHome: () => {
-                app.navTo(app.currentUserRole); // Go back to correct dashboard
+            logout: () => {
+                currentUser.isLoggedIn = false;
+                app.navTo('gateway');
             },
 
-            // Map Initialization (Leaflet)
+            // Application Logic
+            updateProfileView: () => {
+                document.getElementById('profile-email').innerText = currentUser.email;
+                
+                const statusSpan = document.getElementById('profile-status');
+                const form = document.getElementById('driver-application-form');
+
+                if(currentUser.role === 'user') {
+                    statusSpan.innerText = "Not Applied";
+                    statusSpan.className = "badge";
+                    form.style.display = 'block'; // Show Form
+                } else if (currentUser.role === 'pending') {
+                    statusSpan.innerText = "Pending Approval";
+                    statusSpan.className = "badge badge-pending";
+                    form.style.display = 'none';
+                } else if (currentUser.role === 'driver') {
+                    statusSpan.innerText = "Active Driver";
+                    statusSpan.className = "badge badge-success";
+                    form.style.display = 'none';
+                }
+            },
+
+            submitApplication: () => {
+                const name = document.getElementById('app-name').value;
+                if(name) {
+                    alert("Application Submitted! Status: Pending Approval.");
+                    currentUser.role = 'pending';
+                    app.updateProfileView();
+                    app.navTo('driver'); // Go back to dashboard to see pending message
+                } else {
+                    alert("Please fill out all fields.");
+                }
+            },
+
+            // Map Logic
             initMap: () => {
-                if(app.map) return; // Already loaded
+                if(app.map) return;
                 setTimeout(() => {
                     app.map = L.map('map-container').setView([35.0, -97.0], 13);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap'
-                    }).addTo(app.map);
-                    
-                    // Draggable Pin Logic
-                    const marker = L.marker([35.0, -97.0], {draggable: true}).addTo(app.map);
-                    marker.bindPopup("Drag me to your driveway!").openPopup();
-                }, 500); // Small delay to allow view to render
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(app.map);
+                    L.marker([35.0, -97.0], {draggable: true}).addTo(app.map)
+                        .bindPopup("Drag to your driveway").openPopup();
+                }, 500);
             },
 
-            // Pricing Calculator logic
+            // Calculator
             updateTotal: () => {
                 const speed = document.querySelector('input[name="speed"]:checked').value;
                 const whiteGlove = document.getElementById('white-glove').checked;
+                let rush = (speed === 'rush') ? (parseFloat(document.getElementById('rush-amount').value) || 0) : 0;
+                let glove = whiteGlove ? 1.99 : 0;
                 
-                let base = 15.00;
-                let fee = 5.00;
-                let rush = 0;
-                let glove = 0;
-
-                // 1. Handle Rush
-                if(speed === 'rush') {
-                    document.getElementById('rush-bid-container').style.display = 'block';
-                    document.getElementById('rush-row').style.display = 'flex';
-                    rush = parseFloat(document.getElementById('rush-amount').value) || 0;
-                } else {
-                    document.getElementById('rush-bid-container').style.display = 'none';
-                    document.getElementById('rush-row').style.display = 'none';
-                }
-
-                // 2. Handle White Glove
-                if(whiteGlove) {
-                    glove = 1.99;
-                    document.getElementById('glove-row').style.display = 'flex';
-                } else {
-                    document.getElementById('glove-row').style.display = 'none';
-                }
-
+                document.getElementById('rush-bid-container').style.display = (speed === 'rush') ? 'block' : 'none';
+                document.getElementById('rush-row').style.display = (speed === 'rush') ? 'flex' : 'none';
+                document.getElementById('glove-row').style.display = whiteGlove ? 'flex' : 'none';
+                
                 document.getElementById('rush-display').innerText = '$' + rush.toFixed(2);
-                
-                // 3. Final Math
-                let total = base + fee + rush + glove;
-                document.getElementById('grand-total').innerText = '$' + total.toFixed(2);
-            },
+                document.getElementById('grand-total').innerText = '$' + (15 + 5 + rush + glove).toFixed(2);
+            }
+        };
+        
+        // Initial Calculation
+        app.updateTotal();
 
-            // Driver Status Toggle
-            toggleStatus: (checkbox) => {
-                const text = document.getElementById('status-text');
-                if(checkbox.checked) {
-                    text.innerText = "🟢 OPEN: Accepting Orders";
-                    text.style.color = "var(--primary)";
+        // Driver Dashboard Logic Check
+        // If driver goes to dashboard but is pending/user, hide controls
+        const originalNavTo = app.navTo;
+        app.navTo = (viewId) => {
+            originalNavTo(viewId);
+            if(viewId === 'driver') {
+                if(currentUser.role === 'driver') {
+                    document.getElementById('driver-pending-msg').style.display = 'none';
+                    document.getElementById('driver-active-controls').style.display = 'block';
                 } else {
-                    text.innerText = "🔴 CLOSED: Waitlist Only";
-                    text.style.color = "var(--danger)";
+                    document.getElementById('driver-pending-msg').style.display = 'block';
+                    document.getElementById('driver-active-controls').style.display = 'none';
+                    
+                    if(currentUser.role === 'user') {
+                         document.getElementById('driver-pending-msg').innerHTML = 
+                         `<h3>👋 Welcome</h3><p>You are logged in. Go to <a href="#" onclick="app.navTo('profile')">Profile</a> to apply to drive.</p>`;
+                    }
                 }
             }
         };
-
-        // Initialize Pricing on Load
-        app.updateTotal();
 
     </script>
 </body>
