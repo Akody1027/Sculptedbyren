@@ -13,121 +13,68 @@
 </head>
 <body class="bg-slate-50 antialiased font-sans">
 <div id="app" v-cloak>
+    <div v-if="!isFirebaseConnected" class="bg-amber-500 text-white text-[10px] font-black py-1 text-center uppercase tracking-widest">
+        Local Preview Mode (No Database Sync)
+    </div>
+
     <nav class="bg-white px-6 py-4 flex justify-between items-center border-b sticky top-0 z-50">
         <div class="flex items-center gap-2">
             <div class="bg-indigo-600 text-white p-2 rounded-xl"><i class="fas fa-truck-fast"></i></div>
-            <h1 class="text-xl font-black text-slate-800 tracking-tighter uppercase">Rural<span class="text-indigo-600">Drop</span></h1>
+            <h1 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Rural<span class="text-indigo-600">Drop</span></h1>
         </div>
-        <span class="text-[10px] font-black bg-slate-100 px-3 py-1 rounded-full uppercase">Customer Mode</span>
     </nav>
-
-    <div v-if="showStripe" class="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl">
-            <h3 class="font-black text-xl mb-6">Secure Checkout</h3>
-            <div class="p-6 bg-slate-50 rounded-2xl mb-6 border">
-                <p class="text-[10px] font-black text-slate-400 uppercase">Total to Pay</p>
-                <p class="text-3xl font-black text-slate-900">${{ pendingTotal }}.00</p>
-            </div>
-            <button @click="confirmPayment" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black">Authorize Payment</button>
-            <button @click="showStripe = false" class="w-full text-slate-400 text-xs font-bold mt-4 uppercase">Cancel</button>
-        </div>
-    </div>
 
     <main class="max-w-xl mx-auto p-6">
         <div v-if="myOrder" class="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
             <div class="text-center mb-8">
                 <div class="w-16 h-16 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4"><i class="fas fa-check"></i></div>
-                <h2 class="text-2xl font-black">Order is Active</h2>
+                <h2 class="text-2xl font-black">Order Active</h2>
                 <p class="text-sm font-bold text-indigo-600 mt-1 uppercase">{{ myOrder.status }}</p>
             </div>
             <button @click="cancelOrder" class="w-full bg-red-50 text-red-600 py-4 rounded-2xl font-black text-xs uppercase">Cancel & Refund</button>
         </div>
 
         <div v-else class="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-            <h2 class="text-2xl font-black mb-8">Schedule a Delivery</h2>
+            <h2 class="text-2xl font-black mb-8">Schedule Delivery</h2>
             <div class="space-y-4">
-                <input v-model="newOrder.name" placeholder="Your Name" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border focus:border-indigo-600 outline-none">
-                <div v-for="(pickup, i) in newOrder.pickups" :key="i" class="relative">
-                    <div class="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
-                        <input @input="searchAddr($event, i)" v-model="pickup.location" placeholder="Pickup Store" class="w-full bg-transparent font-bold outline-none">
-                        <input v-model="pickup.items" placeholder="What are we getting?" class="w-full bg-transparent text-sm mt-1 outline-none opacity-40">
-                    </div>
-                    <div v-if="suggests[i]" class="absolute z-50 w-full bg-white shadow-xl rounded-xl mt-1 border overflow-hidden">
-                        <div v-for="res in suggests[i]" @click="pickAddr(res, i)" class="p-3 text-xs font-bold border-b hover:bg-indigo-50 cursor-pointer">{{ res.properties.label }}</div>
-                    </div>
+                <input v-model="newOrder.name" placeholder="Your Name" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border outline-none">
+                <div v-for="(pickup, i) in newOrder.pickups" :key="i" class="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
+                    <input v-model="pickup.location" placeholder="Pickup Store" class="w-full bg-transparent font-bold outline-none">
                 </div>
-                <button @click="addStop" class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">+ Add Store (+$5)</button>
+                <button @click="addStop" class="text-[10px] font-black text-indigo-600 uppercase">+ Add Store (+$5)</button>
             </div>
-            <div class="mt-8 relative mb-8">
-                <input @input="searchAddr($event, 'delivery')" v-model="newOrder.delivery" placeholder="Delivery Address" class="w-full p-5 bg-slate-50 rounded-2xl font-bold border-none outline-none focus:ring-2 focus:ring-indigo-600">
-                <div v-if="suggests['delivery']" class="absolute z-50 w-full bg-white shadow-xl rounded-xl mt-1 border overflow-hidden">
-                    <div v-for="res in suggests['delivery']" @click="pickAddr(res, 'delivery')" class="p-3 text-xs font-bold border-b hover:bg-indigo-50 cursor-pointer">{{ res.properties.label }}</div>
-                </div>
-            </div>
-            <button @click="handleStripe" class="w-full bg-slate-900 text-white py-5 rounded-3xl font-black">Pay & Secure Delivery</button>
+            <button @click="confirmOrder" class="w-full bg-slate-900 text-white py-5 rounded-3xl font-black mt-8">Secure Payment ($20)</button>
         </div>
     </main>
 </div>
 
 <script>
-const firebaseConfig = { apiKey: "YOUR_KEY", databaseURL: "YOUR_URL", projectId: "YOUR_PROJECT" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const firebaseConfig = { apiKey: "YOUR_KEY", databaseURL: "YOUR_URL" };
 const { createApp } = Vue;
 
 createApp({
     data() {
         return {
-            myOrder: null, showStripe: false, pendingTotal: 20, suggests: {},
-            newOrder: { name: '', pickups: [{location: '', lat: null, lng: null, items: ''}], delivery: '', dLat: null, dLng: null }
+            isFirebaseConnected: false,
+            myOrder: null,
+            newOrder: { name: '', pickups: [{location: '', items: ''}] }
         }
     },
     methods: {
-        async searchAddr(e, key) {
-            const q = e.target.value;
-            if(q.length < 3) return;
-            const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5`);
-            const data = await res.json();
-            this.suggests[key] = data.features;
-        },
-        pickAddr(res, key) {
-            const c = res.geometry.coordinates;
-            if(key === 'delivery') {
-                this.newOrder.delivery = res.properties.label;
-                this.newOrder.dLat = c[1]; this.newOrder.dLng = c[0];
-            } else {
-                this.newOrder.pickups[key].location = res.properties.label;
-                this.newOrder.pickups[key].lat = c[1]; this.newOrder.pickups[key].lng = c[0];
-            }
-            this.suggests[key] = null;
-        },
-        handleStripe() {
-            this.pendingTotal = 20 + (this.newOrder.pickups.length - 1) * 5;
-            this.showStripe = true;
-        },
-        async confirmPayment() {
-            const o = { ...this.newOrder, id: Date.now(), total: this.pendingTotal, status: 'pending', customer: this.newOrder.name };
+        addStop() { this.newOrder.pickups.push({location: '', items: ''}); },
+        confirmOrder() {
+            const o = { ...this.newOrder, id: Date.now(), total: 20 + (this.newOrder.pickups.length-1)*5, status: 'pending' };
             this.myOrder = o;
-            await db.ref('orders/' + o.id).set(o);
-            this.showStripe = false;
-            localStorage.setItem('rd_my_order', o.id);
+            if(this.isFirebaseConnected) firebase.database().ref('orders/' + o.id).set(o);
         },
-        async cancelOrder() {
-            if(confirm("Cancel and refund?")) {
-                await db.ref('orders/' + this.myOrder.id).remove();
-                this.myOrder = null;
-                localStorage.removeItem('rd_my_order');
-            }
-        },
-        addStop() { this.newOrder.pickups.push({location: '', items: ''}); }
+        cancelOrder() { this.myOrder = null; }
     },
     mounted() {
-        const id = localStorage.getItem('rd_my_order');
-        if(id) {
-            db.ref('orders/' + id).on('value', snap => {
-                this.myOrder = snap.val();
-            });
-        }
+        try {
+            if (firebaseConfig.apiKey.includes("YOUR_")) throw "Config Error";
+            firebase.initializeApp(firebaseConfig);
+            this.isFirebaseConnected = true;
+        } catch (e) { console.log("Demo mode active."); }
     }
 }).mount('#app');
 </script>
